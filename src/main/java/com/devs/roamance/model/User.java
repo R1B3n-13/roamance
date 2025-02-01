@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.data.annotation.CreatedDate;
 
 @Entity
 @Table(name = "users", uniqueConstraints = @UniqueConstraint(columnNames = "email"))
@@ -27,11 +28,7 @@ public class User {
     @JsonIgnore
     private String password;
 
+    @CreatedDate
+    @Column(updatable = false)
     private ZonedDateTime createdAt;
-
-    @PrePersist
-    protected void onCreate() {
-
-        this.createdAt = ZonedDateTime.now();
-    }
 }

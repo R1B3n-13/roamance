@@ -18,6 +18,13 @@ public class GlobalExceptionHandler {
                 HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(UserAlreadyExistException.class)
+    public ResponseEntity<BaseResponseDto> handleUserAlreadyExistException(UserAlreadyExistException ex) {
+
+        return new ResponseEntity<>(new BaseResponseDto(409, false, ex.getMessage()),
+                HttpStatus.CONFLICT);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<BaseResponseDto> handleGeneralException(Exception ex) {
 

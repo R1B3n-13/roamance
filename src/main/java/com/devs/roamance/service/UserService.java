@@ -1,21 +1,15 @@
 package com.devs.roamance.service;
 
-import com.devs.roamance.dto.request.UserRequestDto;
+import com.devs.roamance.dto.request.UserCreateRequestDto;
+import com.devs.roamance.dto.request.UserUpdateRequestDto;
 import com.devs.roamance.dto.response.BaseResponseDto;
 import com.devs.roamance.dto.response.UserListResponseDto;
 import com.devs.roamance.dto.response.UserResponseDto;
 
-public interface UserService {
+public interface UserService extends BaseService<BaseResponseDto, UserListResponseDto,
+        UserResponseDto, UserCreateRequestDto, UserUpdateRequestDto, Long> {
 
-    UserListResponseDto getAllUsers();
+    UserResponseDto getByEmail(String email);
 
-    UserResponseDto getUserById(Long userId);
-
-    UserResponseDto getUserByEmail(String email);
-
-    UserListResponseDto searchUsers(String query);
-
-    BaseResponseDto updateUser(UserRequestDto requestDto, Long userId);
-
-    BaseResponseDto deleteUser(Long userId);
+    UserListResponseDto search(String query);
 }

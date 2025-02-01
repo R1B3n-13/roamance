@@ -4,16 +4,19 @@ import java.util.List;
 
 import com.devs.roamance.constant.ResponseMessage;
 import com.devs.roamance.dto.UserDto;
-import com.devs.roamance.dto.request.UserRequestDto;
+import com.devs.roamance.dto.request.UserCreateRequestDto;
+import com.devs.roamance.dto.request.UserUpdateRequestDto;
 import com.devs.roamance.dto.response.BaseResponseDto;
 import com.devs.roamance.dto.response.UserListResponseDto;
 import com.devs.roamance.dto.response.UserResponseDto;
+import com.devs.roamance.exception.UserAlreadyExistException;
 import com.devs.roamance.exception.UserNotFoundException;
 import com.devs.roamance.model.User;
 import com.devs.roamance.repository.UserRepository;
 import com.devs.roamance.service.UserService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -30,7 +33,24 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserListResponseDto getAllUsers() {
+    public BaseResponseDto create(UserCreateRequestDto requestDto) {
+
+        try {
+            User user = modelMapper.map(requestDto, User.class);
+
+            userRepository.save(user);
+
+            return new BaseResponseDto(201, true, ResponseMessage.REGISTRATION_SUCCESS);
+
+        } catch (DataIntegrityViolationException e) {
+
+            throw new UserAlreadyExistException(
+                    String.format(ResponseMessage.USER_ALREADY_EXIST, requestDto.getEmail()));
+        }
+    }
+
+    @Override
+    public UserListResponseDto getAll() {
 
         List<User> users = userRepository.findAll();
 
@@ -40,7 +60,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponseDto getUserById(Long userId) {
+    public UserResponseDto getById(Long userId) {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(
@@ -52,7 +72,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponseDto getUserByEmail(String email) {
+    public UserResponseDto getByEmail(String email) {
 
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException(
@@ -64,7 +84,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserListResponseDto searchUsers(String query) {
+    public UserListResponseDto search(String query) {
 
         List<User> users = userRepository.searchUsers(query);
 
@@ -74,7 +94,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public BaseResponseDto updateUser(UserRequestDto requestDto, Long userId) {
+    public BaseResponseDto update(UserUpdateRequestDto requestDto, Long userId) {
 
         User existingUser = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(
@@ -96,7 +116,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public BaseResponseDto deleteUser(Long userId) {
+    public BaseResponseDto delete(Long userId) {
 
         User existingUser = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(

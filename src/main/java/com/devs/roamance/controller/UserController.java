@@ -1,6 +1,7 @@
 package com.devs.roamance.controller;
 
-import com.devs.roamance.dto.request.UserRequestDto;
+import com.devs.roamance.dto.request.UserCreateRequestDto;
+import com.devs.roamance.dto.request.UserUpdateRequestDto;
 import com.devs.roamance.dto.response.BaseResponseDto;
 import com.devs.roamance.dto.response.UserListResponseDto;
 import com.devs.roamance.dto.response.UserResponseDto;
@@ -12,14 +13,7 @@ import jakarta.validation.constraints.Pattern;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/users")
@@ -33,10 +27,18 @@ public class UserController {
         this.userService = userService;
     }
 
+    @PostMapping("/register")
+    public ResponseEntity<BaseResponseDto> createUser(@RequestBody UserCreateRequestDto requestDto) {
+
+        BaseResponseDto responseDto = userService.create(requestDto);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
+    }
+
     @GetMapping
     public ResponseEntity<UserListResponseDto> getAllUsers() {
 
-        UserListResponseDto responseDto = userService.getAllUsers();
+        UserListResponseDto responseDto = userService.getAll();
 
         return ResponseEntity.ok(responseDto);
     }
@@ -44,7 +46,7 @@ public class UserController {
     @GetMapping("/{userId}")
     public ResponseEntity<UserResponseDto> getUserById(@PathVariable @NotNull Long userId) {
 
-        UserResponseDto responseDto = userService.getUserById(userId);
+        UserResponseDto responseDto = userService.getById(userId);
 
         return ResponseEntity.ok(responseDto);
     }
@@ -52,7 +54,7 @@ public class UserController {
     @GetMapping("/by-email")
     public ResponseEntity<UserResponseDto> getUserByEmail(@RequestParam @Email @NotBlank String email) {
 
-        UserResponseDto responseDto = userService.getUserByEmail(email);
+        UserResponseDto responseDto = userService.getByEmail(email);
 
         return ResponseEntity.ok(responseDto);
     }
@@ -62,16 +64,16 @@ public class UserController {
                                                            @Pattern(regexp = "^[a-zA-Z0-9\\s]{1,50}$")
                                                            String query) {
 
-        UserListResponseDto responseDto = userService.searchUsers(query);
+        UserListResponseDto responseDto = userService.search(query);
 
         return ResponseEntity.ok(responseDto);
     }
 
     @PutMapping("/update/{userId}")
-    public ResponseEntity<BaseResponseDto> updateUser(@RequestBody UserRequestDto requestDto,
+    public ResponseEntity<BaseResponseDto> updateUser(@RequestBody UserUpdateRequestDto requestDto,
                                                       @PathVariable @NotNull Long userId) {
 
-        BaseResponseDto responseDto = userService.updateUser(requestDto, userId);
+        BaseResponseDto responseDto = userService.update(requestDto, userId);
 
         return ResponseEntity.ok(responseDto);
     }
@@ -80,7 +82,7 @@ public class UserController {
     public ResponseEntity<BaseResponseDto> deleteUser(@PathVariable @NotNull Long userId) {
 
 
-        BaseResponseDto responseDto = userService.deleteUser(userId);
+        BaseResponseDto responseDto = userService.delete(userId);
 
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(responseDto);
     }
