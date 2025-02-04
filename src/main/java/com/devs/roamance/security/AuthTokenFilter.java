@@ -27,14 +27,30 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 
     private final HandlerExceptionResolver exceptionResolver;
 
-    private final JwtUtils jwtUtils;
+    private final JwtUtils jwtUtil;
 
     @Autowired
     public AuthTokenFilter(@Qualifier("handlerExceptionResolver")
                            HandlerExceptionResolver exceptionResolver, JwtUtils jwtUtil) {
 
         this.exceptionResolver = exceptionResolver;
-        this.jwtUtils = jwtUtil;
+        this.jwtUtil = jwtUtil;
+    }
+
+    private void authenticateUserFromToken(String token) {
+        try {
+            String email = jwtUtil.getEmailFromToken(token);
+
+            List<GrantedAuthority> authorities = new ArrayList<>();
+
+            Authentication authentication = new UsernamePasswordAuthenticationToken(email, null, authorities);
+
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        } catch (Exception e) {
+
+            throw new AuthenticationFailedException(ResponseMessage.AUTHENTICATION_FAILED);
+        }
     }
 
     @Override
@@ -54,18 +70,11 @@ public class AuthTokenFilter extends OncePerRequestFilter {
         }
 
         try {
-            String token = jwtUtils.getTokenFromHeader(request.getHeader("Authorization"));
+            String token = jwtUtil.getTokenFromHeader(request.getHeader("Authorization"));
 
             if (token != null) {
 
-                String tokenType = jwtUtils.getTokenType(token);
-
-                if (!"access".equals(tokenType)) {
-
-                    throw new IllegalArgumentException(ResponseMessage.INVALID_TOKEN_TYPE);
-                }
-
-                jwtUtils.validateToken(token);
+                jwtUtil.validateToken(token);
 
                 authenticateUserFromToken(token);
             } else {
@@ -76,8 +85,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 
             Exception exception = e;
 
-            if (exception instanceof IllegalArgumentException &&
-                    !ResponseMessage.INVALID_TOKEN_TYPE.equals(exception.getMessage())) {
+            if (exception instanceof IllegalArgumentException) {
 
                 exception = new IllegalArgumentException(ResponseMessage.JWT_CLAIMS_EMPTY, exception);
             }
@@ -88,21 +96,5 @@ public class AuthTokenFilter extends OncePerRequestFilter {
         }
 
         filterChain.doFilter(request, response);
-    }
-
-    private void authenticateUserFromToken(String token) {
-        try {
-            String email = jwtUtils.getEmailFromToken(token);
-
-            List<GrantedAuthority> authorities = new ArrayList<>();
-
-            Authentication authentication = new UsernamePasswordAuthenticationToken(email, null, authorities);
-
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        } catch (Exception e) {
-
-            throw new AuthenticationFailedException(ResponseMessage.AUTHENTICATION_FAILED);
-        }
     }
 }

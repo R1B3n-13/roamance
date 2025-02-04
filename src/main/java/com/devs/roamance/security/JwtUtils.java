@@ -30,19 +30,19 @@ public class JwtUtils {
 
     public String generateAccessToken(Authentication authentication) {
 
-        return generateToken(authentication, accessTokenExpiration, "access");
+        return generateToken(authentication, accessTokenExpiration);
     }
 
     public String generateRefreshToken(Authentication authentication) {
 
-        return generateToken(authentication, refreshTokenExpiration, "refresh");
+        return generateToken(authentication, refreshTokenExpiration);
     }
 
-    private String generateToken(Authentication authentication, int expiresIn, String tokenType) {
+    private String generateToken(Authentication authentication, int expiresIn) {
 
         return Jwts.builder()
+
                 .subject(authentication.getName())
-                .claim("type", tokenType)
                 .issuer("roamance.com")
                 .issuedAt(new Date())
                 .expiration(new Date((new Date()).getTime() + expiresIn))
@@ -68,16 +68,9 @@ public class JwtUtils {
     public String getEmailFromToken(String token) {
 
         return Jwts.parser()
+
                 .verifyWith((SecretKey) key())
                 .build().parseSignedClaims(token)
                 .getPayload().getSubject();
-    }
-
-    public String getTokenType(String token) {
-
-        return Jwts.parser()
-                .verifyWith((SecretKey) key())
-                .build().parseSignedClaims(token)
-                .getPayload().get("type", String.class);
     }
 }

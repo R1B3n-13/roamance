@@ -52,18 +52,11 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public AuthResponseDto refreshToken(RefreshTokenRequestDto requestDto) {
 
-        String token = requestDto.getRefreshToken();
+        String refreshToken = requestDto.getRefreshToken();
 
-        String tokenType = jwtUtils.getTokenType(token);
+        jwtUtils.validateToken(refreshToken);
 
-        if (!"refresh".equals(tokenType)) {
-
-            throw new IllegalArgumentException(ResponseMessage.INVALID_TOKEN_TYPE);
-        }
-
-        jwtUtils.validateToken(token);
-
-        String email = jwtUtils.getEmailFromToken(token);
+        String email = jwtUtils.getEmailFromToken(refreshToken);
 
         List<GrantedAuthority> authorities = new ArrayList<>();
 

@@ -6,7 +6,6 @@ import com.devs.roamance.dto.response.BaseResponseDto;
 import com.devs.roamance.dto.response.UserListResponseDto;
 import com.devs.roamance.dto.response.UserResponseDto;
 import com.devs.roamance.service.UserService;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -29,7 +28,7 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<BaseResponseDto> createUser(@Valid @RequestBody UserCreateRequestDto requestDto) {
+    public ResponseEntity<BaseResponseDto> createUser(@RequestBody UserCreateRequestDto requestDto) {
 
         BaseResponseDto responseDto = userService.create(requestDto);
 
@@ -79,7 +78,7 @@ public class UserController {
     }
 
     @PutMapping("/update")
-    public ResponseEntity<BaseResponseDto> updateUser(@Valid @RequestBody UserUpdateRequestDto requestDto,
+    public ResponseEntity<BaseResponseDto> updateUser(@RequestBody UserUpdateRequestDto requestDto,
                                                       @RequestHeader("Authorization") String header) {
 
         Long userId = userService.getFromAuthHeader(header).getData().getId();
