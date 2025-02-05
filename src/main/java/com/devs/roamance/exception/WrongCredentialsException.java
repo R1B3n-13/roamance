@@ -5,12 +5,12 @@ import lombok.NoArgsConstructor;
 import java.io.Serial;
 
 @NoArgsConstructor
-public class UserAlreadyExistException extends RuntimeException {
+public class WrongCredentialsException extends RuntimeException {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
-    public UserAlreadyExistException(String message) {
+    public WrongCredentialsException(String message) {
 
         super(message);
     }

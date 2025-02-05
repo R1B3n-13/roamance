@@ -6,6 +6,7 @@ import com.devs.roamance.dto.response.BaseResponseDto;
 import com.devs.roamance.dto.response.UserListResponseDto;
 import com.devs.roamance.dto.response.UserResponseDto;
 import com.devs.roamance.service.UserService;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -28,7 +29,7 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<BaseResponseDto> createUser(@RequestBody UserCreateRequestDto requestDto) {
+    public ResponseEntity<BaseResponseDto> createUser(@Valid @RequestBody UserCreateRequestDto requestDto) {
 
         BaseResponseDto responseDto = userService.create(requestDto);
 
@@ -59,6 +60,14 @@ public class UserController {
         return ResponseEntity.ok(responseDto);
     }
 
+    @GetMapping("/profile")
+    public ResponseEntity<UserResponseDto> getUserFromAuthHeader(@RequestHeader("Authorization") String header) {
+
+        UserResponseDto responseDto = userService.getFromAuthHeader(header);
+
+        return ResponseEntity.ok(responseDto);
+    }
+
     @GetMapping("/search")
     public ResponseEntity<UserListResponseDto> searchUsers(@RequestParam @NotBlank
                                                            @Pattern(regexp = "^[a-zA-Z0-9\\s]{1,50}$")
@@ -69,21 +78,24 @@ public class UserController {
         return ResponseEntity.ok(responseDto);
     }
 
-    @PutMapping("/update/{userId}")
-    public ResponseEntity<BaseResponseDto> updateUser(@RequestBody UserUpdateRequestDto requestDto,
-                                                      @PathVariable @NotNull Long userId) {
+    @PutMapping("/update")
+    public ResponseEntity<BaseResponseDto> updateUser(@Valid @RequestBody UserUpdateRequestDto requestDto,
+                                                      @RequestHeader("Authorization") String header) {
+
+        Long userId = userService.getFromAuthHeader(header).getData().getId();
 
         BaseResponseDto responseDto = userService.update(requestDto, userId);
 
         return ResponseEntity.ok(responseDto);
     }
 
-    @DeleteMapping("/delete/{userId}")
-    public ResponseEntity<BaseResponseDto> deleteUser(@PathVariable @NotNull Long userId) {
+    @DeleteMapping("/delete")
+    public ResponseEntity<BaseResponseDto> deleteUser(@RequestHeader("Authorization") String header) {
 
+        Long userId = userService.getFromAuthHeader(header).getData().getId();
 
         BaseResponseDto responseDto = userService.delete(userId);
 
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(responseDto);
+        return ResponseEntity.ok(responseDto);
     }
 }
