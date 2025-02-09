@@ -72,21 +72,21 @@ public class JwtUtils {
 
   public String getEmailFromToken(String token) {
 
-    return parseToken(token).getSubject();
+    return getTokenPayload(token).getSubject();
   }
 
   public String getTokenType(String token) {
 
-    return parseToken(token).get("type", String.class);
+    return getTokenPayload(token).get("type", String.class);
   }
 
   @SuppressWarnings("unchecked")
   public List<String> getRolesFromToken(String token) {
 
-    return parseToken(token).get("roles", List.class);
+    return getTokenPayload(token).get("roles", List.class);
   }
 
-  private Claims parseToken(String token) {
+  private Claims getTokenPayload(String token) {
 
     return Jwts.parser()
         .verifyWith((SecretKey) key())
