@@ -1,5 +1,6 @@
 package com.devs.roamance.security;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -71,32 +72,26 @@ public class JwtUtils {
 
   public String getEmailFromToken(String token) {
 
-    return Jwts.parser()
-        .verifyWith((SecretKey) key())
-        .build()
-        .parseSignedClaims(token)
-        .getPayload()
-        .getSubject();
+    return parseToken(token).getSubject();
   }
 
   public String getTokenType(String token) {
 
-    return Jwts.parser()
-        .verifyWith((SecretKey) key())
-        .build()
-        .parseSignedClaims(token)
-        .getPayload()
-        .get("type", String.class);
+    return parseToken(token).get("type", String.class);
   }
 
   @SuppressWarnings("unchecked")
   public List<String> getRolesFromToken(String token) {
 
+    return parseToken(token).get("roles", List.class);
+  }
+
+  private Claims parseToken(String token) {
+
     return Jwts.parser()
         .verifyWith((SecretKey) key())
         .build()
         .parseSignedClaims(token)
-        .getPayload()
-        .get("roles", List.class);
+        .getPayload();
   }
 }
