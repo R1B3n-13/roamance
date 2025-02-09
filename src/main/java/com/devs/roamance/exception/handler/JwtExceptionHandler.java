@@ -17,39 +17,39 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 @Order(1)
 public class JwtExceptionHandler {
 
-    @ExceptionHandler(ExpiredJwtException.class)
-    public ResponseEntity<BaseResponseDto> handleExpiredJwtException() {
+  @ExceptionHandler(ExpiredJwtException.class)
+  public ResponseEntity<BaseResponseDto> handleExpiredJwtException() {
 
-        log.warn("JWT has expired");
+    log.warn("JWT has expired");
 
-        return new ResponseEntity<>(new BaseResponseDto(401, false, "JWT has expired!"),
-                HttpStatus.UNAUTHORIZED);
-    }
+    return new ResponseEntity<>(
+        new BaseResponseDto(401, false, "JWT has expired!"), HttpStatus.UNAUTHORIZED);
+  }
 
-    @ExceptionHandler(SignatureException.class)
-    public ResponseEntity<BaseResponseDto> handleSignatureException() {
+  @ExceptionHandler(SignatureException.class)
+  public ResponseEntity<BaseResponseDto> handleSignatureException() {
 
-        log.warn("Invalid JWT signature");
+    log.warn("Invalid JWT signature");
 
-        return new ResponseEntity<>(new BaseResponseDto(401, false, "Invalid JWT signature!"),
-                HttpStatus.UNAUTHORIZED);
-    }
+    return new ResponseEntity<>(
+        new BaseResponseDto(401, false, "Invalid JWT signature!"), HttpStatus.UNAUTHORIZED);
+  }
 
-    @ExceptionHandler(MalformedJwtException.class)
-    public ResponseEntity<BaseResponseDto> handleMalformedJwtException() {
+  @ExceptionHandler(MalformedJwtException.class)
+  public ResponseEntity<BaseResponseDto> handleMalformedJwtException() {
 
-        log.warn("Malformed JWT");
+    log.warn("Malformed JWT");
 
-        return new ResponseEntity<>(new BaseResponseDto(400, false, "Malformed JWT!"),
-                HttpStatus.BAD_REQUEST);
-    }
+    return new ResponseEntity<>(
+        new BaseResponseDto(400, false, "Malformed JWT!"), HttpStatus.BAD_REQUEST);
+  }
 
-    @ExceptionHandler(UnsupportedJwtException.class)
-    public ResponseEntity<BaseResponseDto> handleUnsupportedJwtException() {
+  @ExceptionHandler(UnsupportedJwtException.class)
+  public ResponseEntity<BaseResponseDto> handleUnsupportedJwtException() {
 
-        log.warn("Unsupported JWT");
+    log.warn("Unsupported JWT");
 
-        return new ResponseEntity<>(new BaseResponseDto(400, false, "Unsupported JWT!"),
-                HttpStatus.BAD_REQUEST);
-    }
+    return new ResponseEntity<>(
+        new BaseResponseDto(400, false, "Unsupported JWT!"), HttpStatus.BAD_REQUEST);
+  }
 }
