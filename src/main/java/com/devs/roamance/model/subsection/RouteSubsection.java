@@ -1,4 +1,4 @@
-package com.devs.roamance.model.subsections;
+package com.devs.roamance.model.subsection;
 
 import com.devs.roamance.model.Location;
 import jakarta.persistence.DiscriminatorValue;

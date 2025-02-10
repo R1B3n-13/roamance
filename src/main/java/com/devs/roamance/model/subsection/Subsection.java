@@ -1,4 +1,4 @@
-package com.devs.roamance.model.subsections;
+package com.devs.roamance.model.subsection;
 
 import com.devs.roamance.model.Journal;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
@@ -37,7 +37,8 @@ public abstract class Subsection {
     private String title;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "subsection_type", insertable = false, updatable = false)
+    @Column(name = "subsection_type")
+    @Setter(AccessLevel.NONE)
     private SubsectionType type;
 
     @ElementCollection

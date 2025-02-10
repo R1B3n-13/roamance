@@ -1,6 +1,7 @@
 package com.devs.roamance.model;
 
-import com.devs.roamance.model.subsections.Subsection;
+import com.devs.roamance.model.subsection.Subsection;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedBy;
@@ -32,12 +33,14 @@ public class Journal {
     @Embedded
     private Location destination;
 
-    @NonNull
+    @Nullable
     private String description;
 
     @NonNull
-    @OneToMany(mappedBy = "journal", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ElementCollection
     private List<Subsection> subsections = new ArrayList<>();
+
+    // Auditing Fields
 
     @CreatedDate
     @Column(columnDefinition = "TIMESTAMP WITH TIME ZONE")

@@ -1,4 +1,4 @@
-package com.devs.roamance.model.subsections;
+package com.devs.roamance.model.subsection;
 
 import com.devs.roamance.model.Location;
 import jakarta.persistence.DiscriminatorValue;
@@ -7,16 +7,13 @@ import jakarta.persistence.Entity;
 import lombok.*;
 
 @Entity
-@DiscriminatorValue("Activity")
+@DiscriminatorValue("Sightseeing")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ActivitySubsection extends Subsection {
+public class SightseeingSubsection extends Subsection {
     @Embedded
     @NonNull
     private Location location;
-
-    @NonNull
-    private String activityName;
 }
