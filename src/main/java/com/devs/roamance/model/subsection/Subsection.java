@@ -51,6 +51,8 @@ public abstract class Subsection {
     @ManyToOne
     private Journal journal;
 
+    // Auditing Fields
+
     @CreatedDate
     @Column(columnDefinition = "TIMESTAMP WITH TIME ZONE")
     @Setter(AccessLevel.NONE)

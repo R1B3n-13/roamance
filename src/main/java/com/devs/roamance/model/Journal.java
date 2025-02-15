@@ -37,7 +37,7 @@ public class Journal {
     private String description;
 
     @NonNull
-    @ElementCollection
+    @OneToMany(mappedBy = "journal", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Subsection> subsections = new ArrayList<>();
 
     // Auditing Fields
