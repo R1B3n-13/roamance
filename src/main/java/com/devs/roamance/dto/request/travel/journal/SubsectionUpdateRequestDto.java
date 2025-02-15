@@ -1,6 +1,6 @@
-package com.devs.roamance.dto.request.subsection;
+package com.devs.roamance.dto.request.travel.journal;
 
-import com.devs.roamance.model.subsection.SubsectionType;
+import com.devs.roamance.model.travel.journal.SubsectionType;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import jakarta.validation.constraints.NotBlank;

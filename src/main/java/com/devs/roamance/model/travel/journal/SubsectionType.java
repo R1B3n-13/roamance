@@ -1,4 +1,4 @@
-package com.devs.roamance.model.subsection;
+package com.devs.roamance.model.travel.journal;
 
 public enum SubsectionType {
     SIGHTSEEING,

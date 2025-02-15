@@ -1,12 +1,20 @@
-package com.devs.roamance.dto.request.subsection;
+package com.devs.roamance.dto.request.travel.journal;
 
 import com.devs.roamance.dto.request.LocationUpdateRequestDto;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Positive;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.List;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class RouteSubsectionUpdateRequestDto extends LocationUpdateRequestDto {
     @Valid
     private List<LocationUpdateRequestDto> locations;

@@ -1,6 +1,7 @@
-package com.devs.roamance.model.subsection;
+package com.devs.roamance.model.travel.journal;
 
 import com.devs.roamance.model.Location;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
@@ -20,9 +21,9 @@ public class RouteSubsection extends Subsection {
     @NonNull
     private List<Location> locations = new ArrayList<>();
 
-    @NonNull
+    @Nullable
     private Integer totalTime;
 
-    @NonNull
+    @Nullable
     private Double totalDistance;
 }

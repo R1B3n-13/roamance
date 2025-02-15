@@ -1,6 +1,6 @@
-package com.devs.roamance.model;
+package com.devs.roamance.model.travel.journal;
 
-import com.devs.roamance.model.subsection.Subsection;
+import com.devs.roamance.model.Location;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.*;
@@ -43,12 +43,10 @@ public class Journal {
     // Auditing Fields
 
     @CreatedDate
-    @Column(columnDefinition = "TIMESTAMP WITH TIME ZONE")
     @Setter(AccessLevel.NONE)
     private ZonedDateTime createdAt;
 
     @LastModifiedDate
-    @Column(columnDefinition = "TIMESTAMP WITH TIME ZONE")
     private ZonedDateTime lastModified;
 
     @CreatedBy

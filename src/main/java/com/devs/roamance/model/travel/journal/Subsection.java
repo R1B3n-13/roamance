@@ -1,6 +1,5 @@
-package com.devs.roamance.model.subsection;
+package com.devs.roamance.model.travel.journal;
 
-import com.devs.roamance.model.Journal;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import jakarta.persistence.*;
@@ -17,7 +16,7 @@ import java.util.List;
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "subsection_type", discriminatorType = DiscriminatorType.STRING)
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type", visible = true)
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 @JsonSubTypes({
         @JsonSubTypes.Type(value = SightseeingSubsection.class, name = "Sightseeing"),
         @JsonSubTypes.Type(value = ActivitySubsection.class, name = "Activity"),
@@ -36,11 +35,6 @@ public abstract class Subsection {
     @NonNull
     private String title;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "subsection_type")
-    @Setter(AccessLevel.NONE)
-    private SubsectionType type;
-
     @ElementCollection
     private List<String> notes = new ArrayList<>();
 
@@ -54,12 +48,10 @@ public abstract class Subsection {
     // Auditing Fields
 
     @CreatedDate
-    @Column(columnDefinition = "TIMESTAMP WITH TIME ZONE")
     @Setter(AccessLevel.NONE)
     private ZonedDateTime createdAt;
 
     @LastModifiedDate
-    @Column(columnDefinition = "TIMESTAMP WITH TIME ZONE")
     private ZonedDateTime lastModified;
 
     @CreatedBy
@@ -68,4 +60,11 @@ public abstract class Subsection {
 
     @LastModifiedBy
     private long lastModifiedBy;
+
+//    Methods
+
+    @Transient
+    public String getType() {
+        return this.getClass().getAnnotation(DiscriminatorValue.class).value();
+    }
 }

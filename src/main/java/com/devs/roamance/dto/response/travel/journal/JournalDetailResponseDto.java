@@ -1,6 +1,6 @@
-package com.devs.roamance.dto.response;
+package com.devs.roamance.dto.response.travel.journal;
 
-import com.devs.roamance.dto.response.subsection.SubsectionResponseDto;
+import com.devs.roamance.dto.response.LocationResponseDto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

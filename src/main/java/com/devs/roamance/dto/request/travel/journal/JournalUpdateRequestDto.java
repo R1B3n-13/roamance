@@ -1,6 +1,6 @@
-package com.devs.roamance.dto.request;
+package com.devs.roamance.dto.request.travel.journal;
 
-import com.devs.roamance.dto.request.subsection.SubsectionUpdateRequestDto;
+import com.devs.roamance.dto.request.LocationUpdateRequestDto;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;

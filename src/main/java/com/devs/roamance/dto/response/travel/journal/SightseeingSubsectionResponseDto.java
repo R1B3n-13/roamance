@@ -1,4 +1,4 @@
-package com.devs.roamance.dto.response.subsection;
+package com.devs.roamance.dto.response.travel.journal;
 
 import com.devs.roamance.dto.response.LocationResponseDto;
 import lombok.Getter;

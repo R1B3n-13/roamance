@@ -1,11 +1,19 @@
-package com.devs.roamance.dto.request.subsection;
+package com.devs.roamance.dto.request.travel.journal;
 
 import com.devs.roamance.dto.request.LocationCreateRequestDto;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.List;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class RouteSubsectionCreateRequestDto extends SubsectionCreateRequestDto {
     @NotEmpty(message = "At least one route location is required")
     @Valid
