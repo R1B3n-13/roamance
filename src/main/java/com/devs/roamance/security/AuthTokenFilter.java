@@ -1,108 +1,114 @@
 package com.devs.roamance.security;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 import com.devs.roamance.constant.ResponseMessage;
 import com.devs.roamance.exception.AuthTokenNotFoundException;
 import com.devs.roamance.exception.AuthenticationFailedException;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 
 @Component
 public class AuthTokenFilter extends OncePerRequestFilter {
 
-    private final HandlerExceptionResolver exceptionResolver;
+  private final HandlerExceptionResolver exceptionResolver;
 
-    private final JwtUtils jwtUtils;
+  private final JwtUtils jwtUtils;
 
-    @Autowired
-    public AuthTokenFilter(@Qualifier("handlerExceptionResolver")
-                           HandlerExceptionResolver exceptionResolver, JwtUtils jwtUtil) {
+  @Autowired
+  public AuthTokenFilter(
+      @Qualifier("handlerExceptionResolver") HandlerExceptionResolver exceptionResolver,
+      JwtUtils jwtUtil) {
 
-        this.exceptionResolver = exceptionResolver;
-        this.jwtUtils = jwtUtil;
+    this.exceptionResolver = exceptionResolver;
+    this.jwtUtils = jwtUtil;
+  }
+
+  @Override
+  protected void doFilterInternal(
+      @NonNull HttpServletRequest request,
+      @NonNull HttpServletResponse response,
+      @NonNull FilterChain filterChain)
+      throws ServletException, IOException {
+
+    String contextPath = request.getContextPath();
+
+    if (request.getRequestURI().startsWith(contextPath + "/auth")
+        || request.getRequestURI().equals(contextPath + "/users/register")) {
+
+      filterChain.doFilter(request, response);
+
+      return;
     }
 
-    @Override
-    protected void doFilterInternal(
-            @NonNull HttpServletRequest request,
-            @NonNull HttpServletResponse response,
-            @NonNull FilterChain filterChain) throws ServletException, IOException {
+    try {
+      String token = jwtUtils.getTokenFromHeader(request.getHeader("Authorization"));
 
-        String contextPath = request.getContextPath();
+      if (token != null) {
 
-        if (request.getRequestURI().startsWith(contextPath + "/auth") ||
-                request.getRequestURI().equals(contextPath + "/users/register")) {
+        String tokenType = jwtUtils.getTokenType(token);
 
-            filterChain.doFilter(request, response);
+        if (!"access".equals(tokenType)) {
 
-            return;
+          throw new IllegalArgumentException(ResponseMessage.INVALID_TOKEN_TYPE);
         }
 
-        try {
-            String token = jwtUtils.getTokenFromHeader(request.getHeader("Authorization"));
+        jwtUtils.validateToken(token);
 
-            if (token != null) {
+        authenticateUserFromToken(token);
+      } else {
 
-                String tokenType = jwtUtils.getTokenType(token);
+        throw new AuthTokenNotFoundException(ResponseMessage.AUTH_TOKEN_MISSING);
+      }
+    } catch (Exception e) {
 
-                if (!"access".equals(tokenType)) {
+      Exception exception = e;
 
-                    throw new IllegalArgumentException(ResponseMessage.INVALID_TOKEN_TYPE);
-                }
+      if (exception instanceof IllegalArgumentException
+          && !ResponseMessage.INVALID_TOKEN_TYPE.equals(exception.getMessage())) {
 
-                jwtUtils.validateToken(token);
+        exception = new IllegalArgumentException(ResponseMessage.JWT_CLAIMS_EMPTY, exception);
+      }
 
-                authenticateUserFromToken(token);
-            } else {
+      exceptionResolver.resolveException(request, response, null, exception);
 
-                throw new AuthTokenNotFoundException(ResponseMessage.AUTH_TOKEN_MISSING);
-            }
-        } catch (Exception e) {
-
-            Exception exception = e;
-
-            if (exception instanceof IllegalArgumentException &&
-                    !ResponseMessage.INVALID_TOKEN_TYPE.equals(exception.getMessage())) {
-
-                exception = new IllegalArgumentException(ResponseMessage.JWT_CLAIMS_EMPTY, exception);
-            }
-
-            exceptionResolver.resolveException(request, response, null, exception);
-
-            return;
-        }
-
-        filterChain.doFilter(request, response);
+      return;
     }
 
-    private void authenticateUserFromToken(String token) {
-        try {
-            String email = jwtUtils.getEmailFromToken(token);
+    filterChain.doFilter(request, response);
+  }
 
-            List<GrantedAuthority> authorities = new ArrayList<>();
+  private void authenticateUserFromToken(String token) {
+    try {
+      String email = jwtUtils.getEmailFromToken(token);
 
-            Authentication authentication = new UsernamePasswordAuthenticationToken(email, null, authorities);
+      List<String> roles = jwtUtils.getRolesFromToken(token);
 
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+      List<GrantedAuthority> authorities =
+          roles.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList());
 
-        } catch (Exception e) {
+      Authentication authentication =
+          new UsernamePasswordAuthenticationToken(email, null, authorities);
 
-            throw new AuthenticationFailedException(ResponseMessage.AUTHENTICATION_FAILED);
-        }
+      SecurityContextHolder.getContext().setAuthentication(authentication);
+
+    } catch (Exception e) {
+
+      throw new AuthenticationFailedException(ResponseMessage.AUTHENTICATION_FAILED);
     }
+  }
 }
