@@ -5,10 +5,9 @@ import jakarta.annotation.Nullable;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
-import lombok.*;
-
 import java.util.ArrayList;
 import java.util.List;
+import lombok.*;
 
 @Entity
 @DiscriminatorValue("Route")
@@ -17,13 +16,9 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RouteSubsection extends Subsection {
-    @ElementCollection
-    @NonNull
-    private List<Location> locations = new ArrayList<>();
+  @ElementCollection @NonNull private List<Location> locations = new ArrayList<>();
 
-    @Nullable
-    private Integer totalTime;
+  @Nullable private Integer totalTime;
 
-    @Nullable
-    private Double totalDistance;
+  @Nullable private Double totalDistance;
 }

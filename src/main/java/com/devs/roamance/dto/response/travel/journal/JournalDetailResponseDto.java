@@ -14,13 +14,13 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class JournalDetailResponseDto {
-    private Long id;
-    private String title;
-    private LocationResponseDto destination;
-    private String description;
-    private List<SubsectionResponseDto> subsections;
-    private ZonedDateTime createdAt;
-    private ZonedDateTime lastModified;
-    private long createdBy;
-    private long lastModifiedBy;
+  private Long id;
+  private String title;
+  private LocationResponseDto destination;
+  private String description;
+  private List<SubsectionResponseDto> subsections;
+  private ZonedDateTime createdAt;
+  private ZonedDateTime lastModified;
+  private long createdBy;
+  private long lastModifiedBy;
 }

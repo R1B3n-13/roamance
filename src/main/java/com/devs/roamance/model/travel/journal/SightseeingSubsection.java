@@ -13,7 +13,5 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SightseeingSubsection extends Subsection {
-    @Embedded
-    @NonNull
-    private Location location;
+  @Embedded @NonNull private Location location;
 }

@@ -13,7 +13,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SightseeingSubsectionCreateRequestDto {
-    @Valid
-    @NotNull(message = "Location is required for sightseeing")
-    private LocationCreateRequestDto location;
+  @Valid
+  @NotNull(message = "Location is required for sightseeing")
+  private LocationCreateRequestDto location;
 }

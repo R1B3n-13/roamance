@@ -12,6 +12,5 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SightseeingSubsectionUpdateRequestDto extends SubsectionUpdateRequestDto {
-    @Valid
-    private LocationUpdateRequestDto location;
+  @Valid private LocationUpdateRequestDto location;
 }

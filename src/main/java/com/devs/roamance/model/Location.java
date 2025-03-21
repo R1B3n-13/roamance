@@ -9,9 +9,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Location {
-    @NonNull
-    private Double latitude;
+  @NonNull private Double latitude;
 
-    @NonNull
-    private Double longitude;
+  @NonNull private Double longitude;
 }
