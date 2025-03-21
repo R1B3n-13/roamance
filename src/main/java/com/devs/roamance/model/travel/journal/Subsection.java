@@ -3,14 +3,9 @@ package com.devs.roamance.model.travel.journal;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import jakarta.persistence.*;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.*;
-import org.springframework.data.annotation.CreatedBy;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedBy;
-import org.springframework.data.annotation.LastModifiedDate;
 
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
@@ -38,20 +33,6 @@ public abstract class Subsection {
   @ElementCollection private List<String> checklists = new ArrayList<>();
 
   @NonNull @ManyToOne private Journal journal;
-
-  // Auditing Fields
-
-  @CreatedDate
-  @Setter(AccessLevel.NONE)
-  private ZonedDateTime createdAt;
-
-  @LastModifiedDate private ZonedDateTime lastModified;
-
-  @CreatedBy
-  @Setter(AccessLevel.NONE)
-  private long createdBy;
-
-  @LastModifiedBy private long lastModifiedBy;
 
   //    Methods
 
