@@ -1,7 +1,8 @@
+import { ThemeProvider } from "@/components/common/theme-provider";
+import { Toaster } from "@/components/ui/sonner";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { ThemeProvider } from "@/components/theme-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,8 +16,10 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Roamance - Where Every Journey Becomes a Story",
-  description: "Discover your next adventure with Roamance - the ultimate travel companion app.",
-  keywords: "travel, adventure, destinations, cultural experience, travel plans, world exploration",
+  description:
+    "Discover your next adventure with Roamance - the ultimate travel companion app.",
+  keywords:
+    "travel, adventure, destinations, cultural experience, travel plans, world exploration",
 };
 
 export default function RootLayout({
@@ -37,6 +40,7 @@ export default function RootLayout({
         >
           {children}
         </ThemeProvider>
+        <Toaster />
       </body>
     </html>
   );

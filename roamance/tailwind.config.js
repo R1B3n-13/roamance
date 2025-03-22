@@ -18,6 +18,10 @@ module.exports = {
       },
     },
     extend: {
+      fontFamily: {
+        primary: ["var(--font-geist-sans)", "sans-serif"],
+        secondary: ["var(--font-geist-mono)", "sans-serif"],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -54,29 +58,29 @@ module.exports = {
         },
         // Travel-specific theme colors
         ocean: {
-          light: "#7FB3D5",
-          DEFAULT: "#2980B9",
-          dark: "#1A5276"
+          light: "var(--ocean-light)",
+          DEFAULT: "var(--ocean)",
+          dark: "var(--ocean-dark)"
         },
         sunset: {
-          light: "#F5B041",
-          DEFAULT: "#E67E22",
-          dark: "#BA4A00"
+          light: "var(--sunset-light)",
+          DEFAULT: "var(--sunset)",
+          dark: "var(--sunset-dark)"
         },
         forest: {
-          light: "#7DCEA0",
-          DEFAULT: "#27AE60",
-          dark: "#196F3D"
+          light: "var(--forest-light)",
+          DEFAULT: "var(--forest)",
+          dark: "var(--forest-dark)"
         },
         sand: {
-          light: "#F9E79F",
-          DEFAULT: "#F4D03F",
-          dark: "#D4AC0D"
+          light: "var(--sand-light)",
+          DEFAULT: "var(--sand)",
+          dark: "var(--sand-dark)"
         },
         mountain: {
-          light: "#A6ACAF",
-          DEFAULT: "#707B7C",
-          dark: "#424949"
+          light: "var(--mountain-light)",
+          DEFAULT: "var(--mountain)",
+          dark: "var(--mountain-dark)"
         },
       },
       borderRadius: {
@@ -127,7 +131,7 @@ module.exports = {
       backgroundImage: {
         'world-map': "url('/world-map-pattern.png')",
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-        'gradient-travel': 'linear-gradient(45deg, var(--primary), var(--secondary))',
+        'gradient-travel': 'linear-gradient(45deg, #2980B9, #E67E22)',
       },
     },
   },
