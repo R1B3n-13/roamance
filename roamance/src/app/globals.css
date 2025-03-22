@@ -40,6 +40,23 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+
+  /* Travel-specific theme colors */
+  --color-ocean-light: var(--ocean-light);
+  --color-ocean: var(--ocean);
+  --color-ocean-dark: var(--ocean-dark);
+  --color-sunset-light: var(--sunset-light);
+  --color-sunset: var(--sunset);
+  --color-sunset-dark: var(--sunset-dark);
+  --color-forest-light: var(--forest-light);
+  --color-forest: var(--forest);
+  --color-forest-dark: var(--forest-dark);
+  --color-sand-light: var(--sand-light);
+  --color-sand: var(--sand);
+  --color-sand-dark: var(--sand-dark);
+  --color-mountain-light: var(--mountain-light);
+  --color-mountain: var(--mountain);
+  --color-mountain-dark: var(--mountain-dark);
 }
 
 :root {
@@ -51,44 +68,61 @@
   --popover: oklch(0.99 0 0);
   --popover-foreground: oklch(0.2 0 0);
 
-  /* Ocean Blue as primary */
-  --primary: oklch(0.55 0.18 250);
+  /* Ocean Blue theme color - also used as primary */
+  --ocean-light: #7FB3D5;
+  --ocean: #2980B9;
+  --ocean-dark: #1A5276;
+  --primary: var(--ocean);
   --primary-foreground: oklch(0.99 0 0);
 
   /* Sunset Orange as secondary */
-  --secondary: oklch(0.7 0.22 35);
+  --sunset-light: #F5B041;
+  --sunset: #E67E22;
+  --sunset-dark: #BA4A00;
+  --secondary: var(--sunset);
   --secondary-foreground: oklch(0.99 0 0);
 
   /* Sandy Beige as muted */
+  --sand-light: #F9E79F;
+  --sand: #F4D03F;
+  --sand-dark: #D4AC0D;
   --muted: oklch(0.9 0.05 80);
   --muted-foreground: oklch(0.45 0.05 80);
 
-  /* Tropical Green as accent */
-  --accent: oklch(0.65 0.15 150);
+  /* Tropical Green/Forest as accent */
+  --forest-light: #7DCEA0;
+  --forest: #27AE60;
+  --forest-dark: #196F3D;
+  --accent: var(--forest);
   --accent-foreground: oklch(0.99 0 0);
+
+  /* Mountain colors */
+  --mountain-light: #A6ACAF;
+  --mountain: #707B7C;
+  --mountain-dark: #424949;
 
   /* Adventure Red as destructive */
   --destructive: oklch(0.6 0.25 25);
   --border: oklch(0.85 0.02 80);
   --input: oklch(0.85 0.02 80);
-  --ring: oklch(0.6 0.18 250);
+  --ring: var(--ocean);
 
   /* Chart colors - landscape colors */
-  --chart-1: oklch(0.65 0.18 250); /* Ocean Blue */
-  --chart-2: oklch(0.75 0.22 35);  /* Sunset Orange */
-  --chart-3: oklch(0.6 0.15 150);  /* Tropical Green */
+  --chart-1: var(--ocean);     /* Ocean Blue */
+  --chart-2: var(--sunset);    /* Sunset Orange */
+  --chart-3: var(--forest);    /* Tropical Green */
   --chart-4: oklch(0.7 0.10 270);  /* Lavender Fields */
-  --chart-5: oklch(0.8 0.12 60);   /* Desert Gold */
+  --chart-5: var(--sand);      /* Desert Gold/Sand */
 
   /* Sidebar - Light Theme */
   --sidebar: oklch(0.96 0.03 250);
   --sidebar-foreground: oklch(0.2 0 0);
-  --sidebar-primary: oklch(0.55 0.18 250);
+  --sidebar-primary: var(--primary);
   --sidebar-primary-foreground: oklch(0.99 0 0);
   --sidebar-accent: oklch(0.88 0.05 250);
   --sidebar-accent-foreground: oklch(0.2 0 0);
   --sidebar-border: oklch(0.85 0.05 250);
-  --sidebar-ring: oklch(0.6 0.18 250);
+  --sidebar-ring: var(--ring);
 }
 
 .dark {
@@ -99,7 +133,7 @@
   --popover: oklch(0.18 0.03 250);
   --popover-foreground: oklch(0.95 0 0);
 
-  /* Brighter Ocean Blue as primary */
+  /* Brighter Ocean Blue as primary in dark mode */
   --primary: oklch(0.65 0.22 250);
   --primary-foreground: oklch(0.1 0 0);
 
@@ -131,12 +165,12 @@
   /* Sidebar - Dark Theme */
   --sidebar: oklch(0.18 0.03 250);
   --sidebar-foreground: oklch(0.95 0 0);
-  --sidebar-primary: oklch(0.65 0.22 250);
+  --sidebar-primary: var(--primary);
   --sidebar-primary-foreground: oklch(0.1 0 0);
   --sidebar-accent: oklch(0.22 0.04 250);
   --sidebar-accent-foreground: oklch(0.95 0 0);
   --sidebar-border: oklch(0.3 0.05 250);
-  --sidebar-ring: oklch(0.65 0.22 250);
+  --sidebar-ring: var(--ring);
 }
 
 @layer base {
@@ -145,10 +179,14 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-geist-sans);
+  }
+
+  de, pre {
+    font-family: var(--font-geist-mono);
   }
 }
 
-/* Adding custom animations for travel interactions */
 @keyframes float {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-10px); }
