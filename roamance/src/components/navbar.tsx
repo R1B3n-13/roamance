@@ -1,29 +1,79 @@
-"use client"
+'use client';
 
-import * as React from "react"
-import Link from "next/link"
-import Image from "next/image"
-import { usePathname } from "next/navigation"
-import { MapPin, Menu, X, PlaneTakeoff, Search, User, Globe, Umbrella } from "lucide-react"
-import { ThemeToggle } from "@/components/common/theme-toggle"
-import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
-import { routes } from "@/constants/routes"
+import * as React from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
+import { usePathname, useRouter } from 'next/navigation';
+import {
+  MapPin,
+  Menu,
+  X,
+  PlaneTakeoff,
+  Search,
+  User,
+  Globe,
+  Umbrella,
+} from 'lucide-react';
+import { ThemeToggle } from '@/components/common/theme-toggle';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+import { routes } from '@/constants/routes';
 
 export function Navbar() {
-  const [isMenuOpen, setIsMenuOpen] = React.useState(false)
-  const pathname = usePathname()
-  const isAuthRoute = pathname?.startsWith('/auth')
+  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+  const [isAuthenticated, setIsAuthenticated] = React.useState(false);
+  const pathname = usePathname();
+  const router = useRouter();
+  const isAuthRoute = pathname?.startsWith('/auth');
+
+  console.log('isAuthenticated', isAuthenticated);
+
+  // Check for authentication token on component mount and when cookies change
+  React.useEffect(() => {
+    const checkAuth = () => {
+      // Check if auth token exists in cookies
+      const cookies = document.cookie.split(';');
+      console.log('cookies', cookies);
+      const tokenCookie = cookies.find((cookie) =>
+        cookie.trim().startsWith('access_token=')
+      );
+      setIsAuthenticated(!!tokenCookie);
+    };
+
+    checkAuth();
+
+    // Set up interval to check for cookie changes
+    const intervalId = setInterval(checkAuth, 1000);
+
+    // Cleanup interval on unmount
+    return () => clearInterval(intervalId);
+  }, []);
 
   const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen)
-  }
+    setIsMenuOpen(!isMenuOpen);
+  };
+
+  const handleProfileClick = () => {
+    if (isAuthenticated) {
+      // Redirect to dashboard
+      router.push('/dashboard');
+    } else {
+      // Redirect to sign in
+      router.push(routes.signIn.href);
+    }
+    if (isMenuOpen) {
+      setIsMenuOpen(false);
+    }
+  };
 
   return (
     <nav className="fixed top-0 z-50 w-full backdrop-blur-lg bg-background/90 border-b border-border/40 shadow-sm">
       <div className="container mx-auto flex items-center justify-between h-16 px-4 md:px-6">
         <div className="flex items-center gap-2">
-          <Link href={routes.home.href} className="flex items-center gap-2 cursor-pointer transition-opacity duration-200 hover:opacity-80">
+          <Link
+            href={routes.home.href}
+            className="flex items-center gap-2 cursor-pointer transition-opacity duration-200 hover:opacity-80"
+          >
             <Image
               src="/images/roamance-logo-no-text.png"
               alt="Logo"
@@ -75,20 +125,31 @@ export function Navbar() {
         </div>
 
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" className="hidden md:flex cursor-pointer rounded-full hover:bg-muted/80 transition-colors">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="hidden md:flex cursor-pointer rounded-full hover:bg-muted/80 transition-colors"
+          >
             <Search className="h-[18px] w-[18px] text-muted-foreground" />
           </Button>
           <div className="hidden md:flex">
             <ThemeToggle className="hover:bg-muted/80" />
           </div>
-          <Button variant="ghost" size="icon" className="hidden md:flex rounded-full cursor-pointer hover:bg-muted/80 transition-colors">
-            <User className="h-[18px] w-[18px] text-muted-foreground" />
+
+          <Button
+            variant="ghost"
+            size="icon"
+            className="hidden md:flex rounded-full cursor-pointer hover:bg-muted/80 transition-colors"
+            onClick={handleProfileClick}
+            title={isAuthenticated ? 'Your Profile' : 'Sign In'}
+          >
+            <User
+              className={cn(
+                'h-[18px] w-[18px]',
+                isAuthenticated ? 'text-primary' : 'text-muted-foreground'
+              )}
+            />
           </Button>
-          {!isAuthRoute && (
-            <Link href={routes.signIn.href}>
-              <Button variant="default" size="sm" className="hidden md:flex cursor-pointer rounded-full text-xs font-medium px-4 shadow-sm transition-all duration-200 hover:shadow-md">Sign In</Button>
-            </Link>
-          )}
 
           {/* Mobile menu button */}
           <Button
@@ -97,16 +158,24 @@ export function Navbar() {
             className="md:hidden cursor-pointer rounded-full hover:bg-muted/80 transition-colors"
             onClick={toggleMenu}
           >
-            {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            {isMenuOpen ? (
+              <X className="h-5 w-5" />
+            ) : (
+              <Menu className="h-5 w-5" />
+            )}
           </Button>
         </div>
       </div>
 
       {/* Mobile navigation */}
-      <div className={cn(
-        "md:hidden fixed inset-x-0 top-16 bg-background/95 backdrop-blur-lg border-b transition-all duration-300 ease-in-out",
-        isMenuOpen ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-full pointer-events-none"
-      )}>
+      <div
+        className={cn(
+          'md:hidden fixed inset-x-0 top-16 bg-background/95 backdrop-blur-lg border-b transition-all duration-300 ease-in-out',
+          isMenuOpen
+            ? 'opacity-100 translate-y-0'
+            : 'opacity-0 -translate-y-full pointer-events-none'
+        )}
+      >
         <div className="container px-4 py-4 flex flex-col gap-4">
           <Link
             href={routes.map.href}
@@ -150,26 +219,25 @@ export function Navbar() {
           </Link>
           <div className="flex flex-col gap-3 pt-3 border-t mt-1">
             {!isAuthRoute && (
-              <>
-                <Link href={routes.signIn.href} onClick={toggleMenu}>
-                  <Button variant="outline" className="w-full justify-start cursor-pointer rounded-lg py-5 transition-colors">
-                    <User className="h-5 w-5 mr-3 text-primary" />
-                    <span className="font-medium">Profile</span>
-                  </Button>
-                </Link>
-                <Link href={routes.signIn.href} onClick={toggleMenu}>
-                  <Button
-                    variant="default"
-                    className="w-full cursor-pointer rounded-lg py-5 font-medium transition-all duration-200 shadow-sm hover:shadow-md"
-                  >
-                    Sign In
-                  </Button>
-                </Link>
-              </>
+              <Button
+                variant="outline"
+                className="w-full justify-start cursor-pointer rounded-lg py-5 transition-colors"
+                onClick={handleProfileClick}
+              >
+                <User
+                  className={cn(
+                    'h-5 w-5 mr-3',
+                    isAuthenticated ? 'text-primary' : 'text-muted-foreground'
+                  )}
+                />
+                <span className="font-medium">
+                  {isAuthenticated ? 'Your Profile' : 'Sign In'}
+                </span>
+              </Button>
             )}
           </div>
         </div>
       </div>
     </nav>
-  )
+  );
 }

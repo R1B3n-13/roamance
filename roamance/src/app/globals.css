@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -69,36 +69,36 @@
   --popover-foreground: oklch(0.2 0 0);
 
   /* Ocean Blue theme color - also used as primary */
-  --ocean-light: #7FB3D5;
-  --ocean: #2980B9;
-  --ocean-dark: #1A5276;
+  --ocean-light: #7fb3d5;
+  --ocean: #2980b9;
+  --ocean-dark: #1a5276;
   --primary: var(--ocean);
   --primary-foreground: oklch(0.99 0 0);
 
   /* Sunset Orange as secondary */
-  --sunset-light: #F5B041;
-  --sunset: #E67E22;
-  --sunset-dark: #BA4A00;
+  --sunset-light: #f5b041;
+  --sunset: #e67e22;
+  --sunset-dark: #ba4a00;
   --secondary: var(--sunset);
   --secondary-foreground: oklch(0.99 0 0);
 
   /* Sandy Beige as muted */
-  --sand-light: #F9E79F;
-  --sand: #F4D03F;
-  --sand-dark: #D4AC0D;
+  --sand-light: #f9e79f;
+  --sand: #f4d03f;
+  --sand-dark: #d4ac0d;
   --muted: oklch(0.9 0.05 80);
   --muted-foreground: oklch(0.45 0.05 80);
 
   /* Tropical Green/Forest as accent */
-  --forest-light: #7DCEA0;
-  --forest: #27AE60;
-  --forest-dark: #196F3D;
+  --forest-light: #7dcea0;
+  --forest: #27ae60;
+  --forest-dark: #196f3d;
   --accent: var(--forest);
   --accent-foreground: oklch(0.99 0 0);
 
   /* Mountain colors */
-  --mountain-light: #A6ACAF;
-  --mountain: #707B7C;
+  --mountain-light: #a6acaf;
+  --mountain: #707b7c;
   --mountain-dark: #424949;
 
   /* Adventure Red as destructive */
@@ -108,11 +108,11 @@
   --ring: var(--ocean);
 
   /* Chart colors - landscape colors */
-  --chart-1: var(--ocean);     /* Ocean Blue */
-  --chart-2: var(--sunset);    /* Sunset Orange */
-  --chart-3: var(--forest);    /* Tropical Green */
-  --chart-4: oklch(0.7 0.10 270);  /* Lavender Fields */
-  --chart-5: var(--sand);      /* Desert Gold/Sand */
+  --chart-1: var(--ocean); /* Ocean Blue */
+  --chart-2: var(--sunset); /* Sunset Orange */
+  --chart-3: var(--forest); /* Tropical Green */
+  --chart-4: oklch(0.7 0.1 270); /* Lavender Fields */
+  --chart-5: var(--sand); /* Desert Gold/Sand */
 
   /* Sidebar - Light Theme */
   --sidebar: oklch(0.96 0.03 250);
@@ -157,10 +157,10 @@
 
   /* Chart colors - dark landscape colors */
   --chart-1: oklch(0.65 0.25 250); /* Ocean Blue */
-  --chart-2: oklch(0.75 0.28 35);  /* Sunset Orange */
-  --chart-3: oklch(0.7 0.22 150);  /* Tropical Green */
+  --chart-2: oklch(0.75 0.28 35); /* Sunset Orange */
+  --chart-3: oklch(0.7 0.22 150); /* Tropical Green */
   --chart-4: oklch(0.62 0.15 270); /* Lavender Fields */
-  --chart-5: oklch(0.75 0.18 60);  /* Desert Gold */
+  --chart-5: oklch(0.75 0.18 60); /* Desert Gold */
 
   /* Sidebar - Dark Theme */
   --sidebar: oklch(0.18 0.03 250);
@@ -182,25 +182,42 @@
     font-family: var(--font-geist-sans);
   }
 
-  de, pre {
+  de,
+  pre {
     font-family: var(--font-geist-mono);
   }
 }
 
 @keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.6; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
 }
 
 @keyframes zoom {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 .animate-float {

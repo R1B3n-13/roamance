@@ -1,11 +1,11 @@
-"use client"
+'use client';
 
-import React from "react"
-import { Navbar } from "@/components/navbar"
-import { HeroSection } from "@/components/home/hero-section"
-import { FeatureShowcase } from "@/components/home/feature-showcase"
-import { DestinationShowcase } from "@/components/home/destination-showcase"
-import { Footer } from "@/components/footer"
+import React from 'react';
+import { Navbar } from '@/components/navbar';
+import { HeroSection } from '@/components/home/hero-section';
+import { FeatureShowcase } from '@/components/home/feature-showcase';
+import { DestinationShowcase } from '@/components/home/destination-showcase';
+import { Footer } from '@/components/footer';
 
 export default function Home() {
   return (
@@ -18,5 +18,5 @@ export default function Home() {
       </main>
       <Footer />
     </div>
-  )
+  );
 }

@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { QuickLinkCard } from "@/components/home/quick-link-card";
-import { Button } from "@/components/ui/button";
-import { motion } from "framer-motion";
-import { Calendar, Compass, Globe, MapPin, Search } from "lucide-react";
+import { QuickLinkCard } from '@/components/home/quick-link-card';
+import { Button } from '@/components/ui/button';
+import { motion } from 'framer-motion';
+import { Calendar, Compass, Globe, MapPin, Search } from 'lucide-react';
 
 export function HeroSection() {
   return (
@@ -21,7 +21,7 @@ export function HeroSection() {
       </div>
 
       {/* Hero content */}
-      <div className="container relative pt-32 pb-20 h-screen flex flex-col justify-center items-center text-center gap-8 mx-auto max-w-7xl">
+      <div className="container relative pt-32 pb-20 h-screen flex flex-col justify-center items-center text-center gap-8 px-4 mx-auto max-w-7xl">
         <motion.h1
           className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight"
           initial={{ opacity: 0, y: 20 }}
@@ -79,7 +79,7 @@ export function HeroSection() {
 
         {/* Quick link cards */}
         <motion.div
-          className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 w-full max-w-4xl mt-4 mb-8 lg:mb-0 px-4"
+          className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 w-full max-w-4xl mt-4 mb-8 lg:mb-0"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.8 }}
