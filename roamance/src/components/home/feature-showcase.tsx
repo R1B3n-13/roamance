@@ -1,7 +1,6 @@
-"use client";
+'use client';
 
-import * as React from "react";
-import { motion } from "framer-motion";
+import * as React from 'react';
 import {
   MapPin,
   Calendar,
@@ -9,111 +8,89 @@ import {
   Plane,
   Users,
   Sparkles,
-} from "lucide-react";
-import { cn } from "@/lib/utils";
-import Link from "next/link";
-import { routes } from "@/constants/routes";
+} from 'lucide-react';
+import Link from 'next/link';
+import { routes } from '@/constants/routes';
+import { SectionHeading } from '@/components/common/section-heading';
+import { FeatureItem } from '@/components/home/feature-item';
+import { motion } from 'framer-motion';
 
 export function FeatureShowcase() {
   const features = [
     {
-      icon: <MapPin className="h-6 w-6" />,
-      title: "Explore Destinations",
+      icon: MapPin,
+      title: 'Explore Destinations',
       description:
-        "Discover breathtaking locations around the world with detailed guides and insider tips.",
-      colorClass: "bg-primary/20",
-      textColorClass: "text-primary",
+        'Discover breathtaking locations around the world with detailed guides and insider tips.',
+      colorClass: 'text-primary',
+      bgColorClass: 'bg-primary/20',
     },
     {
-      icon: <Calendar className="h-6 w-6" />,
-      title: "Plan Your Journey",
+      icon: Calendar,
+      title: 'Plan Your Journey',
       description:
-        "Create detailed travel itineraries with our AI-powered planning tools.",
-      colorClass: "bg-sunset/20",
-      textColorClass: "text-sunset",
+        'Create detailed travel itineraries with our AI-powered planning tools.',
+      colorClass: 'text-sunset',
+      bgColorClass: 'bg-sunset/20',
     },
     {
-      icon: <Compass className="h-6 w-6" />,
-      title: "Find Adventures",
+      icon: Compass,
+      title: 'Find Adventures',
       description:
-        "Discover unique experiences and activities tailored to your interests.",
-      colorClass: "bg-forest/20",
-      textColorClass: "text-forest",
+        'Discover unique experiences and activities tailored to your interests.',
+      colorClass: 'text-forest',
+      bgColorClass: 'bg-forest/20',
     },
     {
-      icon: <Plane className="h-6 w-6" />,
-      title: "Track Flights",
+      icon: Plane,
+      title: 'Track Flights',
       description:
-        "Find the best deals on flights and keep track of your travel arrangements.",
-      colorClass: "bg-sunset/20",
-      textColorClass: "text-sunset",
+        'Find the best deals on flights and keep track of your travel arrangements.',
+      colorClass: 'text-sunset',
+      bgColorClass: 'bg-sunset/20',
     },
     {
-      icon: <Users className="h-6 w-6" />,
-      title: "Connect with Travelers",
+      icon: Users,
+      title: 'Connect with Travelers',
       description:
-        "Join a global community of like-minded adventurers and share experiences.",
-      colorClass: "bg-forest/20",
-      textColorClass: "text-forest",
+        'Join a global community of like-minded adventurers and share experiences.',
+      colorClass: 'text-forest',
+      bgColorClass: 'bg-forest/20',
     },
     {
-      icon: <Sparkles className="h-6 w-6" />,
-      title: "AI Recommendations",
+      icon: Sparkles,
+      title: 'AI Recommendations',
       description:
-        "Get personalized suggestions based on your preferences and past travels.",
-      colorClass: "bg-ocean/20",
-      textColorClass: "text-ocean",
+        'Get personalized suggestions based on your preferences and past travels.',
+      colorClass: 'text-ocean',
+      bgColorClass: 'bg-ocean/20',
     },
   ];
 
   return (
     <section className="py-24 bg-background">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-16">
-          <motion.h2
-            className="text-3xl md:text-4xl font-bold mb-4"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-          >
-            Reimagine How You <span className="text-primary">Travel</span>
-          </motion.h2>
-          <motion.p
-            className="text-muted-foreground max-w-2xl mx-auto text-lg"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-          >
-            Roamance combines cutting-edge technology with a passion for
-            exploration, making every journey more meaningful and memorable.
-          </motion.p>
-        </div>
+        <SectionHeading
+          title="Reimagine How You Travel"
+          titleHighlight="Travel"
+          subtitle="Roamance combines cutting-edge technology with a passion for exploration, making every journey more meaningful and memorable."
+        />
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {features.map((feature, index) => (
-            <motion.div
-              key={index}
-              className="bg-background rounded-xl p-6 border hover:shadow-lg transition-all"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.1 * index }}
-              whileHover={{ y: -5 }}
-            >
-              <div
-                className={cn(
-                  "p-3 rounded-full w-fit mb-4",
-                  feature.colorClass
-                )}
-              >
-                <div className={feature.textColorClass}>{feature.icon}</div>
-              </div>
-              <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
-              <p className="text-muted-foreground">{feature.description}</p>
-            </motion.div>
-          ))}
+          {features.map((feature, index) => {
+            const IconComponent = feature.icon;
+            return (
+              <FeatureItem
+                key={index}
+                icon={<IconComponent className={`h-6 w-6 ${feature.colorClass}`} />}
+                title={feature.title}
+                description={feature.description}
+                colorClass={feature.colorClass}
+                bgColorClass={feature.bgColorClass}
+                index={index}
+              />
+            );
+          })}
         </div>
 
         <div className="mt-16 bg-gradient-travel p-8 md:p-12 rounded-2xl dark:text-white">
@@ -129,7 +106,7 @@ export function FeatureShowcase() {
             </div>
             <Link
               className="md:w-1/3 flex justify-center md:justify-end"
-              href={routes.signIn.href}
+              href={routes.signUp.href}
             >
               <motion.button
                 className="dark:bg-white bg-primary text-white dark:text-primary font-medium px-8 py-3 rounded-full transition-all cursor-pointer"

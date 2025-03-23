@@ -1,48 +1,48 @@
 export const paths = {
-  home: "",
-  map: "map",
-  destinations: "destinations",
-  activities: "activities",
-  plans: "plans",
+  home: '',
+  map: 'map',
+  destinations: 'destinations',
+  activities: 'activities',
+  plans: 'plans',
 
   // Authentication paths
-  auth: "auth",
-  signIn: "sign-in",
-  signUp: "sign-up",
+  auth: 'auth',
+  signIn: 'sign-in',
+  signUp: 'sign-up',
 
   // Company paths
-  about: "about",
-  careers: "careers",
-  blog: "blog",
-  contact: "contact",
+  about: 'about',
+  careers: 'careers',
+  blog: 'blog',
+  contact: 'contact',
 
   // Legal paths
-  terms: "terms",
-  privacy: "privacy",
-  cookies: "cookies",
+  terms: 'terms',
+  privacy: 'privacy',
+  cookies: 'cookies',
 };
 
 export const pathTitles = {
-  home: "Home",
-  map: "Map",
-  destinations: "Destinations",
-  activities: "Activities",
-  plans: "Plans",
+  home: 'Home',
+  map: 'Map',
+  destinations: 'Destinations',
+  activities: 'Activities',
+  plans: 'Plans',
 
   // Authentication titles
-  signIn: "Sign In",
-  signUp: "Sign Up",
+  signIn: 'Sign In',
+  signUp: 'Sign Up',
 
   // Company titles
-  about: "About",
-  careers: "Careers",
-  blog: "Blog",
-  contact: "Contact",
+  about: 'About',
+  careers: 'Careers',
+  blog: 'Blog',
+  contact: 'Contact',
 
   // Legal titles
-  terms: "Terms of Service",
-  privacy: "Privacy Policy",
-  cookies: "Cookies Policy",
+  terms: 'Terms of Service',
+  privacy: 'Privacy Policy',
+  cookies: 'Cookies Policy',
 };
 
 export const routes = {

@@ -1,15 +1,15 @@
-"use client"
+'use client';
 
-import * as React from "react"
-import { motion } from "framer-motion"
-import { Star, MapPin } from "lucide-react"
+import * as React from 'react';
+import { motion } from 'framer-motion';
+import { Star, MapPin } from 'lucide-react';
 
 interface DestinationCardProps {
-  title: string
-  location: string
-  image: string
-  rating: number
-  category: string
+  title: string;
+  location: string;
+  image: string;
+  rating: number;
+  category: string;
 }
 
 export function DestinationCard({
@@ -17,7 +17,7 @@ export function DestinationCard({
   location,
   image,
   rating,
-  category
+  category,
 }: DestinationCardProps) {
   return (
     <motion.div
@@ -50,5 +50,5 @@ export function DestinationCard({
         </p>
       </div>
     </motion.div>
-  )
+  );
 }
