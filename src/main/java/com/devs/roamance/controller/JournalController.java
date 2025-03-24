@@ -5,6 +5,7 @@ import com.devs.roamance.service.JournalService;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -12,7 +13,12 @@ import org.springframework.web.bind.annotation.*;
 public class JournalController {
 
   private static final Logger logger = LoggerFactory.getLogger(JournalController.class);
-  private JournalService journalService;
+  private final JournalService journalService;
+
+  @Autowired
+  public JournalController(JournalService journalService) {
+    this.journalService = journalService;
+  }
 
   @GetMapping
   public List<Journal> getAllJournals() {
