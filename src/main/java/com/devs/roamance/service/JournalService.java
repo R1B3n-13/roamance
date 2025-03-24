@@ -6,14 +6,13 @@ import com.devs.roamance.repository.JournalRepository;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class JournalService {
   private static final Logger logger = LoggerFactory.getLogger(JournalService.class);
 
-  @Autowired private JournalRepository journalRepository;
+  private JournalRepository journalRepository;
 
   public List<Journal> getAllJournals() {
     return journalRepository.findAll();
@@ -39,7 +38,7 @@ public class JournalService {
         journal.getSubsections().size());
 
     // Set up the bidirectional relationship for each subsection
-    if (journal.getSubsections() != null && !journal.getSubsections().isEmpty()) {
+    if (!journal.getSubsections().isEmpty()) {
       for (Subsection subsection : journal.getSubsections()) {
         subsection.setJournal(journal);
       }

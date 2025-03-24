@@ -1,5 +1,6 @@
 package com.devs.roamance.model.travel.journal;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import jakarta.persistence.*;
@@ -32,7 +33,7 @@ public abstract class Subsection {
 
   @ElementCollection private List<String> checklists = new ArrayList<>();
 
-  @NonNull @ManyToOne private Journal journal;
+  @JsonBackReference @NonNull @ManyToOne private Journal journal;
 
   //    Methods
 

@@ -1,6 +1,7 @@
 package com.devs.roamance.model.travel.journal;
 
 import com.devs.roamance.model.Location;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import java.time.ZonedDateTime;
@@ -33,6 +34,7 @@ public class Journal {
 
   @NonNull
   @OneToMany(mappedBy = "journal", cascade = CascadeType.ALL, orphanRemoval = true)
+  @JsonManagedReference
   private List<Subsection> subsections = new ArrayList<>();
 
   // Helper methods for managing bidirectional relationships
@@ -44,7 +46,6 @@ public class Journal {
 
   public void removeSubsection(Subsection subsection) {
     subsections.remove(subsection);
-    subsection.setJournal(null);
   }
 
   // Auditing Fields
