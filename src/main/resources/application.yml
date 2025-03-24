@@ -36,3 +36,4 @@ server:
 logging:
   level:
     root: warn
+    com.devs.roamance: info

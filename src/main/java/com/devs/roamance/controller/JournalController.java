@@ -3,12 +3,16 @@ package com.devs.roamance.controller;
 import com.devs.roamance.model.travel.journal.Journal;
 import com.devs.roamance.service.JournalService;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/journals")
 public class JournalController {
+
+  private static final Logger logger = LoggerFactory.getLogger(JournalController.class);
 
   @Autowired private JournalService journalService;
 
@@ -19,7 +23,14 @@ public class JournalController {
 
   @GetMapping("/{id}")
   public Journal getJournalById(@PathVariable Long id) {
-    return journalService.getJournalById(id);
+    Journal journal = journalService.getJournalById(id);
+    logger.info("Retrieved journal with id: {} and title: {}", journal.getId(), journal.getTitle());
+    logger.info(
+        "Journal has {} subsections fetched via JOIN FETCH", journal.getSubsections().size());
+    if (!journal.getSubsections().isEmpty()) {
+      logger.info("First subsection title: {}", journal.getSubsections().get(0).getTitle());
+    }
+    return journal;
   }
 
   @PostMapping

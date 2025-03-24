@@ -35,6 +35,18 @@ public class Journal {
   @OneToMany(mappedBy = "journal", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Subsection> subsections = new ArrayList<>();
 
+  // Helper methods for managing bidirectional relationships
+
+  public void addSubsection(Subsection subsection) {
+    subsections.add(subsection);
+    subsection.setJournal(this);
+  }
+
+  public void removeSubsection(Subsection subsection) {
+    subsections.remove(subsection);
+    subsection.setJournal(null);
+  }
+
   // Auditing Fields
 
   @CreatedDate

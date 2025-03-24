@@ -1,13 +1,18 @@
 package com.devs.roamance.service;
 
 import com.devs.roamance.model.travel.journal.Journal;
+import com.devs.roamance.model.travel.journal.Subsection;
 import com.devs.roamance.repository.JournalRepository;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class JournalService {
+  private static final Logger logger = LoggerFactory.getLogger(JournalService.class);
+
   @Autowired private JournalRepository journalRepository;
 
   public List<Journal> getAllJournals() {
@@ -15,12 +20,34 @@ public class JournalService {
   }
 
   public Journal getJournalById(Long id) {
-    return journalRepository
-        .findById(id)
-        .orElseThrow(() -> new RuntimeException("Journal not found"));
+    logger.info("Fetching journal with id: {} using JOIN FETCH for subsections", id);
+    Journal journal =
+        journalRepository
+            .findByIdWithSubsections(id)
+            .orElseThrow(() -> new RuntimeException("Journal not found"));
+    logger.info(
+        "Successfully fetched journal with title: '{}' and {} subsections",
+        journal.getTitle(),
+        journal.getSubsections().size());
+    return journal;
   }
 
   public Journal createJournal(Journal journal) {
+    logger.info(
+        "Creating journal with title: '{}' and {} subsections",
+        journal.getTitle(),
+        journal.getSubsections().size());
+
+    // Set up the bidirectional relationship for each subsection
+    if (journal.getSubsections() != null && !journal.getSubsections().isEmpty()) {
+      for (Subsection subsection : journal.getSubsections()) {
+        subsection.setJournal(journal);
+      }
+      logger.info(
+          "Established bidirectional relationship for {} subsections",
+          journal.getSubsections().size());
+    }
+
     return journalRepository.save(journal);
   }
 
