@@ -2,16 +2,17 @@ package com.devs.roamance.service;
 
 import com.devs.roamance.model.travel.journal.Journal;
 import java.util.List;
+import java.util.UUID;
 
 public interface JournalService {
 
   List<Journal> getAllJournals();
 
-  Journal getJournalById(Long id);
+  Journal getJournalById(UUID id);
 
   Journal createJournal(Journal journal);
 
-  Journal updateJournal(Long id, Journal journalDetails);
+  Journal updateJournal(UUID id, Journal journalDetails);
 
-  void deleteJournal(Long id);
+  void deleteJournal(UUID id);
 }

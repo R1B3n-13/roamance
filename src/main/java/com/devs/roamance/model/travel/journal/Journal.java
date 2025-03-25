@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import lombok.*;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
@@ -23,8 +24,8 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @AllArgsConstructor
 public class Journal {
   @Id
-  @GeneratedValue(strategy = GenerationType.AUTO)
-  private long id;
+  @GeneratedValue(strategy = GenerationType.UUID)
+  private UUID id;
 
   @NonNull private String title;
 
@@ -58,7 +59,7 @@ public class Journal {
 
   @CreatedBy
   @Setter(AccessLevel.NONE)
-  private long createdBy;
+  private UUID createdBy;
 
-  @LastModifiedBy private long lastModifiedBy;
+  @LastModifiedBy private UUID lastModifiedBy;
 }

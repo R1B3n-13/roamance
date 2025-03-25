@@ -5,6 +5,7 @@ import com.devs.roamance.model.travel.journal.Subsection;
 import com.devs.roamance.repository.JournalRepository;
 import com.devs.roamance.service.JournalService;
 import java.util.List;
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +28,7 @@ public class JournalServiceImpl implements JournalService {
   }
 
   @Override
-  public Journal getJournalById(Long id) {
+  public Journal getJournalById(UUID id) {
     logger.info("Fetching journal with id: {} using JOIN FETCH for subsections", id);
     Journal journal =
         journalRepository
@@ -61,7 +62,7 @@ public class JournalServiceImpl implements JournalService {
   }
 
   @Override
-  public Journal updateJournal(Long id, Journal journalDetails) {
+  public Journal updateJournal(UUID id, Journal journalDetails) {
     Journal journal = getJournalById(id);
     journal.setTitle(journalDetails.getTitle());
     journal.setDescription(journalDetails.getDescription());
@@ -70,7 +71,7 @@ public class JournalServiceImpl implements JournalService {
   }
 
   @Override
-  public void deleteJournal(Long id) {
+  public void deleteJournal(UUID id) {
     Journal journal = getJournalById(id);
     journalRepository.delete(journal);
   }

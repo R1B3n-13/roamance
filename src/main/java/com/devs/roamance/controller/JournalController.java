@@ -3,6 +3,7 @@ package com.devs.roamance.controller;
 import com.devs.roamance.model.travel.journal.Journal;
 import com.devs.roamance.service.JournalService;
 import java.util.List;
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +27,7 @@ public class JournalController {
   }
 
   @GetMapping("/{id}")
-  public Journal getJournalById(@PathVariable Long id) {
+  public Journal getJournalById(@PathVariable UUID id) {
     Journal journal = journalService.getJournalById(id);
     logger.info("Retrieved journal with id: {} and title: {}", journal.getId(), journal.getTitle());
     logger.info(
@@ -43,12 +44,12 @@ public class JournalController {
   }
 
   @PutMapping("/{id}")
-  public Journal updateJournal(@PathVariable Long id, @RequestBody Journal journal) {
+  public Journal updateJournal(@PathVariable UUID id, @RequestBody Journal journal) {
     return journalService.updateJournal(id, journal);
   }
 
   @DeleteMapping("/{id}")
-  public void deleteJournal(@PathVariable Long id) {
+  public void deleteJournal(@PathVariable UUID id) {
     journalService.deleteJournal(id);
   }
 }
