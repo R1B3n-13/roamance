@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import java.util.List;
+import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -18,7 +19,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public abstract class SubsectionUpdateRequestDto {
-  private Long id;
+  private UUID id;
 
   @Size(min = 1, max = 100, message = "Title must be between 1-100 characters")
   private String title;

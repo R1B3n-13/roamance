@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,13 +22,13 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public abstract class SubsectionResponseDto {
-  private Long id;
+  private UUID id;
   private String title;
   private SubsectionType type;
   private List<String> notes;
   private List<String> checklists;
   private ZonedDateTime createdAt;
   private ZonedDateTime lastModified;
-  private long createdBy;
-  private long lastModifiedBy;
+  private UUID createdBy;
+  private UUID lastModifiedBy;
 }
