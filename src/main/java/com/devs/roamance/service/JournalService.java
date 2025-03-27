@@ -8,6 +8,8 @@ public interface JournalService {
 
   List<Journal> getAllJournals();
 
+  List<Journal> getJournalsByUserRole();
+
   Journal getJournalById(UUID id);
 
   Journal createJournal(Journal journal);

@@ -23,7 +23,9 @@ public class JournalController {
 
   @GetMapping
   public List<Journal> getAllJournals() {
-    return journalService.getAllJournals();
+    // This now uses role-based access - ADMIN gets all journals, USER gets only their journals
+    logger.info("Getting journals based on user role");
+    return journalService.getJournalsByUserRole();
   }
 
   @GetMapping("/{id}")
