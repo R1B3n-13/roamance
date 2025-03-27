@@ -16,7 +16,9 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
-@Table(name = "journals", uniqueConstraints = @UniqueConstraint(columnNames = "title"))
+@Table(
+    name = "journals",
+    uniqueConstraints = @UniqueConstraint(columnNames = {"title", "created_by"}))
 @EntityListeners(AuditingEntityListener.class)
 @Getter
 @Setter
@@ -59,6 +61,7 @@ public class Journal {
 
   @CreatedBy
   @Setter(AccessLevel.NONE)
+  @Column(name = "created_by")
   private UUID createdBy;
 
   @LastModifiedBy private UUID lastModifiedBy;
