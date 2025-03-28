@@ -1,20 +1,18 @@
 package com.devs.roamance.service;
 
-import com.devs.roamance.model.travel.journal.Journal;
-import java.util.List;
+import com.devs.roamance.dto.request.travel.journal.JournalCreateRequestDto;
+import com.devs.roamance.dto.request.travel.journal.JournalUpdateRequestDto;
+import com.devs.roamance.dto.response.travel.journal.JournalListResponseDto;
+import com.devs.roamance.dto.response.travel.journal.JournalResponseDto;
 import java.util.UUID;
 
-public interface JournalService {
-
-  List<Journal> getAllJournals();
-
-  List<Journal> getJournalsByUserRole();
-
-  Journal getJournalById(UUID id);
-
-  Journal createJournal(Journal journal);
-
-  Journal updateJournal(UUID id, Journal journalDetails);
-
-  void deleteJournal(UUID id);
+public interface JournalService
+    extends BaseService<
+        JournalResponseDto,
+        JournalListResponseDto,
+        JournalResponseDto,
+        JournalCreateRequestDto,
+        JournalUpdateRequestDto,
+        UUID> {
+  JournalListResponseDto getByUserRole();
 }

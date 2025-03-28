@@ -1,12 +1,11 @@
 package com.devs.roamance.controller;
 
-import com.devs.roamance.constant.ResponseMessage;
+import com.devs.roamance.dto.request.travel.journal.JournalCreateRequestDto;
+import com.devs.roamance.dto.request.travel.journal.JournalUpdateRequestDto;
 import com.devs.roamance.dto.response.BaseResponseDto;
-import com.devs.roamance.dto.response.JournalListResponseDto;
-import com.devs.roamance.dto.response.JournalResponseDto;
-import com.devs.roamance.model.travel.journal.Journal;
+import com.devs.roamance.dto.response.travel.journal.JournalListResponseDto;
+import com.devs.roamance.dto.response.travel.journal.JournalResponseDto;
 import com.devs.roamance.service.JournalService;
-import java.util.List;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,67 +28,50 @@ public class JournalController {
 
   @GetMapping
   public ResponseEntity<JournalListResponseDto> getAllJournals() {
-    // This now uses role-based access - ADMIN gets all journals, USER gets only their journals
     logger.info("Getting journals based on user role");
-    List<Journal> journals = journalService.getJournalsByUserRole();
-
-    JournalListResponseDto responseDto =
-        new JournalListResponseDto(
-            HttpStatus.OK.value(), true, ResponseMessage.JOURNALS_FETCH_SUCCESS, journals);
-
-    return ResponseEntity.ok(responseDto);
+    JournalListResponseDto journals = journalService.getByUserRole();
+    return ResponseEntity.ok(journals);
   }
 
   @GetMapping("/{id}")
   public ResponseEntity<JournalResponseDto> getJournalById(@PathVariable UUID id) {
-    Journal journal = journalService.getJournalById(id);
-    logger.info("Retrieved journal with id: {} and title: {}", journal.getId(), journal.getTitle());
+    JournalResponseDto journal = journalService.getById(id);
     logger.info(
-        "Journal has {} subsections fetched via JOIN FETCH", journal.getSubsections().size());
-    if (!journal.getSubsections().isEmpty()) {
-      logger.info("First subsection title: {}", journal.getSubsections().get(0).getTitle());
+        "Retrieved journal with id: {} and title: {}",
+        journal.getData().getId(),
+        journal.getData().getTitle());
+    logger.info(
+        "Journal has {} subsections fetched via JOIN FETCH",
+        journal.getData().getSubsections().size());
+    if (!journal.getData().getSubsections().isEmpty()) {
+      logger.info(
+          "First subsection title: {}", journal.getData().getSubsections().getFirst().getTitle());
     }
 
-    JournalResponseDto responseDto =
-        new JournalResponseDto(
-            HttpStatus.OK.value(), true, ResponseMessage.JOURNAL_FETCH_SUCCESS, journal);
-
-    return ResponseEntity.ok(responseDto);
+    return ResponseEntity.ok(journal);
   }
 
   @PostMapping
-  public ResponseEntity<JournalResponseDto> createJournal(@RequestBody Journal journal) {
-    Journal createdJournal = journalService.createJournal(journal);
+  public ResponseEntity<JournalResponseDto> createJournal(
+      @RequestBody JournalCreateRequestDto journal) {
+    logger.info("Creating journal with title: '{}'", journal.getTitle());
+    JournalResponseDto createdJournal = journalService.create(journal);
 
-    JournalResponseDto responseDto =
-        new JournalResponseDto(
-            HttpStatus.CREATED.value(),
-            true,
-            ResponseMessage.JOURNAL_CREATE_SUCCESS,
-            createdJournal);
-
-    return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
+    return ResponseEntity.status(HttpStatus.CREATED).body(createdJournal);
   }
 
   @PutMapping("/{id}")
   public ResponseEntity<JournalResponseDto> updateJournal(
-      @PathVariable UUID id, @RequestBody Journal journal) {
-    Journal updatedJournal = journalService.updateJournal(id, journal);
+      @PathVariable UUID id, @RequestBody JournalUpdateRequestDto journal) {
+    JournalResponseDto updatedJournal = journalService.update(journal, id);
 
-    JournalResponseDto responseDto =
-        new JournalResponseDto(
-            HttpStatus.OK.value(), true, ResponseMessage.JOURNAL_UPDATE_SUCCESS, updatedJournal);
-
-    return ResponseEntity.ok(responseDto);
+    return ResponseEntity.ok(updatedJournal);
   }
 
   @DeleteMapping("/{id}")
   public ResponseEntity<BaseResponseDto> deleteJournal(@PathVariable UUID id) {
-    journalService.deleteJournal(id);
+    JournalResponseDto deletedJournal = journalService.delete(id);
 
-    BaseResponseDto responseDto =
-        new BaseResponseDto(HttpStatus.OK.value(), true, ResponseMessage.JOURNAL_DELETE_SUCCESS);
-
-    return ResponseEntity.ok(responseDto);
+    return ResponseEntity.ok(deletedJournal);
   }
 }

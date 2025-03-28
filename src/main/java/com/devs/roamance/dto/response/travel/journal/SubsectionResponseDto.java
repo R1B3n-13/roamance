@@ -3,7 +3,7 @@ package com.devs.roamance.dto.response.travel.journal;
 import com.devs.roamance.model.travel.journal.SubsectionType;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -27,8 +27,8 @@ public abstract class SubsectionResponseDto {
   private SubsectionType type;
   private List<String> notes;
   private List<String> checklists;
-  private ZonedDateTime createdAt;
-  private ZonedDateTime lastModified;
+  private OffsetDateTime createdAt;
+  private OffsetDateTime lastModified;
   private UUID createdBy;
   private UUID lastModifiedBy;
 }

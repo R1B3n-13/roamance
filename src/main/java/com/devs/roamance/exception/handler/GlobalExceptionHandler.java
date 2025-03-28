@@ -81,4 +81,16 @@ public class GlobalExceptionHandler {
     return new ResponseEntity<>(
         new BaseResponseDto(500, false, "Internal server error"), HttpStatus.INTERNAL_SERVER_ERROR);
   }
+
+  // Journal
+
+  @ExceptionHandler(JournalAlreadyExistException.class)
+  public ResponseEntity<BaseResponseDto> handleJournalAlreadyExistException(
+      JournalAlreadyExistException ex) {
+
+    log.error("JournalAlreadyExistException: {}", ex.getMessage(), ex);
+
+    return new ResponseEntity<>(
+        new BaseResponseDto(409, false, ex.getMessage()), HttpStatus.CONFLICT);
+  }
 }

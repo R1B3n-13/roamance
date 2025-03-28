@@ -4,7 +4,7 @@ import com.devs.roamance.model.Location;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -51,13 +51,35 @@ public class Journal {
     subsections.remove(subsection);
   }
 
+  @Override
+  public String toString() {
+    return "Journal{"
+        + "id="
+        + id
+        + ", title='"
+        + title
+        + '\''
+        + ", destination="
+        + destination
+        + ", description='"
+        + description
+        + '\''
+        + ", subsectionsCount="
+        + subsections.size()
+        + ", createdAt="
+        + createdAt
+        + ", lastModified="
+        + lastModified
+        + '}';
+  }
+
   // Auditing Fields
 
   @CreatedDate
   @Setter(AccessLevel.NONE)
-  private ZonedDateTime createdAt;
+  private OffsetDateTime createdAt;
 
-  @LastModifiedDate private ZonedDateTime lastModified;
+  @LastModifiedDate private OffsetDateTime lastModified;
 
   @CreatedBy
   @Setter(AccessLevel.NONE)

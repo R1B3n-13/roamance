@@ -1,15 +1,28 @@
 package com.devs.roamance.service.impl;
 
+import com.devs.roamance.constant.ResponseMessage;
+import com.devs.roamance.dto.JournalDto;
+import com.devs.roamance.dto.request.travel.journal.JournalCreateRequestDto;
+import com.devs.roamance.dto.request.travel.journal.JournalUpdateRequestDto;
+import com.devs.roamance.dto.request.travel.journal.SubsectionCreateRequestDto;
+import com.devs.roamance.dto.response.travel.journal.JournalListResponseDto;
+import com.devs.roamance.dto.response.travel.journal.JournalResponseDto;
+import com.devs.roamance.exception.JournalAlreadyExistException;
+import com.devs.roamance.model.Location;
+import com.devs.roamance.model.User;
 import com.devs.roamance.model.travel.journal.Journal;
 import com.devs.roamance.model.travel.journal.Subsection;
 import com.devs.roamance.repository.JournalRepository;
 import com.devs.roamance.repository.UserRepository;
 import com.devs.roamance.service.JournalService;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
+import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -21,52 +34,61 @@ public class JournalServiceImpl implements JournalService {
 
   private final JournalRepository journalRepository;
   private final UserRepository userRepository;
+  private final ModelMapper modelMapper;
 
   @Autowired
-  public JournalServiceImpl(JournalRepository journalRepository, UserRepository userRepository) {
+  public JournalServiceImpl(
+      JournalRepository journalRepository, UserRepository userService, ModelMapper modelMapper) {
     this.journalRepository = journalRepository;
-    this.userRepository = userRepository;
+    this.userRepository = userService;
+    this.modelMapper = modelMapper;
   }
 
   @Override
-  public List<Journal> getAllJournals() {
-    return journalRepository.findAll();
-  }
+  public JournalResponseDto create(JournalCreateRequestDto requestDto) {
+    try {
+      logger.info(
+          "Creating journal with title: '{}' and {} subsections",
+          requestDto.getTitle(),
+          requestDto.getSubsections().size());
 
-  @Override
-  public List<Journal> getJournalsByUserRole() {
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+      Journal journal = modelMapper.map(requestDto, Journal.class);
 
-    // Check if user has ADMIN role
-    boolean isAdmin =
-        authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"));
+      logger.info("Creating journal with title: '{}'", journal.toString());
 
-    if (isAdmin) {
-      logger.info("User has ADMIN role, returning all journals");
-      return journalRepository.findAll();
-    } else {
-      // For regular users, get their UUID from the authentication
-      String email = authentication.getName();
-      UUID userId = getUserIdFromEmail(email);
+      if (!requestDto.getSubsections().isEmpty()) {
+        for (SubsectionCreateRequestDto subsectionDto : requestDto.getSubsections()) {
+          Subsection subsection = modelMapper.map(subsectionDto, Subsection.class);
+          subsection.setJournal(journal);
+        }
+        logger.info(
+            "Established bidirectional relationship for {} subsections",
+            journal.getSubsections().size());
+      }
 
-      logger.info("User has USER role, returning only their journals, userId: {}", userId);
-      return journalRepository.findByCreatedBy(userId);
+      Journal dto = journalRepository.save(journal);
+
+      return new JournalResponseDto(201, true, ResponseMessage.JOURNAL_CREATE_SUCCESS, dto);
+
+    } catch (DataIntegrityViolationException e) {
+      throw new JournalAlreadyExistException(
+          String.format(ResponseMessage.JOURNAL_ALREADY_EXIST, requestDto.getTitle()));
     }
   }
 
-  private UUID getUserIdFromEmail(String email) {
-    return userRepository
-        .findByEmail(email)
-        .map(
-            user -> {
-              logger.debug("Found user with ID: {} for email: {}", user.getId(), email);
-              return user.getId();
-            })
-        .orElseThrow(() -> new RuntimeException("User not found for email: " + email));
+  @Override
+  public JournalListResponseDto getAll() {
+
+    List<Journal> journals = journalRepository.findAll();
+
+    List<JournalDto> dto =
+        journals.stream().map(journal -> modelMapper.map(journal, JournalDto.class)).toList();
+
+    return new JournalListResponseDto(200, true, ResponseMessage.JOURNALS_FETCH_SUCCESS, dto);
   }
 
   @Override
-  public Journal getJournalById(UUID id) {
+  public JournalResponseDto getById(UUID id) {
     logger.info("Fetching journal with id: {} using JOIN FETCH for subsections", id);
     Journal journal =
         journalRepository
@@ -76,41 +98,57 @@ public class JournalServiceImpl implements JournalService {
         "Successfully fetched journal with title: '{}' and {} subsections",
         journal.getTitle(),
         journal.getSubsections().size());
-    return journal;
+    return new JournalResponseDto(200, true, ResponseMessage.JOURNAL_FETCH_SUCCESS, journal);
   }
 
   @Override
-  public Journal createJournal(Journal journal) {
-    logger.info(
-        "Creating journal with title: '{}' and {} subsections",
-        journal.getTitle(),
-        journal.getSubsections().size());
-
-    // Set up the bidirectional relationship for each subsection
-    if (!journal.getSubsections().isEmpty()) {
-      for (Subsection subsection : journal.getSubsections()) {
-        subsection.setJournal(journal);
-      }
-      logger.info(
-          "Established bidirectional relationship for {} subsections",
-          journal.getSubsections().size());
-    }
-
-    return journalRepository.save(journal);
-  }
-
-  @Override
-  public Journal updateJournal(UUID id, Journal journalDetails) {
-    Journal journal = getJournalById(id);
+  public JournalResponseDto update(JournalUpdateRequestDto journalDetails, UUID id) {
+    Journal journal = modelMapper.map(getById(id), Journal.class);
     journal.setTitle(journalDetails.getTitle());
     journal.setDescription(journalDetails.getDescription());
-    journal.setDestination(journalDetails.getDestination());
-    return journalRepository.save(journal);
+
+    if (journalDetails.getDestination() != null) {
+      journal.setDestination(modelMapper.map(journalDetails.getDestination(), Location.class));
+    }
+
+    Journal dto = journalRepository.save(journal);
+    return new JournalResponseDto(200, true, ResponseMessage.JOURNAL_UPDATE_SUCCESS, dto);
   }
 
   @Override
-  public void deleteJournal(UUID id) {
-    Journal journal = getJournalById(id);
+  public JournalResponseDto delete(UUID id) {
+    Journal journal = getById(id).getData();
     journalRepository.delete(journal);
+    return new JournalResponseDto(200, true, ResponseMessage.JOURNAL_DELETE_SUCCESS, journal);
+  }
+
+  @Override
+  public JournalListResponseDto getByUserRole() {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+    boolean isAdmin =
+        authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"));
+
+    if (isAdmin) {
+      logger.info("User has ADMIN role, returning all journals");
+      List<JournalDto> journals =
+          journalRepository.findAll().stream()
+              .map(journal -> modelMapper.map(journal, JournalDto.class))
+              .toList();
+      return new JournalListResponseDto(
+          200, true, ResponseMessage.JOURNALS_FETCH_SUCCESS, journals);
+    } else {
+      String email = authentication.getName();
+      Optional<UUID> userId = userRepository.findByEmail(email).map(User::getId);
+
+      logger.info("User has USER role, returning only their journals, userId: {}", userId);
+
+      List<JournalDto> journals =
+          journalRepository.findByCreatedBy(userId).stream()
+              .map(journal -> modelMapper.map(journal, JournalDto.class))
+              .toList();
+      return new JournalListResponseDto(
+          200, true, ResponseMessage.JOURNALS_FETCH_SUCCESS, journals);
+    }
   }
 }
