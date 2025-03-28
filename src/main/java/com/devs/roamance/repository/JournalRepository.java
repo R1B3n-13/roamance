@@ -15,5 +15,11 @@ public interface JournalRepository extends JpaRepository<Journal, UUID> {
   @Query("SELECT j FROM Journal j LEFT JOIN FETCH j.subsections WHERE j.id = :id")
   Optional<Journal> findByIdWithSubsections(@Param("id") UUID id);
 
+  @Query("SELECT j FROM Journal j LEFT JOIN FETCH j.subsections")
+  List<Journal> findAllWithSubsections();
+
+  @Query("SELECT j FROM Journal j LEFT JOIN FETCH j.subsections WHERE j.createdBy = :createdBy")
+  List<Journal> findByCreatedByWithSubsections(@Param("createdBy") UUID createdBy);
+
   List<Journal> findByCreatedBy(Optional<UUID> createdBy);
 }

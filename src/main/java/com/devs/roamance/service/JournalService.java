@@ -14,5 +14,6 @@ public interface JournalService
         JournalCreateRequestDto,
         JournalUpdateRequestDto,
         UUID> {
+
   JournalListResponseDto getByUserRole();
 }
