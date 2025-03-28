@@ -18,6 +18,12 @@ public class SubsectionTypeDeserializer extends JsonDeserializer<SubsectionType>
     logger.info("Deserializing SubsectionType from value: {}", value);
 
     try {
+      for (SubsectionType type : SubsectionType.values()) {
+        if (type.getValue().equalsIgnoreCase(value)) {
+          return type;
+        }
+      }
+
       return SubsectionType.valueOf(value.toUpperCase());
     } catch (IllegalArgumentException e) {
       logger.error("Could not deserialize SubsectionType from value: {}", value, e);

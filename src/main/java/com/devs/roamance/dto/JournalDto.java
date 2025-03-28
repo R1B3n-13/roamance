@@ -17,5 +17,8 @@ public class JournalDto {
   private String title;
   private LocationResponseDto destination;
   private String description;
+  private OffsetDateTime createdAt;
   private OffsetDateTime lastModified;
+  private UUID createdBy;
+  private UUID lastModifiedBy;
 }

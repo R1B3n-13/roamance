@@ -34,10 +34,9 @@ public abstract class Subsection {
 
   @ElementCollection private List<String> checklists = new ArrayList<>();
 
-  @JsonBackReference @NonNull @ManyToOne private Journal journal;
+  @JsonBackReference @ManyToOne private Journal journal;
 
-  //    Methods
-
+  // Methods
   @Transient
   public String getType() {
     return this.getClass().getAnnotation(DiscriminatorValue.class).value();
