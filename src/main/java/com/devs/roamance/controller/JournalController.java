@@ -1,18 +1,26 @@
 package com.devs.roamance.controller;
 
+import java.util.UUID;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.devs.roamance.dto.request.travel.journal.JournalCreateRequestDto;
 import com.devs.roamance.dto.request.travel.journal.JournalUpdateRequestDto;
 import com.devs.roamance.dto.response.BaseResponseDto;
 import com.devs.roamance.dto.response.travel.journal.JournalListResponseDto;
 import com.devs.roamance.dto.response.travel.journal.JournalResponseDto;
 import com.devs.roamance.service.JournalService;
-import java.util.UUID;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/journals")
@@ -21,7 +29,6 @@ public class JournalController {
   private static final Logger logger = LoggerFactory.getLogger(JournalController.class);
   private final JournalService journalService;
 
-  @Autowired
   public JournalController(JournalService journalService) {
     this.journalService = journalService;
   }

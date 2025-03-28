@@ -93,4 +93,14 @@ public class GlobalExceptionHandler {
     return new ResponseEntity<>(
         new BaseResponseDto(409, false, ex.getMessage()), HttpStatus.CONFLICT);
   }
+
+  @ExceptionHandler(SubsectionTypeDeserializationException.class)
+  public ResponseEntity<BaseResponseDto> handleSubsectionTypeDeserializationException(
+      SubsectionTypeDeserializationException ex) {
+
+    log.error("SubsectionTypeDeserializationException: {}", ex.getMessage(), ex);
+
+    return new ResponseEntity<>(
+        new BaseResponseDto(400, false, ex.getMessage()), HttpStatus.BAD_REQUEST);
+  }
 }
