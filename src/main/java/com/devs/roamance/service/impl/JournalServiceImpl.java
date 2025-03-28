@@ -6,6 +6,7 @@ import com.devs.roamance.dto.request.travel.journal.*;
 import com.devs.roamance.dto.response.travel.journal.JournalListResponseDto;
 import com.devs.roamance.dto.response.travel.journal.JournalResponseDto;
 import com.devs.roamance.exception.JournalAlreadyExistException;
+import com.devs.roamance.exception.JournalNotFoundException;
 import com.devs.roamance.model.Location;
 import com.devs.roamance.model.User;
 import com.devs.roamance.model.travel.journal.*;
@@ -57,13 +58,14 @@ public class JournalServiceImpl implements JournalService {
                     // Create the appropriate Subsection type based on the DTO class
                     Subsection subsection = switch (subsectionDto) {
                         case ActivitySubsectionCreateRequestDto activitySubsectionCreateRequestDto ->
-                                modelMapper.map(subsectionDto, ActivitySubsection.class);
+                            modelMapper.map(subsectionDto, ActivitySubsection.class);
                         case SightseeingSubsectionCreateRequestDto sightseeingSubsectionCreateRequestDto ->
-                                modelMapper.map(subsectionDto, SightseeingSubsection.class);
+                            modelMapper.map(subsectionDto, SightseeingSubsection.class);
                         case RouteSubsectionCreateRequestDto routeSubsectionCreateRequestDto ->
-                                modelMapper.map(subsectionDto, RouteSubsection.class);
+                            modelMapper.map(subsectionDto, RouteSubsection.class);
                         case null, default ->
-                                throw new IllegalArgumentException("Unknown subsection type: " + subsectionDto.getClass().getName());
+                            throw new IllegalArgumentException(
+                                    "Unknown subsection type: " + subsectionDto.getClass().getName());
                     };
                     journal.addSubsection(subsection);
                 }
@@ -97,7 +99,8 @@ public class JournalServiceImpl implements JournalService {
         logger.info("Fetching journal with id: {} using JOIN FETCH for subsections", id);
         Journal journal = journalRepository
                 .findByIdWithSubsections(id)
-                .orElseThrow(() -> new RuntimeException("Journal not found"));
+                .orElseThrow(() -> new JournalNotFoundException(
+                        String.format(ResponseMessage.JOURNAL_NOT_FOUND, id)));
         logger.info(
                 "Successfully fetched journal with title: '{}' and {} subsections",
                 journal.getTitle(),
@@ -121,9 +124,16 @@ public class JournalServiceImpl implements JournalService {
 
     @Override
     public JournalResponseDto delete(UUID id) {
-        Journal journal = getById(id).getData();
+        Journal journal = journalRepository
+                .findById(id)
+                .orElseThrow(() -> new JournalNotFoundException(
+                        String.format(ResponseMessage.JOURNAL_NOT_FOUND, id)));
+
+        Journal journalDto = modelMapper.map(journal, Journal.class);
+
         journalRepository.delete(journal);
-        return new JournalResponseDto(200, true, ResponseMessage.JOURNAL_DELETE_SUCCESS, journal);
+
+        return new JournalResponseDto(200, true, ResponseMessage.JOURNAL_DELETE_SUCCESS, journalDto);
     }
 
     @Override

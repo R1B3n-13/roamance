@@ -84,6 +84,16 @@ public class GlobalExceptionHandler {
 
   // Journal
 
+  @ExceptionHandler(JournalNotFoundException.class)
+  public ResponseEntity<BaseResponseDto> handleJournalNotFoundException(
+      JournalNotFoundException ex) {
+
+    log.error("JournalNotFoundException: {}", ex.getMessage(), ex);
+
+    return new ResponseEntity<>(
+        new BaseResponseDto(404, false, ex.getMessage()), HttpStatus.NOT_FOUND);
+  }
+
   @ExceptionHandler(JournalAlreadyExistException.class)
   public ResponseEntity<BaseResponseDto> handleJournalAlreadyExistException(
       JournalAlreadyExistException ex) {

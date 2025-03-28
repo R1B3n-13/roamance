@@ -9,10 +9,10 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class JacksonConfig {
 
-    @Bean
-    public Module subsectionTypeModule() {
-        SimpleModule module = new SimpleModule();
-        module.addDeserializer(SubsectionType.class, new SubsectionTypeDeserializer());
-        return module;
-    }
+  @Bean
+  public Module subsectionTypeModule() {
+    SimpleModule module = new SimpleModule();
+    module.addDeserializer(SubsectionType.class, new SubsectionTypeDeserializer());
+    return module;
+  }
 }
