@@ -113,4 +113,14 @@ public class GlobalExceptionHandler {
     return new ResponseEntity<>(
         new BaseResponseDto(400, false, ex.getMessage()), HttpStatus.BAD_REQUEST);
   }
+
+  @ExceptionHandler(SubsectionNotFoundException.class)
+  public ResponseEntity<BaseResponseDto> handleSubsectionNotFoundException(
+      SubsectionNotFoundException ex) {
+
+    log.error("SubsectionNotFoundException: {}", ex.getMessage(), ex);
+
+    return new ResponseEntity<>(
+        new BaseResponseDto(404, false, ex.getMessage()), HttpStatus.NOT_FOUND);
+  }
 }

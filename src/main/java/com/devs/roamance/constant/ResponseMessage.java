@@ -38,4 +38,14 @@ public final class ResponseMessage {
   public static final String JOURNAL_ACCESS_DENIED =
       "You don't have permission to access this journal!";
   public static final String JOURNAL_ALREADY_EXIST = "Journal already exists with email: %s!";
+
+  // Subsection related messages
+  public static final String SUBSECTION_CREATE_SUCCESS = "Subsection created successfully.";
+  public static final String SUBSECTION_FETCH_SUCCESS = "Subsection fetched successfully.";
+  public static final String SUBSECTIONS_FETCH_SUCCESS = "Subsections fetched successfully.";
+  public static final String SUBSECTION_UPDATE_SUCCESS = "Subsection updated successfully.";
+  public static final String SUBSECTION_DELETE_SUCCESS = "Subsection deleted successfully.";
+  public static final String SUBSECTION_ADD_SUCCESS = "Subsection added to journal successfully.";
+  public static final String SUBSECTION_REMOVE_SUCCESS = "Subsection removed from journal successfully.";
+  public static final String SUBSECTION_NOT_FOUND = "No subsection present with id: %s!";
 }
