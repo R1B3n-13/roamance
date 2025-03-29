@@ -6,16 +6,14 @@ public class PaginationSortingUtil {
 
   private PaginationSortingUtil() {}
 
-  public static int validatePageNumber(int pageNumber) {
+  public static int[] validatePaginationParams(int pageNumber, int pageSize) {
 
     final int MAX_PAGE_NUMBER = 10_000;
-    return Math.clamp(pageNumber, 0, MAX_PAGE_NUMBER);
-  }
-
-  public static int validatePageSize(int pageSize) {
-
     final int MAX_PAGE_SIZE = 50;
-    return Math.clamp(pageSize, 1, MAX_PAGE_SIZE);
+
+    return new int[] {
+      Math.clamp(pageNumber, 0, MAX_PAGE_NUMBER), Math.clamp(pageSize, 1, MAX_PAGE_SIZE)
+    };
   }
 
   public static Sort.Direction getSortDirection(String sortDir) {

@@ -46,11 +46,10 @@ public class UserController {
       @RequestParam(defaultValue = "id") String sortBy,
       @RequestParam(defaultValue = "asc") String sortDir) {
 
-    int validatedPageNumber = PaginationSortingUtil.validatePageNumber(pageNumber);
-    int validatedPageSize = PaginationSortingUtil.validatePageSize(pageSize);
+    int[] validatedParams = PaginationSortingUtil.validatePaginationParams(pageNumber, pageSize);
 
     UserListResponseDto responseDto =
-        userService.getAll(validatedPageNumber, validatedPageSize, sortBy, sortDir);
+        userService.getAll(validatedParams[0], validatedParams[1], sortBy, sortDir);
 
     return ResponseEntity.ok(responseDto);
   }
@@ -87,11 +86,10 @@ public class UserController {
       @RequestParam(defaultValue = "0") int pageNumber,
       @RequestParam(defaultValue = "10") int pageSize) {
 
-    int validatedPageNumber = PaginationSortingUtil.validatePageNumber(pageNumber);
-    int validatedPageSize = PaginationSortingUtil.validatePageSize(pageSize);
+    int[] validatedParams = PaginationSortingUtil.validatePaginationParams(pageNumber, pageSize);
 
     UserListResponseDto responseDto =
-        userService.search(query, validatedPageNumber, validatedPageSize);
+        userService.search(query, validatedParams[0], validatedParams[1]);
 
     return ResponseEntity.ok(responseDto);
   }
