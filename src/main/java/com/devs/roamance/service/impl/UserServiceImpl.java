@@ -14,12 +14,17 @@ import com.devs.roamance.model.User;
 import com.devs.roamance.repository.UserRepository;
 import com.devs.roamance.security.JwtUtils;
 import com.devs.roamance.service.UserService;
+import com.devs.roamance.util.PaginationSortingUtil;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -66,17 +71,22 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public UserListResponseDto getAll() {
+  public UserListResponseDto getAll(int pageNumber, int pageSize, String sortBy, String sortDir) {
 
-    List<User> users = userRepository.findAll();
+    Pageable pageable =
+        PageRequest.of(
+            pageNumber, pageSize, Sort.by(PaginationSortingUtil.getSortDirection(sortDir), sortBy));
 
-    List<UserDto> dto = users.stream().map(user -> modelMapper.map(user, UserDto.class)).toList();
+    Page<User> userPage = userRepository.findAll(pageable);
 
-    return new UserListResponseDto(200, true, ResponseMessage.USERS_FETCH_SUCCESS, dto);
+    List<UserDto> dtoList =
+        userPage.getContent().stream().map(user -> modelMapper.map(user, UserDto.class)).toList();
+
+    return new UserListResponseDto(200, true, ResponseMessage.USERS_FETCH_SUCCESS, dtoList);
   }
 
   @Override
-  public UserResponseDto getById(UUID userId) {
+  public UserResponseDto get(UUID userId) {
 
     User user =
         userRepository
@@ -118,13 +128,16 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public UserListResponseDto search(String query) {
+  public UserListResponseDto search(String query, int pageNumber, int pageSize) {
 
-    List<User> users = userRepository.searchUsers(query);
+    Pageable pageable = PageRequest.of(pageNumber, pageSize);
 
-    List<UserDto> dto = users.stream().map(user -> modelMapper.map(user, UserDto.class)).toList();
+    Page<User> userPage = userRepository.searchUsers(query, pageable);
 
-    return new UserListResponseDto(200, true, ResponseMessage.USERS_FETCH_SUCCESS, dto);
+    List<UserDto> dtoList =
+        userPage.getContent().stream().map(user -> modelMapper.map(user, UserDto.class)).toList();
+
+    return new UserListResponseDto(200, true, ResponseMessage.USERS_FETCH_SUCCESS, dtoList);
   }
 
   @Override

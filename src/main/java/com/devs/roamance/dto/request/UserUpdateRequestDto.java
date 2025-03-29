@@ -17,8 +17,7 @@ public class UserUpdateRequestDto {
   @Size(min = 2, max = 50, message = "Name must be between 2 and 50 characters")
   private String name;
 
-  @Email(message = "Email must be valid")
-  private String email;
+  @Email private String email;
 
   @Size(min = 8, max = 20, message = "Password must be between 8 and 20 characters")
   @Pattern(

@@ -6,6 +6,7 @@ import com.devs.roamance.dto.response.BaseResponseDto;
 import com.devs.roamance.dto.response.UserListResponseDto;
 import com.devs.roamance.dto.response.UserResponseDto;
 import com.devs.roamance.service.UserService;
+import com.devs.roamance.util.PaginationSortingUtil;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -39,9 +40,16 @@ public class UserController {
   }
 
   @GetMapping
-  public ResponseEntity<UserListResponseDto> getAllUsers() {
+  public ResponseEntity<UserListResponseDto> getAllUsers(
+      @RequestParam(defaultValue = "0") int pageNumber,
+      @RequestParam(defaultValue = "10") int pageSize,
+      @RequestParam(defaultValue = "id") String sortBy,
+      @RequestParam(defaultValue = "asc") String sortDir) {
 
-    UserListResponseDto responseDto = userService.getAll();
+    int validatedPageSize = PaginationSortingUtil.validatePageSize(pageSize);
+
+    UserListResponseDto responseDto =
+        userService.getAll(pageNumber, validatedPageSize, sortBy, sortDir);
 
     return ResponseEntity.ok(responseDto);
   }
@@ -49,7 +57,7 @@ public class UserController {
   @GetMapping("/{userId}")
   public ResponseEntity<UserResponseDto> getUserById(@PathVariable @NotNull UUID userId) {
 
-    UserResponseDto responseDto = userService.getById(userId);
+    UserResponseDto responseDto = userService.get(userId);
 
     return ResponseEntity.ok(responseDto);
   }
@@ -74,9 +82,13 @@ public class UserController {
 
   @GetMapping("/search")
   public ResponseEntity<UserListResponseDto> searchUsers(
-      @RequestParam @NotBlank @Pattern(regexp = "^[a-zA-Z0-9\\s]{1,50}$") String query) {
+      @RequestParam @NotBlank @Pattern(regexp = "^[a-zA-Z0-9\\s]{1,50}$") String query,
+      @RequestParam(defaultValue = "0") int pageNumber,
+      @RequestParam(defaultValue = "10") int pageSize) {
 
-    UserListResponseDto responseDto = userService.search(query);
+    int validatedPageSize = PaginationSortingUtil.validatePageSize(pageSize);
+
+    UserListResponseDto responseDto = userService.search(query, pageNumber, validatedPageSize);
 
     return ResponseEntity.ok(responseDto);
   }
