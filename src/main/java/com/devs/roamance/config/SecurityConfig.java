@@ -50,6 +50,7 @@ public class SecurityConfig {
             })
         .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
         .addFilterBefore(authTokenFilter, UsernamePasswordAuthenticationFilter.class)
+        // codeql[java/spring-disabled-csrf-protection]: suppress (disabled due to stateless JWT)
         .csrf(AbstractHttpConfigurer::disable)
         .cors(cors -> cors.configurationSource(corsConfigurationSource()))
         .build();

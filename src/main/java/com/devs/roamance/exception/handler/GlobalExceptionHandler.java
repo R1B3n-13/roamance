@@ -175,7 +175,7 @@ public class GlobalExceptionHandler {
     log.error("ConstraintViolationException: {}", ex.getMessage(), ex);
 
     return new ResponseEntity<>(
-        new ValidationErrorResponseDto(400, false, "Validation failed", errors),
+        new ValidationErrorResponseDto(400, false, ResponseMessage.VALIDATION_FAILED, errors),
         HttpStatus.BAD_REQUEST);
   }
 
@@ -183,15 +183,6 @@ public class GlobalExceptionHandler {
   public ResponseEntity<BaseResponseDto> handleGeneralException(Exception ex) {
 
     log.error("GeneralException: {}", ex.getMessage(), ex);
-
-    return new ResponseEntity<>(
-        new BaseResponseDto(500, false, "Internal server error"), HttpStatus.INTERNAL_SERVER_ERROR);
-  }
-
-  @ExceptionHandler(RuntimeException.class)
-  public ResponseEntity<BaseResponseDto> handleRuntimeException(Exception ex) {
-
-    log.error("RuntimeException: {}", ex.getMessage(), ex);
 
     return new ResponseEntity<>(
         new BaseResponseDto(500, false, "Internal server error"), HttpStatus.INTERNAL_SERVER_ERROR);
