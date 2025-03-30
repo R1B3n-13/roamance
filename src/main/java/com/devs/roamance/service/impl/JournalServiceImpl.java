@@ -97,11 +97,12 @@ public class JournalServiceImpl implements JournalService {
     List<Journal> journals = journalRepository.findAllWithSubsections();
     List<JournalDto> journalDtos =
         journals.stream()
-            .map(journal -> {
-              JournalDto dto = modelMapper.map(journal, JournalDto.class);
-              dto.setTotalSubsections(journal.getSubsections().size());
-              return dto;
-            })
+            .map(
+                journal -> {
+                  JournalDto dto = modelMapper.map(journal, JournalDto.class);
+                  dto.setTotalSubsections(journal.getSubsections().size());
+                  return dto;
+                })
             .toList();
 
     return new JournalListResponseDto(
@@ -176,11 +177,12 @@ public class JournalServiceImpl implements JournalService {
       List<Journal> journals = journalRepository.findAllWithSubsections();
       List<JournalDto> journalDtos =
           journals.stream()
-              .map(journal -> {
-                JournalDto dto = modelMapper.map(journal, JournalDto.class);
-                dto.setTotalSubsections(journal.getSubsections().size());
-                return dto;
-              })
+              .map(
+                  journal -> {
+                    JournalDto dto = modelMapper.map(journal, JournalDto.class);
+                    dto.setTotalSubsections(journal.getSubsections().size());
+                    return dto;
+                  })
               .toList();
       return new JournalListResponseDto(
           200, true, ResponseMessage.JOURNALS_FETCH_SUCCESS, journalDtos);
@@ -194,11 +196,12 @@ public class JournalServiceImpl implements JournalService {
         List<Journal> journals = journalRepository.findByCreatedByWithSubsections(userId.get());
         List<JournalDto> journalDtos =
             journals.stream()
-                .map(journal -> {
-                  JournalDto dto = modelMapper.map(journal, JournalDto.class);
-                  dto.setTotalSubsections(journal.getSubsections().size());
-                  return dto;
-                })
+                .map(
+                    journal -> {
+                      JournalDto dto = modelMapper.map(journal, JournalDto.class);
+                      dto.setTotalSubsections(journal.getSubsections().size());
+                      return dto;
+                    })
                 .toList();
         return new JournalListResponseDto(
             200, true, ResponseMessage.JOURNALS_FETCH_SUCCESS, journalDtos);

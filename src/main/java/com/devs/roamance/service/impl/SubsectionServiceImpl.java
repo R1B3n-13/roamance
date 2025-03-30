@@ -1,15 +1,6 @@
 package com.devs.roamance.service.impl;
 
-import java.util.List;
-import java.util.UUID;
-
-import org.modelmapper.ModelMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
 import com.devs.roamance.constant.ResponseMessage;
-import com.devs.roamance.dto.SubsectionDto;
 import com.devs.roamance.dto.request.travel.journal.ActivitySubsectionCreateRequestDto;
 import com.devs.roamance.dto.request.travel.journal.ActivitySubsectionUpdateRequestDto;
 import com.devs.roamance.dto.request.travel.journal.RouteSubsectionCreateRequestDto;
@@ -33,6 +24,12 @@ import com.devs.roamance.model.travel.journal.SubsectionType;
 import com.devs.roamance.repository.JournalRepository;
 import com.devs.roamance.repository.SubsectionRepository;
 import com.devs.roamance.service.SubsectionService;
+import java.util.List;
+import java.util.UUID;
+import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 @Service
 public class SubsectionServiceImpl implements SubsectionService {
@@ -53,14 +50,20 @@ public class SubsectionServiceImpl implements SubsectionService {
 
   @Override
   public SubsectionResponseDto create(SubsectionCreateRequestDto requestDto) {
-    logger.info("Creating subsection with title: '{}' for journal with ID: {}",
-        requestDto.getTitle(), requestDto.getJournalId());
+    logger.info(
+        "Creating subsection with title: '{}' for journal with ID: {}",
+        requestDto.getTitle(),
+        requestDto.getJournalId());
 
     // Find the journal
-    Journal journal = journalRepository
-        .findById(requestDto.getJournalId())
-        .orElseThrow(() -> new JournalNotFoundException(
-            String.format(ResponseMessage.JOURNAL_NOT_FOUND, requestDto.getJournalId())));
+    Journal journal =
+        journalRepository
+            .findById(requestDto.getJournalId())
+            .orElseThrow(
+                () ->
+                    new JournalNotFoundException(
+                        String.format(
+                            ResponseMessage.JOURNAL_NOT_FOUND, requestDto.getJournalId())));
 
     // Create the subsection and link it to the journal
     Subsection subsection = mapToSubsectionType(requestDto);
@@ -68,8 +71,10 @@ public class SubsectionServiceImpl implements SubsectionService {
 
     Subsection savedSubsection = subsectionRepository.save(subsection);
 
-    logger.info("Successfully created subsection with ID: {} linked to journal: {}",
-        savedSubsection.getId(), journal.getTitle());
+    logger.info(
+        "Successfully created subsection with ID: {} linked to journal: {}",
+        savedSubsection.getId(),
+        journal.getTitle());
 
     return new SubsectionResponseDto(
         201, true, ResponseMessage.SUBSECTION_CREATE_SUCCESS, savedSubsection);
@@ -77,34 +82,39 @@ public class SubsectionServiceImpl implements SubsectionService {
 
   @Override
   public SubsectionListResponseDto getAll() {
+    logger.info("Fetching all subsections");
     List<Subsection> subsections = subsectionRepository.findAll();
-    List<SubsectionDto> subsectionDtos = subsections.stream()
-        .map(subsection -> modelMapper.map(subsection, SubsectionDto.class)).toList();
 
+    logger.info("Successfully fetched {} subsections", subsections.size());
     return new SubsectionListResponseDto(
-        200, true, ResponseMessage.SUBSECTIONS_FETCH_SUCCESS, subsectionDtos);
+        200, true, ResponseMessage.SUBSECTIONS_FETCH_SUCCESS, subsections);
   }
 
   @Override
   public SubsectionResponseDto getById(UUID id) {
     logger.info("Fetching subsection with id: {}", id);
-    Subsection subsection = subsectionRepository
-        .findById(id)
-        .orElseThrow(
-            () -> new SubsectionNotFoundException(
-                String.format(ResponseMessage.SUBSECTION_NOT_FOUND, id)));
+    Subsection subsection =
+        subsectionRepository
+            .findById(id)
+            .orElseThrow(
+                () ->
+                    new SubsectionNotFoundException(
+                        String.format(ResponseMessage.SUBSECTION_NOT_FOUND, id)));
 
     logger.info("Successfully fetched subsection with title: '{}'", subsection.getTitle());
-    return new SubsectionResponseDto(200, true, ResponseMessage.SUBSECTION_FETCH_SUCCESS, subsection);
+    return new SubsectionResponseDto(
+        200, true, ResponseMessage.SUBSECTION_FETCH_SUCCESS, subsection);
   }
 
   @Override
   public SubsectionResponseDto update(SubsectionUpdateRequestDto subsectionDetails, UUID id) {
-    Subsection subsection = subsectionRepository
-        .findById(id)
-        .orElseThrow(
-            () -> new SubsectionNotFoundException(
-                String.format(ResponseMessage.SUBSECTION_NOT_FOUND, id)));
+    Subsection subsection =
+        subsectionRepository
+            .findById(id)
+            .orElseThrow(
+                () ->
+                    new SubsectionNotFoundException(
+                        String.format(ResponseMessage.SUBSECTION_NOT_FOUND, id)));
 
     subsection.setTitle(subsectionDetails.getTitle());
 
@@ -112,7 +122,8 @@ public class SubsectionServiceImpl implements SubsectionService {
 
     Subsection savedSubsection = subsectionRepository.save(subsection);
 
-    return new SubsectionResponseDto(200, true, ResponseMessage.SUBSECTION_UPDATE_SUCCESS, savedSubsection);
+    return new SubsectionResponseDto(
+        200, true, ResponseMessage.SUBSECTION_UPDATE_SUCCESS, savedSubsection);
   }
 
   @Override
@@ -140,43 +151,47 @@ public class SubsectionServiceImpl implements SubsectionService {
   private Subsection mapToSubsectionType(SubsectionCreateRequestDto subsectionDto) {
     return switch (subsectionDto) {
       case ActivitySubsectionCreateRequestDto activityDto ->
-        modelMapper.map(subsectionDto, ActivitySubsection.class);
+          modelMapper.map(subsectionDto, ActivitySubsection.class);
       case SightseeingSubsectionCreateRequestDto sightseeingDto ->
-        modelMapper.map(subsectionDto, SightseeingSubsection.class);
+          modelMapper.map(subsectionDto, SightseeingSubsection.class);
       case RouteSubsectionCreateRequestDto routeDto ->
-        modelMapper.map(subsectionDto, RouteSubsection.class);
+          modelMapper.map(subsectionDto, RouteSubsection.class);
       case null, default ->
-        throw new IllegalArgumentException(
-            "Unknown subsection type: " + subsectionDto.getClass().getName());
+          throw new IllegalArgumentException(
+              "Unknown subsection type: " + subsectionDto.getClass().getName());
     };
   }
 
-  private void updateSpecificFields(Subsection subsection, SubsectionUpdateRequestDto subsectionDetails) {
+  private void updateSpecificFields(
+      Subsection subsection, SubsectionUpdateRequestDto subsectionDetails) {
     if (subsection instanceof ActivitySubsection activitySubsection
         && subsectionDetails instanceof ActivitySubsectionUpdateRequestDto activityDetails) {
 
       activitySubsection.setActivityName(activityDetails.getActivityName());
       if (activityDetails.getLocation() != null) {
-        activitySubsection.setLocation(modelMapper.map(activityDetails.getLocation(), Location.class));
+        activitySubsection.setLocation(
+            modelMapper.map(activityDetails.getLocation(), Location.class));
       }
     } else if (subsection instanceof SightseeingSubsection sightseeingSubsection
         && subsectionDetails instanceof SightseeingSubsectionUpdateRequestDto sightseeingDetails) {
 
       if (sightseeingDetails.getLocation() != null) {
-        sightseeingSubsection.setLocation(modelMapper.map(sightseeingDetails.getLocation(), Location.class));
+        sightseeingSubsection.setLocation(
+            modelMapper.map(sightseeingDetails.getLocation(), Location.class));
       }
     } else if (subsection instanceof RouteSubsection routeSubsection
         && subsectionDetails.getType() == SubsectionType.ROUTE) {
 
       try {
-        RouteSubsectionUpdateRequestDto routeDetails = modelMapper.map(subsectionDetails,
-            RouteSubsectionUpdateRequestDto.class);
+        RouteSubsectionUpdateRequestDto routeDetails =
+            modelMapper.map(subsectionDetails, RouteSubsectionUpdateRequestDto.class);
         routeSubsection.setTotalTime(routeDetails.getTotalTime());
         routeSubsection.setTotalDistance(routeDetails.getTotalDistance());
         if (routeDetails.getLocations() != null && !routeDetails.getLocations().isEmpty()) {
-          List<Location> locations = routeDetails.getLocations().stream()
-              .map(loc -> modelMapper.map(loc, Location.class))
-              .toList();
+          List<Location> locations =
+              routeDetails.getLocations().stream()
+                  .map(loc -> modelMapper.map(loc, Location.class))
+                  .toList();
           routeSubsection.setLocations(locations);
         }
       } catch (Exception e) {

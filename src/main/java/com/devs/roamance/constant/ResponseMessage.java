@@ -46,6 +46,7 @@ public final class ResponseMessage {
   public static final String SUBSECTION_UPDATE_SUCCESS = "Subsection updated successfully.";
   public static final String SUBSECTION_DELETE_SUCCESS = "Subsection deleted successfully.";
   public static final String SUBSECTION_ADD_SUCCESS = "Subsection added to journal successfully.";
-  public static final String SUBSECTION_REMOVE_SUCCESS = "Subsection removed from journal successfully.";
+  public static final String SUBSECTION_REMOVE_SUCCESS =
+      "Subsection removed from journal successfully.";
   public static final String SUBSECTION_NOT_FOUND = "No subsection present with id: %s!";
 }
