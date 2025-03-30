@@ -4,6 +4,8 @@ import com.devs.roamance.model.travel.journal.Journal;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -22,4 +24,6 @@ public interface JournalRepository extends JpaRepository<Journal, UUID> {
   List<Journal> findByCreatedByWithSubsections(@Param("createdBy") UUID createdBy);
 
   List<Journal> findByCreatedBy(Optional<UUID> createdBy);
+
+  Page<Journal> findAllByCreatedBy(UUID createdBy, Pageable pageable);
 }

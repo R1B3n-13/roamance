@@ -9,11 +9,10 @@ import java.util.UUID;
 public interface JournalService
     extends BaseService<
         JournalResponseDto,
-        JournalListResponseDto,
         JournalResponseDto,
         JournalCreateRequestDto,
         JournalUpdateRequestDto,
         UUID> {
 
-  JournalListResponseDto getByUserRole();
+  JournalListResponseDto getAll(int pageNumber, int pageSize, String sortBy, String sortDir);
 }

@@ -6,6 +6,7 @@ import com.devs.roamance.dto.response.BaseResponseDto;
 import com.devs.roamance.dto.response.travel.journal.JournalListResponseDto;
 import com.devs.roamance.dto.response.travel.journal.JournalResponseDto;
 import com.devs.roamance.service.JournalService;
+import com.devs.roamance.util.PaginationSortingUtil;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,15 +26,25 @@ public class JournalController {
   }
 
   @GetMapping
-  public ResponseEntity<JournalListResponseDto> getAllJournals() {
-    logger.info("Getting journals based on user role");
-    JournalListResponseDto journals = journalService.getByUserRole();
+  public ResponseEntity<JournalListResponseDto> getAllJournals(
+      @RequestParam(defaultValue = "0") int pageNumber,
+      @RequestParam(defaultValue = "10") int pageSize,
+      @RequestParam(defaultValue = "id") String sortBy,
+      @RequestParam(defaultValue = "asc") String sortDir) {
+
+    logger.info("Getting journals based on user role with pagination");
+
+    int[] validatedParams = PaginationSortingUtil.validatePaginationParams(pageNumber, pageSize);
+
+    JournalListResponseDto journals =
+        journalService.getAll(validatedParams[0], validatedParams[1], sortBy, sortDir);
+
     return ResponseEntity.ok(journals);
   }
 
   @GetMapping("/{id}")
   public ResponseEntity<JournalResponseDto> getJournalById(@PathVariable UUID id) {
-    JournalResponseDto journal = journalService.getById(id);
+    JournalResponseDto journal = journalService.get(id);
     logger.info(
         "Retrieved journal with id: {} and title: {}",
         journal.getData().getId(),

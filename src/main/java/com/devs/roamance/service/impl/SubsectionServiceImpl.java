@@ -24,11 +24,16 @@ import com.devs.roamance.model.travel.journal.SubsectionType;
 import com.devs.roamance.repository.JournalRepository;
 import com.devs.roamance.repository.SubsectionRepository;
 import com.devs.roamance.service.SubsectionService;
+import com.devs.roamance.util.PaginationSortingUtil;
 import java.util.List;
 import java.util.UUID;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -81,9 +86,22 @@ public class SubsectionServiceImpl implements SubsectionService {
   }
 
   @Override
-  public SubsectionListResponseDto getAll() {
-    logger.info("Fetching all subsections");
-    List<Subsection> subsections = subsectionRepository.findAll();
+  public SubsectionListResponseDto getAll(
+      int pageNumber, int pageSize, String sortBy, String sortDir) {
+    logger.info(
+        "Fetching all subsections with pagination - page: {}, size: {}, sortBy: {}, sortDir: {}",
+        pageNumber,
+        pageSize,
+        sortBy,
+        sortDir);
+
+    Pageable pageable =
+        PageRequest.of(
+            pageNumber, pageSize, Sort.by(PaginationSortingUtil.getSortDirection(sortDir), sortBy));
+
+    Page<Subsection> subsectionPage = subsectionRepository.findAll(pageable);
+
+    List<Subsection> subsections = subsectionPage.getContent();
 
     logger.info("Successfully fetched {} subsections", subsections.size());
     return new SubsectionListResponseDto(
@@ -91,7 +109,7 @@ public class SubsectionServiceImpl implements SubsectionService {
   }
 
   @Override
-  public SubsectionResponseDto getById(UUID id) {
+  public SubsectionResponseDto get(UUID id) {
     logger.info("Fetching subsection with id: {}", id);
     Subsection subsection =
         subsectionRepository
@@ -131,7 +149,7 @@ public class SubsectionServiceImpl implements SubsectionService {
     logger.info("Deleting subsection with id: {}", id);
 
     // Fetch subsection with its journal
-    Subsection subsection = getById(id).getData();
+    Subsection subsection = get(id).getData();
     Journal journal = subsection.getJournal();
 
     if (journal != null) {

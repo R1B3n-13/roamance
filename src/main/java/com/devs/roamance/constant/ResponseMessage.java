@@ -49,4 +49,6 @@ public final class ResponseMessage {
   public static final String SUBSECTION_REMOVE_SUCCESS =
       "Subsection removed from journal successfully.";
   public static final String SUBSECTION_NOT_FOUND = "No subsection present with id: %s!";
+
+  public static final String VALIDATION_FAILED = "Validation failed!";
 }

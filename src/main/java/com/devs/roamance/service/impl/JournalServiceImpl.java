@@ -14,6 +14,7 @@ import com.devs.roamance.model.travel.journal.*;
 import com.devs.roamance.repository.JournalRepository;
 import com.devs.roamance.repository.UserRepository;
 import com.devs.roamance.service.JournalService;
+import com.devs.roamance.util.PaginationSortingUtil;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -21,6 +22,10 @@ import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -93,14 +98,46 @@ public class JournalServiceImpl implements JournalService {
   }
 
   @Override
-  public JournalListResponseDto getAll() {
-    List<Journal> journals = journalRepository.findAllWithSubsections();
+  public JournalListResponseDto getAll(
+      int pageNumber, int pageSize, String sortBy, String sortDir) {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    boolean isAdmin =
+        authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"));
+
+    Pageable pageable =
+        PageRequest.of(
+            pageNumber, pageSize, Sort.by(PaginationSortingUtil.getSortDirection(sortDir), sortBy));
+
+    Page<Journal> journalPage;
+
+    if (isAdmin) {
+      logger.info("User has ADMIN role, returning all journals with pagination");
+      journalPage = journalRepository.findAll(pageable);
+    } else {
+      String email = authentication.getName();
+      Optional<UUID> userId = userRepository.findByEmail(email).map(User::getId);
+
+      logger.info("User has USER role, returning only their journals, userId: {}", userId);
+
+      if (userId.isPresent()) {
+        // Using a modified repository method that accepts Pageable
+        journalPage = journalRepository.findAllByCreatedBy(userId.get(), pageable);
+      } else {
+        return new JournalListResponseDto(
+            200, true, ResponseMessage.JOURNALS_FETCH_SUCCESS, List.of());
+      }
+    }
+
     List<JournalDto> journalDtos =
-        journals.stream()
+        journalPage.getContent().stream()
             .map(
                 journal -> {
-                  JournalDto dto = modelMapper.map(journal, JournalDto.class);
-                  dto.setTotalSubsections(journal.getSubsections().size());
+                  // Load subsections for each journal
+                  Journal journalWithSubsections =
+                      journalRepository.findByIdWithSubsections(journal.getId()).orElse(journal);
+
+                  JournalDto dto = modelMapper.map(journalWithSubsections, JournalDto.class);
+                  dto.setTotalSubsections(journalWithSubsections.getSubsections().size());
                   return dto;
                 })
             .toList();
@@ -110,7 +147,7 @@ public class JournalServiceImpl implements JournalService {
   }
 
   @Override
-  public JournalResponseDto getById(UUID id) {
+  public JournalResponseDto get(UUID id) {
     logger.info("Fetching journal with id: {} using JOIN FETCH for subsections", id);
     Journal journal =
         journalRepository
@@ -158,57 +195,10 @@ public class JournalServiceImpl implements JournalService {
 
   @Override
   public BaseResponseDto delete(UUID id) {
-    Journal journal = getById(id).getData();
+    Journal journal = get(id).getData();
 
     journalRepository.delete(journal);
 
     return new BaseResponseDto(200, true, ResponseMessage.JOURNAL_DELETE_SUCCESS);
-  }
-
-  @Override
-  public JournalListResponseDto getByUserRole() {
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-    boolean isAdmin =
-        authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"));
-
-    if (isAdmin) {
-      logger.info("User has ADMIN role, returning all journals");
-      List<Journal> journals = journalRepository.findAllWithSubsections();
-      List<JournalDto> journalDtos =
-          journals.stream()
-              .map(
-                  journal -> {
-                    JournalDto dto = modelMapper.map(journal, JournalDto.class);
-                    dto.setTotalSubsections(journal.getSubsections().size());
-                    return dto;
-                  })
-              .toList();
-      return new JournalListResponseDto(
-          200, true, ResponseMessage.JOURNALS_FETCH_SUCCESS, journalDtos);
-    } else {
-      String email = authentication.getName();
-      Optional<UUID> userId = userRepository.findByEmail(email).map(User::getId);
-
-      logger.info("User has USER role, returning only their journals, userId: {}", userId);
-
-      if (userId.isPresent()) {
-        List<Journal> journals = journalRepository.findByCreatedByWithSubsections(userId.get());
-        List<JournalDto> journalDtos =
-            journals.stream()
-                .map(
-                    journal -> {
-                      JournalDto dto = modelMapper.map(journal, JournalDto.class);
-                      dto.setTotalSubsections(journal.getSubsections().size());
-                      return dto;
-                    })
-                .toList();
-        return new JournalListResponseDto(
-            200, true, ResponseMessage.JOURNALS_FETCH_SUCCESS, journalDtos);
-      } else {
-        return new JournalListResponseDto(
-            200, true, ResponseMessage.JOURNALS_FETCH_SUCCESS, List.of());
-      }
-    }
   }
 }

@@ -6,6 +6,7 @@ import com.devs.roamance.dto.response.BaseResponseDto;
 import com.devs.roamance.dto.response.travel.journal.SubsectionListResponseDto;
 import com.devs.roamance.dto.response.travel.journal.SubsectionResponseDto;
 import com.devs.roamance.service.SubsectionService;
+import com.devs.roamance.util.PaginationSortingUtil;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,16 +26,30 @@ public class SubsectionController {
   }
 
   @GetMapping
-  public ResponseEntity<SubsectionListResponseDto> getAllSubsections() {
-    logger.info("Getting all subsections");
-    SubsectionListResponseDto subsections = subsectionService.getAll();
+  public ResponseEntity<SubsectionListResponseDto> getAllSubsections(
+      @RequestParam(defaultValue = "0") int pageNumber,
+      @RequestParam(defaultValue = "10") int pageSize,
+      @RequestParam(defaultValue = "id") String sortBy,
+      @RequestParam(defaultValue = "asc") String sortDir) {
+    logger.info(
+        "Getting all subsections with pagination: page={}, size={}, sortBy={}, sortDir={}",
+        pageNumber,
+        pageSize,
+        sortBy,
+        sortDir);
+
+    int[] validatedParams = PaginationSortingUtil.validatePaginationParams(pageNumber, pageSize);
+
+    SubsectionListResponseDto subsections =
+        subsectionService.getAll(validatedParams[0], validatedParams[1], sortBy, sortDir);
+
     return ResponseEntity.ok(subsections);
   }
 
   @GetMapping("/{id}")
   public ResponseEntity<SubsectionResponseDto> getSubsectionById(@PathVariable UUID id) {
     logger.info("Getting subsection by id: {}", id);
-    SubsectionResponseDto subsection = subsectionService.getById(id);
+    SubsectionResponseDto subsection = subsectionService.get(id);
     return ResponseEntity.ok(subsection);
   }
 
