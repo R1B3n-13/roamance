@@ -6,12 +6,13 @@ import com.devs.roamance.dto.response.BaseResponseDto;
 import com.devs.roamance.dto.response.travel.journal.SubsectionListResponseDto;
 import com.devs.roamance.dto.response.travel.journal.SubsectionResponseDto;
 import com.devs.roamance.service.SubsectionService;
-import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/subsections")
@@ -59,29 +60,5 @@ public class SubsectionController {
     logger.info("Deleting subsection with id: {}", id);
     BaseResponseDto deletedSubsection = subsectionService.delete(id);
     return ResponseEntity.ok(deletedSubsection);
-  }
-
-  @GetMapping("/journal/{journalId}")
-  public ResponseEntity<SubsectionListResponseDto> getSubsectionsByJournalId(
-      @PathVariable UUID journalId) {
-    logger.info("Getting subsections for journal with id: {}", journalId);
-    SubsectionListResponseDto subsections = subsectionService.getByJournalId(journalId);
-    return ResponseEntity.ok(subsections);
-  }
-
-  @PostMapping("/journal/{journalId}")
-  public ResponseEntity<SubsectionResponseDto> addSubsectionToJournal(
-      @PathVariable UUID journalId, @RequestBody SubsectionCreateRequestDto subsection) {
-    logger.info("Adding subsection to journal with id: {}", journalId);
-    SubsectionResponseDto addedSubsection = subsectionService.addToJournal(journalId, subsection);
-    return ResponseEntity.status(HttpStatus.CREATED).body(addedSubsection);
-  }
-
-  @DeleteMapping("/journal/{journalId}/{subsectionId}")
-  public ResponseEntity<BaseResponseDto> removeSubsectionFromJournal(
-      @PathVariable UUID journalId, @PathVariable UUID subsectionId) {
-    logger.info("Removing subsection with id: {} from journal with id: {}", subsectionId, journalId);
-    BaseResponseDto response = subsectionService.removeFromJournal(journalId, subsectionId);
-    return ResponseEntity.ok(response);
   }
 }

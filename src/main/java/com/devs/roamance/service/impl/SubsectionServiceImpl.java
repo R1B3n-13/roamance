@@ -21,16 +21,13 @@ import com.devs.roamance.dto.request.travel.journal.SubsectionUpdateRequestDto;
 import com.devs.roamance.dto.response.BaseResponseDto;
 import com.devs.roamance.dto.response.travel.journal.SubsectionListResponseDto;
 import com.devs.roamance.dto.response.travel.journal.SubsectionResponseDto;
-import com.devs.roamance.exception.JournalNotFoundException;
 import com.devs.roamance.exception.SubsectionNotFoundException;
 import com.devs.roamance.model.Location;
 import com.devs.roamance.model.travel.journal.ActivitySubsection;
-import com.devs.roamance.model.travel.journal.Journal;
 import com.devs.roamance.model.travel.journal.RouteSubsection;
 import com.devs.roamance.model.travel.journal.SightseeingSubsection;
 import com.devs.roamance.model.travel.journal.Subsection;
 import com.devs.roamance.model.travel.journal.SubsectionType;
-import com.devs.roamance.repository.JournalRepository;
 import com.devs.roamance.repository.SubsectionRepository;
 import com.devs.roamance.service.SubsectionService;
 
@@ -39,15 +36,12 @@ public class SubsectionServiceImpl implements SubsectionService {
   private static final Logger logger = LoggerFactory.getLogger(SubsectionServiceImpl.class);
 
   private final SubsectionRepository subsectionRepository;
-  private final JournalRepository journalRepository;
   private final ModelMapper modelMapper;
 
   public SubsectionServiceImpl(
       SubsectionRepository subsectionRepository,
-      JournalRepository journalRepository,
       ModelMapper modelMapper) {
     this.subsectionRepository = subsectionRepository;
-    this.journalRepository = journalRepository;
     this.modelMapper = modelMapper;
   }
 
@@ -95,7 +89,6 @@ public class SubsectionServiceImpl implements SubsectionService {
 
     subsection.setTitle(subsectionDetails.getTitle());
 
-    // Handle specific subsection type updates based on the class
     updateSpecificFields(subsection, subsectionDetails);
 
     Subsection savedSubsection = subsectionRepository.save(subsection);
@@ -110,73 +103,6 @@ public class SubsectionServiceImpl implements SubsectionService {
     subsectionRepository.delete(subsection);
 
     return new BaseResponseDto(200, true, ResponseMessage.SUBSECTION_DELETE_SUCCESS);
-  }
-
-  @Override
-  public SubsectionListResponseDto getByJournalId(UUID journalId) {
-    logger.info("Fetching subsections for journal with id: {}", journalId);
-
-    Journal journal = journalRepository
-        .findByIdWithSubsections(journalId)
-        .orElseThrow(
-            () -> new JournalNotFoundException(
-                String.format(ResponseMessage.JOURNAL_NOT_FOUND, journalId)));
-
-    List<Subsection> subsections = journal.getSubsections();
-    List<SubsectionDto> subsectionDtos = subsections.stream()
-        .map(subsection -> modelMapper.map(subsection, SubsectionDto.class)).toList();
-
-    logger.info("Found {} subsections for journal with id: {}", subsections.size(), journalId);
-
-    return new SubsectionListResponseDto(
-        200, true, ResponseMessage.SUBSECTIONS_FETCH_SUCCESS, subsectionDtos);
-  }
-
-  @Override
-  public SubsectionResponseDto addToJournal(UUID journalId, SubsectionCreateRequestDto subsectionDto) {
-    logger.info("Adding subsection to journal with id: {}", journalId);
-
-    Journal journal = journalRepository
-        .findByIdWithSubsections(journalId)
-        .orElseThrow(
-            () -> new JournalNotFoundException(
-                String.format(ResponseMessage.JOURNAL_NOT_FOUND, journalId)));
-
-    Subsection subsection = mapToSubsectionType(subsectionDto);
-    subsection.setJournal(journal);
-
-    Subsection savedSubsection = subsectionRepository.save(subsection);
-    journal.addSubsection(savedSubsection);
-    journalRepository.save(journal);
-
-    logger.info("Successfully added subsection to journal with id: {}", journalId);
-
-    return new SubsectionResponseDto(201, true, ResponseMessage.SUBSECTION_ADD_SUCCESS, savedSubsection);
-  }
-
-  @Override
-  public BaseResponseDto removeFromJournal(UUID journalId, UUID subsectionId) {
-    logger.info("Removing subsection with id: {} from journal with id: {}", subsectionId, journalId);
-
-    Journal journal = journalRepository
-        .findByIdWithSubsections(journalId)
-        .orElseThrow(
-            () -> new JournalNotFoundException(
-                String.format(ResponseMessage.JOURNAL_NOT_FOUND, journalId)));
-
-    Subsection subsection = subsectionRepository
-        .findById(subsectionId)
-        .orElseThrow(
-            () -> new SubsectionNotFoundException(
-                String.format(ResponseMessage.SUBSECTION_NOT_FOUND, subsectionId)));
-
-    journal.removeSubsection(subsection);
-    journalRepository.save(journal);
-    subsectionRepository.delete(subsection);
-
-    logger.info("Successfully removed subsection from journal");
-
-    return new BaseResponseDto(200, true, ResponseMessage.SUBSECTION_REMOVE_SUCCESS);
   }
 
   private Subsection mapToSubsectionType(SubsectionCreateRequestDto subsectionDto) {
@@ -211,7 +137,8 @@ public class SubsectionServiceImpl implements SubsectionService {
         && subsectionDetails.getType() == SubsectionType.ROUTE) {
 
       try {
-        RouteSubsectionUpdateRequestDto routeDetails = modelMapper.map(subsectionDetails, RouteSubsectionUpdateRequestDto.class);
+        RouteSubsectionUpdateRequestDto routeDetails = modelMapper.map(subsectionDetails,
+            RouteSubsectionUpdateRequestDto.class);
         routeSubsection.setTotalTime(routeDetails.getTotalTime());
         routeSubsection.setTotalDistance(routeDetails.getTotalDistance());
         if (routeDetails.getLocations() != null && !routeDetails.getLocations().isEmpty()) {
