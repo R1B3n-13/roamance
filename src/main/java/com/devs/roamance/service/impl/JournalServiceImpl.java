@@ -15,9 +15,6 @@ import com.devs.roamance.repository.JournalRepository;
 import com.devs.roamance.repository.UserRepository;
 import com.devs.roamance.service.JournalService;
 import com.devs.roamance.util.PaginationSortingUtil;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +27,11 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class JournalServiceImpl implements JournalService {
@@ -47,6 +49,7 @@ public class JournalServiceImpl implements JournalService {
   }
 
   @Override
+  @Transactional
   public JournalResponseDto create(JournalCreateRequestDto requestDto) {
     try {
       logger.info(
@@ -68,9 +71,11 @@ public class JournalServiceImpl implements JournalService {
                     modelMapper.map(subsectionDto, SightseeingSubsection.class);
                 case RouteSubsectionCreateRequestDto routeSubsectionCreateRequestDto ->
                     modelMapper.map(subsectionDto, RouteSubsection.class);
-                case null, default ->
-                    throw new IllegalArgumentException(
-                        "Unknown subsection type: " + subsectionDto.getClass().getName());
+                case null, default -> {
+                  assert subsectionDto != null;
+                  throw new IllegalArgumentException(
+                      "Unknown subsection type: " + subsectionDto.getClass().getName());
+                }
               };
           journal.addSubsection(subsection);
         }
@@ -120,7 +125,6 @@ public class JournalServiceImpl implements JournalService {
       logger.info("User has USER role, returning only their journals, userId: {}", userId);
 
       if (userId.isPresent()) {
-        // Using a modified repository method that accepts Pageable
         journalPage = journalRepository.findAllByCreatedBy(userId.get(), pageable);
       } else {
         return new JournalListResponseDto(
@@ -132,7 +136,6 @@ public class JournalServiceImpl implements JournalService {
         journalPage.getContent().stream()
             .map(
                 journal -> {
-                  // Load subsections for each journal
                   Journal journalWithSubsections =
                       journalRepository.findByIdWithSubsections(journal.getId()).orElse(journal);
 
@@ -164,36 +167,25 @@ public class JournalServiceImpl implements JournalService {
   }
 
   @Override
-  public JournalResponseDto update(JournalUpdateRequestDto journalDetails, UUID id) {
-    Journal journal =
-        journalRepository
-            .findByIdWithSubsections(id)
-            .orElseThrow(
-                () ->
-                    new JournalNotFoundException(
-                        String.format(ResponseMessage.JOURNAL_NOT_FOUND, id)));
+  @Transactional
+  public JournalResponseDto update(JournalUpdateRequestDto requestDto, UUID id) {
+    Journal journal = get(id).getData();
 
-    journal.setTitle(journalDetails.getTitle());
-    journal.setDescription(journalDetails.getDescription());
+    journal.setTitle(requestDto.getTitle());
+    journal.setDescription(requestDto.getDescription());
 
-    if (journalDetails.getDestination() != null) {
-      journal.setDestination(modelMapper.map(journalDetails.getDestination(), Location.class));
+    if (requestDto.getDestination() != null) {
+      journal.setDestination(modelMapper.map(requestDto.getDestination(), Location.class));
     }
 
     Journal savedJournal = journalRepository.save(journal);
+    journalRepository.flush();
 
-    Journal dto =
-        journalRepository
-            .findByIdWithSubsections(savedJournal.getId())
-            .orElseThrow(
-                () ->
-                    new JournalNotFoundException(
-                        String.format(ResponseMessage.JOURNAL_NOT_FOUND, savedJournal.getId())));
-
-    return new JournalResponseDto(200, true, ResponseMessage.JOURNAL_UPDATE_SUCCESS, dto);
+    return new JournalResponseDto(200, true, ResponseMessage.JOURNAL_UPDATE_SUCCESS, savedJournal);
   }
 
   @Override
+  @Transactional
   public BaseResponseDto delete(UUID id) {
     Journal journal = get(id).getData();
 
