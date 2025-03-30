@@ -1,6 +1,7 @@
 package com.devs.roamance.model.travel.journal;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import jakarta.persistence.*;
@@ -40,5 +41,12 @@ public abstract class Subsection {
   @Transient
   public String getType() {
     return this.getClass().getAnnotation(DiscriminatorValue.class).value();
+  }
+
+  // Add a method to expose the journal ID in JSON responses
+  @Transient
+  @JsonProperty("journalId")
+  public UUID getJournalId() {
+    return journal != null ? journal.getId() : null;
   }
 }
