@@ -96,7 +96,13 @@ public class JournalServiceImpl implements JournalService {
   public JournalListResponseDto getAll() {
     List<Journal> journals = journalRepository.findAllWithSubsections();
     List<JournalDto> journalDtos =
-        journals.stream().map(journal -> modelMapper.map(journal, JournalDto.class)).toList();
+        journals.stream()
+            .map(journal -> {
+              JournalDto dto = modelMapper.map(journal, JournalDto.class);
+              dto.setTotalSubsections(journal.getSubsections().size());
+              return dto;
+            })
+            .toList();
 
     return new JournalListResponseDto(
         200, true, ResponseMessage.JOURNALS_FETCH_SUCCESS, journalDtos);
@@ -169,7 +175,13 @@ public class JournalServiceImpl implements JournalService {
       logger.info("User has ADMIN role, returning all journals");
       List<Journal> journals = journalRepository.findAllWithSubsections();
       List<JournalDto> journalDtos =
-          journals.stream().map(journal -> modelMapper.map(journal, JournalDto.class)).toList();
+          journals.stream()
+              .map(journal -> {
+                JournalDto dto = modelMapper.map(journal, JournalDto.class);
+                dto.setTotalSubsections(journal.getSubsections().size());
+                return dto;
+              })
+              .toList();
       return new JournalListResponseDto(
           200, true, ResponseMessage.JOURNALS_FETCH_SUCCESS, journalDtos);
     } else {
@@ -181,7 +193,13 @@ public class JournalServiceImpl implements JournalService {
       if (userId.isPresent()) {
         List<Journal> journals = journalRepository.findByCreatedByWithSubsections(userId.get());
         List<JournalDto> journalDtos =
-            journals.stream().map(journal -> modelMapper.map(journal, JournalDto.class)).toList();
+            journals.stream()
+                .map(journal -> {
+                  JournalDto dto = modelMapper.map(journal, JournalDto.class);
+                  dto.setTotalSubsections(journal.getSubsections().size());
+                  return dto;
+                })
+                .toList();
         return new JournalListResponseDto(
             200, true, ResponseMessage.JOURNALS_FETCH_SUCCESS, journalDtos);
       } else {

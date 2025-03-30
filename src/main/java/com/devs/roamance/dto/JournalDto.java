@@ -21,4 +21,5 @@ public class JournalDto {
   private OffsetDateTime lastModified;
   private UUID createdBy;
   private UUID lastModifiedBy;
+  private int totalSubsections;
 }
