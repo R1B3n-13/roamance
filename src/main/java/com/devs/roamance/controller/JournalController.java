@@ -7,15 +7,16 @@ import com.devs.roamance.dto.response.travel.journal.JournalListResponseDto;
 import com.devs.roamance.dto.response.travel.journal.JournalResponseDto;
 import com.devs.roamance.service.JournalService;
 import com.devs.roamance.util.PaginationSortingUtil;
-import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @RestController
-@RequestMapping("/journals")
+@RequestMapping("/travel/journals")
 public class JournalController {
 
   private static final Logger logger = LoggerFactory.getLogger(JournalController.class);

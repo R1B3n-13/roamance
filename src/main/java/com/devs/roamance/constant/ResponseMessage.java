@@ -37,8 +37,7 @@ public final class ResponseMessage {
   public static final String JOURNAL_NOT_FOUND = "No journal present with id: %s!";
   public static final String JOURNAL_ACCESS_DENIED =
       "You don't have permission to access this journal!";
-  public static final String JOURNAL_ALREADY_EXIST = "Journal already exists with email: %s!";
-
+  public static final String JOURNAL_ALREADY_EXIST = "Journal already exists with title: %s!";
   // Subsection related messages
   public static final String SUBSECTION_CREATE_SUCCESS = "Subsection created successfully.";
   public static final String SUBSECTION_FETCH_SUCCESS = "Subsection fetched successfully.";
