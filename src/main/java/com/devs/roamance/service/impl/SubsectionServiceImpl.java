@@ -60,7 +60,6 @@ public class SubsectionServiceImpl implements SubsectionService {
         requestDto.getTitle(),
         requestDto.getJournalId());
 
-    // Find the journal
     Journal journal =
         journalRepository
             .findById(requestDto.getJournalId())
@@ -70,7 +69,6 @@ public class SubsectionServiceImpl implements SubsectionService {
                         String.format(
                             ResponseMessage.JOURNAL_NOT_FOUND, requestDto.getJournalId())));
 
-    // Create the subsection and link it to the journal
     Subsection subsection = mapToSubsectionType(requestDto);
     subsection.setJournal(journal);
 
@@ -148,18 +146,15 @@ public class SubsectionServiceImpl implements SubsectionService {
   public BaseResponseDto delete(UUID id) {
     logger.info("Deleting subsection with id: {}", id);
 
-    // Fetch subsection with its journal
     Subsection subsection = get(id).getData();
     Journal journal = subsection.getJournal();
 
     if (journal != null) {
       logger.info("Detaching subsection from journal with ID: {}", journal.getId());
-      // Detach subsection from journal using the helper method in Journal
       journal.removeSubsection(subsection);
       subsection.setJournal(null);
     }
 
-    // Delete the subsection
     subsectionRepository.delete(subsection);
 
     logger.info("Successfully deleted subsection with id: {}", id);

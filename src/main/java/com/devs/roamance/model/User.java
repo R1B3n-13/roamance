@@ -41,10 +41,12 @@ public class User {
   @Enumerated(EnumType.STRING)
   private Set<Role> roles = new HashSet<>();
 
+  @JsonIgnore
   @OneToMany(
       mappedBy = "user",
       fetch = FetchType.LAZY,
-      cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH})
+      cascade = {CascadeType.ALL},
+      orphanRemoval = true)
   private List<Journal> journals;
 
   @CreatedDate

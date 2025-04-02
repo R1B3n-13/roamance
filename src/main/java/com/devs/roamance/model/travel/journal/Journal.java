@@ -69,7 +69,7 @@ public class Journal {
   @JsonIgnore
   @ManyToOne(
       fetch = FetchType.LAZY,
-      cascade = {CascadeType.ALL})
+      cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH})
   @JoinColumn(name = "user_id", referencedColumnName = "id")
   private User user;
 
