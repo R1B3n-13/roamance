@@ -1,6 +1,7 @@
 package com.devs.roamance.service.impl;
 
 import com.devs.roamance.constant.ResponseMessage;
+import com.devs.roamance.dto.SubsectionDto;
 import com.devs.roamance.dto.request.travel.journal.ActivitySubsectionCreateRequestDto;
 import com.devs.roamance.dto.request.travel.journal.ActivitySubsectionUpdateRequestDto;
 import com.devs.roamance.dto.request.travel.journal.RouteSubsectionCreateRequestDto;
@@ -11,6 +12,7 @@ import com.devs.roamance.dto.request.travel.journal.SubsectionCreateRequestDto;
 import com.devs.roamance.dto.request.travel.journal.SubsectionUpdateRequestDto;
 import com.devs.roamance.dto.response.BaseResponseDto;
 import com.devs.roamance.dto.response.travel.journal.SubsectionListResponseDto;
+import com.devs.roamance.dto.response.travel.journal.SubsectionResponseDetailDto;
 import com.devs.roamance.dto.response.travel.journal.SubsectionResponseDto;
 import com.devs.roamance.exception.JournalNotFoundException;
 import com.devs.roamance.exception.SubsectionNotFoundException;
@@ -79,8 +81,10 @@ public class SubsectionServiceImpl implements SubsectionService {
         savedSubsection.getId(),
         journal.getTitle());
 
+    SubsectionResponseDetailDto detailDto = mapToSubsectionResponseDetailDto(savedSubsection);
+
     return new SubsectionResponseDto(
-        201, true, ResponseMessage.SUBSECTION_CREATE_SUCCESS, savedSubsection);
+        201, true, ResponseMessage.SUBSECTION_CREATE_SUCCESS, detailDto);
   }
 
   @Override
@@ -99,7 +103,15 @@ public class SubsectionServiceImpl implements SubsectionService {
 
     Page<Subsection> subsectionPage = subsectionRepository.findAll(pageable);
 
-    List<Subsection> subsections = subsectionPage.getContent();
+    List<SubsectionDto> subsections =
+        subsectionPage.getContent().stream()
+            .map(
+                subsection -> {
+                  SubsectionDto subsectionDto = modelMapper.map(subsection, SubsectionDto.class);
+                  subsectionDto.setJournalId(subsection.getJournal().getId());
+                  return subsectionDto;
+                })
+            .toList();
 
     logger.info("Successfully fetched {} subsections", subsections.size());
     return new SubsectionListResponseDto(
@@ -118,8 +130,11 @@ public class SubsectionServiceImpl implements SubsectionService {
                         String.format(ResponseMessage.SUBSECTION_NOT_FOUND, id)));
 
     logger.info("Successfully fetched subsection with title: '{}'", subsection.getTitle());
+
+    SubsectionResponseDetailDto detailDto = mapToSubsectionResponseDetailDto(subsection);
+
     return new SubsectionResponseDto(
-        200, true, ResponseMessage.SUBSECTION_FETCH_SUCCESS, subsection);
+        200, true, ResponseMessage.SUBSECTION_FETCH_SUCCESS, detailDto);
   }
 
   @Override
@@ -138,15 +153,24 @@ public class SubsectionServiceImpl implements SubsectionService {
 
     Subsection savedSubsection = subsectionRepository.save(subsection);
 
+    SubsectionResponseDetailDto detailDto = mapToSubsectionResponseDetailDto(savedSubsection);
+
     return new SubsectionResponseDto(
-        200, true, ResponseMessage.SUBSECTION_UPDATE_SUCCESS, savedSubsection);
+        200, true, ResponseMessage.SUBSECTION_UPDATE_SUCCESS, detailDto);
   }
 
   @Override
   public BaseResponseDto delete(UUID id) {
     logger.info("Deleting subsection with id: {}", id);
 
-    Subsection subsection = get(id).getData();
+    Subsection subsection =
+        subsectionRepository
+            .findById(id)
+            .orElseThrow(
+                () ->
+                    new SubsectionNotFoundException(
+                        String.format(ResponseMessage.SUBSECTION_NOT_FOUND, id)));
+
     Journal journal = subsection.getJournal();
 
     if (journal != null) {
@@ -211,5 +235,24 @@ public class SubsectionServiceImpl implements SubsectionService {
         logger.error("Error mapping subsection details to RouteSubsectionUpdateRequestDto", e);
       }
     }
+  }
+
+  private SubsectionResponseDetailDto mapToSubsectionResponseDetailDto(Subsection subsection) {
+    SubsectionResponseDetailDto detailDto = new SubsectionResponseDetailDto();
+    detailDto.setId(subsection.getId());
+    detailDto.setTitle(subsection.getTitle());
+    detailDto.setNotes(subsection.getNotes());
+    detailDto.setChecklists(subsection.getChecklists());
+    detailDto.setJournalId(subsection.getJournal().getId());
+
+    if (subsection instanceof ActivitySubsection) {
+      detailDto.setType(SubsectionType.ACTIVITY);
+    } else if (subsection instanceof SightseeingSubsection) {
+      detailDto.setType(SubsectionType.SIGHTSEEING);
+    } else if (subsection instanceof RouteSubsection) {
+      detailDto.setType(SubsectionType.ROUTE);
+    }
+
+    return detailDto;
   }
 }
