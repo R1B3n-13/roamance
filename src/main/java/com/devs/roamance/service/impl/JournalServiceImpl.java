@@ -104,7 +104,7 @@ public class JournalServiceImpl implements JournalService {
 
       Journal dto =
           journalRepository
-              .findByIdWithSubsections(savedJournal.getId())
+              .findById(savedJournal.getId())
               .orElseThrow(
                   () ->
                       new JournalNotFoundException(
@@ -153,7 +153,7 @@ public class JournalServiceImpl implements JournalService {
             .map(
                 journal -> {
                   Journal journalWithSubsections =
-                      journalRepository.findByIdWithSubsections(journal.getId()).orElse(journal);
+                      journalRepository.findById(journal.getId()).orElse(journal);
 
                   JournalDto dto = modelMapper.map(journalWithSubsections, JournalDto.class);
                   dto.setTotalSubsections(journalWithSubsections.getSubsections().size());
@@ -170,11 +170,23 @@ public class JournalServiceImpl implements JournalService {
     logger.info("Fetching journal with id: {} using JOIN FETCH for subsections", id);
     Journal journal =
         journalRepository
-            .findByIdWithSubsections(id)
+            .findById(id)
             .orElseThrow(
                 () ->
                     new JournalNotFoundException(
                         String.format(ResponseMessage.JOURNAL_NOT_FOUND, id)));
+
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    User currentUser = userUtils.getAuthenticatedUser();
+    boolean isAdmin =
+        authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"));
+
+    if (!isAdmin && !journal.getUser().getId().equals(currentUser.getId())) {
+      logger.warn(
+          "User {} attempted to access journal {} without permission", currentUser.getEmail(), id);
+      throw new SecurityException("You don't have permission to access this journal");
+    }
+
     logger.info(
         "Successfully fetched journal with title: '{}' and {} subsections",
         journal.getTitle(),
