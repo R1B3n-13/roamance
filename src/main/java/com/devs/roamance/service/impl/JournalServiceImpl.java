@@ -2,7 +2,12 @@ package com.devs.roamance.service.impl;
 
 import com.devs.roamance.constant.ResponseMessage;
 import com.devs.roamance.dto.JournalDto;
-import com.devs.roamance.dto.request.travel.journal.*;
+import com.devs.roamance.dto.request.travel.journal.ActivitySubsectionCreateRequestDto;
+import com.devs.roamance.dto.request.travel.journal.JournalCreateRequestDto;
+import com.devs.roamance.dto.request.travel.journal.JournalUpdateRequestDto;
+import com.devs.roamance.dto.request.travel.journal.RouteSubsectionCreateRequestDto;
+import com.devs.roamance.dto.request.travel.journal.SightseeingSubsectionCreateRequestDto;
+import com.devs.roamance.dto.request.travel.journal.SubsectionCreateRequestDto;
 import com.devs.roamance.dto.response.BaseResponseDto;
 import com.devs.roamance.dto.response.travel.journal.JournalListResponseDto;
 import com.devs.roamance.dto.response.travel.journal.JournalResponseDto;
@@ -10,11 +15,16 @@ import com.devs.roamance.exception.JournalAlreadyExistException;
 import com.devs.roamance.exception.JournalNotFoundException;
 import com.devs.roamance.model.Location;
 import com.devs.roamance.model.User;
-import com.devs.roamance.model.travel.journal.*;
+import com.devs.roamance.model.travel.journal.ActivitySubsection;
+import com.devs.roamance.model.travel.journal.Journal;
+import com.devs.roamance.model.travel.journal.RouteSubsection;
+import com.devs.roamance.model.travel.journal.SightseeingSubsection;
+import com.devs.roamance.model.travel.journal.Subsection;
 import com.devs.roamance.repository.JournalRepository;
 import com.devs.roamance.repository.UserRepository;
 import com.devs.roamance.service.JournalService;
 import com.devs.roamance.util.PaginationSortingUtil;
+import com.devs.roamance.util.UserUtils;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -39,12 +49,17 @@ public class JournalServiceImpl implements JournalService {
   private final JournalRepository journalRepository;
   private final UserRepository userRepository;
   private final ModelMapper modelMapper;
+  private final UserUtils userUtils;
 
   public JournalServiceImpl(
-      JournalRepository journalRepository, UserRepository userService, ModelMapper modelMapper) {
+      JournalRepository journalRepository,
+      UserRepository userService,
+      ModelMapper modelMapper,
+      UserUtils userUtils) {
     this.journalRepository = journalRepository;
     this.userRepository = userService;
     this.modelMapper = modelMapper;
+    this.userUtils = userUtils;
   }
 
   @Override
@@ -82,6 +97,8 @@ public class JournalServiceImpl implements JournalService {
             "Established bidirectional relationship for {} subsections",
             journal.getSubsections().size());
       }
+
+      journal.setUser(userUtils.getAuthenticatedUser());
 
       Journal savedJournal = journalRepository.save(journal);
 
