@@ -16,7 +16,9 @@ import com.devs.roamance.dto.response.travel.journal.SubsectionResponseDetailDto
 import com.devs.roamance.dto.response.travel.journal.SubsectionResponseDto;
 import com.devs.roamance.exception.JournalNotFoundException;
 import com.devs.roamance.exception.SubsectionNotFoundException;
+import com.devs.roamance.exception.UnauthorizedAccessException;
 import com.devs.roamance.model.Location;
+import com.devs.roamance.model.User;
 import com.devs.roamance.model.travel.journal.ActivitySubsection;
 import com.devs.roamance.model.travel.journal.Journal;
 import com.devs.roamance.model.travel.journal.RouteSubsection;
@@ -27,6 +29,7 @@ import com.devs.roamance.repository.JournalRepository;
 import com.devs.roamance.repository.SubsectionRepository;
 import com.devs.roamance.service.SubsectionService;
 import com.devs.roamance.util.PaginationSortingUtil;
+import com.devs.roamance.util.UserUtils;
 import java.util.List;
 import java.util.UUID;
 import org.modelmapper.ModelMapper;
@@ -45,14 +48,17 @@ public class SubsectionServiceImpl implements SubsectionService {
   private final SubsectionRepository subsectionRepository;
   private final JournalRepository journalRepository;
   private final ModelMapper modelMapper;
+  private final UserUtils userUtils;
 
   public SubsectionServiceImpl(
       SubsectionRepository subsectionRepository,
       JournalRepository journalRepository,
-      ModelMapper modelMapper) {
+      ModelMapper modelMapper,
+      UserUtils userUtils) {
     this.subsectionRepository = subsectionRepository;
     this.journalRepository = journalRepository;
     this.modelMapper = modelMapper;
+    this.userUtils = userUtils;
   }
 
   @Override
@@ -70,6 +76,8 @@ public class SubsectionServiceImpl implements SubsectionService {
                     new JournalNotFoundException(
                         String.format(
                             ResponseMessage.JOURNAL_NOT_FOUND, requestDto.getJournalId())));
+
+    validateUserAccess(journal, "create", requestDto.getJournalId());
 
     Subsection subsection = mapToSubsectionType(requestDto);
     subsection.setJournal(journal);
@@ -97,11 +105,14 @@ public class SubsectionServiceImpl implements SubsectionService {
         sortBy,
         sortDir);
 
+    User authenticatedUser = userUtils.getAuthenticatedUser();
+
     Pageable pageable =
         PageRequest.of(
             pageNumber, pageSize, Sort.by(PaginationSortingUtil.getSortDirection(sortDir), sortBy));
 
-    Page<Subsection> subsectionPage = subsectionRepository.findAll(pageable);
+    Page<Subsection> subsectionPage =
+        subsectionRepository.findAllByJournalCreatedBy(authenticatedUser.getId(), pageable);
 
     List<SubsectionDto> subsections =
         subsectionPage.getContent().stream()
@@ -113,7 +124,10 @@ public class SubsectionServiceImpl implements SubsectionService {
                 })
             .toList();
 
-    logger.info("Successfully fetched {} subsections", subsections.size());
+    logger.info(
+        "Successfully fetched {} subsections for user {}",
+        subsections.size(),
+        authenticatedUser.getId());
     return new SubsectionListResponseDto(
         200, true, ResponseMessage.SUBSECTIONS_FETCH_SUCCESS, subsections);
   }
@@ -129,6 +143,9 @@ public class SubsectionServiceImpl implements SubsectionService {
                     new SubsectionNotFoundException(
                         String.format(ResponseMessage.SUBSECTION_NOT_FOUND, id)));
 
+    Journal journal = subsection.getJournal();
+    validateUserAccess(journal, "access", id);
+
     logger.info("Successfully fetched subsection with title: '{}'", subsection.getTitle());
 
     SubsectionResponseDetailDto detailDto = mapToSubsectionResponseDetailDto(subsection);
@@ -139,6 +156,8 @@ public class SubsectionServiceImpl implements SubsectionService {
 
   @Override
   public SubsectionResponseDto update(SubsectionUpdateRequestDto subsectionDetails, UUID id) {
+    logger.info("Updating subsection with id: {}", id);
+
     Subsection subsection =
         subsectionRepository
             .findById(id)
@@ -147,11 +166,15 @@ public class SubsectionServiceImpl implements SubsectionService {
                     new SubsectionNotFoundException(
                         String.format(ResponseMessage.SUBSECTION_NOT_FOUND, id)));
 
+    Journal journal = subsection.getJournal();
+    validateUserAccess(journal, "update", id);
+
     subsection.setTitle(subsectionDetails.getTitle());
 
     updateSpecificFields(subsection, subsectionDetails);
 
     Subsection savedSubsection = subsectionRepository.save(subsection);
+    logger.info("Successfully updated subsection with id: {}", id);
 
     SubsectionResponseDetailDto detailDto = mapToSubsectionResponseDetailDto(savedSubsection);
 
@@ -173,16 +196,29 @@ public class SubsectionServiceImpl implements SubsectionService {
 
     Journal journal = subsection.getJournal();
 
-    if (journal != null) {
-      logger.info("Detaching subsection from journal with ID: {}", journal.getId());
-      journal.removeSubsection(subsection);
-      subsection.setJournal(null);
-    }
+    validateUserAccess(journal, "delete", id);
+
+    logger.info("Detaching subsection from journal with ID: {}", journal.getId());
+    journal.removeSubsection(subsection);
+    subsection.setJournal(null);
 
     subsectionRepository.delete(subsection);
 
     logger.info("Successfully deleted subsection with id: {}", id);
     return new BaseResponseDto(200, true, ResponseMessage.SUBSECTION_DELETE_SUCCESS);
+  }
+
+  private void validateUserAccess(Journal journal, String operation, UUID resourceId) {
+    User authenticatedUser = userUtils.getAuthenticatedUser();
+    if (!journal.getCreatedBy().equals(authenticatedUser.getId())) {
+      logger.error(
+          "User {} not authorized to {} resource {}",
+          authenticatedUser.getId(),
+          operation,
+          resourceId);
+      throw new UnauthorizedAccessException(
+          "You are not authorized to " + operation + " this resource");
+    }
   }
 
   private Subsection mapToSubsectionType(SubsectionCreateRequestDto subsectionDto) {
