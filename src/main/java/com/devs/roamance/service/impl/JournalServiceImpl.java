@@ -13,6 +13,7 @@ import com.devs.roamance.dto.response.travel.journal.JournalListResponseDto;
 import com.devs.roamance.dto.response.travel.journal.JournalResponseDto;
 import com.devs.roamance.exception.JournalAlreadyExistException;
 import com.devs.roamance.exception.JournalNotFoundException;
+import com.devs.roamance.exception.UnauthorizedAccessException;
 import com.devs.roamance.model.Location;
 import com.devs.roamance.model.User;
 import com.devs.roamance.model.travel.journal.ActivitySubsection;
@@ -184,7 +185,7 @@ public class JournalServiceImpl implements JournalService {
     if (!isAdmin && !journal.getUser().getId().equals(currentUser.getId())) {
       logger.warn(
           "User {} attempted to access journal {} without permission", currentUser.getEmail(), id);
-      throw new SecurityException("You don't have permission to access this journal");
+      throw new UnauthorizedAccessException(ResponseMessage.JOURNAL_ACCESS_DENIED);
     }
 
     logger.info(
