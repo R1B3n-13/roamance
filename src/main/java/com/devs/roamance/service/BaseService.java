@@ -1,5 +1,7 @@
 package com.devs.roamance.service;
 
+import com.devs.roamance.dto.response.BaseResponseDto;
+
 public interface BaseService<B, E, C, U, I> {
 
   B create(C createRequestDto);
@@ -8,5 +10,5 @@ public interface BaseService<B, E, C, U, I> {
 
   B update(U updateRequestDto, I id);
 
-  B delete(I id);
+  BaseResponseDto delete(I id);
 }

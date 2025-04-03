@@ -22,6 +22,8 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 @Order(2)
 public class GlobalExceptionHandler {
 
+  // ==================== User Related Exceptions ====================
+
   @ExceptionHandler(UserNotFoundException.class)
   public ResponseEntity<BaseResponseDto> handleUserNotFoundException(UserNotFoundException ex) {
 
@@ -40,6 +42,8 @@ public class GlobalExceptionHandler {
     return new ResponseEntity<>(
         new BaseResponseDto(409, false, ex.getMessage()), HttpStatus.CONFLICT);
   }
+
+  // ==================== Authentication Related Exceptions ====================
 
   @ExceptionHandler(AuthenticationFailedException.class)
   public ResponseEntity<BaseResponseDto> handleAuthenticationFailedException(
@@ -71,6 +75,8 @@ public class GlobalExceptionHandler {
         new BaseResponseDto(401, false, ex.getMessage()), HttpStatus.UNAUTHORIZED);
   }
 
+  // ==================== General Exceptions ====================
+
   @ExceptionHandler(IllegalArgumentException.class)
   public ResponseEntity<BaseResponseDto> handleIllegalArgumentException(
       IllegalArgumentException ex) {
@@ -87,6 +93,8 @@ public class GlobalExceptionHandler {
                 : "Illegal argument!"),
         HttpStatus.BAD_REQUEST);
   }
+
+  // ==================== Validation Related Exceptions ====================
 
   @ExceptionHandler(MethodArgumentNotValidException.class)
   public ResponseEntity<ValidationErrorResponseDto> handleMethodArgumentNotValidException(
@@ -178,6 +186,64 @@ public class GlobalExceptionHandler {
         new ValidationErrorResponseDto(400, false, ResponseMessage.VALIDATION_FAILED, errors),
         HttpStatus.BAD_REQUEST);
   }
+
+  // ==================== Journal Related Exceptions ====================
+
+  @ExceptionHandler(JournalNotFoundException.class)
+  public ResponseEntity<BaseResponseDto> handleJournalNotFoundException(
+      JournalNotFoundException ex) {
+
+    log.error("JournalNotFoundException: {}", ex.getMessage(), ex);
+
+    return new ResponseEntity<>(
+        new BaseResponseDto(404, false, ex.getMessage()), HttpStatus.NOT_FOUND);
+  }
+
+  @ExceptionHandler(JournalAlreadyExistException.class)
+  public ResponseEntity<BaseResponseDto> handleJournalAlreadyExistException(
+      JournalAlreadyExistException ex) {
+
+    log.error("JournalAlreadyExistException: {}", ex.getMessage(), ex);
+
+    return new ResponseEntity<>(
+        new BaseResponseDto(409, false, ex.getMessage()), HttpStatus.CONFLICT);
+  }
+
+  // ==================== Authorization Related Exceptions ====================
+
+  @ExceptionHandler(UnauthorizedAccessException.class)
+  public ResponseEntity<BaseResponseDto> handleUnauthorizedAccessException(
+      UnauthorizedAccessException ex) {
+
+    log.error("UnauthorizedAccessException: {}", ex.getMessage(), ex);
+
+    return new ResponseEntity<>(
+        new BaseResponseDto(403, false, ex.getMessage()), HttpStatus.FORBIDDEN);
+  }
+
+  // ==================== Subsection Related Exceptions ====================
+
+  @ExceptionHandler(SubsectionTypeDeserializationException.class)
+  public ResponseEntity<BaseResponseDto> handleSubsectionTypeDeserializationException(
+      SubsectionTypeDeserializationException ex) {
+
+    log.error("SubsectionTypeDeserializationException: {}", ex.getMessage(), ex);
+
+    return new ResponseEntity<>(
+        new BaseResponseDto(400, false, ex.getMessage()), HttpStatus.BAD_REQUEST);
+  }
+
+  @ExceptionHandler(SubsectionNotFoundException.class)
+  public ResponseEntity<BaseResponseDto> handleSubsectionNotFoundException(
+      SubsectionNotFoundException ex) {
+
+    log.error("SubsectionNotFoundException: {}", ex.getMessage(), ex);
+
+    return new ResponseEntity<>(
+        new BaseResponseDto(404, false, ex.getMessage()), HttpStatus.NOT_FOUND);
+  }
+
+  // ==================== Fallback Exception Handler ====================
 
   @ExceptionHandler(Exception.class)
   public ResponseEntity<BaseResponseDto> handleGeneralException(Exception ex) {

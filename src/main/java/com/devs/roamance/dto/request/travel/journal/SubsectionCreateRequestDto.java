@@ -4,8 +4,11 @@ import com.devs.roamance.model.travel.journal.SubsectionType;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import java.util.List;
+import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -23,6 +26,9 @@ public abstract class SubsectionCreateRequestDto {
   private String title;
 
   @Valid private SubsectionType type;
+
+  @NotNull(message = "Journal ID is required")
+  private UUID journalId;
 
   @Size(max = 10, message = "Maximum 10 notes allowed")
   private List<@NotBlank(message = "Note cannot be empty") String> notes;
