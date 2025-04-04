@@ -1,16 +1,16 @@
 'use client';
 
 import { SectionHeading } from '@/components/common/section-heading';
+import { touristPlaces } from '@/constants';
 import { cn } from '@/lib/utils';
+import { TouristPlace } from '@/types';
 import { motion } from 'framer-motion';
+import gsap from 'gsap';
 import { MapPin } from 'lucide-react';
 import dynamic from 'next/dynamic';
-import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { GlobeMethods } from 'react-globe.gl';
-import { touristPlaces } from '@/constants';
-import { TouristPlace } from '@/types';
 import * as THREE from 'three';
-import gsap from 'gsap';
 
 const Globe = dynamic(
   () => import('react-globe.gl').then((mod) => mod.default),
@@ -77,7 +77,11 @@ export function GlobeShowcase() {
             .trim()
         : place.color;
 
-    const sphereGeometry = new THREE.SphereGeometry(0.12 * scaleFactor * markerScale, 16, 16);
+    const sphereGeometry = new THREE.SphereGeometry(
+      0.12 * scaleFactor * markerScale,
+      16,
+      16
+    );
     const sphereMaterial = new THREE.MeshStandardMaterial({
       color: pinColor,
       metalness: 0.5,
@@ -97,7 +101,7 @@ export function GlobeShowcase() {
       0.25 * scaleFactor * markerScale,
       12
     );
-    stemGeometry.translate(0, -0.15 * scaleFactor, 0);
+
     const stemMaterial = new THREE.MeshStandardMaterial({
       color: pinColor,
       metalness: 0.3,
@@ -115,9 +119,12 @@ export function GlobeShowcase() {
     pin.add(sphere);
     pin.add(stem);
 
-    pin.position.copy(surfacePoint);
+    stem.position.set(0, -0.15 * scaleFactor * markerScale, 0);
 
-    pin.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), dirVector);
+    pin.position.copy(surfacePoint);
+    const radial = surfacePoint.clone().normalize();
+    pin.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), radial);
+    pin.rotateX(Math.PI);
 
     group.add(pin);
 
@@ -165,7 +172,11 @@ export function GlobeShowcase() {
     group.add(ring);
     group.add(outerRing);
 
-    const glowGeometry = new THREE.SphereGeometry(0.3 * scaleFactor * markerScale, 16, 16);
+    const glowGeometry = new THREE.SphereGeometry(
+      0.3 * scaleFactor * markerScale,
+      16,
+      16
+    );
     const glowMaterial = new THREE.MeshBasicMaterial({
       color: pinColor,
       transparent: true,
