@@ -65,6 +65,16 @@ public class GlobalExceptionHandler {
         new BaseResponseDto(401, false, ex.getMessage()), HttpStatus.UNAUTHORIZED);
   }
 
+  @ExceptionHandler(AuthenticatedUserNotFoundException.class)
+  public ResponseEntity<BaseResponseDto> handleAuthenticatedUserNotFoundException(
+      AuthenticatedUserNotFoundException ex) {
+
+    log.error("AuthenticatedUserNotFoundException: {}", ex.getMessage(), ex);
+
+    return new ResponseEntity<>(
+        new BaseResponseDto(404, false, ex.getMessage()), HttpStatus.NOT_FOUND);
+  }
+
   @ExceptionHandler(WrongCredentialsException.class)
   public ResponseEntity<BaseResponseDto> handleWrongCredentialsException(
       WrongCredentialsException ex) {
