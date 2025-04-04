@@ -115,13 +115,15 @@ export function GlobeShowcase() {
     pin.add(sphere);
     pin.add(stem);
 
-    // Position the pin on the globe surface and point outward
+    // Position the pin on the globe surface
     pin.position.copy(surfacePoint);
-    pin.lookAt(surfacePoint.clone().add(dirVector));
+
+    // Orient the pin so that its local z axis aligns with the globe's outward normal (dirVector)
+    pin.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), dirVector);
 
     group.add(pin);
 
-    // Add a pulsing ring beneath the marker
+    // Add a pulsing ring beneath the marker - rings should be parallel to the surface
     const ringGeometry = new THREE.RingGeometry(0.15 * scaleFactor, 0.18 * scaleFactor, 32);
     const ringMaterial = new THREE.MeshBasicMaterial({
       color: pinColor,
@@ -133,9 +135,10 @@ export function GlobeShowcase() {
     ringMaterial.depthWrite = false;
     const ring = new THREE.Mesh(ringGeometry, ringMaterial);
 
-    // Position the ring directly on the surface
+    // Position the ring correctly aligned with the surface tangent
     ring.position.copy(surfacePoint.clone().add(dirVector.clone().multiplyScalar(0.01)));
-    ring.lookAt(new THREE.Vector3(0, 0, 0));
+    ring.lookAt(0, 0, 0);
+    ring.rotateX(Math.PI / 2); // Rotate 90 degrees to be parallel with the surface
 
     // Create a second pulsing ring
     const outerRingGeometry = new THREE.RingGeometry(0.22 * scaleFactor, 0.24 * scaleFactor, 32);
