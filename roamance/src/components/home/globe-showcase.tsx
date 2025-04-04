@@ -34,7 +34,6 @@ export function GlobeShowcase() {
   );
   const [isMouseOverGlobe, setIsMouseOverGlobe] = useState(false);
 
-  // Create building objects data structure with custom shapes
   const buildingsData = useMemo(
     () =>
       places.map((place) => ({
@@ -49,36 +48,27 @@ export function GlobeShowcase() {
     [places]
   );
 
-  // Custom 3D object factory for buildings
   const objectsThreeObject = useCallback((d: object) => {
     const place = d as TouristPlace;
 
-    // Calculate position based on lat/lng (spherical to Cartesian conversion)
     const latRad = THREE.MathUtils.degToRad(place.lat);
     const lngRad = THREE.MathUtils.degToRad(place.lng);
 
-    // Create direction vector pointing from center to the place
     const dirVector = new THREE.Vector3(
       Math.cos(latRad) * Math.cos(lngRad),
       Math.sin(latRad),
       Math.cos(latRad) * Math.sin(lngRad)
     ).normalize();
 
-    // Define scale factor for bigger markers
     const scaleFactor = 100 / 3;
+    const markerScale = 0.75;
 
-    // Globe radius - exactly 1 unit
     const globeRadius = 1;
 
-    // Position the marker exactly on the surface
     const surfacePoint = dirVector.clone().multiplyScalar(globeRadius);
 
-    // Create a group to hold all elements
     const group = new THREE.Group();
 
-    // Create elegant pin marker - sphere on top of a thin cylinder
-    // Use the color as provided in tourist-places.ts and make the pin non-transparent
-    // Use the color provided in tourist-places.ts by computing its CSS value if it's a variable
     const cssVarMatch = place.color.match(/var\(\s*(--[a-zA-Z0-9-_]+)\s*\)/);
     const pinColor =
       cssVarMatch && typeof window !== 'undefined'
@@ -87,8 +77,7 @@ export function GlobeShowcase() {
             .trim()
         : place.color;
 
-    // Top sphere (head of pin)
-    const sphereGeometry = new THREE.SphereGeometry(0.12 * scaleFactor, 16, 16);
+    const sphereGeometry = new THREE.SphereGeometry(0.12 * scaleFactor * markerScale, 16, 16);
     const sphereMaterial = new THREE.MeshLambertMaterial({
       color: pinColor,
       emissive: pinColor,
@@ -100,11 +89,10 @@ export function GlobeShowcase() {
     sphereMaterial.depthWrite = false;
     const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
 
-    // Thin cylinder (stem of pin)
     const stemGeometry = new THREE.CylinderGeometry(
-      0.03 * scaleFactor,
-      0.08 * scaleFactor,
-      0.25 * scaleFactor,
+      0.03 * scaleFactor * markerScale,
+      0.08 * scaleFactor * markerScale,
+      0.25 * scaleFactor * markerScale,
       12
     );
     stemGeometry.translate(0, -0.15 * scaleFactor, 0);
@@ -119,23 +107,19 @@ export function GlobeShowcase() {
     stemMaterial.depthWrite = false;
     const stem = new THREE.Mesh(stemGeometry, stemMaterial);
 
-    // Group pin parts
     const pin = new THREE.Group();
     pin.add(sphere);
     pin.add(stem);
 
-    // Position the pin on the globe surface
     pin.position.copy(surfacePoint);
 
-    // Orient the pin so that its local z axis aligns with the globe's outward normal (dirVector)
     pin.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), dirVector);
 
     group.add(pin);
 
-    // Add a pulsing ring beneath the marker - rings should be parallel to the surface
     const ringGeometry = new THREE.RingGeometry(
-      0.15 * scaleFactor,
-      0.18 * scaleFactor,
+      0.15 * scaleFactor * markerScale,
+      0.18 * scaleFactor * markerScale,
       32
     );
     const ringMaterial = new THREE.MeshBasicMaterial({
@@ -148,17 +132,15 @@ export function GlobeShowcase() {
     ringMaterial.depthWrite = false;
     const ring = new THREE.Mesh(ringGeometry, ringMaterial);
 
-    // Position the ring correctly aligned with the surface tangent
     ring.position.copy(
       surfacePoint.clone().add(dirVector.clone().multiplyScalar(0.01))
     );
     ring.lookAt(0, 0, 0);
-    ring.rotateX(Math.PI / 2); // Rotate 90 degrees to be parallel with the surface
+    ring.rotateX(Math.PI / 2);
 
-    // Create a second pulsing ring
     const outerRingGeometry = new THREE.RingGeometry(
-      0.22 * scaleFactor,
-      0.24 * scaleFactor,
+      0.22 * scaleFactor * markerScale,
+      0.24 * scaleFactor * markerScale,
       32
     );
     const outerRingMaterial = new THREE.MeshBasicMaterial({
@@ -171,7 +153,6 @@ export function GlobeShowcase() {
     outerRingMaterial.depthWrite = false;
     const outerRing = new THREE.Mesh(outerRingGeometry, outerRingMaterial);
 
-    // Position the outer ring
     outerRing.position.copy(
       surfacePoint.clone().add(dirVector.clone().multiplyScalar(0.01))
     );
@@ -180,8 +161,7 @@ export function GlobeShowcase() {
     group.add(ring);
     group.add(outerRing);
 
-    // Add a glow effect sphere for hover highlighting
-    const glowGeometry = new THREE.SphereGeometry(0.3 * scaleFactor, 16, 16);
+    const glowGeometry = new THREE.SphereGeometry(0.3 * scaleFactor * markerScale, 16, 16);
     const glowMaterial = new THREE.MeshBasicMaterial({
       color: pinColor,
       transparent: true,
@@ -194,20 +174,18 @@ export function GlobeShowcase() {
 
     group.add(glow);
 
-    // Store place data, position vector, and hover state in the group's userData
     group.userData = {
       placeId: place.id,
       isHovered: false,
-      dirVector: dirVector.clone(), // Store normalized direction vector
+      dirVector: dirVector.clone(),
       ring: ring,
       outerRing: outerRing,
-      pulsePhase: Math.random() * Math.PI * 2, // Random phase for animation variety
+      pulsePhase: Math.random() * Math.PI * 2,
     };
 
     return group;
   }, []);
 
-  // Add update function to handle hover animations
   useEffect(() => {
     if (!globeRef.current) return;
     let lastTime = performance.now();
@@ -217,7 +195,7 @@ export function GlobeShowcase() {
         return;
       }
       const currentTime = performance.now();
-      const delta = (currentTime - lastTime) / 1000; // delta in seconds
+      const delta = (currentTime - lastTime) / 1000;
       lastTime = currentTime;
       const time = currentTime * 0.001;
       const pov = globeRef.current.pointOfView();
@@ -285,10 +263,10 @@ export function GlobeShowcase() {
                 duration: 0.3,
               });
             }
-            gsap.to(
-              (glow as THREE.Mesh).material as THREE.MeshBasicMaterial,
-              { opacity: 0.3, duration: 0.5 }
-            );
+            gsap.to((glow as THREE.Mesh).material as THREE.MeshBasicMaterial, {
+              opacity: 0.3,
+              duration: 0.5,
+            });
           } else if (!isSelected && object.userData.isHovered) {
             object.userData.isHovered = false;
             if (pinGroup.scale.x !== 1) {
@@ -299,10 +277,10 @@ export function GlobeShowcase() {
                 duration: 0.3,
               });
             }
-            gsap.to(
-              (glow as THREE.Mesh).material as THREE.MeshBasicMaterial,
-              { opacity: 0, duration: 0.5 }
-            );
+            gsap.to((glow as THREE.Mesh).material as THREE.MeshBasicMaterial, {
+              opacity: 0,
+              duration: 0.5,
+            });
           }
         }
       });
@@ -325,7 +303,7 @@ export function GlobeShowcase() {
         const currentLng = pov ? pov.lng : 0;
         globeRef.current.pointOfView({
           lat: 25,
-          lng: currentLng + 0.1, // smaller incremental rotation per frame
+          lng: currentLng + 0.5,
           altitude: 2.5,
         });
       }
@@ -341,15 +319,12 @@ export function GlobeShowcase() {
   }, [isClient, selectedPlace, isMouseOverGlobe]);
 
   const handlePlaceHover = (place: TouristPlace | null) => {
-    // Prevent flicker by ignoring repeated hovers over the same building.
     if (selectedPlace?.id === place?.id) return;
 
     setSelectedPlace(place);
     if (globeRef.current && place) {
-      // Determine which side of the screen the place is on, and put the details on the opposite side
       const pov = globeRef.current.pointOfView();
       const currentLng = pov ? pov.lng : 0;
-      // If place longitude is greater than current view, it's on the right side
       setDetailsPosition(place.lng > currentLng ? 'left' : 'right');
 
       globeRef.current.pointOfView(
@@ -379,7 +354,6 @@ export function GlobeShowcase() {
         />
 
         <div className="relative mt-12">
-          {/* Full-width globe container */}
           <div className="w-full h-[600px] flex items-center justify-center relative">
             {isClient && (
               <div
@@ -421,7 +395,6 @@ export function GlobeShowcase() {
             )}
           </div>
 
-          {/* Floating details panel */}
           {selectedPlace && (
             <motion.div
               className={cn(
