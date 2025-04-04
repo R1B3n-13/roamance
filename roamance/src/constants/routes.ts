@@ -1,3 +1,5 @@
+import { RouteItem } from '@/types';
+
 export const paths = {
   home: '',
   map: 'map',
@@ -5,18 +7,15 @@ export const paths = {
   activities: 'activities',
   plans: 'plans',
 
-  // Authentication paths
   auth: 'auth',
   signIn: 'sign-in',
   signUp: 'sign-up',
 
-  // Company paths
   about: 'about',
   careers: 'careers',
   blog: 'blog',
   contact: 'contact',
 
-  // Legal paths
   terms: 'terms',
   privacy: 'privacy',
   cookies: 'cookies',
@@ -29,24 +28,20 @@ export const pathTitles = {
   activities: 'Activities',
   plans: 'Plans',
 
-  // Authentication titles
   signIn: 'Sign In',
   signUp: 'Sign Up',
 
-  // Company titles
   about: 'About',
   careers: 'Careers',
   blog: 'Blog',
   contact: 'Contact',
 
-  // Legal titles
   terms: 'Terms of Service',
   privacy: 'Privacy Policy',
   cookies: 'Cookies Policy',
 };
 
-export const routes = {
-  // Home and main navigation
+export const routes: Record<string, RouteItem> = {
   home: {
     title: pathTitles.home,
     href: `/${paths.home}`,
@@ -68,7 +63,6 @@ export const routes = {
     href: `/${paths.plans}`,
   },
 
-  // Authentication routes
   signIn: {
     title: pathTitles.signIn,
     href: `/${paths.auth}/${paths.signIn}`,
@@ -78,7 +72,6 @@ export const routes = {
     href: `/${paths.auth}/${paths.signUp}`,
   },
 
-  // Company routes
   about: {
     title: pathTitles.about,
     href: `/${paths.about}`,
@@ -96,7 +89,6 @@ export const routes = {
     href: `/${paths.contact}`,
   },
 
-  // Legal routes
   terms: {
     title: pathTitles.terms,
     href: `/${paths.terms}`,
