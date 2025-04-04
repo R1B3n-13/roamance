@@ -1,25 +1,23 @@
 package com.devs.roamance.service.impl;
 
 import com.devs.roamance.constant.ResponseMessage;
-import com.devs.roamance.constant.Role;
-import com.devs.roamance.dto.UserDto;
 import com.devs.roamance.dto.request.UserCreateRequestDto;
 import com.devs.roamance.dto.request.UserUpdateRequestDto;
 import com.devs.roamance.dto.response.BaseResponseDto;
+import com.devs.roamance.dto.response.UserDto;
 import com.devs.roamance.dto.response.UserListResponseDto;
 import com.devs.roamance.dto.response.UserResponseDto;
 import com.devs.roamance.exception.UserAlreadyExistException;
 import com.devs.roamance.exception.UserNotFoundException;
+import com.devs.roamance.model.Role;
 import com.devs.roamance.model.User;
 import com.devs.roamance.repository.UserRepository;
-import com.devs.roamance.security.JwtUtils;
 import com.devs.roamance.service.UserService;
 import com.devs.roamance.util.PaginationSortingUtil;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -34,19 +32,13 @@ public class UserServiceImpl implements UserService {
   private final UserRepository userRepository;
   private final ModelMapper modelMapper;
   private final PasswordEncoder passwordEncoder;
-  private final JwtUtils jwtUtils;
 
-  @Autowired
   public UserServiceImpl(
-      UserRepository userRepository,
-      ModelMapper modelMapper,
-      PasswordEncoder passwordEncoder,
-      JwtUtils jwtUtils) {
+      UserRepository userRepository, ModelMapper modelMapper, PasswordEncoder passwordEncoder) {
 
     this.userRepository = userRepository;
     this.modelMapper = modelMapper;
     this.passwordEncoder = passwordEncoder;
-    this.jwtUtils = jwtUtils;
   }
 
   @Override
@@ -115,16 +107,6 @@ public class UserServiceImpl implements UserService {
     UserDto dto = modelMapper.map(user, UserDto.class);
 
     return new UserResponseDto(200, true, ResponseMessage.USER_FETCH_SUCCESS, dto);
-  }
-
-  @Override
-  public UserResponseDto getFromAuthHeader(String header) {
-
-    String token = jwtUtils.getTokenFromHeader(header);
-
-    String email = jwtUtils.getEmailFromToken(token);
-
-    return getByEmail(email);
   }
 
   @Override

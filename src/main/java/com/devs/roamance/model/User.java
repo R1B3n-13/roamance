@@ -1,6 +1,5 @@
 package com.devs.roamance.model;
 
-import com.devs.roamance.constant.Role;
 import com.devs.roamance.model.travel.journal.Journal;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -11,10 +10,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -51,5 +47,6 @@ public class User {
 
   @CreatedDate
   @Column(updatable = false)
+  @Setter(AccessLevel.NONE)
   private OffsetDateTime createdAt;
 }

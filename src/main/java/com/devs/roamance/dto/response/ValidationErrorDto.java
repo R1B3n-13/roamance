@@ -1,4 +1,4 @@
-package com.devs.roamance.dto;
+package com.devs.roamance.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

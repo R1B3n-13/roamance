@@ -4,7 +4,7 @@ public final class ResponseMessage {
 
   private ResponseMessage() {}
 
-  // ==================== Registration and Authentication ====================
+  // ==================== Registration and Login Related ====================
 
   public static final String REGISTRATION_SUCCESS = "Registration successful.";
   public static final String LOGIN_SUCCESS = "Login successful.";
@@ -20,7 +20,7 @@ public final class ResponseMessage {
   public static final String USER_NOT_FOUND_EMAIL = "No user present with email: %s!";
   public static final String USER_ALREADY_EXIST = "User already exists with email: %s!";
 
-  // ==================== Authentication Error ====================
+  // ==================== Authentication Related ====================
 
   public static final String AUTHENTICATION_FAILED = "Authentication failed!";
   public static final String AUTH_TOKEN_MISSING = "Authentication token is missing!";
@@ -47,12 +47,9 @@ public final class ResponseMessage {
   public static final String SUBSECTIONS_FETCH_SUCCESS = "Subsections fetched successfully.";
   public static final String SUBSECTION_UPDATE_SUCCESS = "Subsection updated successfully.";
   public static final String SUBSECTION_DELETE_SUCCESS = "Subsection deleted successfully.";
-  public static final String SUBSECTION_ADD_SUCCESS = "Subsection added to journal successfully.";
-  public static final String SUBSECTION_REMOVE_SUCCESS =
-      "Subsection removed from journal successfully.";
   public static final String SUBSECTION_NOT_FOUND = "No subsection present with id: %s!";
 
-  // ==================== Validation ====================
+  // ==================== Validation Related ====================
 
   public static final String VALIDATION_FAILED = "Validation failed!";
 }

@@ -1,6 +1,5 @@
 package com.devs.roamance.dto.response.travel.journal;
 
-import com.devs.roamance.dto.JournalDto;
 import com.devs.roamance.dto.response.BaseResponseDto;
 import java.util.List;
 import lombok.AllArgsConstructor;

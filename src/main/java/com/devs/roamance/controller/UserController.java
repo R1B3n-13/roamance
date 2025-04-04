@@ -7,13 +7,13 @@ import com.devs.roamance.dto.response.UserListResponseDto;
 import com.devs.roamance.dto.response.UserResponseDto;
 import com.devs.roamance.service.UserService;
 import com.devs.roamance.util.PaginationSortingUtil;
+import com.devs.roamance.util.UserUtil;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import java.util.UUID;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,11 +23,12 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
   private final UserService userService;
+  private final UserUtil userUtil;
 
-  @Autowired
-  public UserController(UserService userService) {
+  public UserController(UserService userService, UserUtil userUtil) {
 
     this.userService = userService;
+    this.userUtil = userUtil;
   }
 
   @PostMapping("/register")
@@ -72,10 +73,11 @@ public class UserController {
   }
 
   @GetMapping("/profile")
-  public ResponseEntity<UserResponseDto> getUserFromAuthHeader(
-      @RequestHeader("Authorization") String header) {
+  public ResponseEntity<UserResponseDto> getUserProfile() {
 
-    UserResponseDto responseDto = userService.getFromAuthHeader(header);
+    UUID userId = userUtil.getAuthenticatedUser().getId();
+
+    UserResponseDto responseDto = userService.get(userId);
 
     return ResponseEntity.ok(responseDto);
   }
@@ -96,10 +98,9 @@ public class UserController {
 
   @PutMapping("/update")
   public ResponseEntity<BaseResponseDto> updateUser(
-      @Valid @RequestBody UserUpdateRequestDto requestDto,
-      @RequestHeader("Authorization") String header) {
+      @Valid @RequestBody UserUpdateRequestDto requestDto) {
 
-    UUID userId = userService.getFromAuthHeader(header).getData().getId();
+    UUID userId = userUtil.getAuthenticatedUser().getId();
 
     BaseResponseDto responseDto = userService.update(requestDto, userId);
 
@@ -107,9 +108,9 @@ public class UserController {
   }
 
   @DeleteMapping("/delete")
-  public ResponseEntity<BaseResponseDto> deleteUser(@RequestHeader("Authorization") String header) {
+  public ResponseEntity<BaseResponseDto> deleteUser() {
 
-    UUID userId = userService.getFromAuthHeader(header).getData().getId();
+    UUID userId = userUtil.getAuthenticatedUser().getId();
 
     BaseResponseDto responseDto = userService.delete(userId);
 
