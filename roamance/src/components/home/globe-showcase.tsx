@@ -32,6 +32,7 @@ export function GlobeShowcase() {
   const [detailsPosition, setDetailsPosition] = useState<'left' | 'right'>(
     'right'
   );
+  const [isMouseOverGlobe, setIsMouseOverGlobe] = useState(false);
 
   // Create building objects data structure with custom shapes
   const buildingsData = useMemo(
@@ -64,7 +65,7 @@ export function GlobeShowcase() {
     ).normalize();
 
     // Define scale factor for bigger markers
-    const scaleFactor = 50;
+    const scaleFactor = 100 / 3;
 
     // Globe radius - exactly 1 unit
     const globeRadius = 1;
@@ -76,7 +77,15 @@ export function GlobeShowcase() {
     const group = new THREE.Group();
 
     // Create elegant pin marker - sphere on top of a thin cylinder
-    const pinColor = place.color.replace('var(--', '').replace(')', '');
+    // Use the color as provided in tourist-places.ts and make the pin non-transparent
+    // Use the color provided in tourist-places.ts by computing its CSS value if it's a variable
+    const cssVarMatch = place.color.match(/var\(\s*(--[a-zA-Z0-9-_]+)\s*\)/);
+    const pinColor =
+      cssVarMatch && typeof window !== 'undefined'
+        ? getComputedStyle(document.documentElement)
+            .getPropertyValue(cssVarMatch[1])
+            .trim()
+        : place.color;
 
     // Top sphere (head of pin)
     const sphereGeometry = new THREE.SphereGeometry(0.12 * scaleFactor, 16, 16);
@@ -84,8 +93,8 @@ export function GlobeShowcase() {
       color: pinColor,
       emissive: pinColor,
       emissiveIntensity: 0.8,
-      transparent: true,
-      opacity: 0.9,
+      transparent: false,
+      opacity: 1,
     });
     sphereMaterial.depthTest = false;
     sphereMaterial.depthWrite = false;
@@ -103,8 +112,8 @@ export function GlobeShowcase() {
       color: pinColor,
       emissive: pinColor,
       emissiveIntensity: 0.5,
-      transparent: true,
-      opacity: 0.9,
+      transparent: false,
+      opacity: 1,
     });
     stemMaterial.depthTest = false;
     stemMaterial.depthWrite = false;
@@ -124,7 +133,11 @@ export function GlobeShowcase() {
     group.add(pin);
 
     // Add a pulsing ring beneath the marker - rings should be parallel to the surface
-    const ringGeometry = new THREE.RingGeometry(0.15 * scaleFactor, 0.18 * scaleFactor, 32);
+    const ringGeometry = new THREE.RingGeometry(
+      0.15 * scaleFactor,
+      0.18 * scaleFactor,
+      32
+    );
     const ringMaterial = new THREE.MeshBasicMaterial({
       color: pinColor,
       transparent: true,
@@ -136,12 +149,18 @@ export function GlobeShowcase() {
     const ring = new THREE.Mesh(ringGeometry, ringMaterial);
 
     // Position the ring correctly aligned with the surface tangent
-    ring.position.copy(surfacePoint.clone().add(dirVector.clone().multiplyScalar(0.01)));
+    ring.position.copy(
+      surfacePoint.clone().add(dirVector.clone().multiplyScalar(0.01))
+    );
     ring.lookAt(0, 0, 0);
     ring.rotateX(Math.PI / 2); // Rotate 90 degrees to be parallel with the surface
 
     // Create a second pulsing ring
-    const outerRingGeometry = new THREE.RingGeometry(0.22 * scaleFactor, 0.24 * scaleFactor, 32);
+    const outerRingGeometry = new THREE.RingGeometry(
+      0.22 * scaleFactor,
+      0.24 * scaleFactor,
+      32
+    );
     const outerRingMaterial = new THREE.MeshBasicMaterial({
       color: pinColor,
       transparent: true,
@@ -153,7 +172,9 @@ export function GlobeShowcase() {
     const outerRing = new THREE.Mesh(outerRingGeometry, outerRingMaterial);
 
     // Position the outer ring
-    outerRing.position.copy(surfacePoint.clone().add(dirVector.clone().multiplyScalar(0.01)));
+    outerRing.position.copy(
+      surfacePoint.clone().add(dirVector.clone().multiplyScalar(0.01))
+    );
     outerRing.lookAt(new THREE.Vector3(0, 0, 0));
 
     group.add(ring);
@@ -219,7 +240,10 @@ export function GlobeShowcase() {
           ) {
             // Check if the object is on the front-facing quarter of the globe
             if (object.userData.dirVector) {
-              if (selectedPlace && object.userData.placeId === selectedPlace.id) {
+              if (
+                selectedPlace &&
+                object.userData.placeId === selectedPlace.id
+              ) {
                 // Always show hovered marker
                 object.visible = true;
                 object.userData.hideLabel = false;
@@ -253,10 +277,12 @@ export function GlobeShowcase() {
 
               // Basic pulsing animation for all markers
               const pulse = 0.3 + 0.2 * Math.sin(time * 1.5 + phase);
-              const outerPulse = 0.2 + 0.15 * Math.sin(time * 1.2 + phase + Math.PI);
+              const outerPulse =
+                0.2 + 0.15 * Math.sin(time * 1.2 + phase + Math.PI);
 
               (ring.material as THREE.MeshBasicMaterial).opacity = pulse;
-              (outerRing.material as THREE.MeshBasicMaterial).opacity = outerPulse;
+              (outerRing.material as THREE.MeshBasicMaterial).opacity =
+                outerPulse;
 
               // Make rings slowly rotate
               ring.rotation.z = time * 0.2;
@@ -328,10 +354,15 @@ export function GlobeShowcase() {
       setPlaces(touristPlaces);
     }, 1000);
 
-    let interval: NodeJS.Timeout;
+    let interval: NodeJS.Timeout | null = null;
+
     const startAutoRotation = () => {
+      // Clear any existing interval first to prevent multiple intervals
+      if (interval) clearInterval(interval);
+
       interval = setInterval(() => {
-        if (globeRef.current && !selectedPlace) { // stop rotation when a building is hovered
+        // Only rotate when mouse is not over globe AND no place is selected
+        if (globeRef.current && !selectedPlace && !isMouseOverGlobe) {
           const pov = globeRef.current.pointOfView();
           const currentLng = pov ? pov.lng : 0;
           globeRef.current.pointOfView({
@@ -343,7 +374,12 @@ export function GlobeShowcase() {
       }, 100);
     };
 
-    const stopInterval = () => clearInterval(interval);
+    const stopInterval = () => {
+      if (interval) {
+        clearInterval(interval);
+        interval = null;
+      }
+    };
 
     if (isClient) {
       setTimeout(() => {
@@ -355,7 +391,7 @@ export function GlobeShowcase() {
       clearTimeout(timer);
       stopInterval();
     };
-  }, [isClient, selectedPlace]);
+  }, [isClient, selectedPlace, isMouseOverGlobe]);
 
   const handlePlaceHover = (place: TouristPlace | null) => {
     // Prevent flicker by ignoring repeated hovers over the same building.
@@ -399,31 +435,42 @@ export function GlobeShowcase() {
           {/* Full-width globe container */}
           <div className="w-full h-[600px] flex items-center justify-center relative">
             {isClient && (
-              <Globe
-                ref={globeRef}
-                globeImageUrl="//unpkg.com/three-globe/example/img/earth-night.jpg"
-                backgroundImageUrl=""
-                backgroundColor="rgba(0,0,0,0)"
-                objectsData={buildingsData}
-                objectLat="lat"
-                objectLng="lng"
-                objectAltitude="altitude"
-                objectThreeObject={objectsThreeObject}
-                objectLabel={(d) => {
-                  const place = d as TouristPlace;
-                  return `
+              <div
+                onPointerEnter={() => setIsMouseOverGlobe(true)}
+                onPointerLeave={() => setIsMouseOverGlobe(false)}
+                className="inline-block"
+              >
+                <Globe
+                  ref={globeRef}
+                  globeImageUrl="//unpkg.com/three-globe/example/img/earth-night.jpg"
+                  backgroundImageUrl=""
+                  backgroundColor="rgba(0,0,0,0)"
+                  // globeMaterial={new THREE.MeshPhongMaterial({
+                  //   map: new THREE.TextureLoader().load("//unpkg.com/three-globe/example/img/earth-night.jpg"),
+                  //   transparent: false,
+                  //   opacity: 1,
+                  // })}
+                  objectsData={buildingsData}
+                  objectLat="lat"
+                  objectLng="lng"
+                  objectAltitude="altitude"
+                  objectThreeObject={objectsThreeObject}
+                  objectLabel={(d) => {
+                    const place = d as TouristPlace;
+                    return `
                 <div class="bg-background/90 backdrop-blur-md p-2 rounded-lg border shadow-lg text-sm">
                   <b>${place.name}</b><br/>
                   ${place.country}
                 </div>
               `;
-                }}
-                onObjectHover={(object) =>
-                  handlePlaceHover(object as TouristPlace | null)
-                }
-                width={800}
-                height={600}
-              />
+                  }}
+                  onObjectHover={(object) =>
+                    handlePlaceHover(object as TouristPlace | null)
+                  }
+                  width={800}
+                  height={600}
+                />
+              </div>
             )}
           </div>
 
