@@ -367,7 +367,7 @@ export function GlobeShowcase() {
           const currentLng = pov ? pov.lng : 0;
           globeRef.current.pointOfView({
             lat: 25,
-            lng: currentLng + 1,
+            lng: currentLng + 3, // increased rotation increment
             altitude: 2.5,
           });
         }
@@ -384,7 +384,7 @@ export function GlobeShowcase() {
     if (isClient) {
       setTimeout(() => {
         startAutoRotation();
-      }, 2000);
+      }, 100); // reduced delay for resuming rotation
     }
 
     return () => {
