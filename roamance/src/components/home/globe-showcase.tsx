@@ -78,12 +78,14 @@ export function GlobeShowcase() {
         : place.color;
 
     const sphereGeometry = new THREE.SphereGeometry(0.12 * scaleFactor * markerScale, 16, 16);
-    const sphereMaterial = new THREE.MeshLambertMaterial({
+    const sphereMaterial = new THREE.MeshStandardMaterial({
       color: pinColor,
-      emissive: pinColor,
-      emissiveIntensity: 0.8,
-      transparent: false,
-      opacity: 1,
+      metalness: 0.5,
+      roughness: 0.2,
+      emissive: new THREE.Color(pinColor),
+      emissiveIntensity: 0.5,
+      transparent: true,
+      opacity: 0.95,
     });
     sphereMaterial.depthTest = false;
     sphereMaterial.depthWrite = false;
@@ -96,12 +98,14 @@ export function GlobeShowcase() {
       12
     );
     stemGeometry.translate(0, -0.15 * scaleFactor, 0);
-    const stemMaterial = new THREE.MeshLambertMaterial({
+    const stemMaterial = new THREE.MeshStandardMaterial({
       color: pinColor,
-      emissive: pinColor,
-      emissiveIntensity: 0.5,
-      transparent: false,
-      opacity: 1,
+      metalness: 0.3,
+      roughness: 0.4,
+      emissive: new THREE.Color(pinColor),
+      emissiveIntensity: 0.3,
+      transparent: true,
+      opacity: 0.97,
     });
     stemMaterial.depthTest = false;
     stemMaterial.depthWrite = false;
@@ -165,7 +169,8 @@ export function GlobeShowcase() {
     const glowMaterial = new THREE.MeshBasicMaterial({
       color: pinColor,
       transparent: true,
-      opacity: 0,
+      opacity: 0.2,
+      blending: THREE.AdditiveBlending,
     });
     glowMaterial.depthTest = false;
     glowMaterial.depthWrite = false;
