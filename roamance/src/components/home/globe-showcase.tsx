@@ -59,7 +59,7 @@ export function GlobeShowcase() {
 
     // Simplify approach: Place objects at a fixed altitude from the globe center
     const globeRadius = 1;
-    const gap = 8; // Increased gap to position buildings clearly outside the globe
+    const gap = 0.1; // Reduced gap to position buildings within the globe container view
 
     // Calculate position based on lat/lng (spherical to Cartesian conversion)
     const latRad = THREE.MathUtils.degToRad(place.lat);
@@ -124,10 +124,11 @@ export function GlobeShowcase() {
     // Apply scaling to the group
     group.scale.set(15, 15, 15);
 
-    // Store place data and hover state in the group's userData
+    // Store place data, position vector, and hover state in the group's userData
     group.userData = {
       placeId: place.id,
-      isHovered: false
+      isHovered: false,
+      dirVector: dirVector.clone() // Store normalized direction vector
     };
 
     return group;
@@ -140,9 +141,41 @@ export function GlobeShowcase() {
     // Animation loop to update object appearances
     const animate = () => {
       if (globeRef.current?.scene) {
+        // Get the current point of view to determine visibility
+        const pov = globeRef.current.pointOfView();
+
+        // Calculate the camera direction vector
+        const cameraLat = pov ? THREE.MathUtils.degToRad(pov.lat) : 0;
+        const cameraLng = pov ? THREE.MathUtils.degToRad(pov.lng) : 0;
+
+        // Create a vector pointing from globe center to camera position
+        const cameraVector = new THREE.Vector3(
+          Math.cos(cameraLat) * Math.cos(cameraLng),
+          Math.sin(cameraLat),
+          Math.cos(cameraLat) * Math.sin(cameraLng)
+        ).normalize();
+
         // Find all group objects in the scene
         globeRef.current.scene().traverse((object) => {
           if (object instanceof THREE.Group && object.userData && object.userData.placeId !== undefined) {
+            // Check if the object is on the front-facing quarter of the globe
+            if (object.userData.dirVector) {
+              // Using 0.9 as threshold shows a much smaller portion (angle < ~25°)
+              // This is a much stricter condition than before
+              const dotProduct = cameraVector.dot(object.userData.dirVector);
+              const isVisible = dotProduct > 0.9;
+
+              // Apply visibility to the entire group and all its children
+              object.visible = isVisible;
+
+              // Also hide labels for invisible objects by setting userData property
+              // This helps when some labels might still appear despite objects being hidden
+              object.userData.hideLabel = !isVisible;
+            }
+
+            // Only continue processing if object is visible
+            if (!object.visible) return;
+
             const isSelected = selectedPlace && object.userData.placeId === selectedPlace.id;
 
             // Find the building and glow objects within the group
