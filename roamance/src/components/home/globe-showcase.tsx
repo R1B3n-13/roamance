@@ -5,10 +5,12 @@ import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 import { MapPin } from 'lucide-react';
 import dynamic from 'next/dynamic';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import { GlobeMethods } from 'react-globe.gl';
 import { touristPlaces } from '@/constants';
 import { TouristPlace } from '@/types';
+import * as THREE from 'three';
+import gsap from 'gsap';
 
 const Globe = dynamic(
   () => import('react-globe.gl').then((mod) => mod.default),
@@ -27,6 +29,179 @@ export function GlobeShowcase() {
   const [places, setPlaces] = useState<TouristPlace[]>([]);
   const [selectedPlace, setSelectedPlace] = useState<TouristPlace | null>(null);
   const [isClient, setIsClient] = useState(false);
+
+  // Create building objects data structure with custom shapes
+  const buildingsData = useMemo(
+    () =>
+      places.map((place) => ({
+        ...place,
+        altitude: 0.05,
+        lat: place.lat,
+        lng: place.lng,
+        radius: 0.2,
+        height: 0.3 + place.size * 0.2,
+        color: place.color,
+      })),
+    [places]
+  );
+
+  // Custom 3D object factory for buildings
+  const objectsThreeObject = useCallback((d: object) => {
+    const place = d as TouristPlace;
+    const buildingHeight = 0.3 + place.size * 0.2;
+    const buildingGeometry = new THREE.BoxGeometry(0.4, buildingHeight * 2, 0.4);
+    const buildingMaterial = new THREE.MeshLambertMaterial({
+      color: place.color.replace('var(--', '').replace(')', ''),
+      transparent: true,
+      opacity: 0.8,
+    });
+    const building = new THREE.Mesh(buildingGeometry, buildingMaterial);
+
+    // Simplify approach: Place objects at a fixed altitude from the globe center
+    const globeRadius = 1;
+    const gap = 8; // Increased gap to position buildings clearly outside the globe
+
+    // Calculate position based on lat/lng (spherical to Cartesian conversion)
+    const latRad = THREE.MathUtils.degToRad(place.lat);
+    const lngRad = THREE.MathUtils.degToRad(place.lng);
+
+    // Calculate outward direction vector
+    const dirVector = new THREE.Vector3(
+      Math.cos(latRad) * Math.cos(lngRad),
+      Math.sin(latRad),
+      Math.cos(latRad) * Math.sin(lngRad)
+    ).normalize();
+
+    // Position surface point and object point
+    const surfacePoint = dirVector.clone().multiplyScalar(globeRadius);
+    const objectPosition = dirVector.clone().multiplyScalar(globeRadius + gap);
+
+    // Position the building directly at the object position
+    building.position.copy(objectPosition);
+
+    // Orient the building to face outward from the center of the globe
+    building.lookAt(new THREE.Vector3(0, 0, 0));
+    // Rotate 90 degrees so the building stands up properly
+    building.rotateX(Math.PI / 2);
+
+    // Create a visible connector line with improved visibility
+    const lineMaterial = new THREE.LineBasicMaterial({
+      color: building.material.color.getHex(),
+      opacity: 0.7,
+      transparent: true,
+    });
+    const lineGeometry = new THREE.BufferGeometry().setFromPoints([
+      surfacePoint,
+      objectPosition
+    ]);
+    const line = new THREE.Line(lineGeometry, lineMaterial);
+
+    // Create a more visible marker at the surface connection point
+    const markerGeometry = new THREE.SphereGeometry(0.1, 16, 16);
+    const markerMaterial = new THREE.MeshBasicMaterial({
+      color: building.material.color.getHex()
+    });
+    const marker = new THREE.Mesh(markerGeometry, markerMaterial);
+    marker.position.copy(surfacePoint);
+
+    // Add a glow effect sphere around the building for hover highlighting
+    const glowGeometry = new THREE.SphereGeometry(0.7, 16, 16);
+    const glowMaterial = new THREE.MeshBasicMaterial({
+      color: building.material.color.getHex(),
+      transparent: true,
+      opacity: 0,
+    });
+    const glow = new THREE.Mesh(glowGeometry, glowMaterial);
+    glow.position.copy(objectPosition);
+
+    // Create group and add all elements
+    const group = new THREE.Group();
+    group.add(line);
+    group.add(marker);
+    group.add(building);
+    group.add(glow);
+
+    // Apply scaling to the group
+    group.scale.set(15, 15, 15);
+
+    // Store place data and hover state in the group's userData
+    group.userData = {
+      placeId: place.id,
+      isHovered: false
+    };
+
+    return group;
+  }, []);
+
+  // Add update function to handle hover animations
+  useEffect(() => {
+    if (!globeRef.current) return;
+
+    // Animation loop to update object appearances
+    const animate = () => {
+      if (globeRef.current?.scene) {
+        // Find all group objects in the scene
+        globeRef.current.scene().traverse((object) => {
+          if (object instanceof THREE.Group && object.userData && object.userData.placeId !== undefined) {
+            const isSelected = selectedPlace && object.userData.placeId === selectedPlace.id;
+
+            // Find the building and glow objects within the group
+            const building = object.children.find(child =>
+              child instanceof THREE.Mesh && child.geometry instanceof THREE.BoxGeometry
+            );
+
+            const glow = object.children.find(child =>
+              child instanceof THREE.Mesh &&
+              child.geometry instanceof THREE.SphereGeometry &&
+              child.material.opacity !== undefined &&
+              (child.material as THREE.MeshBasicMaterial).transparent === true
+            );
+
+            if (building && glow) {
+              // Animate scale on hover
+              if (isSelected && !object.userData.isHovered) {
+                object.userData.isHovered = true;
+
+                // Scale up the building
+                gsap.to(building.scale, {
+                  x: 1.3, y: 1.3, z: 1.3,
+                  duration: 0.3
+                });
+
+                // Make glow visible
+                gsap.to(((glow as THREE.Mesh).material as THREE.MeshBasicMaterial), {
+                  opacity: 0.3,
+                  duration: 0.5
+                });
+              }
+              else if (!isSelected && object.userData.isHovered) {
+                object.userData.isHovered = false;
+
+                // Scale back to normal
+                gsap.to(building.scale, {
+                  x: 1, y: 1, z: 1,
+                  duration: 0.3
+                });
+
+                // Hide glow
+                gsap.to(((glow as THREE.Mesh).material as THREE.MeshBasicMaterial), {
+                  opacity: 0,
+                  duration: 0.5
+                });
+              }
+            }
+          }
+        });
+      }
+      requestAnimationFrame(animate);
+    };
+
+    animate();
+
+    return () => {
+      // No explicit cleanup needed for requestAnimationFrame as it will stop when component unmounts
+    };
+  }, [selectedPlace]);
 
   useEffect(() => {
     setIsClient(true);
@@ -67,13 +242,12 @@ export function GlobeShowcase() {
   const handlePlaceHover = (place: TouristPlace | null) => {
     setSelectedPlace(place);
     if (globeRef.current && place) {
-      globeRef.current.pointOfView(
-        {
-          lat: place.lat,
-          lng: place.lng,
-          altitude: 1.8,
-        },
-        1000
+      globeRef.current.pointOfView({
+        lat: place.lat,
+        lng: place.lng,
+        altitude: 1.8,
+      },
+      1000
       );
     }
   };
@@ -101,14 +275,12 @@ export function GlobeShowcase() {
                 globeImageUrl="//unpkg.com/three-globe/example/img/earth-night.jpg"
                 backgroundImageUrl=""
                 backgroundColor="rgba(0,0,0,0)"
-                pointsData={places}
-                pointLat="lat"
-                pointLng="lng"
-                pointColor="color"
-                pointAltitude={0.01}
-                pointRadius="size"
-                pointsMerge={true}
-                pointLabel={(d) => {
+                objectsData={buildingsData}
+                objectLat="lat"
+                objectLng="lng"
+                objectAltitude="altitude"
+                objectThreeObject={objectsThreeObject}
+                objectLabel={(d) => {
                   const place = d as TouristPlace;
                   return `
                 <div class="bg-background/90 backdrop-blur-md p-2 rounded-lg border shadow-lg text-sm">
@@ -117,8 +289,8 @@ export function GlobeShowcase() {
                 </div>
               `;
                 }}
-                onPointHover={(point) =>
-                  handlePlaceHover(point as TouristPlace | null)
+                onObjectHover={(object) =>
+                  handlePlaceHover(object as TouristPlace | null)
                 }
                 width={500}
                 height={500}
@@ -165,7 +337,7 @@ export function GlobeShowcase() {
               <div className="bg-background/80 backdrop-blur-md p-6 rounded-xl border h-full flex flex-col justify-center">
                 <h3 className="text-xl font-bold mb-4">Interactive Globe</h3>
                 <p className="text-muted-foreground">
-                  Hover over the markers to learn more about some of the
+                  Hover over the 3D buildings to learn more about some of the
                   world&apos;s most famous destinations. Click to explore
                   further details about each location.
                 </p>
