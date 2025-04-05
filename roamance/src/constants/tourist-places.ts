@@ -11,6 +11,7 @@ export const touristPlaces: TouristPlace[] = [
       'Iconic iron tower built in 1889, offering city views from observation decks',
     color: 'var(--ocean)',
     size: 1.2,
+    image: 'https://images.unsplash.com/photo-1543349689-9a4d426bee8e?q=80&w=400&auto=format',
   },
   {
     id: '2',
@@ -22,6 +23,7 @@ export const touristPlaces: TouristPlace[] = [
       'Ancient defensive wall spanning thousands of miles across northern China',
     color: 'var(--sunset)',
     size: 1.2,
+    image: 'https://images.unsplash.com/photo-1508804185872-d7badad00f7d?q=80&w=400&auto=format',
   },
   {
     id: '3',
@@ -33,6 +35,7 @@ export const touristPlaces: TouristPlace[] = [
       '15th-century Inca citadel nestled on a mountain ridge 2,430 meters above sea level',
     color: 'var(--forest)',
     size: 1.2,
+    image: 'https://images.unsplash.com/photo-1526392060635-9d6019884377?q=80&w=400&auto=format',
   },
   {
     id: '4',
@@ -44,6 +47,7 @@ export const touristPlaces: TouristPlace[] = [
       'Magnificent marble mausoleum built by Emperor Shah Jahan in memory of his wife',
     color: 'var(--ocean)',
     size: 1.2,
+    image: 'https://images.unsplash.com/photo-1564507592333-c60657eea523?q=80&w=400&auto=format',
   },
   {
     id: '5',
@@ -55,6 +59,7 @@ export const touristPlaces: TouristPlace[] = [
       'Vast natural wonder carved by the Colorado River with layered bands of red rock',
     color: 'var(--sunset)',
     size: 1.2,
+    image: 'https://images.unsplash.com/photo-1509316785289-025f5b846b35?q=80&w=400&auto=format',
   },
   {
     id: '6',
@@ -66,6 +71,7 @@ export const touristPlaces: TouristPlace[] = [
       'Stunning island known for whitewashed, cubiform houses overlooking the sea',
     color: 'var(--primary)',
     size: 1.2,
+    image: 'https://images.unsplash.com/photo-1570077188670-e3a8d945772b?q=80&w=400&auto=format',
   },
   {
     id: '7',
@@ -77,5 +83,6 @@ export const touristPlaces: TouristPlace[] = [
       'Ancient monuments built as tombs for pharaohs, including the Great Pyramid',
     color: 'var(--forest)',
     size: 1.2,
+    image: 'https://images.unsplash.com/photo-1503177119275-0aa32b3a9368?q=80&w=400&auto=format',
   },
 ];

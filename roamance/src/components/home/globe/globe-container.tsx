@@ -2,6 +2,7 @@ import { TouristPlace } from '@/types';
 import dynamic from 'next/dynamic';
 import { GlobeMethods } from 'react-globe.gl';
 import { useGlobeObject } from './globe-object';
+import { useTheme } from 'next-themes';
 
 interface GlobeContainerProps {
   isClient: boolean;
@@ -33,6 +34,12 @@ export const GlobeContainer = ({
   setIsMouseOverGlobe,
 }: GlobeContainerProps) => {
   const objectsThreeObject = useGlobeObject();
+  const { resolvedTheme } = useTheme();
+  const isDarkMode = resolvedTheme === 'dark';
+
+  const globeImageUrl = isDarkMode
+    ? '//unpkg.com/three-globe/example/img/earth-night.jpg'
+    : '//unpkg.com/three-globe/example/img/earth-blue-marble.jpg';
 
   return (
     <div className="w-full h-[600px] flex items-center justify-center relative">
@@ -44,7 +51,7 @@ export const GlobeContainer = ({
         >
           <Globe
             ref={globeRef}
-            globeImageUrl="//unpkg.com/three-globe/example/img/earth-night.jpg"
+            globeImageUrl={globeImageUrl}
             backgroundImageUrl=""
             backgroundColor="rgba(0,0,0,0)"
             objectsData={buildingsData}
@@ -55,9 +62,9 @@ export const GlobeContainer = ({
             objectLabel={(d) => {
               const place = d as TouristPlace;
               return `
-                <div class="bg-background/90 backdrop-blur-md p-2 rounded-lg border shadow-lg text-sm">
-                  <b>${place.name}</b><br/>
-                  ${place.country}
+                <div class="bg-transparent backdrop-blur-sm p-3 rounded-xl shadow-lg text-sm" style="min-width: 150px; text-shadow: 0 1px 2px rgba(0,0,0,0.1);">
+                  <div style="font-weight: 600; margin-bottom: 4px; font-size: 14px; color: white;">${place.name}</div>
+                  <div style="color: rgba(255,255,255,0.9);">${place.country}</div>
                 </div>
               `;
             }}

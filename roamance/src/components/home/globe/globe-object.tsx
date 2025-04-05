@@ -20,13 +20,10 @@ export const useGlobeObject = () => {
 
     const globeRadius = 1;
 
-    // Calculate the point on the globe's surface
     const surfacePoint = dirVector.clone().multiplyScalar(globeRadius);
 
-    // Create a container group for all pin elements
     const group = new THREE.Group();
 
-    // Extract pin color from CSS variables if needed
     const cssVarRegex = /var\(\s*(--[a-zA-Z0-9-_]+)\s*\)/;
     const cssVarMatch = cssVarRegex.exec(place.color);
     const pinColor =
@@ -36,7 +33,6 @@ export const useGlobeObject = () => {
             .trim()
         : place.color;
 
-    // Create the pin head (sphere) - making it slightly larger since we're removing the stem
     const sphereGeometry = new THREE.SphereGeometry(
       0.15 * scaleFactor * markerScale,
       16,
@@ -55,23 +51,18 @@ export const useGlobeObject = () => {
     sphereMaterial.depthWrite = true;
     const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
 
-    // Group just contains the sphere now (no stem)
     const pin = new THREE.Group();
     pin.add(sphere);
 
-    // Position the pin at the surface point
     pin.position.copy(surfacePoint);
 
-    // Calculate the orientation to make the pin perpendicular to the globe surface
     const radial = surfacePoint.clone().normalize();
     const upVector = new THREE.Vector3(0, 1, 0);
 
-    // Use quaternion to orient the pin perpendicular to the globe surface
     pin.quaternion.setFromUnitVectors(upVector, radial);
 
     group.add(pin);
 
-    // Create inner ring
     const ringGeometry = new THREE.RingGeometry(
       0.15 * scaleFactor * markerScale,
       0.18 * scaleFactor * markerScale,
@@ -87,17 +78,14 @@ export const useGlobeObject = () => {
     ringMaterial.depthWrite = true;
     const ring = new THREE.Mesh(ringGeometry, ringMaterial);
 
-    // Position the ring slightly above the surface
     const ringOffset = 0.01;
     ring.position.copy(
       surfacePoint.clone().add(dirVector.clone().multiplyScalar(ringOffset))
     );
 
-    // Orient the ring to face outward
     ring.lookAt(0, 0, 0);
     ring.rotateX(Math.PI / 2);
 
-    // Create outer ring
     const outerRingGeometry = new THREE.RingGeometry(
       0.22 * scaleFactor * markerScale,
       0.24 * scaleFactor * markerScale,
@@ -113,19 +101,16 @@ export const useGlobeObject = () => {
     outerRingMaterial.depthWrite = true;
     const outerRing = new THREE.Mesh(outerRingGeometry, outerRingMaterial);
 
-    // Position the outer ring slightly above the surface
     outerRing.position.copy(
       surfacePoint.clone().add(dirVector.clone().multiplyScalar(ringOffset))
     );
 
-    // Orient the outer ring to face outward
     outerRing.lookAt(0, 0, 0);
     outerRing.rotateX(Math.PI / 2);
 
     group.add(ring);
     group.add(outerRing);
 
-    // Create glow effect
     const glowGeometry = new THREE.SphereGeometry(
       0.3 * scaleFactor * markerScale,
       16,
@@ -144,7 +129,6 @@ export const useGlobeObject = () => {
 
     group.add(glow);
 
-    // Store metadata in userData for later use
     group.userData = {
       placeId: place.id,
       isHovered: false,

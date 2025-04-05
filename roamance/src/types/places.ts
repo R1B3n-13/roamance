@@ -7,4 +7,5 @@ export interface TouristPlace {
   description: string;
   color: string;
   size: number;
+  image?: string;
 }
