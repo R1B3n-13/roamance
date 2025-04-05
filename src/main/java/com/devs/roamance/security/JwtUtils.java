@@ -5,12 +5,10 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import java.security.Key;
-import java.security.Principal;
 import java.util.Date;
 import java.util.List;
 import javax.crypto.SecretKey;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
@@ -95,9 +93,5 @@ public class JwtUtils {
         .build()
         .parseSignedClaims(token)
         .getPayload();
-  }
-
-  public String getAuthenticatedUserEmail(Principal connectedUser) {
-    return ((UsernamePasswordAuthenticationToken) connectedUser).getName();
   }
 }

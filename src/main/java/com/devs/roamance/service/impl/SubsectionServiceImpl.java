@@ -1,7 +1,6 @@
 package com.devs.roamance.service.impl;
 
 import com.devs.roamance.constant.ResponseMessage;
-import com.devs.roamance.dto.SubsectionDto;
 import com.devs.roamance.dto.request.travel.journal.ActivitySubsectionCreateRequestDto;
 import com.devs.roamance.dto.request.travel.journal.ActivitySubsectionUpdateRequestDto;
 import com.devs.roamance.dto.request.travel.journal.RouteSubsectionCreateRequestDto;
@@ -11,8 +10,9 @@ import com.devs.roamance.dto.request.travel.journal.SightseeingSubsectionUpdateR
 import com.devs.roamance.dto.request.travel.journal.SubsectionCreateRequestDto;
 import com.devs.roamance.dto.request.travel.journal.SubsectionUpdateRequestDto;
 import com.devs.roamance.dto.response.BaseResponseDto;
+import com.devs.roamance.dto.response.travel.journal.SubsectionDetailDto;
+import com.devs.roamance.dto.response.travel.journal.SubsectionDto;
 import com.devs.roamance.dto.response.travel.journal.SubsectionListResponseDto;
-import com.devs.roamance.dto.response.travel.journal.SubsectionResponseDetailDto;
 import com.devs.roamance.dto.response.travel.journal.SubsectionResponseDto;
 import com.devs.roamance.exception.JournalNotFoundException;
 import com.devs.roamance.exception.SubsectionNotFoundException;
@@ -29,7 +29,7 @@ import com.devs.roamance.repository.JournalRepository;
 import com.devs.roamance.repository.SubsectionRepository;
 import com.devs.roamance.service.SubsectionService;
 import com.devs.roamance.util.PaginationSortingUtil;
-import com.devs.roamance.util.UserUtils;
+import com.devs.roamance.util.UserUtil;
 import java.util.List;
 import java.util.UUID;
 import org.modelmapper.ModelMapper;
@@ -48,17 +48,17 @@ public class SubsectionServiceImpl implements SubsectionService {
   private final SubsectionRepository subsectionRepository;
   private final JournalRepository journalRepository;
   private final ModelMapper modelMapper;
-  private final UserUtils userUtils;
+  private final UserUtil userUtil;
 
   public SubsectionServiceImpl(
       SubsectionRepository subsectionRepository,
       JournalRepository journalRepository,
       ModelMapper modelMapper,
-      UserUtils userUtils) {
+      UserUtil userUtil) {
     this.subsectionRepository = subsectionRepository;
     this.journalRepository = journalRepository;
     this.modelMapper = modelMapper;
-    this.userUtils = userUtils;
+    this.userUtil = userUtil;
   }
 
   @Override
@@ -89,7 +89,7 @@ public class SubsectionServiceImpl implements SubsectionService {
         savedSubsection.getId(),
         journal.getTitle());
 
-    SubsectionResponseDetailDto detailDto = mapToSubsectionResponseDetailDto(savedSubsection);
+    SubsectionDetailDto detailDto = mapToSubsectionDetailDto(savedSubsection);
 
     return new SubsectionResponseDto(
         201, true, ResponseMessage.SUBSECTION_CREATE_SUCCESS, detailDto);
@@ -105,7 +105,7 @@ public class SubsectionServiceImpl implements SubsectionService {
         sortBy,
         sortDir);
 
-    User authenticatedUser = userUtils.getAuthenticatedUser();
+    User authenticatedUser = userUtil.getAuthenticatedUser();
 
     Pageable pageable =
         PageRequest.of(
@@ -148,7 +148,7 @@ public class SubsectionServiceImpl implements SubsectionService {
 
     logger.info("Successfully fetched subsection with title: '{}'", subsection.getTitle());
 
-    SubsectionResponseDetailDto detailDto = mapToSubsectionResponseDetailDto(subsection);
+    SubsectionDetailDto detailDto = mapToSubsectionDetailDto(subsection);
 
     return new SubsectionResponseDto(
         200, true, ResponseMessage.SUBSECTION_FETCH_SUCCESS, detailDto);
@@ -176,7 +176,7 @@ public class SubsectionServiceImpl implements SubsectionService {
     Subsection savedSubsection = subsectionRepository.save(subsection);
     logger.info("Successfully updated subsection with id: {}", id);
 
-    SubsectionResponseDetailDto detailDto = mapToSubsectionResponseDetailDto(savedSubsection);
+    SubsectionDetailDto detailDto = mapToSubsectionDetailDto(savedSubsection);
 
     return new SubsectionResponseDto(
         200, true, ResponseMessage.SUBSECTION_UPDATE_SUCCESS, detailDto);
@@ -209,7 +209,7 @@ public class SubsectionServiceImpl implements SubsectionService {
   }
 
   private void validateUserAccess(Journal journal, String operation, UUID resourceId) {
-    User authenticatedUser = userUtils.getAuthenticatedUser();
+    User authenticatedUser = userUtil.getAuthenticatedUser();
     if (!journal.getCreatedBy().equals(authenticatedUser.getId())) {
       logger.error(
           "User {} not authorized to {} resource {}",
@@ -273,8 +273,8 @@ public class SubsectionServiceImpl implements SubsectionService {
     }
   }
 
-  private SubsectionResponseDetailDto mapToSubsectionResponseDetailDto(Subsection subsection) {
-    SubsectionResponseDetailDto detailDto = new SubsectionResponseDetailDto();
+  private SubsectionDetailDto mapToSubsectionDetailDto(Subsection subsection) {
+    SubsectionDetailDto detailDto = new SubsectionDetailDto();
     detailDto.setId(subsection.getId());
     detailDto.setTitle(subsection.getTitle());
     detailDto.setNotes(subsection.getNotes());

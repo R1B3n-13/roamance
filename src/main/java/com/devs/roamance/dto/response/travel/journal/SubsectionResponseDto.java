@@ -11,10 +11,10 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SubsectionResponseDto extends BaseResponseDto {
-  private SubsectionResponseDetailDto data;
+  private SubsectionDetailDto data;
 
   public SubsectionResponseDto(
-      Integer status, Boolean success, String message, SubsectionResponseDetailDto data) {
+      Integer status, Boolean success, String message, SubsectionDetailDto data) {
     super(status, success, message);
     this.data = data;
   }

@@ -1,8 +1,8 @@
 package com.devs.roamance.exception.handler;
 
 import com.devs.roamance.constant.ResponseMessage;
-import com.devs.roamance.dto.ValidationErrorDto;
 import com.devs.roamance.dto.response.BaseResponseDto;
+import com.devs.roamance.dto.response.ValidationErrorDto;
 import com.devs.roamance.dto.response.ValidationErrorResponseDto;
 import com.devs.roamance.exception.*;
 import jakarta.validation.ConstraintViolationException;
@@ -63,6 +63,16 @@ public class GlobalExceptionHandler {
 
     return new ResponseEntity<>(
         new BaseResponseDto(401, false, ex.getMessage()), HttpStatus.UNAUTHORIZED);
+  }
+
+  @ExceptionHandler(AuthenticatedUserNotFoundException.class)
+  public ResponseEntity<BaseResponseDto> handleAuthenticatedUserNotFoundException(
+      AuthenticatedUserNotFoundException ex) {
+
+    log.error("AuthenticatedUserNotFoundException: {}", ex.getMessage(), ex);
+
+    return new ResponseEntity<>(
+        new BaseResponseDto(404, false, ex.getMessage()), HttpStatus.NOT_FOUND);
   }
 
   @ExceptionHandler(WrongCredentialsException.class)

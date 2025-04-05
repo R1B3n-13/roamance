@@ -15,7 +15,5 @@ public interface UserService
 
   UserResponseDto getByEmail(String email);
 
-  UserResponseDto getFromAuthHeader(String header);
-
   UserListResponseDto search(String query, int page, int size);
 }

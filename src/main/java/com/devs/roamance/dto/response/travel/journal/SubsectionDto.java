@@ -1,4 +1,4 @@
-package com.devs.roamance.dto;
+package com.devs.roamance.dto.response.travel.journal;
 
 import com.devs.roamance.model.travel.journal.SubsectionType;
 import com.fasterxml.jackson.annotation.JsonInclude;
