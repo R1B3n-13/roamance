@@ -42,18 +42,21 @@ export const useGlobeAnimation = (
           object.userData.placeId === undefined
         )
           return;
+
         if (object.userData.dirVector) {
+          const dotProduct = cameraVector.dot(object.userData.dirVector);
+          const isVisible = dotProduct > 0.25;
+
           if (selectedPlace && object.userData.placeId === selectedPlace.id) {
             object.visible = true;
             object.userData.hideLabel = false;
           } else {
-            const dotProduct = cameraVector.dot(object.userData.dirVector);
-            const isVisible = dotProduct > 0.9;
             object.visible = isVisible;
             object.userData.hideLabel = !isVisible;
             if (!isVisible) return;
           }
         }
+
         const isSelected =
           selectedPlace && object.userData.placeId === selectedPlace.id;
         const pinGroup = object.children.find(

@@ -47,8 +47,8 @@ export const useGlobeObject = () => {
       transparent: true,
       opacity: 0.95,
     });
-    sphereMaterial.depthTest = false;
-    sphereMaterial.depthWrite = false;
+    sphereMaterial.depthTest = true;
+    sphereMaterial.depthWrite = true;
     const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
 
     const stemGeometry = new THREE.CylinderGeometry(
@@ -67,8 +67,8 @@ export const useGlobeObject = () => {
       transparent: true,
       opacity: 0.97,
     });
-    stemMaterial.depthTest = false;
-    stemMaterial.depthWrite = false;
+    stemMaterial.depthTest = true;
+    stemMaterial.depthWrite = true;
     const stem = new THREE.Mesh(stemGeometry, stemMaterial);
 
     const pin = new THREE.Group();
@@ -95,8 +95,8 @@ export const useGlobeObject = () => {
       opacity: 0.3,
       side: THREE.DoubleSide,
     });
-    ringMaterial.depthTest = false;
-    ringMaterial.depthWrite = false;
+    ringMaterial.depthTest = true;
+    ringMaterial.depthWrite = true;
     const ring = new THREE.Mesh(ringGeometry, ringMaterial);
 
     ring.position.copy(
@@ -116,8 +116,8 @@ export const useGlobeObject = () => {
       opacity: 0.2,
       side: THREE.DoubleSide,
     });
-    outerRingMaterial.depthTest = false;
-    outerRingMaterial.depthWrite = false;
+    outerRingMaterial.depthTest = true;
+    outerRingMaterial.depthWrite = true;
     const outerRing = new THREE.Mesh(outerRingGeometry, outerRingMaterial);
 
     outerRing.position.copy(
@@ -139,8 +139,8 @@ export const useGlobeObject = () => {
       opacity: 0.2,
       blending: THREE.AdditiveBlending,
     });
-    glowMaterial.depthTest = false;
-    glowMaterial.depthWrite = false;
+    glowMaterial.depthTest = true;
+    glowMaterial.depthWrite = true;
     const glow = new THREE.Mesh(glowGeometry, glowMaterial);
     glow.position.copy(surfacePoint);
 
