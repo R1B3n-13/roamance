@@ -1,3 +1,3 @@
 export * from './routes';
 export * from './api';
-export * from './tourist-places';
+export * from '../data/tourist-places';

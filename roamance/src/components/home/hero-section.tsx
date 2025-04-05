@@ -14,11 +14,9 @@ import { cn } from '@/lib/utils';
 import { useTheme } from 'next-themes';
 
 export function HeroSection() {
-  // Theme
   const { resolvedTheme } = useTheme();
   const isDarkMode = resolvedTheme === 'dark';
 
-  // Globe related state and refs
   const globeRef = useRef<GlobeMethods | undefined>(undefined);
   const [places, setPlaces] = useState<TouristPlace[]>([]);
   const [selectedPlace, setSelectedPlace] = useState<TouristPlace | null>(null);
@@ -79,9 +77,7 @@ export function HeroSection() {
       "relative min-h-screen overflow-hidden",
       isDarkMode ? "bg-[#010617]" : "bg-gradient-to-b from-sky-50 via-blue-50 to-white"
     )}>
-      {/* Background elements */}
       <div className="absolute inset-0 -z-10">
-        {/* Star-like particles - only visible in dark mode */}
         {isDarkMode && (
           <div className="absolute inset-0">
             {Array.from({ length: 150 }).map((_, i) => (
@@ -100,7 +96,6 @@ export function HeroSection() {
           </div>
         )}
 
-        {/* Light mode cloud elements */}
         {!isDarkMode && (
           <div className="absolute inset-0 overflow-hidden">
             <div className="absolute top-[10%] left-[5%] w-[15%] h-[15%] rounded-full bg-white blur-3xl opacity-70"></div>
@@ -109,7 +104,6 @@ export function HeroSection() {
           </div>
         )}
 
-        {/* Gradient overlays - different for light/dark modes */}
         <div className={cn(
           "absolute bottom-0 left-0 right-0 h-1/4",
           isDarkMode
@@ -117,7 +111,6 @@ export function HeroSection() {
             : "bg-gradient-to-t from-white to-transparent"
         )} />
 
-        {/* Accent color gradients */}
         <div className={cn(
           "absolute top-0 left-0 w-full h-full bg-gradient-radial",
           isDarkMode
@@ -133,10 +126,8 @@ export function HeroSection() {
         )} />
       </div>
 
-      {/* Hero content with integrated globe */}
       <div className="container relative mx-auto px-4">
         <div className="grid grid-cols-1 lg:grid-cols-5 min-h-screen items-center gap-8">
-          {/* Left side - Text content (2 columns) */}
           <div className="lg:col-span-2 pt-28 pb-12 lg:pt-32 lg:pb-20 flex flex-col justify-center gap-8 z-10">
             <motion.h1
               className={cn(
@@ -163,7 +154,6 @@ export function HeroSection() {
               Explore breathtaking destinations across the globe with Roamance, where every journey transforms into an unforgettable story.
             </motion.p>
 
-            {/* Simplified search box - styled for both modes */}
             <motion.div
               className={cn(
                 "w-full max-w-md rounded-xl p-3 shadow-lg border",
@@ -201,7 +191,6 @@ export function HeroSection() {
               </div>
             </motion.div>
 
-            {/* Call to action to interact with globe */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -219,7 +208,6 @@ export function HeroSection() {
             </motion.div>
           </div>
 
-          {/* Right side - Globe showcase (3 columns) */}
           <motion.div
             className="lg:col-span-3 relative h-[600px]"
             initial={{ opacity: 0 }}
