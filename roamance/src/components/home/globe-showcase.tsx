@@ -2,27 +2,13 @@
 
 import { SectionHeading } from '@/components/common/section-heading';
 import { touristPlaces } from '@/constants';
-import { cn } from '@/lib/utils';
 import { TouristPlace } from '@/types';
-import { motion } from 'framer-motion';
-import gsap from 'gsap';
-import { MapPin } from 'lucide-react';
-import dynamic from 'next/dynamic';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { GlobeMethods } from 'react-globe.gl';
-import * as THREE from 'three';
 
-const Globe = dynamic(
-  () => import('react-globe.gl').then((mod) => mod.default),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="flex items-center justify-center h-[500px] w-full">
-        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-primary"></div>
-      </div>
-    ),
-  }
-);
+import { GlobeContainer } from './globe/globe-container';
+import { PlaceDetailsCard } from './globe/place-details-card';
+import { useGlobeAnimation } from './globe/use-globe-animation';
 
 export function GlobeShowcase() {
   const globeRef = useRef<GlobeMethods | undefined>(undefined);
@@ -48,262 +34,7 @@ export function GlobeShowcase() {
     [places]
   );
 
-  const objectsThreeObject = useCallback((d: object) => {
-    const place = d as TouristPlace;
-
-    const latRad = THREE.MathUtils.degToRad(place.lat);
-    const lngRad = THREE.MathUtils.degToRad(place.lng);
-
-    const dirVector = new THREE.Vector3(
-      Math.cos(latRad) * Math.cos(lngRad),
-      Math.sin(latRad),
-      Math.cos(latRad) * Math.sin(lngRad)
-    ).normalize();
-
-    const scaleFactor = 100 / 3;
-    const markerScale = 0.75;
-
-    const globeRadius = 1;
-
-    const surfacePoint = dirVector.clone().multiplyScalar(globeRadius);
-
-    const group = new THREE.Group();
-
-    const cssVarMatch = place.color.match(/var\(\s*(--[a-zA-Z0-9-_]+)\s*\)/);
-    const pinColor =
-      cssVarMatch && typeof window !== 'undefined'
-        ? getComputedStyle(document.documentElement)
-            .getPropertyValue(cssVarMatch[1])
-            .trim()
-        : place.color;
-
-    const sphereGeometry = new THREE.SphereGeometry(
-      0.12 * scaleFactor * markerScale,
-      16,
-      16
-    );
-    const sphereMaterial = new THREE.MeshStandardMaterial({
-      color: pinColor,
-      metalness: 0.5,
-      roughness: 0.2,
-      emissive: new THREE.Color(pinColor),
-      emissiveIntensity: 0.5,
-      transparent: true,
-      opacity: 0.95,
-    });
-    sphereMaterial.depthTest = false;
-    sphereMaterial.depthWrite = false;
-    const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
-
-    const stemGeometry = new THREE.CylinderGeometry(
-      0.03 * scaleFactor * markerScale,
-      0.08 * scaleFactor * markerScale,
-      0.25 * scaleFactor * markerScale,
-      12
-    );
-
-    const stemMaterial = new THREE.MeshStandardMaterial({
-      color: pinColor,
-      metalness: 0.3,
-      roughness: 0.4,
-      emissive: new THREE.Color(pinColor),
-      emissiveIntensity: 0.3,
-      transparent: true,
-      opacity: 0.97,
-    });
-    stemMaterial.depthTest = false;
-    stemMaterial.depthWrite = false;
-    const stem = new THREE.Mesh(stemGeometry, stemMaterial);
-
-    const pin = new THREE.Group();
-    pin.add(sphere);
-    pin.add(stem);
-
-    stem.position.set(0, -0.15 * scaleFactor * markerScale, 0);
-
-    pin.position.copy(surfacePoint);
-    const radial = surfacePoint.clone().normalize();
-    pin.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), radial);
-    pin.rotateX(Math.PI);
-
-    group.add(pin);
-
-    const ringGeometry = new THREE.RingGeometry(
-      0.15 * scaleFactor * markerScale,
-      0.18 * scaleFactor * markerScale,
-      32
-    );
-    const ringMaterial = new THREE.MeshBasicMaterial({
-      color: pinColor,
-      transparent: true,
-      opacity: 0.3,
-      side: THREE.DoubleSide,
-    });
-    ringMaterial.depthTest = false;
-    ringMaterial.depthWrite = false;
-    const ring = new THREE.Mesh(ringGeometry, ringMaterial);
-
-    ring.position.copy(
-      surfacePoint.clone().add(dirVector.clone().multiplyScalar(0.01))
-    );
-    ring.lookAt(0, 0, 0);
-    ring.rotateX(Math.PI / 2);
-
-    const outerRingGeometry = new THREE.RingGeometry(
-      0.22 * scaleFactor * markerScale,
-      0.24 * scaleFactor * markerScale,
-      32
-    );
-    const outerRingMaterial = new THREE.MeshBasicMaterial({
-      color: pinColor,
-      transparent: true,
-      opacity: 0.2,
-      side: THREE.DoubleSide,
-    });
-    outerRingMaterial.depthTest = false;
-    outerRingMaterial.depthWrite = false;
-    const outerRing = new THREE.Mesh(outerRingGeometry, outerRingMaterial);
-
-    outerRing.position.copy(
-      surfacePoint.clone().add(dirVector.clone().multiplyScalar(0.01))
-    );
-    outerRing.lookAt(new THREE.Vector3(0, 0, 0));
-
-    group.add(ring);
-    group.add(outerRing);
-
-    const glowGeometry = new THREE.SphereGeometry(
-      0.3 * scaleFactor * markerScale,
-      16,
-      16
-    );
-    const glowMaterial = new THREE.MeshBasicMaterial({
-      color: pinColor,
-      transparent: true,
-      opacity: 0.2,
-      blending: THREE.AdditiveBlending,
-    });
-    glowMaterial.depthTest = false;
-    glowMaterial.depthWrite = false;
-    const glow = new THREE.Mesh(glowGeometry, glowMaterial);
-    glow.position.copy(surfacePoint);
-
-    group.add(glow);
-
-    group.userData = {
-      placeId: place.id,
-      isHovered: false,
-      dirVector: dirVector.clone(),
-      ring: ring,
-      outerRing: outerRing,
-      pulsePhase: Math.random() * Math.PI * 2,
-    };
-
-    return group;
-  }, []);
-
-  useEffect(() => {
-    if (!globeRef.current) return;
-    let lastTime = performance.now();
-    const animate = () => {
-      if (!globeRef.current?.scene) {
-        requestAnimationFrame(animate);
-        return;
-      }
-      const currentTime = performance.now();
-      const delta = (currentTime - lastTime) / 1000;
-      lastTime = currentTime;
-      const time = currentTime * 0.001;
-      const pov = globeRef.current.pointOfView();
-      if (!pov) {
-        requestAnimationFrame(animate);
-        return;
-      }
-      const cameraLat = THREE.MathUtils.degToRad(pov.lat);
-      const cameraLng = THREE.MathUtils.degToRad(pov.lng);
-      const cameraVector = new THREE.Vector3(
-        Math.cos(cameraLat) * Math.cos(cameraLng),
-        Math.sin(cameraLat),
-        Math.cos(cameraLat) * Math.sin(cameraLng)
-      ).normalize();
-
-      globeRef.current.scene().traverse((object) => {
-        if (
-          !(object instanceof THREE.Group) ||
-          !object.userData ||
-          object.userData.placeId === undefined
-        )
-          return;
-        if (object.userData.dirVector) {
-          if (selectedPlace && object.userData.placeId === selectedPlace.id) {
-            object.visible = true;
-            object.userData.hideLabel = false;
-          } else {
-            const dotProduct = cameraVector.dot(object.userData.dirVector);
-            const isVisible = dotProduct > 0.9;
-            object.visible = isVisible;
-            object.userData.hideLabel = !isVisible;
-            if (!isVisible) return;
-          }
-        }
-        const isSelected =
-          selectedPlace && object.userData.placeId === selectedPlace.id;
-        const pinGroup = object.children.find(
-          (child) => child instanceof THREE.Group
-        );
-        const ring = object.userData.ring;
-        const outerRing = object.userData.outerRing;
-        if (ring && outerRing) {
-          const phase = object.userData.pulsePhase || 0;
-          const pulse = 0.3 + 0.2 * Math.sin(time * 1.5 + phase);
-          const outerPulse =
-            0.2 + 0.15 * Math.sin(time * 1.2 + phase + Math.PI);
-          (ring.material as THREE.MeshBasicMaterial).opacity = pulse;
-          (outerRing.material as THREE.MeshBasicMaterial).opacity = outerPulse;
-          ring.rotation.z += delta * 0.2;
-          outerRing.rotation.z -= delta * 0.15;
-        }
-        const glow = object.children.find(
-          (child) =>
-            child instanceof THREE.Mesh &&
-            child.geometry instanceof THREE.SphereGeometry
-        );
-        if (pinGroup && glow) {
-          if (isSelected && !object.userData.isHovered) {
-            object.userData.isHovered = true;
-            if (pinGroup.scale.x !== 1.3) {
-              gsap.to(pinGroup.scale, {
-                x: 1.3,
-                y: 1.3,
-                z: 1.3,
-                duration: 0.3,
-              });
-            }
-            gsap.to((glow as THREE.Mesh).material as THREE.MeshBasicMaterial, {
-              opacity: 0.3,
-              duration: 0.5,
-            });
-          } else if (!isSelected && object.userData.isHovered) {
-            object.userData.isHovered = false;
-            if (pinGroup.scale.x !== 1) {
-              gsap.to(pinGroup.scale, {
-                x: 1,
-                y: 1,
-                z: 1,
-                duration: 0.3,
-              });
-            }
-            gsap.to((glow as THREE.Mesh).material as THREE.MeshBasicMaterial, {
-              opacity: 0,
-              duration: 0.5,
-            });
-          }
-        }
-      });
-      requestAnimationFrame(animate);
-    };
-    animate();
-  }, [selectedPlace]);
+  useGlobeAnimation(globeRef, selectedPlace, isClient, isMouseOverGlobe);
 
   useEffect(() => {
     setIsClient(true);
@@ -312,27 +43,10 @@ export function GlobeShowcase() {
       setPlaces(touristPlaces);
     }, 1000);
 
-    let rotationFrame: number;
-    const rotate = () => {
-      if (globeRef.current && !selectedPlace && !isMouseOverGlobe) {
-        const pov = globeRef.current.pointOfView();
-        const currentLng = pov ? pov.lng : 0;
-        globeRef.current.pointOfView({
-          lat: 25,
-          lng: currentLng + 0.5,
-          altitude: 2.5,
-        });
-      }
-      rotationFrame = requestAnimationFrame(rotate);
-    };
-    if (isClient) {
-      rotationFrame = requestAnimationFrame(rotate);
-    }
     return () => {
       clearTimeout(timer);
-      cancelAnimationFrame(rotationFrame);
     };
-  }, [isClient, selectedPlace, isMouseOverGlobe]);
+  }, []);
 
   const handlePlaceHover = (place: TouristPlace | null) => {
     if (selectedPlace?.id === place?.id) return;
@@ -370,87 +84,19 @@ export function GlobeShowcase() {
         />
 
         <div className="relative mt-12">
-          <div className="w-full h-[600px] flex items-center justify-center relative">
-            {isClient && (
-              <div
-                onPointerEnter={() => setIsMouseOverGlobe(true)}
-                onPointerLeave={() => setIsMouseOverGlobe(false)}
-                className="inline-block"
-              >
-                <Globe
-                  ref={globeRef}
-                  globeImageUrl="//unpkg.com/three-globe/example/img/earth-night.jpg"
-                  backgroundImageUrl=""
-                  backgroundColor="rgba(0,0,0,0)"
-                  // globeMaterial={new THREE.MeshPhongMaterial({
-                  //   map: new THREE.TextureLoader().load("//unpkg.com/three-globe/example/img/earth-night.jpg"),
-                  //   transparent: false,
-                  //   opacity: 1,
-                  // })}
-                  objectsData={buildingsData}
-                  objectLat="lat"
-                  objectLng="lng"
-                  objectAltitude="altitude"
-                  objectThreeObject={objectsThreeObject}
-                  objectLabel={(d) => {
-                    const place = d as TouristPlace;
-                    return `
-                <div class="bg-background/90 backdrop-blur-md p-2 rounded-lg border shadow-lg text-sm">
-                  <b>${place.name}</b><br/>
-                  ${place.country}
-                </div>
-              `;
-                  }}
-                  onObjectHover={(object) =>
-                    handlePlaceHover(object as TouristPlace | null)
-                  }
-                  width={800}
-                  height={600}
-                />
-              </div>
-            )}
-          </div>
+          <GlobeContainer
+            isClient={isClient}
+            buildingsData={buildingsData}
+            globeRef={globeRef}
+            onObjectHover={handlePlaceHover}
+            setIsMouseOverGlobe={setIsMouseOverGlobe}
+          />
 
           {selectedPlace && (
-            <motion.div
-              className={cn(
-                'absolute top-1/2 transform -translate-y-1/2 w-[300px] z-20',
-                detailsPosition === 'left' ? 'left-8' : 'right-8'
-              )}
-              initial={{ opacity: 0, x: detailsPosition === 'left' ? -50 : 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: detailsPosition === 'left' ? -50 : 50 }}
-              transition={{ duration: 0.3 }}
-              key={`${selectedPlace.id}-${detailsPosition}`}
-            >
-              <div className="bg-background/80 backdrop-blur-md p-6 rounded-xl border shadow-lg">
-                <div className="flex items-start gap-3 mb-4">
-                  <div
-                    className={cn(
-                      'p-2 rounded-lg',
-                      `bg-${selectedPlace.color.split('--')[1]}/20`
-                    )}
-                  >
-                    <MapPin
-                      className={cn(
-                        'h-5 w-5',
-                        `text-${selectedPlace.color.split('--')[1]}`
-                      )}
-                    />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold">{selectedPlace.name}</h3>
-                    <p className="text-sm text-muted-foreground">
-                      {selectedPlace.country}
-                    </p>
-                  </div>
-                </div>
-                <p className="mb-4">{selectedPlace.description}</p>
-                <button className="text-primary hover:text-primary/80 text-sm font-medium flex items-center gap-1 transition-colors">
-                  Explore more about {selectedPlace.name}
-                </button>
-              </div>
-            </motion.div>
+            <PlaceDetailsCard
+              selectedPlace={selectedPlace}
+              detailsPosition={detailsPosition}
+            />
           )}
         </div>
       </div>
