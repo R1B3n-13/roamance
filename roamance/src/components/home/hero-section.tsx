@@ -1,17 +1,17 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { touristPlaces } from '@/constants';
+import { cn } from '@/lib/utils';
+import { TouristPlace } from '@/types';
 import { motion } from 'framer-motion';
-import { Search } from 'lucide-react';
-import { useEffect, useRef, useState, useMemo } from 'react';
+import { useTheme } from 'next-themes';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { GlobeMethods } from 'react-globe.gl';
 import { GlobeContainer } from './globe/globe-container';
 import { PlaceDetailsCard } from './globe/place-details-card';
 import { useGlobeAnimation } from './globe/use-globe-animation';
-import { touristPlaces } from '@/constants';
-import { TouristPlace } from '@/types';
-import { cn } from '@/lib/utils';
-import { useTheme } from 'next-themes';
+import { PlaceSearchCommand } from './place-search-command';
 
 export function HeroSection() {
   const { resolvedTheme } = useTheme();
@@ -69,6 +69,15 @@ export function HeroSection() {
         },
         1000
       );
+    }
+  };
+
+  const handlePlaceSelect = (place: TouristPlace) => {
+    handlePlaceHover(place);
+
+    // If the place doesn't exist in current places, add it
+    if (!places.some(p => p.id === place.id)) {
+      setPlaces(prevPlaces => [...prevPlaces, place]);
     }
   };
 
@@ -167,20 +176,7 @@ export function HeroSection() {
             >
               <div className="flex gap-2">
                 <div className="flex-1 relative">
-                  <Search className={cn(
-                    "absolute left-3 top-3.5 h-5 w-5",
-                    isDarkMode ? "text-white/60" : "text-gray-400"
-                  )} />
-                  <input
-                    type="text"
-                    placeholder="Where would you like to go?"
-                    className={cn(
-                      "w-full h-12 pl-10 pr-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50",
-                      isDarkMode
-                        ? "bg-white/10 text-white border-0 placeholder:text-white/50"
-                        : "bg-white/50 text-gray-900 border border-gray-200 placeholder:text-gray-500"
-                    )}
-                  />
+                  <PlaceSearchCommand onPlaceSelect={handlePlaceSelect} />
                 </div>
                 <Button
                   variant="default"
@@ -204,7 +200,7 @@ export function HeroSection() {
                 "w-8 h-[1px]",
                 isDarkMode ? "bg-white/40" : "bg-gray-300"
               )}></div>
-              <p className="text-sm font-light">Hover over the globe to discover destinations</p>
+              <p className="text-sm font-light">Search for a destination or hover over the globe</p>
             </motion.div>
           </div>
 

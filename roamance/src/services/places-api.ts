@@ -1,0 +1,75 @@
+import axios from 'axios';
+import { touristPlaces } from '@/data/tourist-places';
+import { TouristPlace } from '@/types';
+
+// This uses the free GeoNames API for tourist attractions
+const GEONAMES_USERNAME = 'demo'; // You should register for free at geonames.org for production use
+
+interface GeoNamesResult {
+  geonames: Array<{
+    name: string;
+    countryName: string;
+    lat: string;
+    lng: string;
+    fcl: string;
+    fcode: string;
+    population?: number;
+    wikipedia?: string;
+  }>;
+}
+
+export async function searchPlaces(query: string): Promise<TouristPlace[]> {
+  if (!query || query.length < 2) return [];
+
+  // First check local data
+  const localResults = touristPlaces.filter(place =>
+    place.name.toLowerCase().includes(query.toLowerCase()) ||
+    place.country.toLowerCase().includes(query.toLowerCase())
+  );
+
+  try {
+    // Then fetch from GeoNames API - it's free and doesn't require API keys
+    const response = await axios.get<GeoNamesResult>(
+      'http://api.geonames.org/searchJSON',
+      {
+        params: {
+          q: query,
+          maxRows: 10,
+          username: GEONAMES_USERNAME,
+          featureClass: 'A', // country, state, region
+          featureCode: 'PCLI,PPLC,PPL,PPLA,PPLA2,PPLA3,PPLA4', // country, capital, populated place
+          isNameRequired: true,
+        },
+      }
+    );
+
+    // Map API results to our TouristPlace type
+    const apiResults = response.data.geonames
+      .filter(item => item.name && item.lat && item.lng)
+      .map((item, index) => ({
+        id: `api-${index}-${item.name}`,
+        name: item.name,
+        lat: parseFloat(item.lat),
+        lng: parseFloat(item.lng),
+        country: item.countryName || '',
+        description: `${item.name} in ${item.countryName || 'Unknown'}${item.fcode === 'PPLC' ? ' (Capital)' : ''}`,
+        color: 'var(--primary)',
+        size: 1.0,
+        image: 'https://images.unsplash.com/photo-1502920917128-1aa500764cbd?q=80&w=400&auto=format', // Default image
+      }));
+
+    // Combine results, removing duplicates by name
+    const allResults = [...localResults];
+    for (const apiResult of apiResults) {
+      if (!allResults.some(place => place.name === apiResult.name)) {
+        allResults.push(apiResult);
+      }
+    }
+
+    return allResults;
+  } catch (error) {
+    console.error('Error fetching places:', error);
+    // If API fails, return just local results
+    return localResults;
+  }
+}
