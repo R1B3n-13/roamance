@@ -49,18 +49,23 @@ export function PlaceSearchCommand({
     'location'
   );
 
-  // Refs
   const searchTimeout = React.useRef<NodeJS.Timeout | null>(null);
   const refinedInputRef = React.useRef<HTMLInputElement>(null);
+  const triggerRef = React.useRef<HTMLDivElement>(null);
+  const [triggerWidth, setTriggerWidth] = React.useState<number>(0);
 
-  // Transfer main value to refined value when opening dropdown
+  React.useEffect(() => {
+    if (triggerRef.current) {
+      setTriggerWidth(triggerRef.current.offsetWidth);
+    }
+  }, [open, className]);
+
   React.useEffect(() => {
     if (open && mainValue && !refinedValue) {
       setRefinedValue(mainValue);
     }
   }, [open, mainValue, refinedValue]);
 
-  // Perform search when refined value changes
   React.useEffect(() => {
     if (refinedValue.length < 2) {
       setPlaces([]);
@@ -90,7 +95,6 @@ export function PlaceSearchCommand({
     };
   }, [refinedValue]);
 
-  // Handle place selection
   const handleSelectPlace = (placeId: string) => {
     const selectedPlace = places.find((place) => place.id === placeId);
     if (selectedPlace) {
@@ -101,7 +105,6 @@ export function PlaceSearchCommand({
     }
   };
 
-  // Clear input and reset
   const handleClearMain = (e: React.MouseEvent) => {
     e.stopPropagation();
     setMainValue('');
@@ -114,7 +117,6 @@ export function PlaceSearchCommand({
     }
   };
 
-  // Toggle search mode
   const toggleSearchMode = () => {
     setSearchMode(searchMode === 'location' ? 'region' : 'location');
   };
@@ -122,11 +124,12 @@ export function PlaceSearchCommand({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <div className={cn('w-full relative', className)}>
+        <div ref={triggerRef} className={cn('w-full relative', className)}>
           <Search
             className={cn(
-              'absolute left-3 top-3.5 h-5 w-5 z-10',
-              isDarkMode ? 'text-white/60' : 'text-gray-400'
+              'absolute left-3 top-3.5 h-5 w-5 z-10 transition-all duration-200',
+              isDarkMode ? 'text-white/60' : 'text-gray-400',
+              mainValue && (isDarkMode ? 'text-primary/80' : 'text-primary/70')
             )}
           />
           <Button
@@ -134,11 +137,16 @@ export function PlaceSearchCommand({
             aria-expanded={open}
             className={cn(
               'w-full h-12 pl-10 pr-10 justify-start text-left font-normal',
+              'shadow-sm transition-all duration-200',
+              'rounded-xl border-2',
               mainValue ? '' : 'text-muted-foreground',
               isDarkMode
-                ? 'bg-white/10 text-white border-white/20 hover:bg-white/20'
-                : 'bg-white/50 text-gray-900 hover:bg-white/60',
-              'transition-colors'
+                ? 'bg-gradient-to-r from-slate-900/80 to-slate-800/80 text-white border-indigo-500/30 hover:border-indigo-500/50 hover:bg-slate-800/90'
+                : 'bg-gradient-to-r from-white/80 to-white/95 text-gray-900 border-indigo-100 hover:border-indigo-200 hover:bg-white/100',
+              open &&
+                (isDarkMode
+                  ? 'ring-2 ring-indigo-500/20 border-indigo-500/40'
+                  : 'ring-2 ring-indigo-200/50 border-indigo-300/60')
             )}
             onClick={() => setOpen(true)}
           >
@@ -148,9 +156,10 @@ export function PlaceSearchCommand({
             <button
               onClick={handleClearMain}
               className={cn(
-                'absolute right-10 top-3.5 z-10',
+                'absolute right-10 top-3.5 z-10 pr-1.5',
+                'cursor-pointer',
                 isDarkMode ? 'text-white/60' : 'text-gray-400',
-                'hover:text-primary transition-colors'
+                'hover:text-primary transition-colors duration-200'
               )}
             >
               <X className="h-5 w-5" />
@@ -158,29 +167,32 @@ export function PlaceSearchCommand({
           )}
           <ChevronsUpDown
             className={cn(
-              'absolute right-3 top-4 h-4 w-4',
-              isDarkMode ? 'text-white/40' : 'text-gray-400/70'
+              'absolute right-3 top-4 h-4 w-4 transition-opacity duration-200',
+              isDarkMode ? 'text-white/40' : 'text-gray-400/70',
+              open && 'opacity-70'
             )}
           />
         </div>
       </PopoverTrigger>
       <PopoverContent
         className={cn(
-          'p-0 w-[calc(100vw-2rem)] sm:w-[450px] z-50 shadow-lg',
+          'p-0 z-50 rounded-xl',
+          'shadow-lg shadow-black/5 border-2 transition-all duration-200',
           isDarkMode
-            ? 'bg-slate-900/90 backdrop-blur-sm border-white/10'
-            : 'bg-white/95 backdrop-blur-sm border-gray-200'
+            ? 'bg-gradient-to-b from-slate-900/95 to-slate-950/95 backdrop-blur-md border-indigo-500/30'
+            : 'bg-gradient-to-b from-white/95 to-gray-50/98 backdrop-blur-md border-indigo-100'
         )}
         align="start"
         side="bottom"
-        sideOffset={8}
+        sideOffset={0}
+        style={{ width: triggerWidth ? `${triggerWidth}px` : 'auto' }}
       >
         <Command shouldFilter={false}>
-          <div className="flex items-center gap-2 p-2 border-b border-border">
+          <div className="flex items-center gap-2 p-3 border-b border-border">
             <div className="relative flex-1">
               <Search
                 className={cn(
-                  'absolute left-3 top-2.5 h-4 w-4 transition-colors',
+                  'absolute left-3 top-2.5 h-4 w-4 transition-colors duration-200',
                   isDarkMode ? 'text-white/50' : 'text-gray-400',
                   refinedValue && 'text-primary'
                 )}
@@ -195,20 +207,22 @@ export function PlaceSearchCommand({
                 value={refinedValue}
                 onValueChange={setRefinedValue}
                 className={cn(
-                  'h-9 pl-9 pr-9 rounded-md font-normal border',
+                  'h-10 pl-9 pr-9 rounded-lg font-normal',
+                  'border-2 transition-all duration-200 shadow-sm',
                   isDarkMode
-                    ? 'bg-slate-800/50 text-white border-white/10 focus:border-white/20'
-                    : 'bg-white text-gray-900 border-gray-200',
-                  'transition-all focus-visible:ring-primary/30'
+                    ? 'bg-slate-800/80 text-white border-indigo-500/30 focus:border-indigo-500/50'
+                    : 'bg-white text-gray-900 border-indigo-100 focus:border-indigo-300/60',
+                  'focus-visible:ring-primary/20 focus-visible:ring-2'
                 )}
               />
               {refinedValue && (
                 <button
                   onClick={handleClearRefined}
                   className={cn(
-                    'absolute right-3 top-2.5',
+                    'absolute right-3 top-3 pr-1.5',
+                    'cursor-pointer',
                     isDarkMode ? 'text-white/50' : 'text-gray-400',
-                    'hover:text-primary transition-colors'
+                    'hover:text-primary transition-colors duration-200'
                   )}
                 >
                   <X className="h-4 w-4" />
@@ -218,10 +232,11 @@ export function PlaceSearchCommand({
             <button
               onClick={toggleSearchMode}
               className={cn(
-                'h-9 w-9 flex items-center justify-center rounded-md transition-colors',
+                'h-10 w-10 flex items-center justify-center rounded-lg transition-all duration-200',
+                'border-2',
                 isDarkMode
-                  ? 'hover:bg-white/10 text-white/70 hover:text-white'
-                  : 'hover:bg-gray-100 text-gray-600 hover:text-gray-900'
+                  ? 'hover:bg-white/10 text-white/70 hover:text-white border-indigo-500/30 hover:border-indigo-500/50'
+                  : 'hover:bg-gray-100 text-gray-600 hover:text-gray-900 border-indigo-100 hover:border-indigo-200'
               )}
               title={
                 searchMode === 'location'
@@ -306,58 +321,120 @@ export function PlaceSearchCommand({
               <div className="flex flex-col items-center justify-center py-8 px-4">
                 <Globe
                   className={cn(
-                    'h-10 w-10 mb-3',
-                    isDarkMode ? 'text-white/30' : 'text-gray-300'
+                    'h-10 w-10 mb-4',
+                    'opacity-70 transition-opacity duration-300',
+                    isDarkMode ? 'text-indigo-400/50' : 'text-indigo-400/40'
                   )}
                 />
-                <p className="text-center text-sm text-muted-foreground">
-                  Start typing to discover amazing destinations around the globe
+                <p className="text-center text-sm mb-6 max-w-[280px]">
+                  <span
+                    className={cn(
+                      'font-medium',
+                      isDarkMode ? 'text-white/80' : 'text-gray-700'
+                    )}
+                  >
+                    Discover the world
+                  </span>
+                  <span className="text-muted-foreground block mt-1">
+                    Start typing to find amazing destinations around the globe
+                  </span>
                 </p>
-                <div
-                  className={cn(
-                    'mt-4 grid grid-cols-2 gap-2 w-full max-w-sm',
-                    isDarkMode ? 'text-white/70' : 'text-gray-500'
-                  )}
-                >
+
+                <div className="text-sm font-medium mb-2 self-start pl-1">
+                  Popular destinations
+                </div>
+
+                <div className={cn('grid grid-cols-2 gap-2.5 w-full')}>
                   <button
                     type="button"
                     className={cn(
-                      'text-center py-2 px-3 rounded-md text-sm cursor-pointer',
-                      isDarkMode ? 'hover:bg-white/10' : 'hover:bg-gray-100'
+                      'flex items-center gap-2 py-3 px-3.5 rounded-lg text-sm',
+                      'border-2 transition-all duration-200',
+                      'bg-opacity-50 backdrop-blur-sm',
+                      isDarkMode
+                        ? 'hover:bg-indigo-950/40 text-white/90 border-indigo-500/20 hover:border-indigo-500/30 bg-indigo-950/20'
+                        : 'hover:bg-indigo-50/80 text-gray-700 border-indigo-100 hover:border-indigo-200 bg-indigo-50/50'
                     )}
                     onClick={() => setRefinedValue('Paris')}
                   >
-                    Paris
+                    <div
+                      className={cn(
+                        'w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0',
+                        isDarkMode ? 'bg-indigo-500/20' : 'bg-indigo-100'
+                      )}
+                    >
+                      <span className="text-xs">🇫🇷</span>
+                    </div>
+                    <span>France</span>
                   </button>
+
                   <button
                     type="button"
                     className={cn(
-                      'text-center py-2 px-3 rounded-md text-sm cursor-pointer',
-                      isDarkMode ? 'hover:bg-white/10' : 'hover:bg-gray-100'
+                      'flex items-center gap-2 py-3 px-3.5 rounded-lg text-sm',
+                      'border-2 transition-all duration-200',
+                      'bg-opacity-50 backdrop-blur-sm',
+                      isDarkMode
+                        ? 'hover:bg-indigo-950/40 text-white/90 border-indigo-500/20 hover:border-indigo-500/30 bg-indigo-950/20'
+                        : 'hover:bg-indigo-50/80 text-gray-700 border-indigo-100 hover:border-indigo-200 bg-indigo-50/50'
                     )}
                     onClick={() => setRefinedValue('Tokyo')}
                   >
-                    Tokyo
+                    <div
+                      className={cn(
+                        'w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0',
+                        isDarkMode ? 'bg-indigo-500/20' : 'bg-indigo-100'
+                      )}
+                    >
+                      <span className="text-xs">🇯🇵</span>
+                    </div>
+                    <span>Japan</span>
                   </button>
+
                   <button
                     type="button"
                     className={cn(
-                      'text-center py-2 px-3 rounded-md text-sm cursor-pointer',
-                      isDarkMode ? 'hover:bg-white/10' : 'hover:bg-gray-100'
+                      'flex items-center gap-2 py-3 px-3.5 rounded-lg text-sm',
+                      'border-2 transition-all duration-200',
+                      'bg-opacity-50 backdrop-blur-sm',
+                      isDarkMode
+                        ? 'hover:bg-indigo-950/40 text-white/90 border-indigo-500/20 hover:border-indigo-500/30 bg-indigo-950/20'
+                        : 'hover:bg-indigo-50/80 text-gray-700 border-indigo-100 hover:border-indigo-200 bg-indigo-50/50'
                     )}
                     onClick={() => setRefinedValue('New York')}
                   >
-                    New York
+                    <div
+                      className={cn(
+                        'w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0',
+                        isDarkMode ? 'bg-indigo-500/20' : 'bg-indigo-100'
+                      )}
+                    >
+                      <span className="text-xs">🇺🇸</span>
+                    </div>
+                    <span>USA</span>
                   </button>
+
                   <button
                     type="button"
                     className={cn(
-                      'text-center py-2 px-3 rounded-md text-sm cursor-pointer',
-                      isDarkMode ? 'hover:bg-white/10' : 'hover:bg-gray-100'
+                      'flex items-center gap-2 py-3 px-3.5 rounded-lg text-sm',
+                      'border-2 transition-all duration-200',
+                      'bg-opacity-50 backdrop-blur-sm',
+                      isDarkMode
+                        ? 'hover:bg-indigo-950/40 text-white/90 border-indigo-500/20 hover:border-indigo-500/30 bg-indigo-950/20'
+                        : 'hover:bg-indigo-50/80 text-gray-700 border-indigo-100 hover:border-indigo-200 bg-indigo-50/50'
                     )}
                     onClick={() => setRefinedValue('Bali')}
                   >
-                    Bali
+                    <div
+                      className={cn(
+                        'w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0',
+                        isDarkMode ? 'bg-indigo-500/20' : 'bg-indigo-100'
+                      )}
+                    >
+                      <span className="text-xs">🇪🇬</span>
+                    </div>
+                    <span>Egypt</span>
                   </button>
                 </div>
               </div>
