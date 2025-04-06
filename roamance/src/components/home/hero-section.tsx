@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { touristPlaces } from '@/constants';
+import { getInitialPlaces } from '@/api/places-api';
 import { cn } from '@/lib/utils';
 import { TouristPlace } from '@/types';
 import { motion } from 'framer-motion';
@@ -43,8 +43,17 @@ export function HeroSection() {
   useEffect(() => {
     setIsClient(true);
 
+    const fetchPlaces = async () => {
+      try {
+        const placesData = await getInitialPlaces();
+        setPlaces(placesData);
+      } catch (error) {
+        console.error('Failed to fetch places:', error);
+      }
+    };
+
     const timer = setTimeout(() => {
-      setPlaces(touristPlaces);
+      fetchPlaces();
     }, 1000);
 
     return () => {
