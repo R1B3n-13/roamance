@@ -15,7 +15,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
-import { searchPlaces } from '@/services/places-api';
+import { searchPlaces } from '@/api/places-api';
 import { TouristPlace } from '@/types';
 import {
   ChevronsUpDown,
@@ -355,7 +355,7 @@ export function PlaceSearchCommand({
                         ? 'hover:bg-indigo-950/40 text-white/90 border-indigo-500/20 hover:border-indigo-500/30 bg-indigo-950/20'
                         : 'hover:bg-indigo-50/80 text-gray-700 border-indigo-100 hover:border-indigo-200 bg-indigo-50/50'
                     )}
-                    onClick={() => setRefinedValue('Paris')}
+                    onClick={() => setRefinedValue('France')}
                   >
                     <div
                       className={cn(
@@ -378,7 +378,7 @@ export function PlaceSearchCommand({
                         ? 'hover:bg-indigo-950/40 text-white/90 border-indigo-500/20 hover:border-indigo-500/30 bg-indigo-950/20'
                         : 'hover:bg-indigo-50/80 text-gray-700 border-indigo-100 hover:border-indigo-200 bg-indigo-50/50'
                     )}
-                    onClick={() => setRefinedValue('Tokyo')}
+                    onClick={() => setRefinedValue('Japan')}
                   >
                     <div
                       className={cn(
@@ -401,7 +401,7 @@ export function PlaceSearchCommand({
                         ? 'hover:bg-indigo-950/40 text-white/90 border-indigo-500/20 hover:border-indigo-500/30 bg-indigo-950/20'
                         : 'hover:bg-indigo-50/80 text-gray-700 border-indigo-100 hover:border-indigo-200 bg-indigo-50/50'
                     )}
-                    onClick={() => setRefinedValue('New York')}
+                    onClick={() => setRefinedValue('US')}
                   >
                     <div
                       className={cn(
@@ -411,7 +411,7 @@ export function PlaceSearchCommand({
                     >
                       <span className="text-xs">🇺🇸</span>
                     </div>
-                    <span>USA</span>
+                    <span>US</span>
                   </button>
 
                   <button
@@ -424,7 +424,7 @@ export function PlaceSearchCommand({
                         ? 'hover:bg-indigo-950/40 text-white/90 border-indigo-500/20 hover:border-indigo-500/30 bg-indigo-950/20'
                         : 'hover:bg-indigo-50/80 text-gray-700 border-indigo-100 hover:border-indigo-200 bg-indigo-50/50'
                     )}
-                    onClick={() => setRefinedValue('Bali')}
+                    onClick={() => setRefinedValue('Egypt')}
                   >
                     <div
                       className={cn(
