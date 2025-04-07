@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { getInitialPlaces } from '@/api/places-api';
+import { getInitialPlaces } from '@/service/tourism-service';
 import { cn } from '@/lib/utils';
 import { TouristPlace } from '@/types';
 import { motion } from 'framer-motion';

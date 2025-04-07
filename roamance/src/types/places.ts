@@ -8,4 +8,5 @@ export interface TouristPlace {
   color: string;
   size: number;
   image?: string;
+  images?: string[]; // Array of image URLs for the carousel
 }

@@ -230,3 +230,9 @@ const authService = new AuthService(apiService);
 const storageService = new StorageService();
 
 export { apiService, authService, storageService };
+
+// Re-export all API functions for easy importing
+export * from "./auth";
+export * from "./places-api";
+export * from "./roamance-api";
+export * from "./unsplash-api";

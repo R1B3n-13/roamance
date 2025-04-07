@@ -1,10 +1,10 @@
 import { cn } from '@/lib/utils';
 import { TouristPlace } from '@/types';
-import { getPlaceDetails } from '@/api/places-api';
+import { getPlaceDetails } from '@/service/tourism-service';
 import { motion } from 'framer-motion';
 import { Globe, MapPin, ExternalLink } from 'lucide-react';
-import Image from 'next/image';
 import { useEffect, useState } from 'react';
+import { PlaceImagesCarousel } from './place-images-carousel';
 
 interface PlaceDetailsCardProps {
   selectedPlace: TouristPlace;
@@ -18,18 +18,15 @@ export const PlaceDetailsCard = ({
   const [isLoading, setIsLoading] = useState(false);
   const [enrichedPlace, setEnrichedPlace] = useState<TouristPlace | null>(null);
 
-  // Get additional details when a place is selected
   useEffect(() => {
     const fetchAdditionalDetails = async () => {
-      // Only fetch for API sourced places - they have 'api' in the ID
+      // Reset the enriched place when changing places
+      setEnrichedPlace(null);
+
       if (selectedPlace.id.includes('api-')) {
         setIsLoading(true);
         try {
-          // Extract country code from country name if available
-          const countryParts = selectedPlace.country.split(',');
-          const countryCode = countryParts.length > 1 ? countryParts[1].trim() : undefined;
-
-          const details = await getPlaceDetails(selectedPlace.name, countryCode);
+          const details = await getPlaceDetails(selectedPlace.id);
           if (details) {
             setEnrichedPlace(details);
           }
@@ -38,21 +35,16 @@ export const PlaceDetailsCard = ({
         } finally {
           setIsLoading(false);
         }
-      } else {
-        setEnrichedPlace(null);
       }
     };
 
     fetchAdditionalDetails();
   }, [selectedPlace.id, selectedPlace.name, selectedPlace.country]);
 
-  // Use enriched data if available, otherwise use the selected place
   const displayPlace = enrichedPlace || selectedPlace;
-
-  // Extract color name from the CSS variable
   const colorName = displayPlace.color.split('--')[1] || 'primary';
 
-  // Format coordinates to be more readable
+  // Helper function for formatting coordinates
   const formatCoordinate = (coord: number): string => {
     const absCoord = Math.abs(coord);
     const degrees = Math.floor(absCoord);
@@ -62,6 +54,20 @@ export const PlaceDetailsCard = ({
 
   const latitude = `${formatCoordinate(displayPlace.lat)}${displayPlace.lat >= 0 ? 'N' : 'S'}`;
   const longitude = `${formatCoordinate(displayPlace.lng)}${displayPlace.lng >= 0 ? 'E' : 'W'}`;
+
+  // Handle images properly for carousel
+  const carouselImages = (() => {
+    // If we have an array of images with content, use it
+    if (Array.isArray(displayPlace.images) && displayPlace.images.length > 0) {
+      return displayPlace.images;
+    }
+    // Fall back to single image if available
+    else if (displayPlace.image) {
+      return [displayPlace.image];
+    }
+    // No images available
+    return [];
+  })();
 
   return (
     <motion.div
@@ -76,36 +82,24 @@ export const PlaceDetailsCard = ({
       key={`${selectedPlace.id}-${detailsPosition}`}
     >
       <div className="bg-background/80 backdrop-blur-md rounded-xl border shadow-lg overflow-hidden">
-        {displayPlace.image && (
-          <div className="relative w-full h-[150px]">
-            <Image
-              src={displayPlace.image}
-              alt={displayPlace.name}
-              fill
-              className="object-cover"
-              sizes="(max-width: 300px) 100vw, 300px"
-            />
-            {isLoading && (
-              <div className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center">
-                <div className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full"></div>
-              </div>
-            )}
+        {isLoading ? (
+          <div className="h-[150px] flex items-center justify-center bg-muted">
+            <div className="animate-pulse">Loading images...</div>
           </div>
+        ) : (
+          carouselImages.length > 0 && (
+            <PlaceImagesCarousel
+              images={carouselImages}
+              alt={displayPlace.name}
+              height={150}
+              isLoading={false}
+            />
+          )
         )}
         <div className="p-6">
           <div className="flex items-start gap-3 mb-4">
-            <div
-              className={cn(
-                'p-2 rounded-lg',
-                `bg-${colorName}/20`
-              )}
-            >
-              <MapPin
-                className={cn(
-                  'h-5 w-5',
-                  `text-${colorName}`
-                )}
-              />
+            <div className={cn('p-2 rounded-lg', `bg-${colorName}/20`)}>
+              <MapPin className={cn('h-5 w-5', `text-${colorName}`)} />
             </div>
             <div>
               <h3 className="text-xl font-bold">{displayPlace.name}</h3>
@@ -119,7 +113,9 @@ export const PlaceDetailsCard = ({
 
           <div className="flex items-center gap-2 mb-4 text-xs text-muted-foreground">
             <Globe className="h-3 w-3" />
-            <span>{latitude}, {longitude}</span>
+            <span>
+              {latitude}, {longitude}
+            </span>
           </div>
 
           <a

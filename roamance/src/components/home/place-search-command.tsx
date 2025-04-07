@@ -15,7 +15,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
-import { searchPlaces } from '@/api/places-api';
+import { searchPlaces } from '@/service/tourism-service';
 import { TouristPlace } from '@/types';
 import {
   ChevronsUpDown,
@@ -345,97 +345,36 @@ export function PlaceSearchCommand({
                 </div>
 
                 <div className={cn('grid grid-cols-2 gap-2.5 w-full')}>
-                  <button
-                    type="button"
-                    className={cn(
-                      'flex items-center gap-2 py-3 px-3.5 rounded-lg text-sm',
-                      'border-2 transition-all duration-200',
-                      'bg-opacity-50 backdrop-blur-sm',
-                      isDarkMode
-                        ? 'hover:bg-indigo-950/40 text-white/90 border-indigo-500/20 hover:border-indigo-500/30 bg-indigo-950/20'
-                        : 'hover:bg-indigo-50/80 text-gray-700 border-indigo-100 hover:border-indigo-200 bg-indigo-50/50'
-                    )}
-                    onClick={() => setRefinedValue('France')}
-                  >
-                    <div
+                  {[
+                    { country: 'France', emoji: '🇫🇷' },
+                    { country: 'Japan', emoji: '🇯🇵' },
+                    { country: 'US', emoji: '🇺🇸' },
+                    { country: 'Egypt', emoji: '🇪🇬' },
+                  ].map((item) => (
+                    <button
+                      key={item.country}
+                      type="button"
                       className={cn(
-                        'w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0',
-                        isDarkMode ? 'bg-indigo-500/20' : 'bg-indigo-100'
+                        'flex items-center gap-2 py-3 px-3.5 rounded-lg text-sm',
+                        'border-2 transition-all duration-200',
+                        'bg-opacity-50 backdrop-blur-sm',
+                        isDarkMode
+                          ? 'hover:bg-indigo-950/40 text-white/90 border-indigo-500/20 hover:border-indigo-500/30 bg-indigo-950/20'
+                          : 'hover:bg-indigo-50/80 text-gray-700 border-indigo-100 hover:border-indigo-200 bg-indigo-50/50'
                       )}
+                      onClick={() => setRefinedValue(item.country)}
                     >
-                      <span className="text-xs">🇫🇷</span>
-                    </div>
-                    <span>France</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    className={cn(
-                      'flex items-center gap-2 py-3 px-3.5 rounded-lg text-sm',
-                      'border-2 transition-all duration-200',
-                      'bg-opacity-50 backdrop-blur-sm',
-                      isDarkMode
-                        ? 'hover:bg-indigo-950/40 text-white/90 border-indigo-500/20 hover:border-indigo-500/30 bg-indigo-950/20'
-                        : 'hover:bg-indigo-50/80 text-gray-700 border-indigo-100 hover:border-indigo-200 bg-indigo-50/50'
-                    )}
-                    onClick={() => setRefinedValue('Japan')}
-                  >
-                    <div
-                      className={cn(
-                        'w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0',
-                        isDarkMode ? 'bg-indigo-500/20' : 'bg-indigo-100'
-                      )}
-                    >
-                      <span className="text-xs">🇯🇵</span>
-                    </div>
-                    <span>Japan</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    className={cn(
-                      'flex items-center gap-2 py-3 px-3.5 rounded-lg text-sm',
-                      'border-2 transition-all duration-200',
-                      'bg-opacity-50 backdrop-blur-sm',
-                      isDarkMode
-                        ? 'hover:bg-indigo-950/40 text-white/90 border-indigo-500/20 hover:border-indigo-500/30 bg-indigo-950/20'
-                        : 'hover:bg-indigo-50/80 text-gray-700 border-indigo-100 hover:border-indigo-200 bg-indigo-50/50'
-                    )}
-                    onClick={() => setRefinedValue('US')}
-                  >
-                    <div
-                      className={cn(
-                        'w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0',
-                        isDarkMode ? 'bg-indigo-500/20' : 'bg-indigo-100'
-                      )}
-                    >
-                      <span className="text-xs">🇺🇸</span>
-                    </div>
-                    <span>US</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    className={cn(
-                      'flex items-center gap-2 py-3 px-3.5 rounded-lg text-sm',
-                      'border-2 transition-all duration-200',
-                      'bg-opacity-50 backdrop-blur-sm',
-                      isDarkMode
-                        ? 'hover:bg-indigo-950/40 text-white/90 border-indigo-500/20 hover:border-indigo-500/30 bg-indigo-950/20'
-                        : 'hover:bg-indigo-50/80 text-gray-700 border-indigo-100 hover:border-indigo-200 bg-indigo-50/50'
-                    )}
-                    onClick={() => setRefinedValue('Egypt')}
-                  >
-                    <div
-                      className={cn(
-                        'w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0',
-                        isDarkMode ? 'bg-indigo-500/20' : 'bg-indigo-100'
-                      )}
-                    >
-                      <span className="text-xs">🇪🇬</span>
-                    </div>
-                    <span>Egypt</span>
-                  </button>
+                      <div
+                        className={cn(
+                          'w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0',
+                          isDarkMode ? 'bg-indigo-500/20' : 'bg-indigo-100'
+                        )}
+                      >
+                        <span className="text-xs">{item.emoji}</span>
+                      </div>
+                      <span>{item.country}</span>
+                    </button>
+                  ))}
                 </div>
               </div>
             )}
