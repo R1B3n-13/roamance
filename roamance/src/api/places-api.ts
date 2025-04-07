@@ -1,56 +1,9 @@
 import axios from 'axios';
 import { touristPlaces } from '@/data/tourist-places';
+import { Geoname, GeoNamesResult, CacheItem } from '@/types/places';
 
 const GEONAMES_USERNAME = 'yashrif';
 const API_CACHE_DURATION = 1000 * 60 * 30; // 30 minutes
-
-export interface Geoname {
-  name: string;
-  toponymName: string;
-  lat: string;
-  lng: string;
-  geonameId: number;
-  countryName: string;
-  countryCode: string;
-  countryId: string;
-  adminCode1: string;
-  adminName1: string;
-  adminCodes1?: {
-    ISO3166_2: string;
-  };
-  fcl: string;
-  fclName: string;
-  fcode: string;
-  fcodeName: string;
-  population: number;
-  timezone?: {
-    timeZoneId: string;
-    dstOffset: number;
-    gmtOffset: number;
-  };
-  bbox?: {
-    east: number;
-    south: number;
-    north: number;
-    west: number;
-  };
-  wikipediaURL?: string;
-  thumbnailImg?: string;
-}
-
-export interface GeoNamesResult {
-  geonames: Geoname[];
-  totalResultsCount?: number;
-  status?: {
-    message: string;
-    value: number;
-  };
-}
-
-interface CacheItem<T> {
-  data: T;
-  timestamp: number;
-}
 
 const cache: {
   [key: string]: CacheItem<unknown>;
