@@ -28,6 +28,10 @@ public final class ResponseMessage {
   public static final String JWT_CLAIMS_EMPTY = "JWT claims string is empty!";
   public static final String INVALID_TOKEN_TYPE = "Invalid token type!";
 
+  // ==================== Validation Related ====================
+
+  public static final String VALIDATION_FAILED = "Validation failed!";
+
   // ==================== Journal Related ====================
 
   public static final String JOURNAL_CREATE_SUCCESS = "Journal created successfully.";
@@ -49,7 +53,20 @@ public final class ResponseMessage {
   public static final String SUBSECTION_DELETE_SUCCESS = "Subsection deleted successfully.";
   public static final String SUBSECTION_NOT_FOUND = "No subsection present with id: %s!";
 
-  // ==================== Validation Related ====================
+  // ======================== Post Related ========================
 
-  public static final String VALIDATION_FAILED = "Validation failed!";
+  public static final String POST_CREATE_SUCCESS = "Post created successfully.";
+  public static final String POST_FETCH_SUCCESS = "Post fetched successfully.";
+  public static final String POSTS_FETCH_SUCCESS = "Posts fetched successfully.";
+  public static final String POST_SAVE_SUCCESS = "Post saved successfully.";
+  public static final String POST_UNSAVE_SUCCESS = "Post unsaved successfully.";
+  public static final String POST_LIKE_SUCCESS = "Post liked successfully.";
+  public static final String POST_UNLIKE_SUCCESS = "Post unliked successfully.";
+  public static final String POST_UPDATE_SUCCESS = "Post updated successfully.";
+  public static final String POST_DELETE_SUCCESS = "Post deleted successfully.";
+  public static final String POST_NOT_FOUND = "No post present with id: %s!";
+  public static final String POST_UPDATE_ACTION_DENIED =
+      "You don't have permission to update this post!";
+  public static final String POST_DELETE_ACTION_DENIED =
+      "You don't have permission to delete this post!";
 }

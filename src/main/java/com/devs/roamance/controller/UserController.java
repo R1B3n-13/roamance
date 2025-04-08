@@ -1,10 +1,10 @@
 package com.devs.roamance.controller;
 
-import com.devs.roamance.dto.request.UserCreateRequestDto;
-import com.devs.roamance.dto.request.UserUpdateRequestDto;
+import com.devs.roamance.dto.request.user.UserCreateRequestDto;
+import com.devs.roamance.dto.request.user.UserUpdateRequestDto;
 import com.devs.roamance.dto.response.BaseResponseDto;
-import com.devs.roamance.dto.response.UserListResponseDto;
-import com.devs.roamance.dto.response.UserResponseDto;
+import com.devs.roamance.dto.response.user.UserListResponseDto;
+import com.devs.roamance.dto.response.user.UserResponseDto;
 import com.devs.roamance.service.UserService;
 import com.devs.roamance.util.PaginationSortingUtil;
 import com.devs.roamance.util.UserUtil;

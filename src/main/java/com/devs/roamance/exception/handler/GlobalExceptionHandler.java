@@ -197,23 +197,23 @@ public class GlobalExceptionHandler {
         HttpStatus.BAD_REQUEST);
   }
 
-  // ==================== Journal Related Exceptions ====================
+  // ==================== Resource Related Exceptions ====================
 
-  @ExceptionHandler(JournalNotFoundException.class)
-  public ResponseEntity<BaseResponseDto> handleJournalNotFoundException(
-      JournalNotFoundException ex) {
+  @ExceptionHandler(ResourceNotFoundException.class)
+  public ResponseEntity<BaseResponseDto> handleResourceNotFoundException(
+      ResourceNotFoundException ex) {
 
-    log.error("JournalNotFoundException: {}", ex.getMessage(), ex);
+    log.error("ResourceNotFoundException: {}", ex.getMessage(), ex);
 
     return new ResponseEntity<>(
         new BaseResponseDto(404, false, ex.getMessage()), HttpStatus.NOT_FOUND);
   }
 
-  @ExceptionHandler(JournalAlreadyExistException.class)
-  public ResponseEntity<BaseResponseDto> handleJournalAlreadyExistException(
-      JournalAlreadyExistException ex) {
+  @ExceptionHandler(ResourceAlreadyExistException.class)
+  public ResponseEntity<BaseResponseDto> handleResourceAlreadyExistException(
+      ResourceAlreadyExistException ex) {
 
-    log.error("JournalAlreadyExistException: {}", ex.getMessage(), ex);
+    log.error("ResourceAlreadyExistException: {}", ex.getMessage(), ex);
 
     return new ResponseEntity<>(
         new BaseResponseDto(409, false, ex.getMessage()), HttpStatus.CONFLICT);
@@ -231,6 +231,16 @@ public class GlobalExceptionHandler {
         new BaseResponseDto(403, false, ex.getMessage()), HttpStatus.FORBIDDEN);
   }
 
+  @ExceptionHandler(UnauthorizedActionException.class)
+  public ResponseEntity<BaseResponseDto> handleUnauthorizedActionException(
+      UnauthorizedActionException ex) {
+
+    log.error("UnauthorizedActionException: {}", ex.getMessage(), ex);
+
+    return new ResponseEntity<>(
+        new BaseResponseDto(403, false, ex.getMessage()), HttpStatus.FORBIDDEN);
+  }
+
   // ==================== Subsection Related Exceptions ====================
 
   @ExceptionHandler(SubsectionTypeDeserializationException.class)
@@ -241,16 +251,6 @@ public class GlobalExceptionHandler {
 
     return new ResponseEntity<>(
         new BaseResponseDto(400, false, ex.getMessage()), HttpStatus.BAD_REQUEST);
-  }
-
-  @ExceptionHandler(SubsectionNotFoundException.class)
-  public ResponseEntity<BaseResponseDto> handleSubsectionNotFoundException(
-      SubsectionNotFoundException ex) {
-
-    log.error("SubsectionNotFoundException: {}", ex.getMessage(), ex);
-
-    return new ResponseEntity<>(
-        new BaseResponseDto(404, false, ex.getMessage()), HttpStatus.NOT_FOUND);
   }
 
   // ==================== Fallback Exception Handler ====================

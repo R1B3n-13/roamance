@@ -14,17 +14,16 @@ import com.devs.roamance.dto.response.travel.journal.SubsectionDetailDto;
 import com.devs.roamance.dto.response.travel.journal.SubsectionDto;
 import com.devs.roamance.dto.response.travel.journal.SubsectionListResponseDto;
 import com.devs.roamance.dto.response.travel.journal.SubsectionResponseDto;
-import com.devs.roamance.exception.JournalNotFoundException;
-import com.devs.roamance.exception.SubsectionNotFoundException;
+import com.devs.roamance.exception.ResourceNotFoundException;
 import com.devs.roamance.exception.UnauthorizedAccessException;
 import com.devs.roamance.model.Location;
-import com.devs.roamance.model.User;
 import com.devs.roamance.model.travel.journal.ActivitySubsection;
 import com.devs.roamance.model.travel.journal.Journal;
 import com.devs.roamance.model.travel.journal.RouteSubsection;
 import com.devs.roamance.model.travel.journal.SightseeingSubsection;
 import com.devs.roamance.model.travel.journal.Subsection;
 import com.devs.roamance.model.travel.journal.SubsectionType;
+import com.devs.roamance.model.user.User;
 import com.devs.roamance.repository.JournalRepository;
 import com.devs.roamance.repository.SubsectionRepository;
 import com.devs.roamance.service.SubsectionService;
@@ -73,7 +72,7 @@ public class SubsectionServiceImpl implements SubsectionService {
             .findById(requestDto.getJournalId())
             .orElseThrow(
                 () ->
-                    new JournalNotFoundException(
+                    new ResourceNotFoundException(
                         String.format(
                             ResponseMessage.JOURNAL_NOT_FOUND, requestDto.getJournalId())));
 
@@ -140,7 +139,7 @@ public class SubsectionServiceImpl implements SubsectionService {
             .findById(id)
             .orElseThrow(
                 () ->
-                    new SubsectionNotFoundException(
+                    new ResourceNotFoundException(
                         String.format(ResponseMessage.SUBSECTION_NOT_FOUND, id)));
 
     Journal journal = subsection.getJournal();
@@ -163,7 +162,7 @@ public class SubsectionServiceImpl implements SubsectionService {
             .findById(id)
             .orElseThrow(
                 () ->
-                    new SubsectionNotFoundException(
+                    new ResourceNotFoundException(
                         String.format(ResponseMessage.SUBSECTION_NOT_FOUND, id)));
 
     Journal journal = subsection.getJournal();
@@ -191,7 +190,7 @@ public class SubsectionServiceImpl implements SubsectionService {
             .findById(id)
             .orElseThrow(
                 () ->
-                    new SubsectionNotFoundException(
+                    new ResourceNotFoundException(
                         String.format(ResponseMessage.SUBSECTION_NOT_FOUND, id)));
 
     Journal journal = subsection.getJournal();

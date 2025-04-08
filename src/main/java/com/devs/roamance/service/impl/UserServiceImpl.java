@@ -1,16 +1,16 @@
 package com.devs.roamance.service.impl;
 
 import com.devs.roamance.constant.ResponseMessage;
-import com.devs.roamance.dto.request.UserCreateRequestDto;
-import com.devs.roamance.dto.request.UserUpdateRequestDto;
+import com.devs.roamance.dto.request.user.UserCreateRequestDto;
+import com.devs.roamance.dto.request.user.UserUpdateRequestDto;
 import com.devs.roamance.dto.response.BaseResponseDto;
-import com.devs.roamance.dto.response.UserDto;
-import com.devs.roamance.dto.response.UserListResponseDto;
-import com.devs.roamance.dto.response.UserResponseDto;
+import com.devs.roamance.dto.response.user.UserDto;
+import com.devs.roamance.dto.response.user.UserListResponseDto;
+import com.devs.roamance.dto.response.user.UserResponseDto;
 import com.devs.roamance.exception.UserAlreadyExistException;
 import com.devs.roamance.exception.UserNotFoundException;
-import com.devs.roamance.model.Role;
-import com.devs.roamance.model.User;
+import com.devs.roamance.model.user.Role;
+import com.devs.roamance.model.user.User;
 import com.devs.roamance.repository.UserRepository;
 import com.devs.roamance.service.UserService;
 import com.devs.roamance.util.PaginationSortingUtil;
@@ -25,6 +25,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -42,6 +43,7 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
+  @Transactional
   public BaseResponseDto create(UserCreateRequestDto requestDto) {
 
     try {
@@ -123,6 +125,7 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
+  @Transactional
   public BaseResponseDto update(UserUpdateRequestDto requestDto, UUID userId) {
 
     User existingUser =
@@ -149,6 +152,7 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
+  @Transactional
   public BaseResponseDto delete(UUID userId) {
 
     User existingUser =

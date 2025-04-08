@@ -11,16 +11,16 @@ import com.devs.roamance.dto.response.BaseResponseDto;
 import com.devs.roamance.dto.response.travel.journal.JournalDto;
 import com.devs.roamance.dto.response.travel.journal.JournalListResponseDto;
 import com.devs.roamance.dto.response.travel.journal.JournalResponseDto;
-import com.devs.roamance.exception.JournalAlreadyExistException;
-import com.devs.roamance.exception.JournalNotFoundException;
+import com.devs.roamance.exception.ResourceAlreadyExistException;
+import com.devs.roamance.exception.ResourceNotFoundException;
 import com.devs.roamance.exception.UnauthorizedAccessException;
 import com.devs.roamance.model.Location;
-import com.devs.roamance.model.User;
 import com.devs.roamance.model.travel.journal.ActivitySubsection;
 import com.devs.roamance.model.travel.journal.Journal;
 import com.devs.roamance.model.travel.journal.RouteSubsection;
 import com.devs.roamance.model.travel.journal.SightseeingSubsection;
 import com.devs.roamance.model.travel.journal.Subsection;
+import com.devs.roamance.model.user.User;
 import com.devs.roamance.repository.JournalRepository;
 import com.devs.roamance.repository.UserRepository;
 import com.devs.roamance.service.JournalService;
@@ -108,13 +108,13 @@ public class JournalServiceImpl implements JournalService {
               .findById(savedJournal.getId())
               .orElseThrow(
                   () ->
-                      new JournalNotFoundException(
+                      new ResourceNotFoundException(
                           String.format(ResponseMessage.JOURNAL_NOT_FOUND, savedJournal.getId())));
 
       return new JournalResponseDto(201, true, ResponseMessage.JOURNAL_CREATE_SUCCESS, dto);
 
     } catch (DataIntegrityViolationException e) {
-      throw new JournalAlreadyExistException(
+      throw new ResourceAlreadyExistException(
           String.format(ResponseMessage.JOURNAL_ALREADY_EXIST, requestDto.getTitle()));
     }
   }
@@ -174,7 +174,7 @@ public class JournalServiceImpl implements JournalService {
             .findById(id)
             .orElseThrow(
                 () ->
-                    new JournalNotFoundException(
+                    new ResourceNotFoundException(
                         String.format(ResponseMessage.JOURNAL_NOT_FOUND, id)));
 
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
