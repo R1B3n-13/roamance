@@ -14,7 +14,6 @@ export const DEFAULT_META_DESCRIPTION =
   'Discover, plan and experience your next adventure with Roamance, the ultimate tourism companion.';
 export const MAX_WIDTH = 1400;
 
-// Default map center coordinates (New York City)
 export const defaultCenter = { lat: 40.7128, lng: -74.006 };
 
 export default function MapPage() {
@@ -22,7 +21,6 @@ export default function MapPage() {
   const { resolvedTheme } = useTheme();
   const isDarkMode = resolvedTheme === 'dark';
 
-  // Map state
   const [center, setCenter] = useState({ lat: 0, lng: 0 });
   const [locationName, setLocationName] = useState('');
   const [userLocation, setUserLocation] = useState<{
@@ -34,7 +32,6 @@ export default function MapPage() {
   const [showDirectionsPanel, setShowDirectionsPanel] = useState(false);
   const [centerOnUser, setCenterOnUser] = useState(false);
 
-  // Get query parameters
   useEffect(() => {
     const lat = searchParams?.get('lat');
     const lng = searchParams?.get('lng');
@@ -49,13 +46,11 @@ export default function MapPage() {
       setLocationName(name);
       setDirections(dir);
     } else {
-      // Default location if no coordinates provided (New York)
       setCenter(defaultCenter);
       setLocationName('New York City');
     }
   }, [searchParams]);
 
-  // Get user's location
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -72,7 +67,6 @@ export default function MapPage() {
     }
   }, []);
 
-  // Listen for "get directions" events
   useEffect(() => {
     const handleGetDirections = () => {
       setDirections(true);
@@ -86,17 +80,17 @@ export default function MapPage() {
     };
   }, []);
 
-  // Handle search query changes
   const handleSearchChange = (value: string) => {
     setSearchQuery(value);
   };
 
-  // Center map on user's location
   const handleCenterOnUser = () => {
     if (userLocation) {
       setCenterOnUser(true);
-      // Reset the flag after a short delay to allow re-centering in the future
-      setTimeout(() => setCenterOnUser(false), 1000);
+
+      setTimeout(() => {
+        setCenterOnUser(false);
+      }, 500);
     }
   };
 
@@ -111,7 +105,6 @@ export default function MapPage() {
         )}
       />
 
-      {/* Map Header */}
       <div
         className={cn(
           'w-full py-4 px-5 flex items-center justify-between relative z-10',
@@ -190,7 +183,6 @@ export default function MapPage() {
         </div>
       </div>
 
-      {/* Search Bar */}
       <div
         className={cn(
           'w-full py-3 px-5 relative z-10',
@@ -206,7 +198,6 @@ export default function MapPage() {
         />
       </div>
 
-      {/* Main Content */}
       <div className="flex-1 relative overflow-hidden">
         <MapContainer
           center={center}
@@ -218,7 +209,6 @@ export default function MapPage() {
           centerOnUser={centerOnUser}
         />
 
-        {/* Direction panel with enhanced styling */}
         {directions && showDirectionsPanel && (
           <motion.div
             initial={{ opacity: 0, x: -40 }}
@@ -243,7 +233,6 @@ export default function MapPage() {
                 <h2 className="font-semibold text-lg">Directions</h2>
               </div>
 
-              {/* Directions panel content with stylish placeholder */}
               <div className="mt-6 space-y-5">
                 <div className={cn(
                   'rounded-lg p-3',
@@ -293,7 +282,6 @@ export default function MapPage() {
         )}
       </div>
 
-      {/* Map Info displays at the bottom of some mobile screens */}
       <MapFeaturesInfo isDarkMode={isDarkMode} />
     </div>
   );

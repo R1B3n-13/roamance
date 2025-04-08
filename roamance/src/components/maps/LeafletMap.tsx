@@ -15,7 +15,7 @@ import { MapControlButtons } from './MapControlButtons';
 import { MapController } from './MapController';
 import { MapInternalControls } from './MapInternalControls';
 import { mapLayerAttribution, mapLayers } from './MapLayerControl';
-import { DestinationMarker, UserLocationMarker } from './MapMarkers';
+import { DestinationMarker, SearchPinMarker, UserLocationMarker } from './MapMarkers';
 import { PointsOfInterest } from './PointsOfInterest';
 import { SearchResults } from './SearchResults';
 import { WaypointsPanel } from './WaypointsPanel';
@@ -120,11 +120,28 @@ export default function LeafletMap({
     Array<{ lat: number; lng: number }>
   >([]);
   const [mapFeatureHelp, setMapFeatureHelp] = useState<string | null>(null);
+  // Add state for search pin
+  const [searchPin, setSearchPin] = useState<{
+    lat: number;
+    lng: number;
+    name: string;
+  } | null>(null);
 
   // Event handlers
   const handleSelectSearchResult = (lat: number, lng: number) => {
     if (mapRef.current) {
       mapRef.current.setView([lat, lng], 15);
+
+      // Set the search pin when selecting a result
+      const selectedResult = searchResults.find(r => r.lat === lat && r.lng === lng);
+      if (selectedResult) {
+        setSearchPin({
+          lat,
+          lng,
+          name: selectedResult.name
+        });
+      }
+
       setSearchResults([]);
     }
   };
@@ -177,6 +194,10 @@ export default function LeafletMap({
     const fetchSearchResults = async () => {
       if (searchQuery.length < 3) {
         setSearchResults([]);
+        // Clear the search pin when search query is cleared or too short
+        if (searchPin && searchQuery.length === 0) {
+          setSearchPin(null);
+        }
         return;
       }
 
@@ -248,6 +269,16 @@ export default function LeafletMap({
             <UserLocationMarker
               position={userLocation}
               isDarkMode={isDarkMode}
+            />
+          )}
+
+          {/* Display search pin marker */}
+          {searchPin && (
+            <SearchPinMarker
+              position={{ lat: searchPin.lat, lng: searchPin.lng }}
+              name={searchPin.name}
+              isDarkMode={isDarkMode}
+              onClear={() => setSearchPin(null)}
             />
           )}
 

@@ -184,6 +184,65 @@ interface POIMarkerProps {
   directions?: boolean;
 }
 
+// Search pin marker (blue pin)
+interface SearchPinMarkerProps {
+  position: { lat: number; lng: number };
+  name: string;
+  isDarkMode: boolean;
+  onClear: () => void;
+}
+
+export function SearchPinMarker({
+  position,
+  name,
+  isDarkMode,
+  onClear,
+}: SearchPinMarkerProps) {
+  return (
+    <Marker
+      position={[position.lat, position.lng]}
+      icon={
+        new L.Icon({
+          iconUrl:
+            'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAiIGhlaWdodD0iNDUiIHZpZXdCb3g9IjAgMCAzMCA0NSIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTE1IDQ0LjVDMTUgNDQuNSAzMCAyOS42NTQgMzAgMTVDMzAgNi43MTU3MyAyMy4yODQzIDAgMTUgMEM2LjcxNTczIDAgMCA2LjcxNTczIDAgMTVDMCAyOS42NTQgMTUgNDQuNSAxNSA0NC41WiIgZmlsbD0iIzNiODJmNiIvPgo8Y2lyY2xlIGN4PSIxNSIgY3k9IjE1IiByPSI3LjUiIGZpbGw9IndoaXRlIi8+Cjwvc3ZnPg==',
+          iconSize: [30, 45],
+          iconAnchor: [15, 45],
+          popupAnchor: [0, -45],
+        })
+      }
+    >
+      <Popup>
+        <div className={cn('p-2', isDarkMode ? 'bg-card text-foreground' : '')}>
+          <h3 className={cn('font-bold', isDarkMode ? 'text-foreground' : '')}>
+            {name}
+          </h3>
+          <p
+            className={cn('text-sm', isDarkMode ? 'text-muted-foreground' : '')}
+          >
+            Coordinates: {position.lat.toFixed(4)}, {position.lng.toFixed(4)}
+          </p>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                size="sm"
+                variant="outline"
+                className="mt-2 w-full"
+                onClick={onClear}
+              >
+                Clear Pin
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Remove this pin from the map</p>
+            </TooltipContent>
+          </Tooltip>
+          <StreetViewButton position={position} isDarkMode={isDarkMode} />
+        </div>
+      </Popup>
+    </Marker>
+  );
+}
+
 export function POIMarker({
   position,
   name,

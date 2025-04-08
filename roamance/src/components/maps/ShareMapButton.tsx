@@ -36,11 +36,9 @@ export function ShareMapButton({
         });
       } catch (err) {
         console.error('Error sharing:', err);
-        // Fallback to clipboard
         copyToClipboard(shareUrl);
       }
     } else {
-      // Fallback for browsers that don't support Web Share API
       copyToClipboard(shareUrl);
     }
   };

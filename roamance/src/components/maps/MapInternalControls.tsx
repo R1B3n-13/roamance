@@ -24,55 +24,52 @@ export function MapInternalControls({
   const previousCenterOnUser = useRef(centerOnUser);
   const userLocationCentered = useRef(false);
 
-  // Handle centering on user location
   useEffect(() => {
-    // Only center the map when centerOnUser changes from false to true
     if (centerOnUser && !previousCenterOnUser.current && userLocation) {
       map.setView([userLocation.lat, userLocation.lng], 15, {
         animate: true,
         duration: 1,
       });
 
-      // Mark that we've centered on user location to prevent any other component
-      // from re-centering the map on a different location
       userLocationCentered.current = true;
-
-      // After a short delay, reset the flag to allow future centering actions
-      const resetTimer = setTimeout(() => {
-        userLocationCentered.current = false;
-      }, 2000);
 
       const event = new CustomEvent('userLocationCentered');
       window.dispatchEvent(event);
-
-      return () => clearTimeout(resetTimer);
+    } else if (!centerOnUser && previousCenterOnUser.current) {
+      userLocationCentered.current = false;
     }
 
-    // Update the ref to track the current value
     previousCenterOnUser.current = centerOnUser;
   }, [centerOnUser, map, userLocation]);
 
-  // Override the map's default centering behavior when we're handling user location centering
   useEffect(() => {
-    if (userLocationCentered.current) {
-      // Temporarily disable the map's setView method if we have just centered on user location
-      const originalSetView = map.setView;
-      map.setView = function (...args) {
-        // Only apply if we're not actively centering on user
-        if (!userLocationCentered.current) {
-          return originalSetView.apply(this, args);
+    const originalSetView = map.setView;
+
+    map.setView = function (...args) {
+      if (userLocationCentered.current) {
+        const [_, zoom, options] = args;
+
+        if (zoom !== undefined) {
+          const currentCenter = map.getCenter();
+          return originalSetView.call(
+            this,
+            [currentCenter.lat, currentCenter.lng],
+            zoom,
+            options
+          );
         }
+
         return this;
-      };
+      }
 
-      return () => {
-        // Restore the original method when component unmounts or dependencies change
-        map.setView = originalSetView;
-      };
-    }
-  }, [centerOnUser, map]);
+      return originalSetView.apply(this, args);
+    };
 
-  // Handle measurement toggle
+    return () => {
+      map.setView = originalSetView;
+    };
+  }, [map]);
+
   useEffect(() => {
     const handleToggleMeasure = () => {
       setIsMeasuring((prev) => !prev);
