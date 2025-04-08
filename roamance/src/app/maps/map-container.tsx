@@ -9,7 +9,8 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
-import { Info, MapPin } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Globe, HelpCircle, Info } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
 
@@ -17,14 +18,51 @@ import { useEffect, useState } from 'react';
 const LeafletMap = dynamic(() => import('@/components/maps/LeafletMap'), {
   ssr: false,
   loading: () => (
-    <div className="h-full w-full flex items-center justify-center bg-slate-100">
-      <div className="animate-pulse flex flex-col items-center">
-        <div className="h-16 w-16 bg-slate-300 rounded-full mb-4 flex items-center justify-center">
-          <MapPin className="h-8 w-8 text-slate-400" />
+    <div className="h-full w-full flex items-center justify-center relative">
+      <div className="absolute inset-0 bg-gradient-to-br from-sky-50/50 to-blue-50/30 dark:from-background dark:to-background/95" />
+
+      <motion.div
+        className="flex flex-col items-center gap-3 z-10 relative"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+      >
+        <div className="relative">
+          <motion.div
+            className="h-20 w-20 rounded-full bg-blue-100/50 dark:bg-blue-900/20 flex items-center justify-center"
+            animate={{
+              scale: [1, 1.05, 1],
+              opacity: [0.7, 1, 0.7]
+            }}
+            transition={{
+              repeat: Infinity,
+              duration: 2,
+              ease: "easeInOut"
+            }}
+          >
+            <Globe className="h-10 w-10 text-primary/80" strokeWidth={1.5} />
+          </motion.div>
+
+          <motion.div
+            className="absolute -inset-1.5 rounded-full border border-primary/30 dark:border-primary/20"
+            animate={{
+              scale: [1, 1.1, 1],
+              opacity: [0.3, 0.7, 0.3]
+            }}
+            transition={{
+              repeat: Infinity,
+              duration: 2,
+              ease: "easeInOut",
+              delay: 0.2
+            }}
+          />
         </div>
-        <div className="h-4 w-48 bg-slate-300 rounded"></div>
-        <div className="h-3 w-64 bg-slate-300 rounded mt-2"></div>
-      </div>
+
+        <div className="text-center space-y-1.5 max-w-[220px]">
+          <h3 className="font-medium text-lg text-foreground/90">Loading Map</h3>
+          <p className="text-sm text-muted-foreground">Preparing your interactive map experience</p>
+        </div>
+      </motion.div>
     </div>
   ),
 });
@@ -60,6 +98,7 @@ export function MapContainer({
     traffic: 'Show simulated traffic conditions in the area',
     share: 'Share this location with others or copy a link to it',
     waypoints: 'Add stops along your route when getting directions',
+    theme: 'Toggle between light and dark mode for better visibility',
   };
 
   useEffect(() => {
@@ -94,37 +133,75 @@ export function MapContainer({
 
   return (
     <div className="h-full w-full relative">
+      {/* Glass effect overlay */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className={cn(
+          "absolute left-0 top-0 w-1/4 h-1/4 rounded-full opacity-20 blur-3xl",
+          isDarkMode ? "bg-primary/5" : "bg-primary/10"
+        )} style={{ transform: 'translate(-30%, -30%)' }} />
+
+        <div className={cn(
+          "absolute right-0 bottom-0 w-1/3 h-1/3 rounded-full opacity-20 blur-3xl",
+          isDarkMode ? "bg-blue-500/5" : "bg-blue-500/10"
+        )} style={{ transform: 'translate(20%, 20%)' }} />
+      </div>
+
       {/* Location info card */}
-      <LocationInfoCard
-        visible={infoCardVisible && mapLoaded}
-        locationName={locationName}
-        center={center}
-        isDarkMode={isDarkMode}
-      />
+      <AnimatePresence>
+        {infoCardVisible && mapLoaded && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.3 }}
+          >
+            <LocationInfoCard
+              visible={true}
+              locationName={locationName}
+              center={center}
+              isDarkMode={isDarkMode}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Feature help card */}
-      {mapFeatureHelp && (
-        <FeatureHelpCard
-          featureName={mapFeatureHelp}
-          description={mapFeatures[mapFeatureHelp as keyof typeof mapFeatures]}
-          isDarkMode={isDarkMode}
-        />
-      )}
+      <AnimatePresence>
+        {mapFeatureHelp && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 5 }}
+            transition={{ duration: 0.2 }}
+          >
+            <FeatureHelpCard
+              featureName={mapFeatureHelp}
+              description={mapFeatures[mapFeatureHelp as keyof typeof mapFeatures]}
+              isDarkMode={isDarkMode}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Map help tooltip */}
       <TooltipProvider>
-        <div className="absolute bottom-4 right-4 z-[1000]">
+        <motion.div
+          className="absolute bottom-4 right-4 z-[1000]"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 1, duration: 0.3 }}
+        >
           <Tooltip>
             <TooltipTrigger asChild>
               <div
                 className={cn(
-                  'p-2 rounded-full cursor-pointer transition-all duration-200 hover:scale-105',
+                  'p-2.5 rounded-full cursor-pointer transition-all duration-200 hover:scale-105',
                   isDarkMode
-                    ? 'bg-card/80 border border-primary/30 text-primary'
-                    : 'bg-white/90 border border-muted text-muted-foreground'
+                    ? 'bg-background/70 backdrop-blur-md border border-primary/30 text-primary shadow-md shadow-primary/5'
+                    : 'bg-white/90 backdrop-blur-md border border-primary/20 text-primary/80 shadow-lg shadow-primary/5'
                 )}
               >
-                <Info className="h-5 w-5" />
+                <HelpCircle className="h-5 w-5" />
               </div>
             </TooltipTrigger>
             <TooltipContent
@@ -139,22 +216,22 @@ export function MapContainer({
                   : "bg-white/95"
               )}>
                 <div className={cn(
-                  "px-4 py-2.5 border-b",
+                  "px-4 py-3 border-b",
                   isDarkMode ? "border-primary/20" : "border-muted/50"
                 )}>
-                  <h4 className="font-medium text-sm flex items-center gap-1.5">
-                    <Info className="h-3.5 w-3.5 text-primary" />
-                    <span>Map Features</span>
+                  <h4 className="font-medium text-sm flex items-center gap-2">
+                    <Info className="h-4 w-4 text-primary" />
+                    <span>Map Features Guide</span>
                   </h4>
                 </div>
-                <ul className="px-4 pb-3 space-y-2 text-xs">
+                <ul className="px-4 pb-3 space-y-2.5 text-xs">
                   {Object.entries(mapFeatures).map(([key, description]) => (
                     <li key={key} className="flex items-start gap-2">
                       <span className={cn(
                         "font-medium capitalize flex-shrink-0 px-1.5 py-0.5 rounded text-xs",
                         isDarkMode
                           ? "bg-primary/20 text-primary"
-                          : "bg-muted text-muted-foreground"
+                          : "bg-primary/10 text-primary-foreground/80"
                       )}>
                         {key}
                       </span>
@@ -165,7 +242,7 @@ export function MapContainer({
               </div>
             </TooltipContent>
           </Tooltip>
-        </div>
+        </motion.div>
       </TooltipProvider>
 
       <LeafletMap
