@@ -24,6 +24,31 @@ L.Icon.Default.mergeOptions({
   shadowUrl: '/marker-shadow.png',
 });
 
+if (typeof document !== 'undefined') {
+  const styleElement = document.createElement('style');
+  styleElement.textContent = `
+    .dark-map .leaflet-tile-pane {
+      filter: brightness(0.6) contrast(1.1) saturate(1.1);
+    }
+    .dark-map .leaflet-control,
+    .dark-map .leaflet-control a {
+      background-color: #1e1e1e !important;
+      color: #f3f4f6 !important;
+      border-color: #374151 !important;
+    }
+    .dark-map .leaflet-control a:hover {
+      background-color: #374151 !important;
+    }
+    .dark-map .leaflet-popup-content-wrapper,
+    .dark-map .leaflet-popup-tip {
+      background-color: #1e1e1e !important;
+      color: #f3f4f6 !important;
+      border-color: #374151 !important;
+    }
+  `;
+  document.head.appendChild(styleElement);
+}
+
 interface MapProps {
   center: { lat: number; lng: number };
   locationName: string;
@@ -87,6 +112,20 @@ function MapController({
       )}
     </>
   );
+}
+
+function DarkModeMapLayer({ isDarkMode }: { isDarkMode: boolean }) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (isDarkMode) {
+      map.getContainer().classList.add('dark-map');
+    } else {
+      map.getContainer().classList.remove('dark-map');
+    }
+  }, [isDarkMode, map]);
+
+  return null;
 }
 
 function SearchResults({
@@ -384,6 +423,8 @@ export default function LeafletMap({
           directions={directions}
           onMapLoaded={onMapLoaded}
         />
+
+        <DarkModeMapLayer isDarkMode={isDarkMode} />
       </MapContainer>
 
       <SearchResults

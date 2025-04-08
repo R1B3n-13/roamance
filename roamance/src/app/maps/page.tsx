@@ -12,15 +12,42 @@ import { MapContainer } from './map-container';
 
 export default function MapPage() {
   const searchParams = useSearchParams();
-  const lat = searchParams?.get('lat') ? parseFloat(searchParams.get('lat') as string) : 0;
-  const lng = searchParams?.get('lng') ? parseFloat(searchParams.get('lng') as string) : 0;
+  const lat = searchParams?.get('lat')
+    ? parseFloat(searchParams.get('lat') as string)
+    : 0;
+  const lng = searchParams?.get('lng')
+    ? parseFloat(searchParams.get('lng') as string)
+    : 0;
   const name = searchParams?.get('name') || 'Location';
 
   const { resolvedTheme } = useTheme();
-  const isDarkMode = resolvedTheme === 'dark';
+  const [mounted, setMounted] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    const systemPrefersDark = window.matchMedia(
+      '(prefers-color-scheme: dark)'
+    ).matches;
+
+    if (!localStorage.getItem('theme') && systemPrefersDark) {
+      setIsDarkMode(true);
+    } else if (localStorage.getItem('theme') === 'dark') {
+      setIsDarkMode(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (mounted) {
+      setIsDarkMode(resolvedTheme === 'dark');
+    }
+  }, [resolvedTheme, mounted]);
 
   const [searchQuery, setSearchQuery] = useState('');
-  const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);
+  const [userLocation, setUserLocation] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
   const [isLocating, setIsLocating] = useState(false);
   const [directions, setDirections] = useState<boolean>(false);
   const [centerOnUser, setCenterOnUser] = useState<boolean>(false);
@@ -32,7 +59,7 @@ export default function MapPage() {
         (position) => {
           const userPos = {
             lat: position.coords.latitude,
-            lng: position.coords.longitude
+            lng: position.coords.longitude,
           };
           setUserLocation(userPos);
           setCenterOnUser(true);
@@ -41,7 +68,9 @@ export default function MapPage() {
         (error) => {
           console.error('Error getting location:', error);
           setIsLocating(false);
-          alert('Could not get your location. Please check your browser permissions.');
+          alert(
+            'Could not get your location. Please check your browser permissions.'
+          );
         }
       );
     } else {
@@ -58,7 +87,10 @@ export default function MapPage() {
     window.addEventListener('userLocationCentered', handleUserLocationCentered);
 
     return () => {
-      window.removeEventListener('userLocationCentered', handleUserLocationCentered);
+      window.removeEventListener(
+        'userLocationCentered',
+        handleUserLocationCentered
+      );
     };
   }, []);
 
@@ -69,6 +101,10 @@ export default function MapPage() {
     setDirections(!directions);
   };
 
+  if (!mounted) {
+    return <div className="h-[calc(100vh-4rem)] w-full bg-background"></div>;
+  }
+
   return (
     <div className="relative h-[calc(100vh-4rem)] w-full">
       <div className="absolute top-4 left-4 right-4 z-[1000] flex flex-col gap-2">
@@ -78,10 +114,10 @@ export default function MapPage() {
               variant="outline"
               size="icon"
               className={cn(
-                "h-10 w-10 rounded-full backdrop-blur-md shadow-lg transition-all duration-200 hover:scale-105",
+                'h-10 w-10 rounded-full backdrop-blur-md shadow-lg transition-all duration-200 hover:scale-105',
                 isDarkMode
-                  ? "bg-card/80 border-card-foreground/20 text-primary hover:bg-card/90 hover:text-primary"
-                  : "bg-white/90 border-muted hover:bg-white"
+                  ? 'bg-card/80 border-card-foreground/20 text-primary hover:bg-card/90 hover:text-primary'
+                  : 'bg-white/90 border-muted hover:bg-white'
               )}
             >
               <ArrowLeft className="h-5 w-5" />
@@ -89,21 +125,30 @@ export default function MapPage() {
           </Link>
 
           <div className="max-w-md w-full md:w-80">
-            <div className={cn(
-              "flex items-center px-4 py-2 backdrop-blur-md shadow-sm border rounded-full overflow-hidden transition-all duration-200",
-              isDarkMode
-                ? "bg-background/50 border-muted/30 hover:bg-background/70"
-                : "bg-white/80 border-muted/20 hover:bg-white/90"
-            )}>
-              <Search className={cn("h-3.5 w-3.5 mr-2", isDarkMode ? "text-muted-foreground/70" : "text-muted-foreground/60")} />
+            <div
+              className={cn(
+                'flex items-center px-4 py-2 backdrop-blur-md shadow-sm border rounded-full overflow-hidden transition-all duration-200',
+                isDarkMode
+                  ? 'bg-background/50 border-muted/30 hover:bg-background/70'
+                  : 'bg-white/80 border-muted/20 hover:bg-white/90'
+              )}
+            >
+              <Search
+                className={cn(
+                  'h-3.5 w-3.5 mr-2',
+                  isDarkMode
+                    ? 'text-muted-foreground/70'
+                    : 'text-muted-foreground/60'
+                )}
+              />
               <Input
                 placeholder="Search places..."
                 className={cn(
-                  "border-none shadow-none focus-visible:ring-0 bg-transparent h-7 px-0",
+                  'border-none shadow-none focus-visible:ring-0 bg-transparent h-7 px-0',
                   isDarkMode
-                    ? "placeholder:text-muted-foreground/50 text-foreground"
-                    : "placeholder:text-muted-foreground/50 text-foreground",
-                  "text-sm"
+                    ? 'placeholder:text-muted-foreground/50 text-foreground'
+                    : 'placeholder:text-muted-foreground/50 text-foreground',
+                  'text-sm'
                 )}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -113,10 +158,10 @@ export default function MapPage() {
                   variant="ghost"
                   size="sm"
                   className={cn(
-                    "h-6 w-6 p-0 rounded-full ml-1",
+                    'h-6 w-6 p-0 rounded-full ml-1',
                     isDarkMode
-                      ? "hover:bg-muted/20 text-muted-foreground"
-                      : "hover:bg-muted/20 text-muted-foreground"
+                      ? 'hover:bg-muted/20 text-muted-foreground'
+                      : 'hover:bg-muted/20 text-muted-foreground'
                   )}
                   onClick={() => setSearchQuery('')}
                 >
@@ -135,27 +180,27 @@ export default function MapPage() {
           onClick={getUserLocation}
           disabled={isLocating}
           className={cn(
-            "h-12 w-12 rounded-full backdrop-blur-md shadow-lg transition-all duration-200 hover:scale-105",
+            'h-12 w-12 rounded-full backdrop-blur-md shadow-lg transition-all duration-200 hover:scale-105',
             isDarkMode
-              ? "bg-card/90 border-primary/30 text-primary hover:bg-primary/20 hover:border-primary/50"
-              : "bg-white/90 border-muted hover:bg-white",
-            isLocating && "animate-pulse"
+              ? 'bg-card/90 border-primary/30 text-primary hover:bg-primary/20 hover:border-primary/50'
+              : 'bg-white/90 border-muted hover:bg-white',
+            isLocating && 'animate-pulse'
           )}
         >
           <Locate className="h-5 w-5" />
         </Button>
 
         <Button
-          variant={directions ? "default" : "outline"}
+          variant={directions ? 'default' : 'outline'}
           size="icon"
           onClick={toggleDirections}
           className={cn(
-            "h-12 w-12 rounded-full backdrop-blur-md shadow-lg transition-all duration-200 hover:scale-105",
+            'h-12 w-12 rounded-full backdrop-blur-md shadow-lg transition-all duration-200 hover:scale-105',
             directions
-              ? "bg-primary text-primary-foreground"
+              ? 'bg-primary text-primary-foreground'
               : isDarkMode
-                ? "bg-card/90 border-primary/30 text-primary hover:bg-primary/20 hover:border-primary/50"
-                : "bg-white/90 border-muted hover:bg-white"
+                ? 'bg-card/90 border-primary/30 text-primary hover:bg-primary/20 hover:border-primary/50'
+                : 'bg-white/90 border-muted hover:bg-white'
           )}
         >
           <Navigation className="h-5 w-5" />
