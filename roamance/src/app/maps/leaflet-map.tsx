@@ -19,13 +19,23 @@ import {
 } from 'react-leaflet';
 import { searchGeonames } from '@/api/places-api';
 import { Card } from '@/components/ui/card';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 // Add Leaflet Draw for distance measurement and drawing
 import 'leaflet-draw/dist/leaflet.draw.css';
-import { EditControl } from "react-leaflet-draw";
+import { EditControl } from 'react-leaflet-draw';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 
 delete (L.Icon.Default.prototype as { _getIconUrl?: () => string })._getIconUrl;
@@ -81,39 +91,72 @@ const mapLayers = {
     light: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
     dark: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
     name: 'Standard',
+    description: 'Default map view showing roads and basic features',
   },
   satellite: {
-    light: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    light:
+      'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
     dark: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
     name: 'Satellite',
+    description: 'Satellite imagery of the area',
   },
   terrain: {
-    light: 'https://stamen-tiles-{s}.a.ssl.fastly.net/terrain/{z}/{x}/{y}{r}.png',
+    light:
+      'https://stamen-tiles-{s}.a.ssl.fastly.net/terrain/{z}/{x}/{y}{r}.png',
     dark: 'https://stamen-tiles-{s}.a.ssl.fastly.net/terrain-dark/{z}/{x}/{y}{r}.png',
     name: 'Terrain',
+    description: 'Map showing topography and elevation features',
   },
   transport: {
     light: 'https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png',
     dark: 'https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png',
     name: 'Transport',
+    description: 'Map showing roads, transit routes and cycling paths',
   },
 };
 
 const mapLayerAttribution = {
-  standard: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+  standard:
+    '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
   satellite: '&copy; <a href="https://www.arcgis.com/">Esri</a>',
-  terrain: '&copy; <a href="http://stamen.com">Stamen Design</a>, <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-  transport: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>, <a href="https://github.com/cyclosm/cyclosm-cartocss-style">CyclOSM</a>',
+  terrain:
+    '&copy; <a href="http://stamen.com">Stamen Design</a>, <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+  transport:
+    '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>, <a href="https://github.com/cyclosm/cyclosm-cartocss-style">CyclOSM</a>',
 };
 
 // POI categories
 const poiCategories = [
-  { name: 'Restaurant', icon: '🍽️' },
-  { name: 'Hotel', icon: '🏨' },
-  { name: 'Museum', icon: '🏛️' },
-  { name: 'Park', icon: '🌳' },
-  { name: 'Hospital', icon: '🏥' },
-  { name: 'Shopping', icon: '🛍️' },
+  {
+    name: 'Restaurant',
+    icon: '🍽️',
+    description: 'Places to dine and enjoy local cuisine',
+  },
+  {
+    name: 'Hotel',
+    icon: '🏨',
+    description: 'Accommodation options in the area',
+  },
+  {
+    name: 'Museum',
+    icon: '🏛️',
+    description: 'Cultural and historical attractions',
+  },
+  {
+    name: 'Park',
+    icon: '🌳',
+    description: 'Green spaces, parks and recreation areas',
+  },
+  {
+    name: 'Hospital',
+    icon: '🏥',
+    description: 'Medical facilities and emergency services',
+  },
+  {
+    name: 'Shopping',
+    icon: '🛍️',
+    description: 'Shopping centers, markets and retail areas',
+  },
 ];
 
 interface MapProps {
@@ -152,7 +195,7 @@ function MapController({
 
   useEffect(() => {
     if (directions && userLocation && center.lat !== 0 && center.lng !== 0) {
-      let points: [number, number][] = [];
+      const points: [number, number][] = [];
 
       // Start with user location
       if (userLocation) {
@@ -161,7 +204,7 @@ function MapController({
 
       // Add all waypoints
       if (waypoints.length > 0) {
-        waypoints.forEach(wp => {
+        waypoints.forEach((wp) => {
           points.push([wp.lat, wp.lng]);
         });
       }
@@ -174,7 +217,7 @@ function MapController({
       setRoute(points);
 
       // Create bounds that include all points
-      const bounds = L.latLngBounds(points.map(p => L.latLng(p[0], p[1])));
+      const bounds = L.latLngBounds(points.map((p) => L.latLng(p[0], p[1])));
       map.fitBounds(bounds, { padding: [50, 50] });
     } else {
       setRoute([]);
@@ -309,7 +352,13 @@ function SearchResults({
   ) : null;
 }
 
-function StreetViewButton({ position, isDarkMode }: { position: { lat: number; lng: number }, isDarkMode: boolean }) {
+function StreetViewButton({
+  position,
+  isDarkMode,
+}: {
+  position: { lat: number; lng: number };
+  isDarkMode: boolean;
+}) {
   const [streetViewUrl, setStreetViewUrl] = useState('');
   const [streetViewOpen, setStreetViewOpen] = useState(false);
 
@@ -320,22 +369,33 @@ function StreetViewButton({ position, isDarkMode }: { position: { lat: number; l
 
   return (
     <>
-      <Button
-        size="sm"
-        variant={isDarkMode ? "outline" : "secondary"}
-        className={cn(
-          "mt-2 w-full",
-          isDarkMode ? "bg-background/60 hover:bg-background/80" : ""
-        )}
-        onClick={() => setStreetViewOpen(true)}
-      >
-        Street View
-      </Button>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            size="sm"
+            variant={isDarkMode ? 'outline' : 'secondary'}
+            className={cn(
+              'mt-2 w-full',
+              isDarkMode ? 'bg-background/60 hover:bg-background/80' : ''
+            )}
+            onClick={() => setStreetViewOpen(true)}
+          >
+            Street View
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>See 360° street-level imagery of this location</p>
+        </TooltipContent>
+      </Tooltip>
 
       <Dialog open={streetViewOpen} onOpenChange={setStreetViewOpen}>
         <DialogContent className="max-w-4xl w-full h-[80vh]">
           <div className="absolute top-2 right-2 z-10">
-            <Button variant="ghost" size="icon" onClick={() => setStreetViewOpen(false)}>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setStreetViewOpen(false)}
+            >
               <X className="h-4 w-4" />
             </Button>
           </div>
@@ -351,44 +411,62 @@ function StreetViewButton({ position, isDarkMode }: { position: { lat: number; l
   );
 }
 
-function MapLayerControl({ currentLayer, setCurrentLayer, isDarkMode }: {
-  currentLayer: keyof typeof mapLayers,
-  setCurrentLayer: (layer: keyof typeof mapLayers) => void,
-  isDarkMode: boolean
+function MapLayerControl({
+  currentLayer,
+  setCurrentLayer,
+  isDarkMode,
+}: {
+  currentLayer: keyof typeof mapLayers;
+  setCurrentLayer: (layer: keyof typeof mapLayers) => void;
+  isDarkMode: boolean;
 }) {
   return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          size="icon"
-          className={cn(
-            'h-10 w-10 rounded-full backdrop-blur-md shadow-lg',
-            isDarkMode
-              ? 'bg-card/90 border-primary/30 text-primary hover:bg-primary/20 hover:border-primary/50'
-              : 'bg-white/90 border-muted hover:bg-white'
-          )}
-        >
-          <Layers className="h-5 w-5" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-56" align="end">
-        <div className="space-y-2">
-          <h4 className="font-medium text-sm">Map Type</h4>
-          <RadioGroup
-            value={currentLayer}
-            onValueChange={(value) => setCurrentLayer(value as keyof typeof mapLayers)}
-          >
-            {Object.entries(mapLayers).map(([key, layer]) => (
-              <div key={key} className="flex items-center space-x-2">
-                <RadioGroupItem value={key} id={`layer-${key}`} />
-                <Label htmlFor={`layer-${key}`}>{layer.name}</Label>
-              </div>
-            ))}
-          </RadioGroup>
-        </div>
-      </PopoverContent>
-    </Popover>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              size="icon"
+              className={cn(
+                'h-10 w-10 rounded-full backdrop-blur-md shadow-lg',
+                isDarkMode
+                  ? 'bg-card/90 border-primary/30 text-primary hover:bg-primary/20 hover:border-primary/50'
+                  : 'bg-white/90 border-muted hover:bg-white'
+              )}
+            >
+              <Layers className="h-5 w-5" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-56" align="end">
+            <div className="space-y-2">
+              <h4 className="font-medium text-sm">Map Type</h4>
+              <RadioGroup
+                value={currentLayer}
+                onValueChange={(value) =>
+                  setCurrentLayer(value as keyof typeof mapLayers)
+                }
+              >
+                {Object.entries(mapLayers).map(([key, layer]) => (
+                  <div key={key} className="flex items-center space-x-2">
+                    <RadioGroupItem value={key} id={`layer-${key}`} />
+                    <div>
+                      <Label htmlFor={`layer-${key}`}>{layer.name}</Label>
+                      <p className="text-xs text-muted-foreground">
+                        {layer.description}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </RadioGroup>
+            </div>
+          </PopoverContent>
+        </Popover>
+      </TooltipTrigger>
+      <TooltipContent>
+        <p>Change map style</p>
+      </TooltipContent>
+    </Tooltip>
   );
 }
 
@@ -410,17 +488,17 @@ function MapMeasureControl({ isDarkMode }: { isDarkMode: boolean }) {
           polyline: {
             shapeOptions: {
               color: '#3b82f6',
-              weight: 3
+              weight: 3,
             },
             metric: true,
-            feet: false
-          }
+            feet: false,
+          },
         },
         edit: {
           featureGroup: featureGroupRef.current as L.FeatureGroup,
           edit: false,
-          remove: true
-        }
+          remove: true,
+        },
       });
 
       map.addControl(drawControl);
@@ -437,31 +515,44 @@ function MapMeasureControl({ isDarkMode }: { isDarkMode: boolean }) {
 
   return (
     <>
-      <Button
-        variant={isMeasuring ? "default" : "outline"}
-        size="icon"
-        onClick={handleMeasurementClick}
-        className={cn(
-          'h-10 w-10 rounded-full backdrop-blur-md shadow-lg',
-          isMeasuring
-            ? 'bg-primary text-primary-foreground'
-            : isDarkMode
-              ? 'bg-card/90 border-primary/30 text-primary hover:bg-primary/20 hover:border-primary/50'
-              : 'bg-white/90 border-muted hover:bg-white'
-        )}
-      >
-        <Ruler className="h-4 w-4" />
-      </Button>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant={isMeasuring ? 'default' : 'outline'}
+            size="icon"
+            onClick={handleMeasurementClick}
+            className={cn(
+              'h-10 w-10 rounded-full backdrop-blur-md shadow-lg',
+              isMeasuring
+                ? 'bg-primary text-primary-foreground'
+                : isDarkMode
+                  ? 'bg-card/90 border-primary/30 text-primary hover:bg-primary/20 hover:border-primary/50'
+                  : 'bg-white/90 border-muted hover:bg-white'
+            )}
+          >
+            <Ruler className="h-4 w-4" />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>{isMeasuring ? 'Stop measuring' : 'Measure distances'}</p>
+        </TooltipContent>
+      </Tooltip>
 
       {isMeasuring && (
-        <FeatureGroup ref={(el) => { featureGroupRef.current = el as any; }}>
+        <FeatureGroup
+          ref={(el) => {
+            featureGroupRef.current = el as L.FeatureGroup;
+          }}
+        >
           <EditControl
             position="topright"
             onCreated={(e) => {
               const layer = e.layer;
               if (layer instanceof L.Polyline) {
                 const distanceInMeters = calculatePolylineDistance(layer);
-                layer.bindPopup(`Distance: ${formatDistance(distanceInMeters)}`).openPopup();
+                layer
+                  .bindPopup(`Distance: ${formatDistance(distanceInMeters)}`)
+                  .openPopup();
               }
             }}
             draw={{
@@ -470,7 +561,7 @@ function MapMeasureControl({ isDarkMode }: { isDarkMode: boolean }) {
               circlemarker: false,
               marker: false,
               polygon: false,
-              polyline: true
+              polyline: true,
             }}
           />
         </FeatureGroup>
@@ -485,7 +576,7 @@ function calculatePolylineDistance(polyline: L.Polyline): number {
   let totalDistance = 0;
 
   for (let i = 1; i < latlngs.length; i++) {
-    totalDistance += latlngs[i-1].distanceTo(latlngs[i]);
+    totalDistance += latlngs[i - 1].distanceTo(latlngs[i]);
   }
 
   return totalDistance;
@@ -500,9 +591,21 @@ function formatDistance(meters: number): string {
   }
 }
 
-function TrafficLayer({ showTraffic, isDarkMode }: { showTraffic: boolean, isDarkMode: boolean }) {
+type TrafficPoint = {
+  position: [number, number];
+  radius: number;
+  intensity: number;
+};
+
+function TrafficLayer({
+  showTraffic,
+  isDarkMode,
+}: {
+  showTraffic: boolean;
+  isDarkMode: boolean;
+}) {
   const map = useMap();
-  const [trafficData, setTrafficData] = useState<any[]>([]);
+  const [trafficData, setTrafficData] = useState<TrafficPoint[]>([]);
 
   useEffect(() => {
     if (showTraffic) {
@@ -520,9 +623,9 @@ function TrafficLayer({ showTraffic, isDarkMode }: { showTraffic: boolean, isDar
         const intensity = Math.random(); // 0 to 1 (light to heavy)
 
         trafficPoints.push({
-          position: [lat, lng],
+          position: [lat, lng] as [number, number],
           radius: 200 + Math.random() * 500,
-          intensity
+          intensity,
         });
       }
 
@@ -544,13 +647,15 @@ function TrafficLayer({ showTraffic, isDarkMode }: { showTraffic: boolean, isDar
           pathOptions={{
             color: getTrafficColor(point.intensity),
             fillOpacity: 0.4,
-            weight: 2
+            weight: 2,
           }}
         >
           <Popup>
-            <div className={cn(isDarkMode ? "text-white" : "text-black")}>
+            <div className={cn(isDarkMode ? 'text-white' : 'text-black')}>
               <h4 className="font-medium">Traffic {index + 1}</h4>
-              <p className="text-sm">{getTrafficDescription(point.intensity)}</p>
+              <p className="text-sm">
+                {getTrafficDescription(point.intensity)}
+              </p>
             </div>
           </Popup>
         </Circle>
@@ -571,10 +676,14 @@ function getTrafficDescription(intensity: number): string {
   return 'Heavy traffic';
 }
 
-function ShareMapButton({ position, locationName, isDarkMode }: {
-  position: { lat: number; lng: number },
-  locationName: string,
-  isDarkMode: boolean
+function ShareMapButton({
+  position,
+  locationName,
+  isDarkMode,
+}: {
+  position: { lat: number; lng: number };
+  locationName: string;
+  isDarkMode: boolean;
 }) {
   const shareMap = async () => {
     const shareUrl = `${window.location.origin}/maps?lat=${position.lat}&lng=${position.lng}&name=${encodeURIComponent(locationName)}`;
@@ -584,7 +693,7 @@ function ShareMapButton({ position, locationName, isDarkMode }: {
         await navigator.share({
           title: `Check out ${locationName} on Roamance`,
           text: `I found this amazing place: ${locationName}`,
-          url: shareUrl
+          url: shareUrl,
         });
       } catch (err) {
         console.error('Error sharing:', err);
@@ -598,27 +707,37 @@ function ShareMapButton({ position, locationName, isDarkMode }: {
   };
 
   const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text).then(() => {
-      alert('Map link copied to clipboard!');
-    }).catch(err => {
-      console.error('Could not copy text: ', err);
-    });
+    navigator.clipboard
+      .writeText(text)
+      .then(() => {
+        alert('Map link copied to clipboard!');
+      })
+      .catch((err) => {
+        console.error('Could not copy text: ', err);
+      });
   };
 
   return (
-    <Button
-      variant="outline"
-      size="icon"
-      onClick={shareMap}
-      className={cn(
-        'h-10 w-10 rounded-full backdrop-blur-md shadow-lg',
-        isDarkMode
-          ? 'bg-card/90 border-primary/30 text-primary hover:bg-primary/20 hover:border-primary/50'
-          : 'bg-white/90 border-muted hover:bg-white'
-      )}
-    >
-      <Share className="h-5 w-5" />
-    </Button>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={shareMap}
+          className={cn(
+            'h-10 w-10 rounded-full backdrop-blur-md shadow-lg',
+            isDarkMode
+              ? 'bg-card/90 border-primary/30 text-primary hover:bg-primary/20 hover:border-primary/50'
+              : 'bg-white/90 border-muted hover:bg-white'
+          )}
+        >
+          <Share className="h-5 w-5" />
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>
+        <p>Share this location</p>
+      </TooltipContent>
+    </Tooltip>
   );
 }
 
@@ -637,14 +756,20 @@ export default function LeafletMap({
   >([]);
   const [isSearching, setIsSearching] = useState<boolean>(false);
   const mapRef = useRef<L.Map | null>(null);
-  const [currentMapLayer, setCurrentMapLayer] = useState<keyof typeof mapLayers>('standard');
+  const [currentMapLayer, setCurrentMapLayer] =
+    useState<keyof typeof mapLayers>('standard');
   const [showTraffic, setShowTraffic] = useState<boolean>(false);
-  const [waypoints, setWaypoints] = useState<Array<{lat: number, lng: number}>>([]);
-  const [pois, setPois] = useState<Array<{
-    name: string,
-    category: string,
-    position: [number, number]
-  }>>([]);
+  const [waypoints, setWaypoints] = useState<
+    Array<{ lat: number; lng: number }>
+  >([]);
+  const [pois, setPois] = useState<
+    Array<{
+      name: string;
+      category: string;
+      icon: string;
+      position: [number, number];
+    }>
+  >([]);
 
   // Move these functions outside of any hook that requires map context
   const toggleTraffic = () => {
@@ -735,13 +860,17 @@ export default function LeafletMap({
           const latOffset = (Math.random() - 0.5) * 0.02;
           const lngOffset = (Math.random() - 0.5) * 0.02;
 
-          const category = poiCategories[Math.floor(Math.random() * poiCategories.length)];
+          const category =
+            poiCategories[Math.floor(Math.random() * poiCategories.length)];
 
           genPois.push({
             name: `${category.name} ${i + 1}`,
             category: category.name,
             icon: category.icon,
-            position: [center.lat + latOffset, center.lng + lngOffset] as [number, number]
+            position: [center.lat + latOffset, center.lng + lngOffset] as [
+              number,
+              number,
+            ],
           });
         }
         setPois(genPois);
@@ -769,7 +898,7 @@ export default function LeafletMap({
           await navigator.share({
             title: `Check out ${locationName} on Roamance`,
             text: `I found this amazing place: ${locationName}`,
-            url: shareUrl
+            url: shareUrl,
           });
         } catch (err) {
           console.error('Error sharing:', err);
@@ -783,20 +912,76 @@ export default function LeafletMap({
     };
 
     const copyToClipboard = (text: string) => {
-      navigator.clipboard.writeText(text).then(() => {
-        alert('Map link copied to clipboard!');
-      }).catch(err => {
-        console.error('Could not copy text: ', err);
-      });
+      navigator.clipboard
+        .writeText(text)
+        .then(() => {
+          alert('Map link copied to clipboard!');
+        })
+        .catch((err) => {
+          console.error('Could not copy text: ', err);
+        });
     };
 
     return (
       <div className="absolute top-24 right-4 z-[1000] flex flex-col gap-3">
-        <Popover>
-          <PopoverTrigger asChild>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className={cn(
+                    'h-10 w-10 rounded-full backdrop-blur-md shadow-lg',
+                    isDarkMode
+                      ? 'bg-card/90 border-primary/30 text-primary hover:bg-primary/20 hover:border-primary/50'
+                      : 'bg-white/90 border-muted hover:bg-white'
+                  )}
+                >
+                  <Layers className="h-5 w-5" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-56" align="end">
+                <div className="space-y-2">
+                  <h4 className="font-medium text-sm">Map Type</h4>
+                  <RadioGroup
+                    value={currentMapLayer}
+                    onValueChange={(value) =>
+                      setCurrentMapLayer(value as keyof typeof mapLayers)
+                    }
+                  >
+                    {Object.entries(mapLayers).map(([key, layer]) => (
+                      <div key={key} className="flex items-center space-x-2">
+                        <RadioGroupItem value={key} id={`layer-${key}`} />
+                        <div>
+                          <Label htmlFor={`layer-${key}`}>{layer.name}</Label>
+                          <p className="text-xs text-muted-foreground">
+                            {layer.description}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </RadioGroup>
+                </div>
+              </PopoverContent>
+            </Popover>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Change map style</p>
+          </TooltipContent>
+        </Tooltip>
+
+        <Tooltip>
+          <TooltipTrigger asChild>
             <Button
               variant="outline"
               size="icon"
+              onClick={() => {
+                // Instead of using the MapMeasureControl component that has useMap,
+                // we toggle a state that will be used inside MapContainer's children
+                const event = new CustomEvent('toggle-measure');
+                window.dispatchEvent(event);
+              }}
               className={cn(
                 'h-10 w-10 rounded-full backdrop-blur-md shadow-lg',
                 isDarkMode
@@ -804,75 +989,57 @@ export default function LeafletMap({
                   : 'bg-white/90 border-muted hover:bg-white'
               )}
             >
-              <Layers className="h-5 w-5" />
+              <Ruler className="h-4 w-4" />
             </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-56" align="end">
-            <div className="space-y-2">
-              <h4 className="font-medium text-sm">Map Type</h4>
-              <RadioGroup
-                value={currentMapLayer}
-                onValueChange={(value) => setCurrentMapLayer(value as keyof typeof mapLayers)}
-              >
-                {Object.entries(mapLayers).map(([key, layer]) => (
-                  <div key={key} className="flex items-center space-x-2">
-                    <RadioGroupItem value={key} id={`layer-${key}`} />
-                    <Label htmlFor={`layer-${key}`}>{layer.name}</Label>
-                  </div>
-                ))}
-              </RadioGroup>
-            </div>
-          </PopoverContent>
-        </Popover>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Measure distances</p>
+          </TooltipContent>
+        </Tooltip>
 
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={() => {
-            // Instead of using the MapMeasureControl component that has useMap,
-            // we toggle a state that will be used inside MapContainer's children
-            const event = new CustomEvent('toggle-measure');
-            window.dispatchEvent(event);
-          }}
-          className={cn(
-            'h-10 w-10 rounded-full backdrop-blur-md shadow-lg',
-            isDarkMode
-              ? 'bg-card/90 border-primary/30 text-primary hover:bg-primary/20 hover:border-primary/50'
-              : 'bg-white/90 border-muted hover:bg-white'
-          )}
-        >
-          <Ruler className="h-4 w-4" />
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant={showTraffic ? 'default' : 'outline'}
+              size="icon"
+              onClick={toggleTraffic}
+              className={cn(
+                'h-10 w-10 rounded-full backdrop-blur-md shadow-lg',
+                showTraffic
+                  ? 'bg-primary text-primary-foreground'
+                  : isDarkMode
+                    ? 'bg-card/90 border-primary/30 text-primary hover:bg-primary/20 hover:border-primary/50'
+                    : 'bg-white/90 border-muted hover:bg-white'
+              )}
+            >
+              <TrafficCone className="h-5 w-5" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>{showTraffic ? 'Hide traffic' : 'Show traffic'}</p>
+          </TooltipContent>
+        </Tooltip>
 
-        <Button
-          variant={showTraffic ? "default" : "outline"}
-          size="icon"
-          onClick={toggleTraffic}
-          className={cn(
-            'h-10 w-10 rounded-full backdrop-blur-md shadow-lg',
-            showTraffic
-              ? 'bg-primary text-primary-foreground'
-              : isDarkMode
-                ? 'bg-card/90 border-primary/30 text-primary hover:bg-primary/20 hover:border-primary/50'
-                : 'bg-white/90 border-muted hover:bg-white'
-          )}
-        >
-          <TrafficCone className="h-5 w-5" />
-        </Button>
-
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={shareMap}
-          className={cn(
-            'h-10 w-10 rounded-full backdrop-blur-md shadow-lg',
-            isDarkMode
-              ? 'bg-card/90 border-primary/30 text-primary hover:bg-primary/20 hover:border-primary/50'
-              : 'bg-white/90 border-muted hover:bg-white'
-          )}
-        >
-          <Share className="h-5 w-5" />
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={shareMap}
+              className={cn(
+                'h-10 w-10 rounded-full backdrop-blur-md shadow-lg',
+                isDarkMode
+                  ? 'bg-card/90 border-primary/30 text-primary hover:bg-primary/20 hover:border-primary/50'
+                  : 'bg-white/90 border-muted hover:bg-white'
+              )}
+            >
+              <Share className="h-5 w-5" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Share this location</p>
+          </TooltipContent>
+        </Tooltip>
       </div>
     );
   };
@@ -885,7 +1052,7 @@ export default function LeafletMap({
 
     useEffect(() => {
       const handleToggleMeasure = () => {
-        setIsMeasuring(prev => !prev);
+        setIsMeasuring((prev) => !prev);
       };
 
       window.addEventListener('toggle-measure', handleToggleMeasure);
@@ -908,17 +1075,17 @@ export default function LeafletMap({
             polyline: {
               shapeOptions: {
                 color: '#3b82f6',
-                weight: 3
+                weight: 3,
               },
               metric: true,
-              feet: false
-            }
+              feet: false,
+            },
           },
           edit: {
             featureGroup: featureGroupRef.current as L.FeatureGroup,
             edit: false,
-            remove: true
-          }
+            remove: true,
+          },
         });
 
         map.addControl(drawControl);
@@ -929,289 +1096,382 @@ export default function LeafletMap({
       }
     }, [isMeasuring, map]);
 
-    return (
-      isMeasuring ? (
-        <FeatureGroup ref={(el) => { featureGroupRef.current = el as any; }}>
-          <EditControl
-            position="topright"
-            onCreated={(e) => {
-              const layer = e.layer;
-              if (layer instanceof L.Polyline) {
-                const distanceInMeters = calculatePolylineDistance(layer);
-                layer.bindPopup(`Distance: ${formatDistance(distanceInMeters)}`).openPopup();
-              }
-            }}
-            draw={{
-              rectangle: false,
-              circle: false,
-              circlemarker: false,
-              marker: false,
-              polygon: false,
-              polyline: true
-            }}
-          />
-        </FeatureGroup>
-      ) : null
-    );
+    return isMeasuring ? (
+      <FeatureGroup
+        ref={(el) => {
+          featureGroupRef.current = el as L.FeatureGroup;
+        }}
+      >
+        <EditControl
+          position="topright"
+          onCreated={(e) => {
+            const layer = e.layer;
+            if (layer instanceof L.Polyline) {
+              const distanceInMeters = calculatePolylineDistance(layer);
+              layer
+                .bindPopup(`Distance: ${formatDistance(distanceInMeters)}`)
+                .openPopup();
+            }
+          }}
+          draw={{
+            rectangle: false,
+            circle: false,
+            circlemarker: false,
+            marker: false,
+            polygon: false,
+            polyline: true,
+          }}
+        />
+      </FeatureGroup>
+    ) : null;
   };
 
   return (
-    <div className="h-full w-full relative">
-      <MapContainer
-        center={[center.lat || 0, center.lng || 0]}
-        zoom={13}
-        style={{ height: '100%', width: '100%' }}
-        ref={mapRef}
-        zoomControl={false}
-        className={cn({ 'dark-mode': isDarkMode })}
-      >
-        <ZoomControl position="topright" />
+    <TooltipProvider delayDuration={300}>
+      <div className="h-full w-full relative">
+        <MapContainer
+          center={[center.lat || 0, center.lng || 0]}
+          zoom={13}
+          style={{ height: '100%', width: '100%' }}
+          ref={mapRef}
+          zoomControl={false}
+          className={cn({ 'dark-mode': isDarkMode })}
+        >
+          <ZoomControl position="topright" />
 
-        <TileLayer
-          attribution={mapLayerAttribution[currentMapLayer]}
-          url={isDarkMode ? mapLayers[currentMapLayer].dark : mapLayers[currentMapLayer].light}
-        />
-
-        {center.lat !== 0 && center.lng !== 0 && (
-          <Marker
-            position={[center.lat, center.lng]}
-            icon={
-              new L.Icon({
-                iconUrl:
-                  'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzYiIGhlaWdodD0iNTQiIHZpZXdCb3g9IjAgMCAzNiA1NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTE4IDUzLjVDMTggNTMuNSAzNiAzNS41ODUgMzYgMThDMzYgOC4wNTg5MSAyNy45NDExIDAgMTggMEM4LjA1ODkgMCAwIDguMDU4OTEgMCAxOEMwIDM1LjU4NSAxOCA1My41IDE4IDUzLjVaIiBmaWxsPSIjRTUzOTM1Ii8+CjxjaXJjbGUgY3g9IjE4IiBjeT0iMTgiIHI9IjkiIGZpbGw9IndoaXRlIi8+Cjwvc3ZnPg==',
-                iconSize: [36, 54],
-                iconAnchor: [18, 54],
-                popupAnchor: [0, -54],
-              })
+          <TileLayer
+            attribution={mapLayerAttribution[currentMapLayer]}
+            url={
+              isDarkMode
+                ? mapLayers[currentMapLayer].dark
+                : mapLayers[currentMapLayer].light
             }
-          >
-            <Popup>
-              <div
-                className={cn(
-                  'p-2',
-                  isDarkMode ? 'bg-card text-foreground' : ''
-                )}
-              >
-                <h3
+          />
+
+          {center.lat !== 0 && center.lng !== 0 && (
+            <Marker
+              position={[center.lat, center.lng]}
+              icon={
+                new L.Icon({
+                  iconUrl:
+                    'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzYiIGhlaWdodD0iNTQiIHZpZXdCb3g9IjAgMCAzNiA1NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTE4IDUzLjVDMTggNTMuNSAzNiAzNS41ODUgMzYgMThDMzYgOC4wNTg5MSAyNy45NDExIDAgMTggMEM4LjA1ODkgMCAwIDguMDU4OTEgMCAxOEMwIDM1LjU4NSAxOCA1My41IDE4IDUzLjVaIiBmaWxsPSIjRTUzOTM1Ii8+CjxjaXJjbGUgY3g9IjE4IiBjeT0iMTgiIHI9IjkiIGZpbGw9IndoaXRlIi8+Cjwvc3ZnPg==',
+                  iconSize: [36, 54],
+                  iconAnchor: [18, 54],
+                  popupAnchor: [0, -54],
+                })
+              }
+            >
+              <Popup>
+                <div
                   className={cn(
-                    'font-bold',
-                    isDarkMode ? 'text-foreground' : ''
+                    'p-2',
+                    isDarkMode ? 'bg-card text-foreground' : ''
                   )}
                 >
-                  {locationName}
-                </h3>
-                <p
-                  className={cn(
-                    'text-sm',
-                    isDarkMode ? 'text-muted-foreground' : ''
-                  )}
-                >
-                  Coordinates: {center.lat.toFixed(4)}, {center.lng.toFixed(4)}
-                </p>
-                {userLocation && !directions && (
-                  <Button
-                    size="sm"
-                    className="mt-2 w-full"
-                    onClick={() => {
-                      const event = new CustomEvent('getDirections');
-                      window.dispatchEvent(event);
-                    }}
+                  <h3
+                    className={cn(
+                      'font-bold',
+                      isDarkMode ? 'text-foreground' : ''
+                    )}
                   >
-                    Get Directions
-                  </Button>
-                )}
-                <StreetViewButton position={center} isDarkMode={isDarkMode} />
-              </div>
-            </Popup>
-          </Marker>
-        )}
-
-        {userLocation && (
-          <Marker
-            position={[userLocation.lat, userLocation.lng]}
-            icon={
-              new L.Icon({
-                iconUrl:
-                  'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTUiIGZpbGw9IiMzQjgyRjYiIGZpbGwtb3BhY2l0eT0iMC4yIiBzdHJva2U9IiMzQjgyRjYiIHN0cm9rZS13aWR0aD0iMiIvPgo8Y2lyY2xlIGN4PSIxNiIgY3k9IjE2IiByPSI2IiBmaWxsPSIjM0I4MkY2Ii8+Cjwvc3ZnPg==',
-                iconSize: [32, 32],
-                iconAnchor: [16, 16],
-                popupAnchor: [0, -8],
-              })
-            }
-          >
-            <Popup>
-              <div
-                className={cn(
-                  'p-2',
-                  isDarkMode ? 'bg-card text-foreground' : ''
-                )}
-              >
-                <h3
-                  className={cn(
-                    'font-bold',
-                    isDarkMode ? 'text-foreground' : ''
-                  )}
-                >
-                  Your Location
-                </h3>
-                <p
-                  className={cn(
-                    'text-sm',
-                    isDarkMode ? 'text-muted-foreground' : ''
-                  )}
-                >
-                  {userLocation.lat.toFixed(4)}, {userLocation.lng.toFixed(4)}
-                </p>
-              </div>
-            </Popup>
-          </Marker>
-        )}
-
-        {/* Display waypoints */}
-        {waypoints.map((wp, index) => (
-          <Marker
-            key={`waypoint-${index}`}
-            position={[wp.lat, wp.lng]}
-            icon={
-              new L.Icon({
-                iconUrl:
-                  'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMzYiIHZpZXdCb3g9IjAgMCAyNCAzNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDM2QzEyIDM2IDI0IDIzLjcyMyAyNCAxMkMyNCA1LjM3MjU4IDE4LjYyNzQgMCAxMiAwQzUuMzcyNTggMCAwIDUuMzcyNTggMCAxMkMwIDIzLjcyMyAxMiAzNiAxMiAzNloiIGZpbGw9IiM2MzY2RjEiLz4KPGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iNiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+',
-                iconSize: [24, 36],
-                iconAnchor: [12, 36],
-                popupAnchor: [0, -36],
-              })
-            }
-          >
-            <Popup>
-              <div className={cn('p-2', isDarkMode ? 'bg-card text-foreground' : '')}>
-                <h3 className={cn('font-bold', isDarkMode ? 'text-foreground' : '')}>
-                  Waypoint {index + 1}
-                </h3>
-                <p className={cn('text-sm', isDarkMode ? 'text-muted-foreground' : '')}>
-                  {wp.lat.toFixed(4)}, {wp.lng.toFixed(4)}
-                </p>
-                <Button
-                  size="sm"
-                  variant="destructive"
-                  className="mt-2 w-full"
-                  onClick={() => removeWaypoint(index)}
-                >
-                  Remove
-                </Button>
-              </div>
-            </Popup>
-          </Marker>
-        ))}
-
-        {/* Display POIs */}
-        {pois.map((poi, index) => (
-          <Marker
-            key={`poi-${index}`}
-            position={poi.position}
-            icon={
-              new L.DivIcon({
-                html: `<div style="font-size: 18px; background-color: white; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">${poi.icon}</div>`,
-                className: '',
-                iconSize: [30, 30],
-                iconAnchor: [15, 15]
-              })
-            }
-          >
-            <Popup>
-              <div className={cn('p-2', isDarkMode ? 'bg-card text-foreground' : '')}>
-                <h3 className={cn('font-bold', isDarkMode ? 'text-foreground' : '')}>
-                  {poi.name}
-                </h3>
-                <p className={cn('text-sm', isDarkMode ? 'text-muted-foreground' : '')}>
-                  Category: {poi.category}
-                </p>
-                <div className="flex flex-col gap-2 mt-2">
-                  <Button
-                    size="sm"
-                    variant="default"
-                    className="w-full"
-                    onClick={() => {
-                      if (mapRef.current) {
-                        mapRef.current.setView(poi.position, 16);
-                      }
-                    }}
+                    {locationName}
+                  </h3>
+                  <p
+                    className={cn(
+                      'text-sm',
+                      isDarkMode ? 'text-muted-foreground' : ''
+                    )}
                   >
-                    View Details
-                  </Button>
-                  {directions && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="w-full"
-                      onClick={() => addWaypoint(poi.position[0], poi.position[1])}
-                    >
-                      Add as Waypoint
-                    </Button>
+                    Coordinates: {center.lat.toFixed(4)},{' '}
+                    {center.lng.toFixed(4)}
+                  </p>
+                  {userLocation && !directions && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          size="sm"
+                          className="mt-2 w-full"
+                          onClick={() => {
+                            const event = new CustomEvent('getDirections');
+                            window.dispatchEvent(event);
+                          }}
+                        >
+                          Get Directions
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Get directions from your location</p>
+                      </TooltipContent>
+                    </Tooltip>
                   )}
+                  <StreetViewButton position={center} isDarkMode={isDarkMode} />
                 </div>
-              </div>
-            </Popup>
-          </Marker>
-        ))}
+              </Popup>
+            </Marker>
+          )}
 
-        <MapController
-          center={center}
-          userLocation={userLocation}
-          directions={directions}
-          onMapLoaded={onMapLoaded}
-          waypoints={waypoints}
+          {userLocation && (
+            <Marker
+              position={[userLocation.lat, userLocation.lng]}
+              icon={
+                new L.Icon({
+                  iconUrl:
+                    'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTUiIGZpbGw9IiMzQjgyRjYiIGZpbGwtb3BhY2l0eT0iMC4yIiBzdHJva2U9IiMzQjgyRjYiIHN0cm9rZS13aWR0aD0iMiIvPgo8Y2lyY2xlIGN4PSIxNiIgY3k9IjE2IiByPSI2IiBmaWxsPSIjM0I4MkY2Ii8+Cjwvc3ZnPg==',
+                  iconSize: [32, 32],
+                  iconAnchor: [16, 16],
+                  popupAnchor: [0, -8],
+                })
+              }
+            >
+              <Popup>
+                <div
+                  className={cn(
+                    'p-2',
+                    isDarkMode ? 'bg-card text-foreground' : ''
+                  )}
+                >
+                  <h3
+                    className={cn(
+                      'font-bold',
+                      isDarkMode ? 'text-foreground' : ''
+                    )}
+                  >
+                    Your Location
+                  </h3>
+                  <p
+                    className={cn(
+                      'text-sm',
+                      isDarkMode ? 'text-muted-foreground' : ''
+                    )}
+                  >
+                    {userLocation.lat.toFixed(4)}, {userLocation.lng.toFixed(4)}
+                  </p>
+                </div>
+              </Popup>
+            </Marker>
+          )}
+
+          {/* Display waypoints */}
+          {waypoints.map((wp, index) => (
+            <Marker
+              key={`waypoint-${index}`}
+              position={[wp.lat, wp.lng]}
+              icon={
+                new L.Icon({
+                  iconUrl:
+                    'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMzYiIHZpZXdCb3g9IjAgMCAyNCAzNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDM2QzEyIDM2IDI0IDIzLjcyMyAyNCAxMkMyNCA1LjM3MjU4IDE4LjYyNzQgMCAxMiAwQzUuMzcyNTggMCAwIDUuMzcyNTggMCAxMkMwIDIzLjcyMyAxMiAzNiAxMiAzNloiIGZpbGw9IiM2MzY2RjEiLz4KPGNpcmxlIGN4PSIxMiIgY3k9IjEyIiByPSI2IiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4=',
+                  iconSize: [24, 36],
+                  iconAnchor: [12, 36],
+                  popupAnchor: [0, -36],
+                })
+              }
+            >
+              <Popup>
+                <div
+                  className={cn(
+                    'p-2',
+                    isDarkMode ? 'bg-card text-foreground' : ''
+                  )}
+                >
+                  <h3
+                    className={cn(
+                      'font-bold',
+                      isDarkMode ? 'text-foreground' : ''
+                    )}
+                  >
+                    Waypoint {index + 1}
+                  </h3>
+                  <p
+                    className={cn(
+                      'text-sm',
+                      isDarkMode ? 'text-muted-foreground' : ''
+                    )}
+                  >
+                    {wp.lat.toFixed(4)}, {wp.lng.toFixed(4)}
+                  </p>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        className="mt-2 w-full"
+                        onClick={() => removeWaypoint(index)}
+                      >
+                        Remove
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Remove this waypoint from your route</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
+              </Popup>
+            </Marker>
+          ))}
+
+          {/* Display POIs */}
+          {pois.map((poi, index) => (
+            <Marker
+              key={`poi-${index}`}
+              position={poi.position}
+              icon={
+                new L.DivIcon({
+                  html: `<div style="font-size: 18px; background-color: white; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2);" title="${poi.name}">${poi.icon}</div>`,
+                  className: '',
+                  iconSize: [30, 30],
+                  iconAnchor: [15, 15],
+                })
+              }
+            >
+              <Popup>
+                <div
+                  className={cn(
+                    'p-2',
+                    isDarkMode ? 'bg-card text-foreground' : ''
+                  )}
+                >
+                  <h3
+                    className={cn(
+                      'font-bold',
+                      isDarkMode ? 'text-foreground' : ''
+                    )}
+                  >
+                    {poi.name}
+                  </h3>
+                  <p
+                    className={cn(
+                      'text-sm',
+                      isDarkMode ? 'text-muted-foreground' : ''
+                    )}
+                  >
+                    Category: {poi.category}
+                  </p>
+                  <div className="flex flex-col gap-2 mt-2">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          size="sm"
+                          variant="default"
+                          className="w-full"
+                          onClick={() => {
+                            if (mapRef.current) {
+                              mapRef.current.setView(poi.position, 16);
+                            }
+                          }}
+                        >
+                          View Details
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Zoom in to view this point of interest</p>
+                      </TooltipContent>
+                    </Tooltip>
+
+                    {directions && (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="w-full"
+                            onClick={() =>
+                              addWaypoint(poi.position[0], poi.position[1])
+                            }
+                          >
+                            Add as Waypoint
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Add this location as a stop on your route</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    )}
+                  </div>
+                </div>
+              </Popup>
+            </Marker>
+          ))}
+
+          <MapController
+            center={center}
+            userLocation={userLocation}
+            directions={directions}
+            onMapLoaded={onMapLoaded}
+            waypoints={waypoints}
+          />
+
+          {/* These components now safely use the useMap() hook within MapContainer */}
+          <MapControls />
+          <MeasurementTools />
+        </MapContainer>
+
+        {/* Components outside of MapContainer that don't use Leaflet hooks */}
+        <SearchResults
+          results={searchResults}
+          onSelect={handleSelectSearchResult}
+          isDarkMode={isDarkMode}
+          isSearching={isSearching}
         />
 
-        {/* These components now safely use the useMap() hook within MapContainer */}
-        <MapControls />
-        <MeasurementTools />
-      </MapContainer>
+        {/* Controls that are rendered outside of MapContainer that don't use Leaflet hooks */}
+        <MapControlWrapper />
 
-      {/* Components outside of MapContainer that don't use Leaflet hooks */}
-      <SearchResults
-        results={searchResults}
-        onSelect={handleSelectSearchResult}
-        isDarkMode={isDarkMode}
-        isSearching={isSearching}
-      />
-
-      {/* Controls that are rendered outside of MapContainer that don't use Leaflet hooks */}
-      <MapControlWrapper />
-
-      {/* Waypoints panel - only show when directions are active */}
-      {directions && waypoints.length > 0 && (
-        <Card className={cn(
-          "absolute left-4 bottom-20 z-[1000] p-4 max-w-xs backdrop-blur-md border",
-          isDarkMode
-            ? "bg-card/80 border-card-foreground/10"
-            : "bg-white/90 border-muted"
-        )}>
-          <h3 className="font-medium text-sm mb-2">Waypoints ({waypoints.length})</h3>
-          <div className="space-y-2 max-h-40 overflow-y-auto">
-            {waypoints.map((wp, index) => (
-              <div key={index} className="flex items-center justify-between text-xs">
-                <span>Waypoint {index + 1}</span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-6 p-0"
-                  onClick={() => removeWaypoint(index)}
-                >
-                  <X className="h-3 w-3" />
-                </Button>
-              </div>
-            ))}
-          </div>
-          <Button
-            variant="destructive"
-            size="sm"
-            className="w-full mt-2"
-            onClick={() => setWaypoints([])}
+        {/* Waypoints panel - only show when directions are active */}
+        {directions && waypoints.length > 0 && (
+          <Card
+            className={cn(
+              'absolute left-4 bottom-20 z-[1000] p-4 max-w-xs backdrop-blur-md border',
+              isDarkMode
+                ? 'bg-card/80 border-card-foreground/10'
+                : 'bg-white/90 border-muted'
+            )}
           >
-            Clear All
-          </Button>
-        </Card>
-      )}
-    </div>
+            <h3 className="font-medium text-sm mb-2">
+              Waypoints ({waypoints.length})
+            </h3>
+            <div className="space-y-2 max-h-40 overflow-y-auto">
+              {waypoints.map((wp, index) => (
+                <div
+                  key={index}
+                  className="flex items-center justify-between text-xs"
+                >
+                  <span>Waypoint {index + 1}</span>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 p-0"
+                        onClick={() => removeWaypoint(index)}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Remove waypoint {index + 1}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
+              ))}
+            </div>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  className="w-full mt-2"
+                  onClick={() => setWaypoints([])}
+                >
+                  Clear All
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Remove all waypoints from route</p>
+              </TooltipContent>
+            </Tooltip>
+          </Card>
+        )}
+      </div>
+    </TooltipProvider>
   );
 }

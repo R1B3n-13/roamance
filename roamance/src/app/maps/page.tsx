@@ -10,6 +10,7 @@ import { useSearchParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { MapContainer } from './map-container';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 export default function MapPage() {
   const searchParams = useSearchParams();
@@ -126,156 +127,184 @@ export default function MapPage() {
   }
 
   return (
-    <div className="relative h-[calc(100vh-4rem)] w-full">
-      <div className="absolute top-4 left-4 right-4 z-[1000] flex flex-col gap-2">
-        <div className="flex items-center gap-2">
-          <Link href="/">
-            <Button
-              variant="outline"
-              size="icon"
-              className={cn(
-                'h-10 w-10 rounded-full backdrop-blur-md shadow-lg transition-all duration-200 hover:scale-105',
-                isDarkMode
-                  ? 'bg-card/80 border-card-foreground/20 text-primary hover:bg-card/90 hover:text-primary'
-                  : 'bg-white/90 border-muted hover:bg-white'
-              )}
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-          </Link>
+    <TooltipProvider delayDuration={300}>
+      <div className="relative h-[calc(100vh-4rem)] w-full">
+        <div className="absolute top-4 left-4 right-4 z-[1000] flex flex-col gap-2">
+          <div className="flex items-center gap-2">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Link href="/">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className={cn(
+                      'h-10 w-10 rounded-full backdrop-blur-md shadow-lg transition-all duration-200 hover:scale-105',
+                      isDarkMode
+                        ? 'bg-card/80 border-card-foreground/20 text-primary hover:bg-card/90 hover:text-primary'
+                        : 'bg-white/90 border-muted hover:bg-white'
+                    )}
+                  >
+                    <ArrowLeft className="h-5 w-5" />
+                  </Button>
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Back to home</p>
+              </TooltipContent>
+            </Tooltip>
 
-          <div className="max-w-md w-full md:w-80">
-            <div
-              className={cn(
-                'flex items-center px-4 py-2 backdrop-blur-md shadow-sm border rounded-full overflow-hidden transition-all duration-200',
-                isDarkMode
-                  ? 'bg-background/50 border-muted/30 hover:bg-background/70'
-                  : 'bg-white/80 border-muted/20 hover:bg-white/90'
-              )}
-            >
-              <Search
+            <div className="max-w-md w-full md:w-80">
+              <div
                 className={cn(
-                  'h-3.5 w-3.5 mr-2',
+                  'flex items-center px-4 py-2 backdrop-blur-md shadow-sm border rounded-full overflow-hidden transition-all duration-200',
                   isDarkMode
-                    ? 'text-muted-foreground/70'
-                    : 'text-muted-foreground/60'
+                    ? 'bg-background/50 border-muted/30 hover:bg-background/70'
+                    : 'bg-white/80 border-muted/20 hover:bg-white/90'
                 )}
-              />
-              <Input
-                placeholder="Search places..."
-                className={cn(
-                  'border-none shadow-none focus-visible:ring-0 bg-transparent h-7 px-0',
-                  isDarkMode
-                    ? 'placeholder:text-muted-foreground/50 text-foreground'
-                    : 'placeholder:text-muted-foreground/50 text-foreground',
-                  'text-sm'
-                )}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-              {searchQuery && (
-                <Button
-                  variant="ghost"
-                  size="sm"
+              >
+                <Search
                   className={cn(
-                    'h-6 w-6 p-0 rounded-full ml-1',
+                    'h-3.5 w-3.5 mr-2',
                     isDarkMode
-                      ? 'hover:bg-muted/20 text-muted-foreground'
-                      : 'hover:bg-muted/20 text-muted-foreground'
+                      ? 'text-muted-foreground/70'
+                      : 'text-muted-foreground/60'
                   )}
-                  onClick={() => setSearchQuery('')}
-                >
-                  <ArrowLeft className="h-3 w-3 rotate-45" />
-                </Button>
-              )}
+                />
+                <Input
+                  placeholder="Search places..."
+                  className={cn(
+                    'border-none shadow-none focus-visible:ring-0 bg-transparent h-7 px-0',
+                    isDarkMode
+                      ? 'placeholder:text-muted-foreground/50 text-foreground'
+                      : 'placeholder:text-muted-foreground/50 text-foreground',
+                    'text-sm'
+                  )}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+                {searchQuery && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className={cn(
+                      'h-6 w-6 p-0 rounded-full ml-1',
+                      isDarkMode
+                        ? 'hover:bg-muted/20 text-muted-foreground'
+                        : 'hover:bg-muted/20 text-muted-foreground'
+                    )}
+                    onClick={() => setSearchQuery('')}
+                  >
+                    <ArrowLeft className="h-3 w-3 rotate-45" />
+                  </Button>
+                )}
+              </div>
             </div>
-          </div>
 
-          {/* Map options popover */}
-          <Popover open={showingTooltip === 'features'} onOpenChange={(open) => setShowingTooltip(open ? 'features' : null)}>
-            <PopoverTrigger asChild>
+            {/* Map options popover with tooltip */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Popover open={showingTooltip === 'features'} onOpenChange={(open) => setShowingTooltip(open ? 'features' : null)}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className={cn(
+                        'ml-auto h-10 w-10 rounded-full backdrop-blur-md shadow-lg transition-all duration-200 hover:scale-105',
+                        isDarkMode
+                          ? 'bg-card/80 border-card-foreground/20 text-primary hover:bg-card/90 hover:text-primary'
+                          : 'bg-white/90 border-muted hover:bg-white'
+                      )}
+                    >
+                      <Layers className="h-5 w-5" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-56" align="end">
+                    <div className="space-y-3">
+                      <h4 className="font-medium text-sm">Map Features</h4>
+                      <div className="text-xs text-muted-foreground">
+                        <p>This map includes the following features:</p>
+                        <ul className="list-disc pl-4 mt-1 space-y-1">
+                          <li>Different map layers (Standard, Satellite, Terrain)</li>
+                          <li>Distance measurement tools</li>
+                          <li>Traffic visualization</li>
+                          <li>Points of interest</li>
+                          <li>Street View integration</li>
+                          <li>Waypoint management for routing</li>
+                          <li>Map sharing functionality</li>
+                        </ul>
+                      </div>
+                      <p className="text-xs">Look for control buttons on the right side of the map.</p>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Map features info</p>
+              </TooltipContent>
+            </Tooltip>
+          </div>
+        </div>
+
+        <div className="absolute bottom-8 right-4 z-[1000] flex flex-col gap-3">
+          <Tooltip>
+            <TooltipTrigger asChild>
               <Button
                 variant="outline"
                 size="icon"
+                onClick={getUserLocation}
+                disabled={isLocating}
                 className={cn(
-                  'ml-auto h-10 w-10 rounded-full backdrop-blur-md shadow-lg transition-all duration-200 hover:scale-105',
+                  'h-12 w-12 rounded-full backdrop-blur-md shadow-lg transition-all duration-200 hover:scale-105',
                   isDarkMode
-                    ? 'bg-card/80 border-card-foreground/20 text-primary hover:bg-card/90 hover:text-primary'
-                    : 'bg-white/90 border-muted hover:bg-white'
+                    ? 'bg-card/90 border-primary/30 text-primary hover:bg-primary/20 hover:border-primary/50'
+                    : 'bg-white/90 border-muted hover:bg-white',
+                  isLocating && 'animate-pulse'
                 )}
+                aria-label="Locate me"
               >
-                <Layers className="h-5 w-5" />
+                <Locate className="h-5 w-5" />
               </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-56" align="end">
-              <div className="space-y-3">
-                <h4 className="font-medium text-sm">Map Features</h4>
-                <div className="text-xs text-muted-foreground">
-                  <p>This map includes the following features:</p>
-                  <ul className="list-disc pl-4 mt-1 space-y-1">
-                    <li>Different map layers (Standard, Satellite, Terrain)</li>
-                    <li>Distance measurement tools</li>
-                    <li>Traffic visualization</li>
-                    <li>Points of interest</li>
-                    <li>Street View integration</li>
-                    <li>Waypoint management for routing</li>
-                    <li>Map sharing functionality</li>
-                  </ul>
-                </div>
-                <p className="text-xs">Look for control buttons on the right side of the map.</p>
-              </div>
-            </PopoverContent>
-          </Popover>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Find my location</p>
+            </TooltipContent>
+          </Tooltip>
+
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant={directions ? 'default' : 'outline'}
+                size="icon"
+                onClick={toggleDirections}
+                className={cn(
+                  'h-12 w-12 rounded-full backdrop-blur-md shadow-lg transition-all duration-200 hover:scale-105',
+                  directions
+                    ? 'bg-primary text-primary-foreground'
+                    : isDarkMode
+                      ? 'bg-card/90 border-primary/30 text-primary hover:bg-primary/20 hover:border-primary/50'
+                      : 'bg-white/90 border-muted hover:bg-white'
+                )}
+                aria-label={directions ? "Hide directions" : "Show directions"}
+              >
+                <Navigation className="h-5 w-5" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{directions ? 'Hide directions' : 'Get directions'}</p>
+            </TooltipContent>
+          </Tooltip>
         </div>
+
+        <MapContainer
+          center={{ lat, lng }}
+          locationName={name}
+          userLocation={userLocation}
+          searchQuery={searchQuery}
+          directions={directions}
+          isDarkMode={isDarkMode}
+          centerOnUser={centerOnUser}
+        />
       </div>
-
-      <div className="absolute bottom-8 right-4 z-[1000] flex flex-col gap-3">
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={getUserLocation}
-          disabled={isLocating}
-          className={cn(
-            'h-12 w-12 rounded-full backdrop-blur-md shadow-lg transition-all duration-200 hover:scale-105',
-            isDarkMode
-              ? 'bg-card/90 border-primary/30 text-primary hover:bg-primary/20 hover:border-primary/50'
-              : 'bg-white/90 border-muted hover:bg-white',
-            isLocating && 'animate-pulse'
-          )}
-          aria-label="Locate me"
-          title="Find my location"
-        >
-          <Locate className="h-5 w-5" />
-        </Button>
-
-        <Button
-          variant={directions ? 'default' : 'outline'}
-          size="icon"
-          onClick={toggleDirections}
-          className={cn(
-            'h-12 w-12 rounded-full backdrop-blur-md shadow-lg transition-all duration-200 hover:scale-105',
-            directions
-              ? 'bg-primary text-primary-foreground'
-              : isDarkMode
-                ? 'bg-card/90 border-primary/30 text-primary hover:bg-primary/20 hover:border-primary/50'
-                : 'bg-white/90 border-muted hover:bg-white'
-          )}
-          aria-label={directions ? "Hide directions" : "Show directions"}
-          title={directions ? "Hide directions" : "Get directions"}
-        >
-          <Navigation className="h-5 w-5" />
-        </Button>
-      </div>
-
-      <MapContainer
-        center={{ lat, lng }}
-        locationName={name}
-        userLocation={userLocation}
-        searchQuery={searchQuery}
-        directions={directions}
-        isDarkMode={isDarkMode}
-        centerOnUser={centerOnUser}
-      />
-    </div>
+    </TooltipProvider>
   );
 }
