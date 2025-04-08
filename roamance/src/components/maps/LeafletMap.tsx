@@ -77,6 +77,7 @@ const mapFeatures = {
   traffic: 'Show simulated traffic conditions in the area',
   share: 'Share this location with others or copy a link to it',
   waypoints: 'Add stops along your route when getting directions',
+  theme: 'Toggle between light and dark mode for better visibility',
 };
 
 interface LeafletMapProps {

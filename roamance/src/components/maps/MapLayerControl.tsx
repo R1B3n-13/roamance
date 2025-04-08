@@ -33,8 +33,8 @@ export const mapLayers = {
   },
   terrain: {
     light:
-      'https://stamen-tiles-{s}.a.ssl.fastly.net/terrain/{z}/{x}/{y}{r}.png',
-    dark: 'https://stamen-tiles-{s}.a.ssl.fastly.net/terrain-dark/{z}/{x}/{y}{r}.png',
+      'https://{s}.basemaps.cartocdn.com/rastertiles/voyager_labels_under/{z}/{x}/{y}{r}.png',
+    dark: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
     name: 'Terrain',
     description: 'Map showing topography and elevation features',
   },
@@ -51,7 +51,7 @@ export const mapLayerAttribution = {
     '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
   satellite: '&copy; <a href="https://www.arcgis.com/">Esri</a>',
   terrain:
-    '&copy; <a href="http://stamen.com">Stamen Design</a>, <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    '&copy; <a href="https://carto.com">CARTO</a>, <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
   transport:
     '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>, <a href="https://github.com/cyclosm/cyclosm-cartocss-style">CyclOSM</a>',
 };
@@ -72,53 +72,53 @@ export function MapLayerControl({
   onMouseLeave,
 }: MapLayerControlProps) {
   return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              size="icon"
-              className={cn(
-                'h-10 w-10 rounded-full backdrop-blur-md shadow-lg',
-                isDarkMode
-                  ? 'bg-card/90 border-primary/30 text-primary hover:bg-primary/20 hover:border-primary/50'
-                  : 'bg-white/90 border-muted hover:bg-white'
-              )}
-              onMouseEnter={onMouseEnter}
-              onMouseLeave={onMouseLeave}
-            >
-              <Layers className="h-5 w-5" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-56" align="end">
-            <div className="space-y-2">
-              <h4 className="font-medium text-sm">Map Type</h4>
-              <RadioGroup
-                value={currentLayer}
-                onValueChange={(value) =>
-                  setCurrentLayer(value as keyof typeof mapLayers)
-                }
+    <div onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
+      <Popover>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                className={cn(
+                  'h-10 w-10 rounded-full backdrop-blur-md shadow-lg',
+                  isDarkMode
+                    ? 'bg-card/90 border-primary/30 text-primary hover:bg-primary/20 hover:border-primary/50'
+                    : 'bg-white/90 border-muted hover:bg-white'
+                )}
               >
-                {Object.entries(mapLayers).map(([key, layer]) => (
-                  <div key={key} className="flex items-center space-x-2">
-                    <RadioGroupItem value={key} id={`layer-${key}`} />
-                    <div>
-                      <Label htmlFor={`layer-${key}`}>{layer.name}</Label>
-                      <p className="text-xs text-muted-foreground">
-                        {layer.description}
-                      </p>
-                    </div>
+                <Layers className="h-5 w-5" />
+              </Button>
+            </PopoverTrigger>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Change map style</p>
+          </TooltipContent>
+        </Tooltip>
+        <PopoverContent className="w-56" align="end">
+          <div className="space-y-2">
+            <h4 className="font-medium text-sm">Map Type</h4>
+            <RadioGroup
+              value={currentLayer}
+              onValueChange={(value) =>
+                setCurrentLayer(value as keyof typeof mapLayers)
+              }
+            >
+              {Object.entries(mapLayers).map(([key, layer]) => (
+                <div key={key} className="flex items-center space-x-2">
+                  <RadioGroupItem value={key} id={`layer-${key}`} />
+                  <div>
+                    <Label htmlFor={`layer-${key}`}>{layer.name}</Label>
+                    <p className="text-xs text-muted-foreground">
+                      {layer.description}
+                    </p>
                   </div>
-                ))}
-              </RadioGroup>
-            </div>
-          </PopoverContent>
-        </Popover>
-      </TooltipTrigger>
-      <TooltipContent>
-        <p>Change map style</p>
-      </TooltipContent>
-    </Tooltip>
+                </div>
+              ))}
+            </RadioGroup>
+          </div>
+        </PopoverContent>
+      </Popover>
+    </div>
   );
 }

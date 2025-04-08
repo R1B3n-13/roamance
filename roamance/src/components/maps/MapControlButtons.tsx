@@ -7,7 +7,8 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
-import { Ruler, TrafficCone } from 'lucide-react';
+import { Moon, Ruler, Sun, TrafficCone } from 'lucide-react';
+import { useTheme } from 'next-themes';
 import { MapLayerControl } from './MapLayerControl';
 import { ShareMapButton } from './ShareMapButton';
 
@@ -32,6 +33,8 @@ export function MapControlButtons({
   position,
   locationName,
 }: MapControlButtonsProps) {
+  const { setTheme, theme } = useTheme();
+
   // Helper function to emit hover events for contextual help
   const emitMapControlHover = (feature: string) => {
     const event = new CustomEvent('mapControlHover', { detail: { feature } });
@@ -101,6 +104,30 @@ export function MapControlButtons({
         </TooltipTrigger>
         <TooltipContent>
           <p>{showTraffic ? 'Hide traffic' : 'Show traffic'}</p>
+        </TooltipContent>
+      </Tooltip>
+
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+            className={cn(
+              'h-10 w-10 rounded-full backdrop-blur-md shadow-lg relative overflow-hidden',
+              isDarkMode
+                ? 'bg-card/90 border-primary/30 text-primary hover:bg-primary/20 hover:border-primary/50'
+                : 'bg-white/90 border-muted hover:bg-white'
+            )}
+            onMouseEnter={() => emitMapControlHover('theme')}
+            onMouseLeave={emitMapControlLeave}
+          >
+            <Sun className="h-5 w-5 transition-all duration-300 rotate-0 scale-100 dark:-rotate-90 dark:scale-0" />
+            <Moon className="absolute h-5 w-5 transition-all duration-300 rotate-90 scale-0 dark:rotate-0 dark:scale-100" />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>Toggle {isDarkMode ? 'light' : 'dark'} mode</p>
         </TooltipContent>
       </Tooltip>
 
