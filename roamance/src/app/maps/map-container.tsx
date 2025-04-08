@@ -1,17 +1,20 @@
 'use client';
 
-import { Badge } from '@/components/ui/badge';
-import { Card } from '@/components/ui/card';
+import { FeatureHelpCard } from '@/components/maps/FeatureHelpCard';
+import { LocationInfoCard } from '@/components/maps/LocationInfoCard';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
-import 'leaflet/dist/leaflet.css';
-// Import Leaflet Draw CSS for the measurement tools
-import 'leaflet-draw/dist/leaflet.draw.css';
-import { Info, Layers, MapPin, Ruler, Share, TrafficCone, Navigation } from 'lucide-react';
+import { Info, MapPin } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
-const LeafletMap = dynamic(() => import('./leaflet-map'), {
+// Dynamically import the LeafletMap component to avoid SSR issues
+const LeafletMap = dynamic(() => import('@/components/maps/LeafletMap'), {
   ssr: false,
   loading: () => (
     <div className="h-full w-full flex items-center justify-center bg-slate-100">
@@ -23,7 +26,7 @@ const LeafletMap = dynamic(() => import('./leaflet-map'), {
         <div className="h-3 w-64 bg-slate-300 rounded mt-2"></div>
       </div>
     </div>
-  )
+  ),
 });
 
 interface MapContainerProps {
@@ -43,7 +46,7 @@ export function MapContainer({
   searchQuery,
   directions,
   isDarkMode,
-  centerOnUser
+  centerOnUser,
 }: MapContainerProps) {
   const [mapLoaded, setMapLoaded] = useState(false);
   const [infoCardVisible, setInfoCardVisible] = useState(true);
@@ -51,20 +54,12 @@ export function MapContainer({
 
   // Set up tooltips for map features
   const mapFeatures = {
-    layers: "Switch between map styles like Standard, Satellite, Terrain, and Transport",
-    measure: "Measure distances on the map by drawing lines",
-    traffic: "Show simulated traffic conditions in the area",
-    share: "Share this location with others or copy a link to it",
-    waypoints: "Add stops along your route when getting directions"
-  };
-
-  // Feature icons mapping
-  const featureIcons = {
-    layers: <Layers className="h-5 w-5" />,
-    measure: <Ruler className="h-5 w-5" />,
-    traffic: <TrafficCone className="h-5 w-5" />,
-    share: <Share className="h-5 w-5" />,
-    waypoints: <Navigation className="h-5 w-5" />
+    layers:
+      'Switch between map styles like Standard, Satellite, Terrain, and Transport',
+    measure: 'Measure distances on the map by drawing lines',
+    traffic: 'Show simulated traffic conditions in the area',
+    share: 'Share this location with others or copy a link to it',
+    waypoints: 'Add stops along your route when getting directions',
   };
 
   useEffect(() => {
@@ -97,107 +92,72 @@ export function MapContainer({
     };
   }, []);
 
-  useEffect(() => {
-    const handleGetDirections = () => {
-      const event = new CustomEvent('getDirections');
-      window.dispatchEvent(event);
-    };
-
-    window.addEventListener('getDirections', handleGetDirections);
-
-    return () => {
-      window.removeEventListener('getDirections', handleGetDirections);
-    };
-  }, []);
-
   return (
     <div className="h-full w-full relative">
-      {/* Info card about the current location */}
-      {infoCardVisible && mapLoaded && center.lat !== 0 && (
-        <Card className={cn(
-          "absolute top-20 left-4 z-[1000] p-4 max-w-xs backdrop-blur-md shadow-lg transition-all duration-300 animate-in fade-in-0 slide-in-from-left-5 border",
-          isDarkMode
-            ? "bg-card/80 border-card-foreground/10"
-            : "bg-white/90 border-muted"
-        )}>
-          <div className="flex items-start gap-3">
-            <div className={cn(
-              "p-2 rounded-full",
-              isDarkMode ? "bg-primary/20" : "bg-primary/10"
-            )}>
-              <MapPin className="h-5 w-5 text-primary" />
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold">{locationName}</h3>
-              <div className="flex flex-wrap gap-1 mt-1">
-                <Badge variant={isDarkMode ? "default" : "outline"} className={cn(
-                  "text-xs font-normal",
-                  isDarkMode
-                    ? "bg-primary/20 text-primary-foreground border-primary/30"
-                    : "bg-primary/10 text-primary border-primary/30"
-                )}>
-                  Destination
-                </Badge>
-                <Badge variant="outline" className={cn(
-                  "text-xs font-normal",
-                  isDarkMode
-                    ? "bg-muted/30 text-muted-foreground border-muted/50"
-                    : "bg-muted/50 text-muted-foreground border-muted/70"
-                )}>
-                  {center.lat.toFixed(4)}, {center.lng.toFixed(4)}
-                </Badge>
-              </div>
-            </div>
-          </div>
-        </Card>
-      )}
+      {/* Location info card */}
+      <LocationInfoCard
+        visible={infoCardVisible && mapLoaded}
+        locationName={locationName}
+        center={center}
+        isDarkMode={isDarkMode}
+      />
 
-      {/* Contextual Feature Help Card */}
+      {/* Feature help card */}
       {mapFeatureHelp && (
-        <Card className={cn(
-          "absolute top-4 right-16 z-[1000] p-3 max-w-xs backdrop-blur-md shadow-lg transition-all duration-200 animate-in fade-in-50 slide-in-from-right-5 border",
-          isDarkMode
-            ? "bg-card/80 border-primary/20"
-            : "bg-white/90 border-primary/10"
-        )}>
-          <div className="flex items-start gap-2">
-            <div className={cn(
-              "p-1.5 rounded-full",
-              isDarkMode ? "bg-primary/20" : "bg-primary/10"
-            )}>
-              {featureIcons[mapFeatureHelp as keyof typeof featureIcons]}
-            </div>
-            <div>
-              <h4 className="font-medium capitalize">{mapFeatureHelp}</h4>
-              <p className="text-sm text-muted-foreground mt-0.5">
-                {mapFeatures[mapFeatureHelp as keyof typeof mapFeatures]}
-              </p>
-            </div>
-          </div>
-        </Card>
+        <FeatureHelpCard
+          featureName={mapFeatureHelp}
+          description={mapFeatures[mapFeatureHelp as keyof typeof mapFeatures]}
+          isDarkMode={isDarkMode}
+        />
       )}
 
-      {/* Features help tooltip */}
+      {/* Map help tooltip */}
       <TooltipProvider>
         <div className="absolute bottom-4 right-4 z-[1000]">
           <Tooltip>
             <TooltipTrigger asChild>
-              <div className={cn(
-                "p-2 rounded-full cursor-pointer transition-all duration-200 hover:scale-105",
-                isDarkMode
-                  ? "bg-card/80 border border-primary/30 text-primary"
-                  : "bg-white/90 border border-muted text-muted-foreground"
-              )}>
+              <div
+                className={cn(
+                  'p-2 rounded-full cursor-pointer transition-all duration-200 hover:scale-105',
+                  isDarkMode
+                    ? 'bg-card/80 border border-primary/30 text-primary'
+                    : 'bg-white/90 border border-muted text-muted-foreground'
+                )}
+              >
                 <Info className="h-5 w-5" />
               </div>
             </TooltipTrigger>
-            <TooltipContent side="top" className="max-w-xs">
-              <div className="space-y-2">
-                <h4 className="font-medium">Map Features</h4>
-                <ul className="space-y-1 text-sm">
+            <TooltipContent
+              side="top"
+              className="max-w-xs z-[2000] backdrop-blur-sm border border-primary/20 shadow-lg p-0 overflow-hidden"
+              sideOffset={5}
+            >
+              <div className={cn(
+                "space-y-3",
+                isDarkMode
+                  ? "bg-card/95 text-card-foreground"
+                  : "bg-white/95"
+              )}>
+                <div className={cn(
+                  "px-4 py-2.5 border-b",
+                  isDarkMode ? "border-primary/20" : "border-muted/50"
+                )}>
+                  <h4 className="font-medium text-sm flex items-center gap-1.5">
+                    <Info className="h-3.5 w-3.5 text-primary" />
+                    <span>Map Features</span>
+                  </h4>
+                </div>
+                <ul className="px-4 pb-3 space-y-2 text-xs">
                   {Object.entries(mapFeatures).map(([key, description]) => (
                     <li key={key} className="flex items-start gap-2">
-                      <span className="font-medium capitalize">{key}:</span>
+                      <span className={cn(
+                        "font-medium capitalize flex-shrink-0 px-1.5 py-0.5 rounded text-xs",
+                        isDarkMode
+                          ? "bg-primary/20 text-primary"
+                          : "bg-muted text-muted-foreground"
+                      )}>
+                        {key}
+                      </span>
                       <span className="text-muted-foreground">{description}</span>
                     </li>
                   ))}
