@@ -4,9 +4,11 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { MapPin } from 'lucide-react';
+import { Layers, MapPin, Ruler, Share, TrafficCone, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import {
+  Circle,
+  FeatureGroup,
   MapContainer,
   Marker,
   Polyline,
@@ -16,6 +18,15 @@ import {
   ZoomControl,
 } from 'react-leaflet';
 import { searchGeonames } from '@/api/places-api';
+import { Card } from '@/components/ui/card';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
+
+// Add Leaflet Draw for distance measurement and drawing
+import 'leaflet-draw/dist/leaflet.draw.css';
+import { EditControl } from "react-leaflet-draw";
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 
 delete (L.Icon.Default.prototype as { _getIconUrl?: () => string })._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -45,9 +56,65 @@ if (typeof document !== 'undefined') {
       color: #f3f4f6 !important;
       border-color: #374151 !important;
     }
+    .leaflet-draw-tooltip {
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(0, 0, 0, 0.5);
+      color: #fff;
+    }
+    .dark-map .leaflet-draw-toolbar a {
+      background-color: #1e1e1e !important;
+      color: #f3f4f6 !important;
+      border-color: #374151 !important;
+    }
+    .dark-map .leaflet-draw-actions a {
+      background-color: #1e1e1e !important;
+      color: #f3f4f6 !important;
+      border-color: #374151 !important;
+    }
   `;
   document.head.appendChild(styleElement);
 }
+
+// Different map tile layers similar to Google Maps
+const mapLayers = {
+  standard: {
+    light: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    dark: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+    name: 'Standard',
+  },
+  satellite: {
+    light: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    dark: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    name: 'Satellite',
+  },
+  terrain: {
+    light: 'https://stamen-tiles-{s}.a.ssl.fastly.net/terrain/{z}/{x}/{y}{r}.png',
+    dark: 'https://stamen-tiles-{s}.a.ssl.fastly.net/terrain-dark/{z}/{x}/{y}{r}.png',
+    name: 'Terrain',
+  },
+  transport: {
+    light: 'https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png',
+    dark: 'https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png',
+    name: 'Transport',
+  },
+};
+
+const mapLayerAttribution = {
+  standard: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+  satellite: '&copy; <a href="https://www.arcgis.com/">Esri</a>',
+  terrain: '&copy; <a href="http://stamen.com">Stamen Design</a>, <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+  transport: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>, <a href="https://github.com/cyclosm/cyclosm-cartocss-style">CyclOSM</a>',
+};
+
+// POI categories
+const poiCategories = [
+  { name: 'Restaurant', icon: '🍽️' },
+  { name: 'Hotel', icon: '🏨' },
+  { name: 'Museum', icon: '🏛️' },
+  { name: 'Park', icon: '🌳' },
+  { name: 'Hospital', icon: '🏥' },
+  { name: 'Shopping', icon: '🛍️' },
+];
 
 interface MapProps {
   center: { lat: number; lng: number };
@@ -65,11 +132,13 @@ function MapController({
   userLocation,
   directions,
   onMapLoaded,
+  waypoints,
 }: {
   center: { lat: number; lng: number };
   userLocation: { lat: number; lng: number } | null;
   directions: boolean;
   onMapLoaded: () => void;
+  waypoints: Array<{ lat: number; lng: number }>;
 }) {
   const map = useMap();
   const [route, setRoute] = useState<[number, number][]>([]);
@@ -83,21 +152,34 @@ function MapController({
 
   useEffect(() => {
     if (directions && userLocation && center.lat !== 0 && center.lng !== 0) {
-      const points: [number, number][] = [
-        [userLocation.lat, userLocation.lng],
-        [center.lat, center.lng],
-      ];
+      let points: [number, number][] = [];
+
+      // Start with user location
+      if (userLocation) {
+        points.push([userLocation.lat, userLocation.lng]);
+      }
+
+      // Add all waypoints
+      if (waypoints.length > 0) {
+        waypoints.forEach(wp => {
+          points.push([wp.lat, wp.lng]);
+        });
+      }
+
+      // End with destination
+      if (center.lat !== 0 && center.lng !== 0) {
+        points.push([center.lat, center.lng]);
+      }
+
       setRoute(points);
 
-      const bounds = new L.LatLngBounds([
-        [userLocation.lat, userLocation.lng],
-        [center.lat, center.lng],
-      ]);
+      // Create bounds that include all points
+      const bounds = L.latLngBounds(points.map(p => L.latLng(p[0], p[1])));
       map.fitBounds(bounds, { padding: [50, 50] });
     } else {
       setRoute([]);
     }
-  }, [directions, userLocation, center, map]);
+  }, [directions, userLocation, center, map, waypoints]);
 
   return (
     <>
@@ -227,6 +309,319 @@ function SearchResults({
   ) : null;
 }
 
+function StreetViewButton({ position, isDarkMode }: { position: { lat: number; lng: number }, isDarkMode: boolean }) {
+  const [streetViewUrl, setStreetViewUrl] = useState('');
+  const [streetViewOpen, setStreetViewOpen] = useState(false);
+
+  useEffect(() => {
+    const url = `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${position.lat},${position.lng}`;
+    setStreetViewUrl(url);
+  }, [position]);
+
+  return (
+    <>
+      <Button
+        size="sm"
+        variant={isDarkMode ? "outline" : "secondary"}
+        className={cn(
+          "mt-2 w-full",
+          isDarkMode ? "bg-background/60 hover:bg-background/80" : ""
+        )}
+        onClick={() => setStreetViewOpen(true)}
+      >
+        Street View
+      </Button>
+
+      <Dialog open={streetViewOpen} onOpenChange={setStreetViewOpen}>
+        <DialogContent className="max-w-4xl w-full h-[80vh]">
+          <div className="absolute top-2 right-2 z-10">
+            <Button variant="ghost" size="icon" onClick={() => setStreetViewOpen(false)}>
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+          <iframe
+            src={streetViewUrl}
+            className="w-full h-full border-none"
+            title="Street View"
+            allow="fullscreen"
+          />
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
+
+function MapLayerControl({ currentLayer, setCurrentLayer, isDarkMode }: {
+  currentLayer: keyof typeof mapLayers,
+  setCurrentLayer: (layer: keyof typeof mapLayers) => void,
+  isDarkMode: boolean
+}) {
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          size="icon"
+          className={cn(
+            'h-10 w-10 rounded-full backdrop-blur-md shadow-lg',
+            isDarkMode
+              ? 'bg-card/90 border-primary/30 text-primary hover:bg-primary/20 hover:border-primary/50'
+              : 'bg-white/90 border-muted hover:bg-white'
+          )}
+        >
+          <Layers className="h-5 w-5" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-56" align="end">
+        <div className="space-y-2">
+          <h4 className="font-medium text-sm">Map Type</h4>
+          <RadioGroup
+            value={currentLayer}
+            onValueChange={(value) => setCurrentLayer(value as keyof typeof mapLayers)}
+          >
+            {Object.entries(mapLayers).map(([key, layer]) => (
+              <div key={key} className="flex items-center space-x-2">
+                <RadioGroupItem value={key} id={`layer-${key}`} />
+                <Label htmlFor={`layer-${key}`}>{layer.name}</Label>
+              </div>
+            ))}
+          </RadioGroup>
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+function MapMeasureControl({ isDarkMode }: { isDarkMode: boolean }) {
+  const [isMeasuring, setIsMeasuring] = useState(false);
+  const map = useMap();
+  const featureGroupRef = useRef<L.FeatureGroup | null>(null);
+
+  useEffect(() => {
+    if (isMeasuring && map) {
+      // Add measurement functionality
+      const drawControl = new L.Control.Draw({
+        draw: {
+          polygon: false,
+          marker: false,
+          circle: false,
+          rectangle: false,
+          circlemarker: false,
+          polyline: {
+            shapeOptions: {
+              color: '#3b82f6',
+              weight: 3
+            },
+            metric: true,
+            feet: false
+          }
+        },
+        edit: {
+          featureGroup: featureGroupRef.current as L.FeatureGroup,
+          edit: false,
+          remove: true
+        }
+      });
+
+      map.addControl(drawControl);
+
+      return () => {
+        map.removeControl(drawControl);
+      };
+    }
+  }, [isMeasuring, map]);
+
+  const handleMeasurementClick = () => {
+    setIsMeasuring(!isMeasuring);
+  };
+
+  return (
+    <>
+      <Button
+        variant={isMeasuring ? "default" : "outline"}
+        size="icon"
+        onClick={handleMeasurementClick}
+        className={cn(
+          'h-10 w-10 rounded-full backdrop-blur-md shadow-lg',
+          isMeasuring
+            ? 'bg-primary text-primary-foreground'
+            : isDarkMode
+              ? 'bg-card/90 border-primary/30 text-primary hover:bg-primary/20 hover:border-primary/50'
+              : 'bg-white/90 border-muted hover:bg-white'
+        )}
+      >
+        <Ruler className="h-4 w-4" />
+      </Button>
+
+      {isMeasuring && (
+        <FeatureGroup ref={(el) => { featureGroupRef.current = el as any; }}>
+          <EditControl
+            position="topright"
+            onCreated={(e) => {
+              const layer = e.layer;
+              if (layer instanceof L.Polyline) {
+                const distanceInMeters = calculatePolylineDistance(layer);
+                layer.bindPopup(`Distance: ${formatDistance(distanceInMeters)}`).openPopup();
+              }
+            }}
+            draw={{
+              rectangle: false,
+              circle: false,
+              circlemarker: false,
+              marker: false,
+              polygon: false,
+              polyline: true
+            }}
+          />
+        </FeatureGroup>
+      )}
+    </>
+  );
+}
+
+// Helper function to calculate polyline distance
+function calculatePolylineDistance(polyline: L.Polyline): number {
+  const latlngs = polyline.getLatLngs() as L.LatLng[];
+  let totalDistance = 0;
+
+  for (let i = 1; i < latlngs.length; i++) {
+    totalDistance += latlngs[i-1].distanceTo(latlngs[i]);
+  }
+
+  return totalDistance;
+}
+
+// Helper function to format distance
+function formatDistance(meters: number): string {
+  if (meters >= 1000) {
+    return `${(meters / 1000).toFixed(2)} km`;
+  } else {
+    return `${Math.round(meters)} m`;
+  }
+}
+
+function TrafficLayer({ showTraffic, isDarkMode }: { showTraffic: boolean, isDarkMode: boolean }) {
+  const map = useMap();
+  const [trafficData, setTrafficData] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (showTraffic) {
+      // Simulate traffic data
+      // In a real app, this would be fetched from a traffic API
+      const bounds = map.getBounds();
+      const ne = bounds.getNorthEast();
+      const sw = bounds.getSouthWest();
+
+      // Generate random traffic points
+      const trafficPoints = [];
+      for (let i = 0; i < 10; i++) {
+        const lat = sw.lat + Math.random() * (ne.lat - sw.lat);
+        const lng = sw.lng + Math.random() * (ne.lng - sw.lng);
+        const intensity = Math.random(); // 0 to 1 (light to heavy)
+
+        trafficPoints.push({
+          position: [lat, lng],
+          radius: 200 + Math.random() * 500,
+          intensity
+        });
+      }
+
+      setTrafficData(trafficPoints);
+    } else {
+      setTrafficData([]);
+    }
+  }, [showTraffic, map]);
+
+  if (!showTraffic) return null;
+
+  return (
+    <>
+      {trafficData.map((point, index) => (
+        <Circle
+          key={index}
+          center={[point.position[0], point.position[1]]}
+          radius={point.radius}
+          pathOptions={{
+            color: getTrafficColor(point.intensity),
+            fillOpacity: 0.4,
+            weight: 2
+          }}
+        >
+          <Popup>
+            <div className={cn(isDarkMode ? "text-white" : "text-black")}>
+              <h4 className="font-medium">Traffic {index + 1}</h4>
+              <p className="text-sm">{getTrafficDescription(point.intensity)}</p>
+            </div>
+          </Popup>
+        </Circle>
+      ))}
+    </>
+  );
+}
+
+function getTrafficColor(intensity: number): string {
+  if (intensity < 0.3) return '#4ade80'; // Light traffic - green
+  if (intensity < 0.7) return '#facc15'; // Medium traffic - yellow
+  return '#ef4444'; // Heavy traffic - red
+}
+
+function getTrafficDescription(intensity: number): string {
+  if (intensity < 0.3) return 'Light traffic';
+  if (intensity < 0.7) return 'Moderate traffic';
+  return 'Heavy traffic';
+}
+
+function ShareMapButton({ position, locationName, isDarkMode }: {
+  position: { lat: number; lng: number },
+  locationName: string,
+  isDarkMode: boolean
+}) {
+  const shareMap = async () => {
+    const shareUrl = `${window.location.origin}/maps?lat=${position.lat}&lng=${position.lng}&name=${encodeURIComponent(locationName)}`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `Check out ${locationName} on Roamance`,
+          text: `I found this amazing place: ${locationName}`,
+          url: shareUrl
+        });
+      } catch (err) {
+        console.error('Error sharing:', err);
+        // Fallback to clipboard
+        copyToClipboard(shareUrl);
+      }
+    } else {
+      // Fallback for browsers that don't support Web Share API
+      copyToClipboard(shareUrl);
+    }
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text).then(() => {
+      alert('Map link copied to clipboard!');
+    }).catch(err => {
+      console.error('Could not copy text: ', err);
+    });
+  };
+
+  return (
+    <Button
+      variant="outline"
+      size="icon"
+      onClick={shareMap}
+      className={cn(
+        'h-10 w-10 rounded-full backdrop-blur-md shadow-lg',
+        isDarkMode
+          ? 'bg-card/90 border-primary/30 text-primary hover:bg-primary/20 hover:border-primary/50'
+          : 'bg-white/90 border-muted hover:bg-white'
+      )}
+    >
+      <Share className="h-5 w-5" />
+    </Button>
+  );
+}
+
 export default function LeafletMap({
   center,
   locationName,
@@ -242,7 +637,55 @@ export default function LeafletMap({
   >([]);
   const [isSearching, setIsSearching] = useState<boolean>(false);
   const mapRef = useRef<L.Map | null>(null);
+  const [currentMapLayer, setCurrentMapLayer] = useState<keyof typeof mapLayers>('standard');
+  const [showTraffic, setShowTraffic] = useState<boolean>(false);
+  const [waypoints, setWaypoints] = useState<Array<{lat: number, lng: number}>>([]);
+  const [pois, setPois] = useState<Array<{
+    name: string,
+    category: string,
+    position: [number, number]
+  }>>([]);
 
+  // Move these functions outside of any hook that requires map context
+  const toggleTraffic = () => {
+    setShowTraffic(!showTraffic);
+  };
+
+  const addWaypoint = (lat: number, lng: number) => {
+    setWaypoints([...waypoints, { lat, lng }]);
+  };
+
+  const removeWaypoint = (index: number) => {
+    const updatedWaypoints = [...waypoints];
+    updatedWaypoints.splice(index, 1);
+    setWaypoints(updatedWaypoints);
+  };
+
+  // Create a separate component for map controls that will be rendered inside MapContainer
+  const MapControls = () => {
+    const map = useMap(); // This is now safely inside the MapContainer context
+
+    useEffect(() => {
+      if (centerOnUser && userLocation) {
+        map.setView([userLocation.lat, userLocation.lng], 15, {
+          animate: true,
+          duration: 1,
+        });
+
+        const event = new CustomEvent('userLocationCentered');
+        window.dispatchEvent(event);
+      }
+    }, [centerOnUser, map]);
+
+    return (
+      <>
+        <DarkModeMapLayer isDarkMode={isDarkMode} />
+        <TrafficLayer showTraffic={showTraffic} isDarkMode={isDarkMode} />
+      </>
+    );
+  };
+
+  // Handle functions that don't need the map context
   useEffect(() => {
     const fetchSearchResults = async () => {
       if (searchQuery.length < 3) {
@@ -284,22 +727,232 @@ export default function LeafletMap({
   }, [searchQuery]);
 
   useEffect(() => {
-    if (centerOnUser && userLocation && mapRef.current) {
-      mapRef.current.setView([userLocation.lat, userLocation.lng], 15, {
-        animate: true,
-        duration: 1,
-      });
+    if (center.lat !== 0 && center.lng !== 0) {
+      const generatePOIs = () => {
+        const genPois = [];
+        for (let i = 0; i < 15; i++) {
+          // Random offset between -0.01 and 0.01 (roughly 1km)
+          const latOffset = (Math.random() - 0.5) * 0.02;
+          const lngOffset = (Math.random() - 0.5) * 0.02;
 
-      const event = new CustomEvent('userLocationCentered');
-      window.dispatchEvent(event);
+          const category = poiCategories[Math.floor(Math.random() * poiCategories.length)];
+
+          genPois.push({
+            name: `${category.name} ${i + 1}`,
+            category: category.name,
+            icon: category.icon,
+            position: [center.lat + latOffset, center.lng + lngOffset] as [number, number]
+          });
+        }
+        setPois(genPois);
+      };
+
+      generatePOIs();
     }
-  }, [centerOnUser, userLocation]);
+  }, [center]);
 
   const handleSelectSearchResult = (lat: number, lng: number) => {
     if (mapRef.current) {
       mapRef.current.setView([lat, lng], 15);
       setSearchResults([]);
     }
+  };
+
+  // Create a wrapper for the map control buttons that will be outside MapContainer
+  const MapControlWrapper = () => {
+    // This component doesn't rely on useMap() or useLeafletContext()
+    const shareMap = async () => {
+      const shareUrl = `${window.location.origin}/maps?lat=${center.lat}&lng=${center.lng}&name=${encodeURIComponent(locationName)}`;
+
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: `Check out ${locationName} on Roamance`,
+            text: `I found this amazing place: ${locationName}`,
+            url: shareUrl
+          });
+        } catch (err) {
+          console.error('Error sharing:', err);
+          // Fallback to clipboard
+          copyToClipboard(shareUrl);
+        }
+      } else {
+        // Fallback for browsers that don't support Web Share API
+        copyToClipboard(shareUrl);
+      }
+    };
+
+    const copyToClipboard = (text: string) => {
+      navigator.clipboard.writeText(text).then(() => {
+        alert('Map link copied to clipboard!');
+      }).catch(err => {
+        console.error('Could not copy text: ', err);
+      });
+    };
+
+    return (
+      <div className="absolute top-24 right-4 z-[1000] flex flex-col gap-3">
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              size="icon"
+              className={cn(
+                'h-10 w-10 rounded-full backdrop-blur-md shadow-lg',
+                isDarkMode
+                  ? 'bg-card/90 border-primary/30 text-primary hover:bg-primary/20 hover:border-primary/50'
+                  : 'bg-white/90 border-muted hover:bg-white'
+              )}
+            >
+              <Layers className="h-5 w-5" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-56" align="end">
+            <div className="space-y-2">
+              <h4 className="font-medium text-sm">Map Type</h4>
+              <RadioGroup
+                value={currentMapLayer}
+                onValueChange={(value) => setCurrentMapLayer(value as keyof typeof mapLayers)}
+              >
+                {Object.entries(mapLayers).map(([key, layer]) => (
+                  <div key={key} className="flex items-center space-x-2">
+                    <RadioGroupItem value={key} id={`layer-${key}`} />
+                    <Label htmlFor={`layer-${key}`}>{layer.name}</Label>
+                  </div>
+                ))}
+              </RadioGroup>
+            </div>
+          </PopoverContent>
+        </Popover>
+
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => {
+            // Instead of using the MapMeasureControl component that has useMap,
+            // we toggle a state that will be used inside MapContainer's children
+            const event = new CustomEvent('toggle-measure');
+            window.dispatchEvent(event);
+          }}
+          className={cn(
+            'h-10 w-10 rounded-full backdrop-blur-md shadow-lg',
+            isDarkMode
+              ? 'bg-card/90 border-primary/30 text-primary hover:bg-primary/20 hover:border-primary/50'
+              : 'bg-white/90 border-muted hover:bg-white'
+          )}
+        >
+          <Ruler className="h-4 w-4" />
+        </Button>
+
+        <Button
+          variant={showTraffic ? "default" : "outline"}
+          size="icon"
+          onClick={toggleTraffic}
+          className={cn(
+            'h-10 w-10 rounded-full backdrop-blur-md shadow-lg',
+            showTraffic
+              ? 'bg-primary text-primary-foreground'
+              : isDarkMode
+                ? 'bg-card/90 border-primary/30 text-primary hover:bg-primary/20 hover:border-primary/50'
+                : 'bg-white/90 border-muted hover:bg-white'
+          )}
+        >
+          <TrafficCone className="h-5 w-5" />
+        </Button>
+
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={shareMap}
+          className={cn(
+            'h-10 w-10 rounded-full backdrop-blur-md shadow-lg',
+            isDarkMode
+              ? 'bg-card/90 border-primary/30 text-primary hover:bg-primary/20 hover:border-primary/50'
+              : 'bg-white/90 border-muted hover:bg-white'
+          )}
+        >
+          <Share className="h-5 w-5" />
+        </Button>
+      </div>
+    );
+  };
+
+  // Create a component for measurement tools that will be inside MapContainer
+  const MeasurementTools = () => {
+    const map = useMap();
+    const [isMeasuring, setIsMeasuring] = useState(false);
+    const featureGroupRef = useRef<L.FeatureGroup | null>(null);
+
+    useEffect(() => {
+      const handleToggleMeasure = () => {
+        setIsMeasuring(prev => !prev);
+      };
+
+      window.addEventListener('toggle-measure', handleToggleMeasure);
+
+      return () => {
+        window.removeEventListener('toggle-measure', handleToggleMeasure);
+      };
+    }, []);
+
+    useEffect(() => {
+      if (isMeasuring && map) {
+        // Add measurement functionality
+        const drawControl = new L.Control.Draw({
+          draw: {
+            polygon: false,
+            marker: false,
+            circle: false,
+            rectangle: false,
+            circlemarker: false,
+            polyline: {
+              shapeOptions: {
+                color: '#3b82f6',
+                weight: 3
+              },
+              metric: true,
+              feet: false
+            }
+          },
+          edit: {
+            featureGroup: featureGroupRef.current as L.FeatureGroup,
+            edit: false,
+            remove: true
+          }
+        });
+
+        map.addControl(drawControl);
+
+        return () => {
+          map.removeControl(drawControl);
+        };
+      }
+    }, [isMeasuring, map]);
+
+    return (
+      isMeasuring ? (
+        <FeatureGroup ref={(el) => { featureGroupRef.current = el as any; }}>
+          <EditControl
+            position="topright"
+            onCreated={(e) => {
+              const layer = e.layer;
+              if (layer instanceof L.Polyline) {
+                const distanceInMeters = calculatePolylineDistance(layer);
+                layer.bindPopup(`Distance: ${formatDistance(distanceInMeters)}`).openPopup();
+              }
+            }}
+            draw={{
+              rectangle: false,
+              circle: false,
+              circlemarker: false,
+              marker: false,
+              polygon: false,
+              polyline: true
+            }}
+          />
+        </FeatureGroup>
+      ) : null
+    );
   };
 
   return (
@@ -315,12 +968,8 @@ export default function LeafletMap({
         <ZoomControl position="topright" />
 
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url={
-            isDarkMode
-              ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-              : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
-          }
+          attribution={mapLayerAttribution[currentMapLayer]}
+          url={isDarkMode ? mapLayers[currentMapLayer].dark : mapLayers[currentMapLayer].light}
         />
 
         {center.lat !== 0 && center.lng !== 0 && (
@@ -371,6 +1020,7 @@ export default function LeafletMap({
                     Get Directions
                   </Button>
                 )}
+                <StreetViewButton position={center} isDarkMode={isDarkMode} />
               </div>
             </Popup>
           </Marker>
@@ -417,22 +1067,151 @@ export default function LeafletMap({
           </Marker>
         )}
 
+        {/* Display waypoints */}
+        {waypoints.map((wp, index) => (
+          <Marker
+            key={`waypoint-${index}`}
+            position={[wp.lat, wp.lng]}
+            icon={
+              new L.Icon({
+                iconUrl:
+                  'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMzYiIHZpZXdCb3g9IjAgMCAyNCAzNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDM2QzEyIDM2IDI0IDIzLjcyMyAyNCAxMkMyNCA1LjM3MjU4IDE4LjYyNzQgMCAxMiAwQzUuMzcyNTggMCAwIDUuMzcyNTggMCAxMkMwIDIzLjcyMyAxMiAzNiAxMiAzNloiIGZpbGw9IiM2MzY2RjEiLz4KPGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iNiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+',
+                iconSize: [24, 36],
+                iconAnchor: [12, 36],
+                popupAnchor: [0, -36],
+              })
+            }
+          >
+            <Popup>
+              <div className={cn('p-2', isDarkMode ? 'bg-card text-foreground' : '')}>
+                <h3 className={cn('font-bold', isDarkMode ? 'text-foreground' : '')}>
+                  Waypoint {index + 1}
+                </h3>
+                <p className={cn('text-sm', isDarkMode ? 'text-muted-foreground' : '')}>
+                  {wp.lat.toFixed(4)}, {wp.lng.toFixed(4)}
+                </p>
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  className="mt-2 w-full"
+                  onClick={() => removeWaypoint(index)}
+                >
+                  Remove
+                </Button>
+              </div>
+            </Popup>
+          </Marker>
+        ))}
+
+        {/* Display POIs */}
+        {pois.map((poi, index) => (
+          <Marker
+            key={`poi-${index}`}
+            position={poi.position}
+            icon={
+              new L.DivIcon({
+                html: `<div style="font-size: 18px; background-color: white; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">${poi.icon}</div>`,
+                className: '',
+                iconSize: [30, 30],
+                iconAnchor: [15, 15]
+              })
+            }
+          >
+            <Popup>
+              <div className={cn('p-2', isDarkMode ? 'bg-card text-foreground' : '')}>
+                <h3 className={cn('font-bold', isDarkMode ? 'text-foreground' : '')}>
+                  {poi.name}
+                </h3>
+                <p className={cn('text-sm', isDarkMode ? 'text-muted-foreground' : '')}>
+                  Category: {poi.category}
+                </p>
+                <div className="flex flex-col gap-2 mt-2">
+                  <Button
+                    size="sm"
+                    variant="default"
+                    className="w-full"
+                    onClick={() => {
+                      if (mapRef.current) {
+                        mapRef.current.setView(poi.position, 16);
+                      }
+                    }}
+                  >
+                    View Details
+                  </Button>
+                  {directions && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => addWaypoint(poi.position[0], poi.position[1])}
+                    >
+                      Add as Waypoint
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </Popup>
+          </Marker>
+        ))}
+
         <MapController
           center={center}
           userLocation={userLocation}
           directions={directions}
           onMapLoaded={onMapLoaded}
+          waypoints={waypoints}
         />
 
-        <DarkModeMapLayer isDarkMode={isDarkMode} />
+        {/* These components now safely use the useMap() hook within MapContainer */}
+        <MapControls />
+        <MeasurementTools />
       </MapContainer>
 
+      {/* Components outside of MapContainer that don't use Leaflet hooks */}
       <SearchResults
         results={searchResults}
         onSelect={handleSelectSearchResult}
         isDarkMode={isDarkMode}
         isSearching={isSearching}
       />
+
+      {/* Controls that are rendered outside of MapContainer that don't use Leaflet hooks */}
+      <MapControlWrapper />
+
+      {/* Waypoints panel - only show when directions are active */}
+      {directions && waypoints.length > 0 && (
+        <Card className={cn(
+          "absolute left-4 bottom-20 z-[1000] p-4 max-w-xs backdrop-blur-md border",
+          isDarkMode
+            ? "bg-card/80 border-card-foreground/10"
+            : "bg-white/90 border-muted"
+        )}>
+          <h3 className="font-medium text-sm mb-2">Waypoints ({waypoints.length})</h3>
+          <div className="space-y-2 max-h-40 overflow-y-auto">
+            {waypoints.map((wp, index) => (
+              <div key={index} className="flex items-center justify-between text-xs">
+                <span>Waypoint {index + 1}</span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 p-0"
+                  onClick={() => removeWaypoint(index)}
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              </div>
+            ))}
+          </div>
+          <Button
+            variant="destructive"
+            size="sm"
+            className="w-full mt-2"
+            onClick={() => setWaypoints([])}
+          >
+            Clear All
+          </Button>
+        </Card>
+      )}
     </div>
   );
 }

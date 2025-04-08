@@ -3,12 +3,13 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import { ArrowLeft, Locate, Navigation, Search } from 'lucide-react';
+import { ArrowLeft, Layers, Locate, Navigation, Search } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { MapContainer } from './map-container';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 export default function MapPage() {
   const searchParams = useSearchParams();
@@ -51,6 +52,25 @@ export default function MapPage() {
   const [isLocating, setIsLocating] = useState(false);
   const [directions, setDirections] = useState<boolean>(false);
   const [centerOnUser, setCenterOnUser] = useState<boolean>(false);
+
+  // Add state for feature tooltips
+  const [showingTooltip, setShowingTooltip] = useState<string | null>(null);
+
+  // Event listener for showing directions from a popup
+  useEffect(() => {
+    const handleDirectionsRequest = () => {
+      if (!userLocation) {
+        getUserLocation();
+      }
+      setDirections(true);
+    };
+
+    window.addEventListener('getDirections', handleDirectionsRequest);
+
+    return () => {
+      window.removeEventListener('getDirections', handleDirectionsRequest);
+    };
+  }, [userLocation]);
 
   const getUserLocation = () => {
     setIsLocating(true);
@@ -170,6 +190,42 @@ export default function MapPage() {
               )}
             </div>
           </div>
+
+          {/* Map options popover */}
+          <Popover open={showingTooltip === 'features'} onOpenChange={(open) => setShowingTooltip(open ? 'features' : null)}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                className={cn(
+                  'ml-auto h-10 w-10 rounded-full backdrop-blur-md shadow-lg transition-all duration-200 hover:scale-105',
+                  isDarkMode
+                    ? 'bg-card/80 border-card-foreground/20 text-primary hover:bg-card/90 hover:text-primary'
+                    : 'bg-white/90 border-muted hover:bg-white'
+                )}
+              >
+                <Layers className="h-5 w-5" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-56" align="end">
+              <div className="space-y-3">
+                <h4 className="font-medium text-sm">Map Features</h4>
+                <div className="text-xs text-muted-foreground">
+                  <p>This map includes the following features:</p>
+                  <ul className="list-disc pl-4 mt-1 space-y-1">
+                    <li>Different map layers (Standard, Satellite, Terrain)</li>
+                    <li>Distance measurement tools</li>
+                    <li>Traffic visualization</li>
+                    <li>Points of interest</li>
+                    <li>Street View integration</li>
+                    <li>Waypoint management for routing</li>
+                    <li>Map sharing functionality</li>
+                  </ul>
+                </div>
+                <p className="text-xs">Look for control buttons on the right side of the map.</p>
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
       </div>
 
@@ -186,6 +242,8 @@ export default function MapPage() {
               : 'bg-white/90 border-muted hover:bg-white',
             isLocating && 'animate-pulse'
           )}
+          aria-label="Locate me"
+          title="Find my location"
         >
           <Locate className="h-5 w-5" />
         </Button>
@@ -202,6 +260,8 @@ export default function MapPage() {
                 ? 'bg-card/90 border-primary/30 text-primary hover:bg-primary/20 hover:border-primary/50'
                 : 'bg-white/90 border-muted hover:bg-white'
           )}
+          aria-label={directions ? "Hide directions" : "Show directions"}
+          title={directions ? "Hide directions" : "Get directions"}
         >
           <Navigation className="h-5 w-5" />
         </Button>
