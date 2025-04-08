@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 import 'leaflet/dist/leaflet.css';
 // Import Leaflet Draw CSS for the measurement tools
 import 'leaflet-draw/dist/leaflet.draw.css';
-import { Info, MapPin } from 'lucide-react';
+import { Info, Layers, MapPin, Ruler, Share, TrafficCone, Navigation } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -58,6 +58,15 @@ export function MapContainer({
     waypoints: "Add stops along your route when getting directions"
   };
 
+  // Feature icons mapping
+  const featureIcons = {
+    layers: <Layers className="h-5 w-5" />,
+    measure: <Ruler className="h-5 w-5" />,
+    traffic: <TrafficCone className="h-5 w-5" />,
+    share: <Share className="h-5 w-5" />,
+    waypoints: <Navigation className="h-5 w-5" />
+  };
+
   useEffect(() => {
     if (mapLoaded) {
       const timer = setTimeout(() => {
@@ -67,6 +76,26 @@ export function MapContainer({
       return () => clearTimeout(timer);
     }
   }, [mapLoaded]);
+
+  // Listen for map control hover events
+  useEffect(() => {
+    const handleMapControlHover = (e: Event) => {
+      setMapFeatureHelp((e as CustomEvent).detail.feature);
+    };
+
+    const handleMapControlLeave = () => {
+      // Add a small timeout before hiding to make the UI feel smoother
+      setTimeout(() => setMapFeatureHelp(null), 100);
+    };
+
+    window.addEventListener('mapControlHover', handleMapControlHover);
+    window.addEventListener('mapControlLeave', handleMapControlLeave);
+
+    return () => {
+      window.removeEventListener('mapControlHover', handleMapControlHover);
+      window.removeEventListener('mapControlLeave', handleMapControlLeave);
+    };
+  }, []);
 
   useEffect(() => {
     const handleGetDirections = () => {
@@ -118,6 +147,31 @@ export function MapContainer({
                   {center.lat.toFixed(4)}, {center.lng.toFixed(4)}
                 </Badge>
               </div>
+            </div>
+          </div>
+        </Card>
+      )}
+
+      {/* Contextual Feature Help Card */}
+      {mapFeatureHelp && (
+        <Card className={cn(
+          "absolute top-4 right-16 z-[1000] p-3 max-w-xs backdrop-blur-md shadow-lg transition-all duration-200 animate-in fade-in-50 slide-in-from-right-5 border",
+          isDarkMode
+            ? "bg-card/80 border-primary/20"
+            : "bg-white/90 border-primary/10"
+        )}>
+          <div className="flex items-start gap-2">
+            <div className={cn(
+              "p-1.5 rounded-full",
+              isDarkMode ? "bg-primary/20" : "bg-primary/10"
+            )}>
+              {featureIcons[mapFeatureHelp as keyof typeof featureIcons]}
+            </div>
+            <div>
+              <h4 className="font-medium capitalize">{mapFeatureHelp}</h4>
+              <p className="text-sm text-muted-foreground mt-0.5">
+                {mapFeatures[mapFeatureHelp as keyof typeof mapFeatures]}
+              </p>
             </div>
           </div>
         </Card>

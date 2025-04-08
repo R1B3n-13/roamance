@@ -285,6 +285,16 @@ export default function MapPage() {
                       : 'bg-white/90 border-muted hover:bg-white'
                 )}
                 aria-label={directions ? "Hide directions" : "Show directions"}
+                onMouseEnter={() => {
+                  const event = new CustomEvent('mapControlHover', {
+                    detail: { feature: 'waypoints' }
+                  });
+                  window.dispatchEvent(event);
+                }}
+                onMouseLeave={() => {
+                  const event = new CustomEvent('mapControlLeave');
+                  window.dispatchEvent(event);
+                }}
               >
                 <Navigation className="h-5 w-5" />
               </Button>

@@ -889,6 +889,17 @@ export default function LeafletMap({
 
   // Create a wrapper for the map control buttons that will be outside MapContainer
   const MapControlWrapper = () => {
+    // Helper function to emit hover events for contextual help
+    const emitMapControlHover = (feature: string) => {
+      const event = new CustomEvent('mapControlHover', { detail: { feature } });
+      window.dispatchEvent(event);
+    };
+
+    const emitMapControlLeave = () => {
+      const event = new CustomEvent('mapControlLeave');
+      window.dispatchEvent(event);
+    };
+
     // This component doesn't rely on useMap() or useLeafletContext()
     const shareMap = async () => {
       const shareUrl = `${window.location.origin}/maps?lat=${center.lat}&lng=${center.lng}&name=${encodeURIComponent(locationName)}`;
@@ -937,6 +948,8 @@ export default function LeafletMap({
                       ? 'bg-card/90 border-primary/30 text-primary hover:bg-primary/20 hover:border-primary/50'
                       : 'bg-white/90 border-muted hover:bg-white'
                   )}
+                  onMouseEnter={() => emitMapControlHover('layers')}
+                  onMouseLeave={emitMapControlLeave}
                 >
                   <Layers className="h-5 w-5" />
                 </Button>
@@ -988,6 +1001,8 @@ export default function LeafletMap({
                   ? 'bg-card/90 border-primary/30 text-primary hover:bg-primary/20 hover:border-primary/50'
                   : 'bg-white/90 border-muted hover:bg-white'
               )}
+              onMouseEnter={() => emitMapControlHover('measure')}
+              onMouseLeave={emitMapControlLeave}
             >
               <Ruler className="h-4 w-4" />
             </Button>
@@ -1011,6 +1026,8 @@ export default function LeafletMap({
                     ? 'bg-card/90 border-primary/30 text-primary hover:bg-primary/20 hover:border-primary/50'
                     : 'bg-white/90 border-muted hover:bg-white'
               )}
+              onMouseEnter={() => emitMapControlHover('traffic')}
+              onMouseLeave={emitMapControlLeave}
             >
               <TrafficCone className="h-5 w-5" />
             </Button>
@@ -1032,6 +1049,8 @@ export default function LeafletMap({
                   ? 'bg-card/90 border-primary/30 text-primary hover:bg-primary/20 hover:border-primary/50'
                   : 'bg-white/90 border-muted hover:bg-white'
               )}
+              onMouseEnter={() => emitMapControlHover('share')}
+              onMouseLeave={emitMapControlLeave}
             >
               <Share className="h-5 w-5" />
             </Button>
@@ -1259,7 +1278,7 @@ export default function LeafletMap({
               icon={
                 new L.Icon({
                   iconUrl:
-                    'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMzYiIHZpZXdCb3g9IjAgMCAyNCAzNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDM2QzEyIDM2IDI0IDIzLjcyMyAyNCAxMkMyNCA1LjM3MjU4IDE4LjYyNzQgMCAxMiAwQzUuMzcyNTggMCAwIDUuMzcyNTggMCAxMkMwIDIzLjcyMyAxMiAzNiAxMiAzNloiIGZpbGw9IiM2MzY2RjEiLz4KPGNpcmxlIGN4PSIxMiIgY3k9IjEyIiByPSI2IiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4=',
+                    'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMzYiIHZpZXdCb3g9IjAgMCAyNCAzNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDM2QzEyIDM2IDI0IDIzLjcyMyAyNCAxMkMyNCA1LjM3MjU4IDE4LjYyNzQgMCAxMiAwQzUuMzcyNTggMCAwIDUuMzcyNTggMCAxOEMwIDIzLjcyMyAxMiAzNiAxMiAzNloiIGZpbGw9IiM2MzY2RjEiLz4KPGNpcmxlIGN4PSIxMiIgY3k9IjEyIiByPSI2IiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4=',
                   iconSize: [24, 36],
                   iconAnchor: [12, 36],
                   popupAnchor: [0, -36],
