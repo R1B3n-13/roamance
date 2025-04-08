@@ -1,8 +1,9 @@
 import { cn } from '@/lib/utils';
-import { TouristPlace } from '@/types';
 import { getPlaceDetails } from '@/service/tourism-service';
+import { TouristPlace } from '@/types';
 import { motion } from 'framer-motion';
-import { Globe, MapPin, ExternalLink } from 'lucide-react';
+import { ExternalLink, Globe, MapPin } from 'lucide-react';
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { PlaceImagesCarousel } from './place-images-carousel';
 
@@ -20,7 +21,6 @@ export const PlaceDetailsCard = ({
 
   useEffect(() => {
     const fetchAdditionalDetails = async () => {
-      // Reset the enriched place when changing places
       setEnrichedPlace(null);
 
       if (selectedPlace.id.includes('api-')) {
@@ -44,7 +44,6 @@ export const PlaceDetailsCard = ({
   const displayPlace = enrichedPlace || selectedPlace;
   const colorName = displayPlace.color.split('--')[1] || 'primary';
 
-  // Helper function for formatting coordinates
   const formatCoordinate = (coord: number): string => {
     const absCoord = Math.abs(coord);
     const degrees = Math.floor(absCoord);
@@ -55,17 +54,12 @@ export const PlaceDetailsCard = ({
   const latitude = `${formatCoordinate(displayPlace.lat)}${displayPlace.lat >= 0 ? 'N' : 'S'}`;
   const longitude = `${formatCoordinate(displayPlace.lng)}${displayPlace.lng >= 0 ? 'E' : 'W'}`;
 
-  // Handle images properly for carousel
   const carouselImages = (() => {
-    // If we have an array of images with content, use it
     if (Array.isArray(displayPlace.images) && displayPlace.images.length > 0) {
       return displayPlace.images;
-    }
-    // Fall back to single image if available
-    else if (displayPlace.image) {
+    } else if (displayPlace.image) {
       return [displayPlace.image];
     }
-    // No images available
     return [];
   })();
 
@@ -118,15 +112,13 @@ export const PlaceDetailsCard = ({
             </span>
           </div>
 
-          <a
-            href={`https://www.google.com/maps/search/?api=1&query=${displayPlace.lat},${displayPlace.lng}`}
-            target="_blank"
-            rel="noopener noreferrer"
+          <Link
+            href={`/maps?lat=${displayPlace.lat}&lng=${displayPlace.lng}&name=${encodeURIComponent(displayPlace.name)}`}
             className="text-primary hover:text-primary/80 text-sm font-medium flex items-center gap-1 transition-colors"
           >
-            Explore more about {displayPlace.name}
+            Explore {displayPlace.name} on map
             <ExternalLink className="h-3 w-3" />
-          </a>
+          </Link>
         </div>
       </div>
     </motion.div>
