@@ -16,7 +16,8 @@ export const DEFAULT_META_DESCRIPTION =
   'Discover, plan and experience your next adventure with Roamance, the ultimate tourism companion.';
 export const MAX_WIDTH = 1400;
 
-export const defaultCenter = { lat: 40.7128, lng: -74.006 };
+// Saint Martin Island, Bangladesh coordinates
+export const defaultCenter = { lat: 20.6295, lng: 92.3208 };
 
 export default function MapPage() {
   const searchParams = useSearchParams();
@@ -55,8 +56,9 @@ export default function MapPage() {
       setLocationName(name);
       setDirections(dir);
     } else {
+      // Default to Saint Martin Island, Bangladesh
       setCenter(defaultCenter);
-      setLocationName('New York City');
+      setLocationName('Saint Martin Island, Bangladesh');
     }
   }, [searchParams]);
 
@@ -64,17 +66,24 @@ export default function MapPage() {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          setUserLocation({
+          const userLocationData = {
             lat: position.coords.latitude,
             lng: position.coords.longitude,
-          });
+          };
+          setUserLocation(userLocationData);
+
+          // If no URL parameters were provided, use user's current location
+          if (!searchParams?.get('lat') && !searchParams?.get('lng')) {
+            setCenter(userLocationData);
+            setLocationName('Your Current Location');
+          }
         },
         (error) => {
           console.error('Error getting location', error);
         }
       );
     }
-  }, []);
+  }, [searchParams]);
 
   useEffect(() => {
     const handleGetDirections = () => {

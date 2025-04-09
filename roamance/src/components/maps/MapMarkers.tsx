@@ -1,15 +1,15 @@
 'use client';
 
-import { cn } from '@/lib/utils';
-import L from 'leaflet';
-import { Marker, Popup } from 'react-leaflet';
 import { Button } from '@/components/ui/button';
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { StreetViewButton } from './StreetViewButton';
+import { cn } from '@/lib/utils';
+import L from 'leaflet';
+import { Compass, Eye, Plus, X } from 'lucide-react';
+import { Marker, Popup } from 'react-leaflet';
 
 // Destination marker (red pin)
 interface DestinationMarkerProps {
@@ -52,28 +52,69 @@ export function DestinationMarker({
             </p>
           </div>
 
-          <div className="space-y-2">
-            {userLocation && !directions && (
+          {userLocation && !directions && (
+            <div className="flex items-center gap-2 mt-3">
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
                     size="sm"
-                    className="w-full transition-all hover:translate-y-[-1px] font-medium"
+                    variant="outline"
+                    className={cn(
+                      "flex-1 h-9 transition-all hover:translate-y-[-1px] font-medium gap-1.5",
+                      isDarkMode
+                        ? "border-primary/30 hover:bg-primary/10 text-primary"
+                        : "border-primary/50 hover:bg-primary/5 text-primary"
+                    )}
                     onClick={() => {
                       const event = new CustomEvent('getDirections');
                       window.dispatchEvent(event);
                     }}
                   >
-                    Get Directions
+                    <Compass className="h-4 w-4" />
+                    <span>Directions</span>
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
                   <p>Get directions from your location</p>
                 </TooltipContent>
               </Tooltip>
-            )}
-            <StreetViewButton position={position} isDarkMode={isDarkMode} />
-          </div>
+
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className={cn(
+                      "flex-1 h-9 transition-all hover:translate-y-[-1px] font-medium gap-1.5",
+                      isDarkMode
+                        ? "border-emerald-600/30 hover:bg-emerald-600/10 text-emerald-500"
+                        : "border-emerald-600/50 hover:bg-emerald-600/5 text-emerald-700"
+                    )}
+                    onClick={() => {
+                      const mapElement = document.querySelector('.leaflet-map-pane')?.parentElement;
+
+                      interface LeafletElement extends HTMLElement {
+                        _leaflet_map: L.Map;
+                      }
+
+                      if (mapElement && 'leaflet' in mapElement) {
+                        const map = (mapElement as unknown as LeafletElement)._leaflet_map;
+                        if (map) {
+                          map.setView([position.lat, position.lng], 18, { animate: true });
+                        }
+                      }
+                    }}
+                  >
+                    <Eye className="h-4 w-4" />
+                    <span>Street View</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>View street-level imagery</p>
+                </TooltipContent>
+              </Tooltip>
+            </div>
+          )}
         </div>
       </Popup>
     </Marker>
@@ -219,21 +260,64 @@ export function WaypointMarker({
             </p>
           </div>
 
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                size="sm"
-                variant="destructive"
-                className="w-full transition-all hover:translate-y-[-1px] hover:bg-red-600"
-                onClick={onRemove}
-              >
-                Remove
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Remove this waypoint from your route</p>
-            </TooltipContent>
-          </Tooltip>
+          <div className="flex items-center gap-2 mt-3">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className={cn(
+                    "flex-1 h-9 transition-all hover:translate-y-[-1px] font-medium gap-1.5",
+                    isDarkMode
+                      ? "border-purple-500/30 hover:bg-purple-500/10 text-purple-400"
+                      : "border-purple-500/50 hover:bg-purple-500/5 text-purple-600"
+                  )}
+                  onClick={() => {
+                    const mapElement = document.querySelector('.leaflet-map-pane')?.parentElement;
+
+                    interface LeafletElement extends HTMLElement {
+                      _leaflet_map: L.Map;
+                    }
+
+                    if (mapElement && 'leaflet' in mapElement) {
+                      const map = (mapElement as unknown as LeafletElement)._leaflet_map;
+                      if (map) {
+                        map.setView([position.lat, position.lng], 16, { animate: true });
+                      }
+                    }
+                  }}
+                >
+                  <Eye className="h-4 w-4" />
+                  <span>View</span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>View this waypoint on map</p>
+              </TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className={cn(
+                    "flex-1 h-9 transition-all hover:translate-y-[-1px] font-medium gap-1.5 border-red-500/30",
+                    isDarkMode
+                      ? "hover:bg-red-500/10 text-red-400"
+                      : "hover:bg-red-500/5 text-red-500"
+                  )}
+                  onClick={onRemove}
+                >
+                  <X className="h-4 w-4" />
+                  <span>Remove</span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Remove this waypoint from your route</p>
+              </TooltipContent>
+            </Tooltip>
+          </div>
         </div>
       </Popup>
     </Marker>
@@ -290,23 +374,63 @@ export function SearchPinMarker({
             </p>
           </div>
 
-          <div className="space-y-2">
+          <div className="flex items-center gap-2 mt-3">
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
                   size="sm"
                   variant="outline"
-                  className="w-full transition-transform hover:translate-y-[-1px]"
+                  className={cn(
+                    "flex-1 h-9 transition-all hover:translate-y-[-1px] font-medium gap-1.5",
+                    isDarkMode
+                      ? "border-blue-500/30 hover:bg-blue-500/10 text-blue-500"
+                      : "border-blue-500/50 hover:bg-blue-500/5 text-blue-600"
+                  )}
                   onClick={onClear}
                 >
-                  Clear Pin
+                  <X className="h-4 w-4" />
+                  <span>Clear</span>
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
                 <p>Remove this pin from the map</p>
               </TooltipContent>
             </Tooltip>
-            <StreetViewButton position={position} isDarkMode={isDarkMode} />
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className={cn(
+                    "flex-1 h-9 transition-all hover:translate-y-[-1px] font-medium gap-1.5",
+                    isDarkMode
+                      ? "border-emerald-600/30 hover:bg-emerald-600/10 text-emerald-500"
+                      : "border-emerald-600/50 hover:bg-emerald-600/5 text-emerald-700"
+                  )}
+                  onClick={() => {
+                    const mapElement = document.querySelector('.leaflet-map-pane')?.parentElement;
+
+                    interface LeafletElement extends HTMLElement {
+                      _leaflet_map: L.Map;
+                    }
+
+                    if (mapElement && 'leaflet' in mapElement) {
+                      const map = (mapElement as unknown as LeafletElement)._leaflet_map;
+                      if (map) {
+                        map.setView([position.lat, position.lng], 18, { animate: true });
+                      }
+                    }
+                  }}
+                >
+                  <Eye className="h-4 w-4" />
+                  <span>Street View</span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>View street-level imagery</p>
+              </TooltipContent>
+            </Tooltip>
           </div>
         </div>
       </Popup>
@@ -348,37 +472,39 @@ export function POIMarker({
             </div>
           </div>
 
-          <div className="space-y-2 mt-3">
+          <div className="flex items-center gap-2 mt-3">
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
                   size="sm"
-                  variant="default"
-                  className="w-full transition-all hover:translate-y-[-1px]"
+                  variant="outline"
+                  className={cn(
+                    "flex-1 h-9 transition-all hover:translate-y-[-1px] font-medium gap-1.5",
+                    isDarkMode
+                      ? "border-primary/30 hover:bg-primary/10 text-primary"
+                      : "border-primary/50 hover:bg-primary/5 text-primary"
+                  )}
                   onClick={() => {
-                    const mapElement =
-                      document.querySelector(
-                        '.leaflet-map-pane'
-                      )?.parentElement;
+                    const mapElement = document.querySelector('.leaflet-map-pane')?.parentElement;
 
                     interface LeafletElement extends HTMLElement {
                       _leaflet_map: L.Map;
                     }
 
                     if (mapElement && 'leaflet' in mapElement) {
-                      const map = (mapElement as unknown as LeafletElement)
-                        ._leaflet_map;
+                      const map = (mapElement as unknown as LeafletElement)._leaflet_map;
                       if (map) {
                         map.setView(position, 16);
                       }
                     }
                   }}
                 >
-                  View Details
+                  <Eye className="h-4 w-4" />
+                  <span>Details</span>
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                <p>Zoom in to view this point of interest</p>
+                <p>View details about this location</p>
               </TooltipContent>
             </Tooltip>
 
@@ -388,10 +514,16 @@ export function POIMarker({
                   <Button
                     size="sm"
                     variant="outline"
-                    className="w-full transition-all hover:bg-purple-100 hover:text-purple-900 hover:translate-y-[-1px] dark:hover:bg-purple-900/30 dark:hover:text-purple-200"
+                    className={cn(
+                      "flex-1 h-9 transition-all hover:translate-y-[-1px] font-medium gap-1.5",
+                      isDarkMode
+                        ? "border-emerald-600/30 hover:bg-emerald-600/10 text-emerald-500"
+                        : "border-emerald-600/50 hover:bg-emerald-600/5 text-emerald-700"
+                    )}
                     onClick={onAddAsWaypoint}
                   >
-                    Add as Waypoint
+                    <Plus className="h-4 w-4" />
+                    <span>Waypoint</span>
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
