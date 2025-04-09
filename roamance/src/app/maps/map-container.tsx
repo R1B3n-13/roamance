@@ -10,9 +10,13 @@ import {
 } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Globe, HelpCircle, Info } from 'lucide-react';
+import { Globe, HelpCircle, Info, X } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
+
+// Import RouteData type
+import { RouteData } from '@/components/maps/MapController';
+import { Button } from '@/components/ui/button';
 
 // Dynamically import the LeafletMap component to avoid SSR issues
 const LeafletMap = dynamic(() => import('@/components/maps/LeafletMap'), {
@@ -75,6 +79,7 @@ interface MapContainerProps {
   directions: boolean;
   isDarkMode: boolean;
   centerOnUser?: boolean;
+  onRouteCalculated?: (routeData: RouteData) => void;
 }
 
 export function MapContainer({
@@ -85,6 +90,7 @@ export function MapContainer({
   directions,
   isDarkMode,
   centerOnUser,
+  onRouteCalculated,
 }: MapContainerProps) {
   const [mapLoaded, setMapLoaded] = useState(false);
   const [infoCardVisible, setInfoCardVisible] = useState(true);
@@ -144,6 +150,7 @@ export function MapContainer({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.3 }}
+            className="relative"
           >
             <LocationInfoCard
               visible={true}
@@ -151,6 +158,20 @@ export function MapContainer({
               center={center}
               isDarkMode={isDarkMode}
             />
+            <Button
+              onClick={() => setInfoCardVisible(false)}
+              className={cn(
+                'absolute top-3 right-3 h-7 w-7 rounded-full p-0',
+                isDarkMode
+                  ? 'bg-background/40 border-background/20 hover:bg-background/60'
+                  : 'bg-background/70 border-muted hover:bg-background/90'
+              )}
+              variant="outline"
+              size="icon"
+            >
+              <X className="h-3.5 w-3.5" />
+              <span className="sr-only">Close location info</span>
+            </Button>
           </motion.div>
         )}
       </AnimatePresence>
@@ -244,6 +265,7 @@ export function MapContainer({
         onMapLoaded={() => setMapLoaded(true)}
         isDarkMode={isDarkMode}
         centerOnUser={centerOnUser}
+        onRouteCalculated={onRouteCalculated}
       />
     </div>
   );

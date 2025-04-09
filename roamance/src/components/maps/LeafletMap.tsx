@@ -12,7 +12,7 @@ import { MapContainer, TileLayer } from 'react-leaflet';
 // Import refactored components
 import { FeatureHelpCard } from './FeatureHelpCard';
 import { MapControlButtons } from './MapControlButtons';
-import { MapController } from './MapController';
+import { MapController, RouteData } from './MapController';
 import { MapInternalControls } from './MapInternalControls';
 import { mapLayerAttribution, mapLayers } from './MapLayerControl';
 import { DestinationMarker, SearchPinMarker, UserLocationMarker } from './MapMarkers';
@@ -89,6 +89,7 @@ interface LeafletMapProps {
   onMapLoaded: () => void;
   isDarkMode: boolean;
   centerOnUser?: boolean;
+  onRouteCalculated?: (routeData: RouteData) => void;
 }
 
 export default function LeafletMap({
@@ -100,6 +101,7 @@ export default function LeafletMap({
   onMapLoaded,
   isDarkMode,
   centerOnUser,
+  onRouteCalculated,
 }: LeafletMapProps) {
   const [searchResults, setSearchResults] = useState<
     {
@@ -162,6 +164,13 @@ export default function LeafletMap({
 
   const clearWaypoints = () => {
     setWaypoints([]);
+  };
+
+  // Handle route data calculation
+  const handleRouteCalculated = (routeData: RouteData) => {
+    if (onRouteCalculated) {
+      onRouteCalculated(routeData);
+    }
   };
 
   // Event listeners for feature help
@@ -297,6 +306,7 @@ export default function LeafletMap({
             directions={directions}
             waypoints={waypoints}
             onMapLoaded={onMapLoaded}
+            onRouteCalculated={handleRouteCalculated}
           />
 
           {/* Components that require map context */}
