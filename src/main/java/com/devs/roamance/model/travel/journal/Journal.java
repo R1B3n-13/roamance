@@ -101,7 +101,7 @@ public class Journal {
         + subsections.size()
         + ", createdAt="
         + createdAt
-        + ", lastModified="
+        + ", lastModifiedAt="
         + lastModifiedAt
         + '}';
   }

@@ -57,7 +57,7 @@ public class PostController {
     return ResponseEntity.ok(responseDto);
   }
 
-  @GetMapping("/by-ids")
+  @PostMapping("/by-ids")
   public ResponseEntity<PostListResponseDto> getPostsByIds(
       @RequestBody List<UUID> postIds,
       @RequestParam(defaultValue = "0") int pageNumber,

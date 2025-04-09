@@ -22,6 +22,6 @@ public class UserDto {
   @JsonProperty("created_at")
   private OffsetDateTime createdAt;
 
-  @JsonProperty("last_modified")
-  private OffsetDateTime lastModified;
+  @JsonProperty("last_modified_at")
+  private OffsetDateTime lastModifiedAt;
 }
