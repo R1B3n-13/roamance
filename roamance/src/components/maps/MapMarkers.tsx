@@ -40,36 +40,40 @@ export function DestinationMarker({
         })
       }
     >
-      <Popup>
-        <div className={cn('p-2', isDarkMode ? 'bg-card text-foreground' : '')}>
-          <h3 className={cn('font-bold', isDarkMode ? 'text-foreground' : '')}>
-            {locationName}
-          </h3>
-          <p
-            className={cn('text-sm', isDarkMode ? 'text-muted-foreground' : '')}
-          >
-            Coordinates: {position.lat.toFixed(4)}, {position.lng.toFixed(4)}
-          </p>
-          {userLocation && !directions && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  size="sm"
-                  className="mt-2 w-full"
-                  onClick={() => {
-                    const event = new CustomEvent('getDirections');
-                    window.dispatchEvent(event);
-                  }}
-                >
-                  Get Directions
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Get directions from your location</p>
-              </TooltipContent>
-            </Tooltip>
-          )}
-          <StreetViewButton position={position} isDarkMode={isDarkMode} />
+      <Popup className={cn('rounded-lg shadow-lg', isDarkMode ? 'dark-popup' : '')}>
+        <div className={cn('p-4 rounded-lg backdrop-blur-sm border border-opacity-20',
+          isDarkMode ? 'bg-card/95 text-foreground border-white/10' : 'bg-white/95 border-black/10')}>
+          <div className="space-y-1 mb-3">
+            <h3 className={cn('font-bold text-lg', isDarkMode ? 'text-foreground' : 'text-gray-900')}>
+              {locationName}
+            </h3>
+            <p className={cn('text-sm', isDarkMode ? 'text-muted-foreground' : 'text-gray-600')}>
+              {position.lat.toFixed(4)}, {position.lng.toFixed(4)}
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            {userLocation && !directions && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="sm"
+                    className="w-full transition-all hover:translate-y-[-1px] font-medium"
+                    onClick={() => {
+                      const event = new CustomEvent('getDirections');
+                      window.dispatchEvent(event);
+                    }}
+                  >
+                    Get Directions
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Get directions from your location</p>
+                </TooltipContent>
+              </Tooltip>
+            )}
+            <StreetViewButton position={position} isDarkMode={isDarkMode} />
+          </div>
         </div>
       </Popup>
     </Marker>
@@ -99,14 +103,18 @@ export function UserLocationMarker({
         })
       }
     >
-      <Popup>
-        <div className={cn('p-2', isDarkMode ? 'bg-card text-foreground' : '')}>
-          <h3 className={cn('font-bold', isDarkMode ? 'text-foreground' : '')}>
-            Your Location
-          </h3>
-          <p
-            className={cn('text-sm', isDarkMode ? 'text-muted-foreground' : '')}
-          >
+      <Popup className={cn('rounded-lg shadow-lg', isDarkMode ? 'dark-popup' : '')}>
+        <div className={cn('p-4 rounded-lg backdrop-blur-sm border border-opacity-20',
+          isDarkMode ? 'bg-card/95 text-foreground border-white/10' : 'bg-white/95 border-black/10')}>
+          <div className="pulse-dot mb-2.5">
+            <div className={cn('w-3 h-3 rounded-full inline-block mr-2',
+              isDarkMode ? 'bg-blue-500' : 'bg-blue-500')}></div>
+            <h3 className={cn('font-bold text-lg inline',
+              isDarkMode ? 'text-foreground' : 'text-gray-900')}>
+              Your Location
+            </h3>
+          </div>
+          <p className={cn('text-sm', isDarkMode ? 'text-muted-foreground' : 'text-gray-600')}>
             {position.lat.toFixed(4)}, {position.lng.toFixed(4)}
           </p>
         </div>
@@ -142,22 +150,30 @@ export function WaypointMarker({
         })
       }
     >
-      <Popup>
-        <div className={cn('p-2', isDarkMode ? 'bg-card text-foreground' : '')}>
-          <h3 className={cn('font-bold', isDarkMode ? 'text-foreground' : '')}>
-            Waypoint {index + 1}
-          </h3>
-          <p
-            className={cn('text-sm', isDarkMode ? 'text-muted-foreground' : '')}
-          >
-            {position.lat.toFixed(4)}, {position.lng.toFixed(4)}
-          </p>
+      <Popup className={cn('rounded-lg shadow-lg', isDarkMode ? 'dark-popup' : '')}>
+        <div className={cn('p-4 rounded-lg backdrop-blur-sm border border-opacity-20',
+          isDarkMode ? 'bg-card/95 text-foreground border-white/10' : 'bg-white/95 border-black/10')}>
+          <div className="space-y-1 mb-3">
+            <div className="flex items-center">
+              <span className={cn('inline-flex items-center justify-center w-5 h-5 rounded-full text-xs font-medium mr-2',
+                isDarkMode ? 'bg-purple-400 text-gray-900' : 'bg-purple-100 text-purple-800')}>
+                {index + 1}
+              </span>
+              <h3 className={cn('font-bold text-lg', isDarkMode ? 'text-foreground' : 'text-gray-900')}>
+                Waypoint
+              </h3>
+            </div>
+            <p className={cn('text-sm', isDarkMode ? 'text-muted-foreground' : 'text-gray-600')}>
+              {position.lat.toFixed(4)}, {position.lng.toFixed(4)}
+            </p>
+          </div>
+
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
                 size="sm"
                 variant="destructive"
-                className="mt-2 w-full"
+                className="w-full transition-all hover:translate-y-[-1px] hover:bg-red-600"
                 onClick={onRemove}
               >
                 Remove
@@ -211,32 +227,36 @@ export function SearchPinMarker({
         })
       }
     >
-      <Popup>
-        <div className={cn('p-2', isDarkMode ? 'bg-card text-foreground' : '')}>
-          <h3 className={cn('font-bold', isDarkMode ? 'text-foreground' : '')}>
-            {name}
-          </h3>
-          <p
-            className={cn('text-sm', isDarkMode ? 'text-muted-foreground' : '')}
-          >
-            Coordinates: {position.lat.toFixed(4)}, {position.lng.toFixed(4)}
-          </p>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                size="sm"
-                variant="outline"
-                className="mt-2 w-full"
-                onClick={onClear}
-              >
-                Clear Pin
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Remove this pin from the map</p>
-            </TooltipContent>
-          </Tooltip>
-          <StreetViewButton position={position} isDarkMode={isDarkMode} />
+      <Popup className={cn('rounded-lg shadow-lg', isDarkMode ? 'dark-popup' : '')}>
+        <div className={cn('p-4 rounded-lg backdrop-blur-sm border border-opacity-20',
+          isDarkMode ? 'bg-card/95 text-foreground border-white/10' : 'bg-white/95 border-black/10')}>
+          <div className="space-y-1 mb-3">
+            <h3 className={cn('font-bold text-lg', isDarkMode ? 'text-foreground' : 'text-gray-900')}>
+              {name}
+            </h3>
+            <p className={cn('text-sm', isDarkMode ? 'text-muted-foreground' : 'text-gray-600')}>
+              {position.lat.toFixed(4)}, {position.lng.toFixed(4)}
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="w-full transition-transform hover:translate-y-[-1px]"
+                  onClick={onClear}
+                >
+                  Clear Pin
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Remove this pin from the map</p>
+              </TooltipContent>
+            </Tooltip>
+            <StreetViewButton position={position} isDarkMode={isDarkMode} />
+          </div>
         </div>
       </Popup>
     </Marker>
@@ -264,23 +284,26 @@ export function POIMarker({
         })
       }
     >
-      <Popup>
-        <div className={cn('p-2', isDarkMode ? 'bg-card text-foreground' : '')}>
-          <h3 className={cn('font-bold', isDarkMode ? 'text-foreground' : '')}>
-            {name}
-          </h3>
-          <p
-            className={cn('text-sm', isDarkMode ? 'text-muted-foreground' : '')}
-          >
-            Category: {category}
-          </p>
-          <div className="flex flex-col gap-2 mt-2">
+      <Popup className={cn('rounded-lg shadow-lg', isDarkMode ? 'dark-popup' : '')}>
+        <div className={cn('p-4 rounded-lg backdrop-blur-sm border border-opacity-20',
+          isDarkMode ? 'bg-card/95 text-foreground border-white/10' : 'bg-white/95 border-black/10')}>
+          <div className="space-y-1 mb-3">
+            <h3 className={cn('font-bold text-lg', isDarkMode ? 'text-foreground' : 'text-gray-900')}>
+              {name}
+            </h3>
+            <div className={cn('inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium',
+              isDarkMode ? 'bg-blue-900/30 text-blue-200' : 'bg-blue-100 text-blue-800')}>
+              {category}
+            </div>
+          </div>
+
+          <div className="space-y-2 mt-3">
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
                   size="sm"
                   variant="default"
-                  className="w-full"
+                  className="w-full transition-all hover:translate-y-[-1px]"
                   onClick={() => {
                     const mapElement =
                       document.querySelector(
@@ -314,7 +337,7 @@ export function POIMarker({
                   <Button
                     size="sm"
                     variant="outline"
-                    className="w-full"
+                    className="w-full transition-all hover:bg-purple-100 hover:text-purple-900 hover:translate-y-[-1px] dark:hover:bg-purple-900/30 dark:hover:text-purple-200"
                     onClick={onAddAsWaypoint}
                   >
                     Add as Waypoint

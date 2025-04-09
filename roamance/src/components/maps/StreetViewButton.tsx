@@ -1,14 +1,13 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
-import { X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 interface StreetViewButtonProps {
@@ -20,12 +19,12 @@ export function StreetViewButton({
   position,
   isDarkMode,
 }: StreetViewButtonProps) {
-  const [streetViewUrl, setStreetViewUrl] = useState('');
   const [streetViewOpen, setStreetViewOpen] = useState(false);
+  const [viewerUrl, setViewerUrl] = useState('');
 
   useEffect(() => {
-    const url = `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${position.lat},${position.lng}`;
-    setStreetViewUrl(url);
+    const url = `https://www.openstreetmap.org/export/embed.html?bbox=${position.lng - 0.002},${position.lat - 0.002},${position.lng + 0.002},${position.lat + 0.002}&layer=mapillary&marker=${position.lat},${position.lng}`;
+    setViewerUrl(url);
   }, [position]);
 
   return (
@@ -45,27 +44,43 @@ export function StreetViewButton({
           </Button>
         </TooltipTrigger>
         <TooltipContent>
-          <p>See 360° street-level imagery of this location</p>
+          <p>See street-level imagery of this location</p>
         </TooltipContent>
       </Tooltip>
 
       <Dialog open={streetViewOpen} onOpenChange={setStreetViewOpen}>
-        <DialogContent className="max-w-4xl w-full h-[80vh]">
-          <div className="absolute top-2 right-2 z-10">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setStreetViewOpen(false)}
-            >
-              <X className="h-4 w-4" />
-            </Button>
+        <DialogContent className="max-w-4xl w-full h-[80vh] z-[9999]">
+          <DialogTitle className="sr-only">Street View</DialogTitle>
+          <div className="w-full h-full flex flex-col">
+            <iframe
+              src={viewerUrl}
+              className="w-full h-full border-none"
+              title="Street View Map"
+              allowFullScreen
+              referrerPolicy="no-referrer"
+            />
+            <div className="py-2 text-xs text-center text-muted-foreground">
+              Street-level imagery powered by OpenStreetMap & Mapillary
+            </div>
+            <div className="py-2 px-4 flex justify-between items-center border-t">
+              <div className="text-sm">
+                <span className="font-medium">Tip:</span> Click the blue lines
+                or dots on the map to view street photos
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  window.open(
+                    `https://www.openstreetmap.org/?mlat=${position.lat}&mlon=${position.lng}&layers=M`,
+                    '_blank'
+                  )
+                }
+              >
+                Open in full viewer
+              </Button>
+            </div>
           </div>
-          <iframe
-            src={streetViewUrl}
-            className="w-full h-full border-none"
-            title="Street View"
-            allow="fullscreen"
-          />
         </DialogContent>
       </Dialog>
     </>

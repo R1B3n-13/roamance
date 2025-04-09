@@ -101,16 +101,6 @@ export function MapContainer({
     theme: 'Toggle between light and dark mode for better visibility',
   };
 
-  useEffect(() => {
-    if (mapLoaded) {
-      const timer = setTimeout(() => {
-        setInfoCardVisible(false);
-      }, 5000);
-
-      return () => clearTimeout(timer);
-    }
-  }, [mapLoaded]);
-
   // Listen for map control hover events
   useEffect(() => {
     const handleMapControlHover = (e: Event) => {

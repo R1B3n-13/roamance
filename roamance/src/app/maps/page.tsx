@@ -216,7 +216,7 @@ export default function MapPage() {
             exit={{ opacity: 0, x: -40 }}
             transition={{ duration: 0.3 }}
             className={cn(
-              'absolute top-0 left-0 h-full w-64 md:w-80 lg:w-96 border-r overflow-y-auto',
+              'absolute top-0 left-0 h-full w-64 md:w-80 lg:w-96 border-r overflow-y-auto z-[9999]',
               isDarkMode
                 ? 'bg-background/80 backdrop-blur-xl border-muted/30'
                 : 'bg-white/90 backdrop-blur-xl border-muted/20'
