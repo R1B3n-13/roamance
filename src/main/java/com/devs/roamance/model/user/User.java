@@ -73,5 +73,5 @@ public class User {
   @Column(updatable = false)
   private OffsetDateTime createdAt;
 
-  @LastModifiedDate private OffsetDateTime lastModified;
+  @LastModifiedDate private OffsetDateTime lastModifiedAt;
 }

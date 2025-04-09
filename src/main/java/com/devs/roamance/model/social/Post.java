@@ -33,12 +33,12 @@ public class Post {
   private String text;
 
   @Size(max = 50, message = "No more than 50 images are allowed per post")
-  @ElementCollection(fetch = FetchType.EAGER)
+  @ElementCollection(fetch = FetchType.LAZY)
   private List<String> imagePaths = new ArrayList<>();
 
   @Size(max = 5, message = "No more than 5 videos are allowed per post")
-  @ElementCollection(fetch = FetchType.EAGER)
-  private List<String> videoPaths;
+  @ElementCollection(fetch = FetchType.LAZY)
+  private List<String> videoPaths = new ArrayList<>();
 
   private int likesCount = 0;
 
@@ -73,7 +73,7 @@ public class Post {
   @Column(updatable = false)
   private OffsetDateTime createdAt;
 
-  @LastModifiedDate private OffsetDateTime lastModified;
+  @LastModifiedDate private OffsetDateTime lastModifiedAt;
 
   @CreatedBy
   @Column(name = "created_by", updatable = false)
