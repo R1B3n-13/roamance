@@ -314,3 +314,19 @@
 .leaflet-fade-anim .leaflet-map-pane .leaflet-popup {
   transition: opacity 0.3s ease-in-out, transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
 }
+
+/* Hide default Leaflet Routing Machine container */
+.leaflet-routing-container.hidden {
+  display: none !important;
+}
+
+/* Style for the routing path */
+.leaflet-routing-alt {
+  display: none;
+}
+
+/* Additional styles for fixing conflicts */
+.leaflet-routing-geocoder input {
+  width: 100%;
+  box-sizing: border-box;
+}

@@ -43,9 +43,11 @@ export function DirectionsPanel({
   const [showStartResults, setShowStartResults] = useState<boolean>(false);
   const [showDestResults, setShowDestResults] = useState<boolean>(false);
 
+  // Format the distance to be more user-friendly
   const getTravelTimeEstimate = (): string => {
     if (!routeData) return "Calculating...";
 
+    // Convert seconds to minutes for display
     const minutes = Math.round(routeData.duration / 60);
     if (minutes < 60) return `${minutes} min`;
     const hours = Math.floor(minutes / 60);
@@ -120,6 +122,8 @@ export function DirectionsPanel({
       setStartPointSearch(geoname.toponymName || geoname.name);
     }
     setShowStartResults(false);
+    // Reset active step when changing route
+    setActiveStep(null);
   };
 
   // Handle selection of destination
@@ -133,6 +137,8 @@ export function DirectionsPanel({
       setDestinationSearch(geoname.toponymName || geoname.name);
     }
     setShowDestResults(false);
+    // Reset active step when changing route
+    setActiveStep(null);
   };
 
   return (

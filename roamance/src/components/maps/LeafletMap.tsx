@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import L from 'leaflet';
 import 'leaflet-draw/dist/leaflet.draw.css';
 import 'leaflet/dist/leaflet.css';
+import 'leaflet-routing-machine/dist/leaflet-routing-machine.css';
 import { useRef } from 'react';
 import { MapContainer, TileLayer } from 'react-leaflet';
 
@@ -177,6 +178,7 @@ export default function LeafletMap({
             onMapLoaded={onMapLoaded}
             onRouteCalculated={routeCalculatedHandler}
             destination={destination}
+            locationName={locationName}
           />
 
           {/* Components that require map context */}
