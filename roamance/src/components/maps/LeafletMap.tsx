@@ -1,28 +1,26 @@
 'use client';
 
-import { searchGeonames } from '@/api/places-api';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import L from 'leaflet';
 import 'leaflet-draw/dist/leaflet.draw.css';
 import 'leaflet/dist/leaflet.css';
-import { useEffect, useRef, useState } from 'react';
+import { useRef } from 'react';
 import { MapContainer, TileLayer } from 'react-leaflet';
 
 // Import refactored components
-import { FeatureHelpCard } from './FeatureHelpCard';
 import { MapControlButtons } from './MapControlButtons';
 import { MapController, RouteData } from './MapController';
+import { MapFeatureHelp } from './MapFeatureHelp';
 import { MapInternalControls } from './MapInternalControls';
 import { mapLayerAttribution, mapLayers } from './MapLayerControl';
-import {
-  CustomStartPointMarker,
-  DestinationMarker,
-  UserLocationMarker
-} from './MapMarkers';
-
-import { SearchResults } from './SearchResults';
+import { MapMarkersContainer } from './MapMarkersContainer';
+import { MapSearchHandler } from './MapSearchHandler';
 import { WaypointsPanel } from './WaypointsPanel';
+
+// Import custom hooks
+import { useMapFeatures } from '../../hooks/useMapFeatures';
+import { useMapSearch } from '../../hooks/useMapSearch';
 
 // Initialize Leaflet icons
 delete (L.Icon.Default.prototype as { _getIconUrl?: () => string })._getIconUrl;
@@ -73,17 +71,6 @@ if (typeof document !== 'undefined') {
   document.head.appendChild(styleElement);
 }
 
-// Map features descriptions for contextual help
-const mapFeatures = {
-  layers:
-    'Switch between map styles like Standard, Satellite, Terrain, and Transport',
-  measure: 'Measure distances on the map by drawing lines',
-  traffic: 'Show simulated traffic conditions in the area',
-  share: 'Share this location with others or copy a link to it',
-  waypoints: 'Add stops along your route when getting directions',
-  theme: 'Toggle between light and dark mode for better visibility',
-};
-
 // Saint Martin Island coordinates as fallback
 export const fallbackLocation = { lat: 20.6295, lng: 92.3208 };
 
@@ -116,132 +103,40 @@ export default function LeafletMap({
   isCustomStartPoint = false,
   onSearchResultSelect,
 }: LeafletMapProps) {
-  const [searchResults, setSearchResults] = useState<
-    {
-      name: string;
-      lat: number;
-      lng: number;
-      country?: string;
-      adminName?: string;
-      population?: number;
-    }[]
-  >([]);
-  const [isSearching, setIsSearching] = useState<boolean>(false);
+  // Use custom hooks for map features and search
+  const {
+    searchResults,
+    isSearching,
+    setSearchResults
+  } = useMapSearch(searchQuery);
+
+  const {
+    currentMapLayer,
+    setCurrentMapLayer,
+    showTraffic,
+    toggleTraffic,
+    waypoints,
+    setWaypoints,
+    removeWaypoint,
+    clearWaypoints,
+    mapFeatureHelp,
+    handleRouteCalculated
+  } = useMapFeatures();
+
   const mapRef = useRef<L.Map | null>(null);
-  const [currentMapLayer, setCurrentMapLayer] =
-    useState<keyof typeof mapLayers>('standard');
-  const [showTraffic, setShowTraffic] = useState<boolean>(false);
-  const [waypoints, setWaypoints] = useState<
-    Array<{ lat: number; lng: number }>
-  >([]);
-  const [mapFeatureHelp, setMapFeatureHelp] = useState<string | null>(null);
 
-  // Event handlers
-  const handleSelectSearchResult = (lat: number, lng: number) => {
-    if (mapRef.current) {
-      mapRef.current.setView([lat, lng], 15);
-
-      // Find the selected result
-      const selectedResult = searchResults.find(
-        (r) => r.lat === lat && r.lng === lng
-      );
-
-      if (selectedResult && onSearchResultSelect) {
-        // Use the callback to set this as the destination
-        onSearchResultSelect(lat, lng, selectedResult.name);
-      }
-
-      setSearchResults([]);
+  // Handle search result selection with callback to parent
+  const handleSearchResultSelect = (lat: number, lng: number, name: string) => {
+    if (onSearchResultSelect) {
+      onSearchResultSelect(lat, lng, name);
     }
+    setSearchResults([]);
   };
 
-  const toggleTraffic = () => {
-    setShowTraffic(!showTraffic);
+  // Route data calculation handler with callback to parent
+  const routeCalculatedHandler = (routeData: RouteData) => {
+    handleRouteCalculated(routeData, onRouteCalculated);
   };
-
-  const removeWaypoint = (index: number) => {
-    const updatedWaypoints = [...waypoints];
-    updatedWaypoints.splice(index, 1);
-    setWaypoints(updatedWaypoints);
-  };
-
-  const clearWaypoints = () => {
-    setWaypoints([]);
-  };
-
-  // Handle route data calculation
-  const handleRouteCalculated = (routeData: RouteData) => {
-    if (onRouteCalculated) {
-      onRouteCalculated(routeData);
-    }
-  };
-
-  // Event listeners for feature help
-  useEffect(() => {
-    const handleMapControlHover = (e: CustomEvent) => {
-      setMapFeatureHelp(e.detail.feature);
-    };
-
-    const handleMapControlLeave = () => {
-      setMapFeatureHelp(null);
-    };
-
-    window.addEventListener(
-      'mapControlHover',
-      handleMapControlHover as EventListener
-    );
-    window.addEventListener('mapControlLeave', handleMapControlLeave);
-
-    return () => {
-      window.removeEventListener(
-        'mapControlHover',
-        handleMapControlHover as EventListener
-      );
-      window.removeEventListener('mapControlLeave', handleMapControlLeave);
-    };
-  }, []);
-
-  // Handle search functionality
-  useEffect(() => {
-    const fetchSearchResults = async () => {
-      if (searchQuery.length < 3) {
-        setSearchResults([]);
-        return;
-      }
-
-      setIsSearching(true);
-      try {
-        const geonames = await searchGeonames(searchQuery);
-
-        // Map Geoname objects to the format expected by SearchResults
-        const formattedResults = geonames
-          .filter((geoname) => geoname.lat && geoname.lng && geoname.name)
-          .map((geoname) => ({
-            name: geoname.toponymName || geoname.name,
-            lat: parseFloat(geoname.lat),
-            lng: parseFloat(geoname.lng),
-            country: geoname.countryName || '',
-            adminName: geoname.adminName1 || '',
-            population: geoname.population || 0,
-          }))
-          .slice(0, 10);
-
-        setSearchResults(formattedResults);
-      } catch (error) {
-        console.error('Error searching locations:', error);
-        setSearchResults([]);
-      } finally {
-        setIsSearching(false);
-      }
-    };
-
-    const debounceTimer = setTimeout(() => {
-      fetchSearchResults();
-    }, 500);
-
-    return () => clearTimeout(debounceTimer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchQuery]);
 
   return (
     <TooltipProvider delayDuration={300}>
@@ -263,33 +158,15 @@ export default function LeafletMap({
             }
           />
 
-          {/* Map markers - only show destination marker if destination exists */}
-          {destination && (
-            <DestinationMarker
-              position={destination}
-              locationName={locationName}
-              isDarkMode={isDarkMode}
-              userLocation={userLocation}
-              directions={directions}
-            />
-          )}
-
-          {/* Show user location marker only if not using custom starting point */}
-          {userLocation && !isCustomStartPoint && (
-            <UserLocationMarker
-              position={userLocation}
-              isDarkMode={isDarkMode}
-            />
-          )}
-
-          {/* Show custom start point marker if applicable */}
-          {userLocation && isCustomStartPoint && (
-            <CustomStartPointMarker
-              position={userLocation}
-              name={userLocation.name || 'Custom Start'}
-              isDarkMode={isDarkMode}
-            />
-          )}
+          {/* Map markers component */}
+          <MapMarkersContainer
+            destination={destination}
+            locationName={locationName}
+            userLocation={userLocation}
+            isDarkMode={isDarkMode}
+            isCustomStartPoint={isCustomStartPoint}
+            directions={directions}
+          />
 
           {/* Map Controller for route directions */}
           <MapController
@@ -298,7 +175,7 @@ export default function LeafletMap({
             directions={directions && !!destination}
             waypoints={waypoints}
             onMapLoaded={onMapLoaded}
-            onRouteCalculated={handleRouteCalculated}
+            onRouteCalculated={routeCalculatedHandler}
             destination={destination}
           />
 
@@ -311,12 +188,13 @@ export default function LeafletMap({
           />
         </MapContainer>
 
-        {/* Search results */}
-        <SearchResults
+        {/* Search results handler */}
+        <MapSearchHandler
           results={searchResults}
-          onSelect={handleSelectSearchResult}
-          isDarkMode={isDarkMode}
           isSearching={isSearching}
+          isDarkMode={isDarkMode}
+          onSelect={handleSearchResultSelect}
+          mapRef={mapRef}
         />
 
         {/* Map controls outside of MapContainer */}
@@ -330,16 +208,11 @@ export default function LeafletMap({
           locationName={locationName}
         />
 
-        {/* Feature help card - displays helpful information about map features when hovering */}
-        {mapFeatureHelp && (
-          <FeatureHelpCard
-            featureName={mapFeatureHelp}
-            description={
-              mapFeatures[mapFeatureHelp as keyof typeof mapFeatures]
-            }
-            isDarkMode={isDarkMode}
-          />
-        )}
+        {/* Feature help component */}
+        <MapFeatureHelp
+          featureName={mapFeatureHelp}
+          isDarkMode={isDarkMode}
+        />
 
         {/* Waypoints panel */}
         {directions && waypoints.length > 0 && destination && (
