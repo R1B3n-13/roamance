@@ -220,6 +220,7 @@ export function MapController({
     }
 
     return routeData;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

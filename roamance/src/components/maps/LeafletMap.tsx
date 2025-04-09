@@ -241,6 +241,7 @@ export default function LeafletMap({
     }, 500);
 
     return () => clearTimeout(debounceTimer);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchQuery]);
 
   return (
