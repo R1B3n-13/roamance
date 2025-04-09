@@ -15,8 +15,13 @@ import { MapControlButtons } from './MapControlButtons';
 import { MapController, RouteData } from './MapController';
 import { MapInternalControls } from './MapInternalControls';
 import { mapLayerAttribution, mapLayers } from './MapLayerControl';
-import { DestinationMarker, SearchPinMarker, UserLocationMarker } from './MapMarkers';
-import { PointsOfInterest } from './PointsOfInterest';
+import {
+  CustomStartPointMarker,
+  DestinationMarker,
+  SearchPinMarker,
+  UserLocationMarker,
+} from './MapMarkers';
+
 import { SearchResults } from './SearchResults';
 import { WaypointsPanel } from './WaypointsPanel';
 
@@ -83,13 +88,14 @@ const mapFeatures = {
 interface LeafletMapProps {
   center: { lat: number; lng: number };
   locationName: string;
-  userLocation: { lat: number; lng: number } | null;
+  userLocation: { lat: number; lng: number; name?: string } | null;
   searchQuery: string;
   directions: boolean;
   onMapLoaded: () => void;
   isDarkMode: boolean;
   centerOnUser?: boolean;
   onRouteCalculated?: (routeData: RouteData) => void;
+  isCustomStartPoint?: boolean;
 }
 
 export default function LeafletMap({
@@ -102,6 +108,7 @@ export default function LeafletMap({
   isDarkMode,
   centerOnUser,
   onRouteCalculated,
+  isCustomStartPoint = false,
 }: LeafletMapProps) {
   const [searchResults, setSearchResults] = useState<
     {
@@ -135,12 +142,14 @@ export default function LeafletMap({
       mapRef.current.setView([lat, lng], 15);
 
       // Set the search pin when selecting a result
-      const selectedResult = searchResults.find(r => r.lat === lat && r.lng === lng);
+      const selectedResult = searchResults.find(
+        (r) => r.lat === lat && r.lng === lng
+      );
       if (selectedResult) {
         setSearchPin({
           lat,
           lng,
-          name: selectedResult.name
+          name: selectedResult.name,
         });
       }
 
@@ -150,10 +159,6 @@ export default function LeafletMap({
 
   const toggleTraffic = () => {
     setShowTraffic(!showTraffic);
-  };
-
-  const addWaypoint = (lat: number, lng: number) => {
-    setWaypoints([...waypoints, { lat, lng }]);
   };
 
   const removeWaypoint = (index: number) => {
@@ -241,7 +246,7 @@ export default function LeafletMap({
     }, 500);
 
     return () => clearTimeout(debounceTimer);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchQuery]);
 
   return (
@@ -275,9 +280,19 @@ export default function LeafletMap({
             />
           )}
 
-          {userLocation && (
+          {/* Show user location marker only if not using custom starting point */}
+          {userLocation && !isCustomStartPoint && (
             <UserLocationMarker
               position={userLocation}
+              isDarkMode={isDarkMode}
+            />
+          )}
+
+          {/* Show custom start point marker if applicable */}
+          {userLocation && isCustomStartPoint && (
+            <CustomStartPointMarker
+              position={userLocation}
+              name={userLocation.name || 'Custom Start'}
               isDarkMode={isDarkMode}
             />
           )}
@@ -291,14 +306,6 @@ export default function LeafletMap({
               onClear={() => setSearchPin(null)}
             />
           )}
-
-          {/* Points of interest */}
-          <PointsOfInterest
-            center={center}
-            isDarkMode={isDarkMode}
-            directions={directions}
-            onAddWaypoint={addWaypoint}
-          />
 
           {/* Map Controller for route directions */}
           <MapController

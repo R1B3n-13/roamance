@@ -80,6 +80,7 @@ interface MapContainerProps {
   isDarkMode: boolean;
   centerOnUser?: boolean;
   onRouteCalculated?: (routeData: RouteData) => void;
+  isCustomStartPoint?: boolean;
 }
 
 export function MapContainer({
@@ -91,6 +92,7 @@ export function MapContainer({
   isDarkMode,
   centerOnUser,
   onRouteCalculated,
+  isCustomStartPoint = false,
 }: MapContainerProps) {
   const [mapLoaded, setMapLoaded] = useState(false);
   const [infoCardVisible, setInfoCardVisible] = useState(true);
@@ -266,6 +268,7 @@ export function MapContainer({
         isDarkMode={isDarkMode}
         centerOnUser={centerOnUser}
         onRouteCalculated={onRouteCalculated}
+        isCustomStartPoint={isCustomStartPoint}
       />
     </div>
   );

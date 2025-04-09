@@ -21,7 +21,6 @@ export {
 } from './MapMarkers';
 export { MapControls } from './MapControls';
 export { MeasurementControl } from './MeasurementControl';
-export { PointsOfInterest, poiCategories } from './PointsOfInterest';
 export { SearchBar } from './SearchBar';
 export { SearchResults } from './SearchResults';
 export { ShareMapButton } from './ShareMapButton';

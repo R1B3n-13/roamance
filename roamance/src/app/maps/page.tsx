@@ -29,6 +29,11 @@ export default function MapPage() {
     lat: number;
     lng: number;
   } | null>(null);
+  const [customStartPoint, setCustomStartPoint] = useState<{
+    lat: number;
+    lng: number;
+    name: string;
+  } | null>(null);
   const [directions, setDirections] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showDirectionsPanel, setShowDirectionsPanel] = useState(false);
@@ -107,6 +112,19 @@ export default function MapPage() {
     setShowDirectionsPanel(!showDirectionsPanel);
   };
 
+  const handleChangeStartPoint = (lat: number, lng: number, name: string) => {
+    setCustomStartPoint({ lat, lng, name });
+    // Reset route data so it gets recalculated
+    setRouteData(null);
+  };
+
+  const handleChangeDestination = (lat: number, lng: number, name: string) => {
+    setCenter({ lat, lng });
+    setLocationName(name);
+    // Reset route data so it gets recalculated
+    setRouteData(null);
+  };
+
   return (
     <div className="h-screen w-screen flex flex-col overflow-hidden">
       <div
@@ -137,12 +155,13 @@ export default function MapPage() {
         <MapContainer
           center={center}
           locationName={locationName}
-          userLocation={userLocation}
+          userLocation={customStartPoint || userLocation}
           searchQuery={searchQuery}
           directions={directions}
           isDarkMode={isDarkMode}
           centerOnUser={centerOnUser}
           onRouteCalculated={handleRouteCalculated}
+          isCustomStartPoint={!!customStartPoint}
         />
 
         <AnimatePresence>
@@ -155,6 +174,8 @@ export default function MapPage() {
               activeStep={activeStep}
               setActiveStep={setActiveStep}
               onClose={toggleDirectionsPanel}
+              onChangeStartPoint={handleChangeStartPoint}
+              onChangeDestination={handleChangeDestination}
             />
           )}
         </AnimatePresence>
