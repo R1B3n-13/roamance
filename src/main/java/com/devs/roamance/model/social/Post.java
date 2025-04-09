@@ -80,12 +80,4 @@ public class Post {
   private UUID createdBy;
 
   @LastModifiedBy private UUID lastModifiedBy;
-
-  public void incrementLikesCount() {
-    this.likesCount++;
-  }
-
-  public void decrementLikesCount() {
-    this.likesCount--;
-  }
 }

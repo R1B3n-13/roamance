@@ -54,6 +54,7 @@ public class UserServiceImpl implements UserService {
       user.setRoles(Set.of(Role.USER));
 
       userRepository.save(user);
+      userRepository.flush();
 
       return new BaseResponseDto(201, true, ResponseMessage.REGISTRATION_SUCCESS);
 

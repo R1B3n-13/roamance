@@ -104,12 +104,9 @@ public class PostServiceImpl implements PostService {
   }
 
   @Override
-  public PostListResponseDto getByIds(
-      List<UUID> postIds, int pageNumber, int pageSize, String sortBy, String sortDir) {
+  public PostListResponseDto getByIds(List<UUID> postIds, int pageNumber, int pageSize) {
 
-    Pageable pageable =
-        PageRequest.of(
-            pageNumber, pageSize, Sort.by(PaginationSortingUtil.getSortDirection(sortDir), sortBy));
+    Pageable pageable = PageRequest.of(pageNumber, pageSize);
 
     UUID[] idsArray = postIds.toArray(new UUID[0]);
 
@@ -204,7 +201,7 @@ public class PostServiceImpl implements PostService {
 
   @Override
   @Transactional
-  public BaseResponseDto save(UUID postId) {
+  public BaseResponseDto toggleSave(UUID postId) {
 
     if (!postRepository.existsById(postId)) {
       throw new ResourceNotFoundException(String.format(ResponseMessage.POST_NOT_FOUND, postId));
@@ -233,15 +230,11 @@ public class PostServiceImpl implements PostService {
 
   @Override
   @Transactional
-  public BaseResponseDto like(UUID postId) {
+  public BaseResponseDto toggleLike(UUID postId) {
 
-    Post post =
-        postRepository
-            .findById(postId)
-            .orElseThrow(
-                () ->
-                    new ResourceNotFoundException(
-                        String.format(ResponseMessage.POST_NOT_FOUND, postId)));
+    if (!postRepository.existsById(postId)) {
+      throw new ResourceNotFoundException(String.format(ResponseMessage.POST_NOT_FOUND, postId));
+    }
 
     UUID userId = userUtil.getAuthenticatedUser().getId();
 
@@ -253,18 +246,14 @@ public class PostServiceImpl implements PostService {
 
     if (isLiked) {
 
-      post.decrementLikesCount();
       postRepository.unlikeByUser(postId, userId);
-
-      postRepository.save(post);
+      postRepository.decrementLikeCount(postId);
 
       return new BaseResponseDto(200, true, ResponseMessage.POST_UNLIKE_SUCCESS);
     } else {
 
-      post.incrementLikesCount();
       postRepository.likeByUser(postId, userId);
-
-      postRepository.save(post);
+      postRepository.incrementLikeCount(postId);
 
       return new BaseResponseDto(200, true, ResponseMessage.POST_LIKE_SUCCESS);
     }

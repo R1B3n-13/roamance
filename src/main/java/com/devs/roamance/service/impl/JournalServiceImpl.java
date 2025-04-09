@@ -102,6 +102,7 @@ public class JournalServiceImpl implements JournalService {
       journal.setUser(userUtil.getAuthenticatedUser());
 
       Journal savedJournal = journalRepository.save(journal);
+      journalRepository.flush();
 
       Journal dto =
           journalRepository

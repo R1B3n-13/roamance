@@ -61,14 +61,12 @@ public class PostController {
   public ResponseEntity<PostListResponseDto> getPostsByIds(
       @RequestBody List<UUID> postIds,
       @RequestParam(defaultValue = "0") int pageNumber,
-      @RequestParam(defaultValue = "10") int pageSize,
-      @RequestParam(defaultValue = "id") String sortBy,
-      @RequestParam(defaultValue = "desc") String sortDir) {
+      @RequestParam(defaultValue = "10") int pageSize) {
 
     int[] validatedParams = PaginationSortingUtil.validatePaginationParams(pageNumber, pageSize);
 
     PostListResponseDto responseDto =
-        postService.getByIds(postIds, validatedParams[0], validatedParams[1], sortBy, sortDir);
+        postService.getByIds(postIds, validatedParams[0], validatedParams[1]);
 
     return ResponseEntity.ok(responseDto);
   }
@@ -131,17 +129,17 @@ public class PostController {
   }
 
   @PostMapping("/save/{postId}")
-  public ResponseEntity<BaseResponseDto> savePost(@PathVariable @NotNull UUID postId) {
+  public ResponseEntity<BaseResponseDto> togglePostSave(@PathVariable @NotNull UUID postId) {
 
-    BaseResponseDto responseDto = postService.save(postId);
+    BaseResponseDto responseDto = postService.toggleSave(postId);
 
     return ResponseEntity.ok(responseDto);
   }
 
   @PostMapping("/like/{postId}")
-  public ResponseEntity<BaseResponseDto> likePost(@PathVariable @NotNull UUID postId) {
+  public ResponseEntity<BaseResponseDto> togglePostLike(@PathVariable @NotNull UUID postId) {
 
-    BaseResponseDto responseDto = postService.like(postId);
+    BaseResponseDto responseDto = postService.toggleLike(postId);
 
     return ResponseEntity.ok(responseDto);
   }

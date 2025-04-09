@@ -15,7 +15,12 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
 
   Page<Post> findAllBySavedBy_Id(UUID userId, Pageable pageable);
 
-  @Query(value = "SELECT p FROM Post p WHERE p.id = ANY(:ids)", nativeQuery = true)
+  @Query(
+      value =
+          "SELECT * FROM posts p "
+              + "WHERE p.id = ANY(:ids) "
+              + "ORDER BY array_position(:ids, p.id)",
+      nativeQuery = true)
   Page<Post> findAllByIds(@Param("ids") UUID[] ids, Pageable pageable);
 
   // Saving or unsaving a post
@@ -53,4 +58,16 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
       value = "DELETE FROM post_likes WHERE post_id = :postId AND user_id = :userId",
       nativeQuery = true)
   void unlikeByUser(@Param("postId") UUID postId, @Param("userId") UUID userId);
+
+  @Modifying
+  @Query(
+      value = "UPDATE posts SET likes_count = likes_count + 1 WHERE id = :postId",
+      nativeQuery = true)
+  void incrementLikeCount(@Param("postId") UUID postId);
+
+  @Modifying
+  @Query(
+      value = "UPDATE posts SET likes_count = likes_count - 1 WHERE id = :postId",
+      nativeQuery = true)
+  void decrementLikeCount(@Param("postId") UUID postId);
 }

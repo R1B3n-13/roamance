@@ -13,8 +13,7 @@ public interface PostService
 
   PostListResponseDto getAll(int pageNumber, int pageSize, String sortBy, String sortDir);
 
-  PostListResponseDto getByIds(
-      List<UUID> postIds, int pageNumber, int pageSize, String sortBy, String sortDir);
+  PostListResponseDto getByIds(List<UUID> postIds, int pageNumber, int pageSize);
 
   PostListResponseDto getByUserId(
       UUID userId, int pageNumber, int pageSize, String sortBy, String sortDir);
@@ -25,7 +24,7 @@ public interface PostService
   UserListResponseDto getUsersWhoLiked(
       UUID postId, int pageNumber, int pageSize, String sortBy, String sortDir);
 
-  BaseResponseDto save(UUID postId);
+  BaseResponseDto toggleSave(UUID postId);
 
-  BaseResponseDto like(UUID postId);
+  BaseResponseDto toggleLike(UUID postId);
 }
