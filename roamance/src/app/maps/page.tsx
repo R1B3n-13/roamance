@@ -24,7 +24,8 @@ export default function MapPage() {
   const { resolvedTheme } = useTheme();
   const isDarkMode = resolvedTheme === 'dark';
 
-  const [center, setCenter] = useState({ lat: 0, lng: 0 });
+  // Destination state - can be null when no destination is selected
+  const [destination, setDestination] = useState<{ lat: number; lng: number } | null>(null);
   const [locationName, setLocationName] = useState('');
   const [userLocation, setUserLocation] = useState<{
     lat: number;
@@ -41,6 +42,7 @@ export default function MapPage() {
   const [centerOnUser, setCenterOnUser] = useState(false);
   const [routeData, setRouteData] = useState<RouteData | null>(null);
   const [activeStep, setActiveStep] = useState<number | null>(null);
+  const [mapCenter, setMapCenter] = useState(defaultCenter); // For map centering, separate from destination
 
   useEffect(() => {
     const lat = searchParams?.get('lat');
@@ -49,16 +51,19 @@ export default function MapPage() {
     const dir = searchParams?.get('dir') === 'true';
 
     if (lat && lng) {
-      setCenter({
+      const newDestination = {
         lat: parseFloat(lat),
         lng: parseFloat(lng),
-      });
+      };
+      setDestination(newDestination);
+      setMapCenter(newDestination);
       setLocationName(name);
       setDirections(dir);
     } else {
-      // Default to Saint Martin Island, Bangladesh
-      setCenter(defaultCenter);
-      setLocationName('Saint Martin Island, Bangladesh');
+      // No destination from URL parameters
+      setDestination(null);
+      setMapCenter(defaultCenter); // Default map center for visualization
+      setLocationName('');
     }
   }, [searchParams]);
 
@@ -72,10 +77,9 @@ export default function MapPage() {
           };
           setUserLocation(userLocationData);
 
-          // If no URL parameters were provided, use user's current location
+          // If no URL parameters were provided, center the map on user's location
           if (!searchParams?.get('lat') && !searchParams?.get('lng')) {
-            setCenter(userLocationData);
-            setLocationName('Your Current Location');
+            setMapCenter(userLocationData);
           }
         },
         (error) => {
@@ -105,6 +109,7 @@ export default function MapPage() {
   const handleCenterOnUser = () => {
     if (userLocation) {
       setCenterOnUser(true);
+      setMapCenter(userLocation);
 
       setTimeout(() => {
         setCenterOnUser(false);
@@ -128,10 +133,20 @@ export default function MapPage() {
   };
 
   const handleChangeDestination = (lat: number, lng: number, name: string) => {
-    setCenter({ lat, lng });
+    setDestination({ lat, lng });
+    setMapCenter({ lat, lng });
     setLocationName(name);
     // Reset route data so it gets recalculated
     setRouteData(null);
+  };
+
+  // Handle search result selection as destination
+  const handleSearchResultSelected = (lat: number, lng: number, name: string) => {
+    setDestination({ lat, lng });
+    setMapCenter({ lat, lng });
+    setLocationName(name);
+    // Clear search results after selection
+    setSearchQuery('');
   };
 
   return (
@@ -162,7 +177,8 @@ export default function MapPage() {
 
       <div className="flex-1 relative overflow-hidden">
         <MapContainer
-          center={center}
+          center={mapCenter}
+          destination={destination}
           locationName={locationName}
           userLocation={customStartPoint || userLocation}
           searchQuery={searchQuery}
@@ -171,10 +187,11 @@ export default function MapPage() {
           centerOnUser={centerOnUser}
           onRouteCalculated={handleRouteCalculated}
           isCustomStartPoint={!!customStartPoint}
+          onSearchResultSelect={handleSearchResultSelected}
         />
 
         <AnimatePresence>
-          {directions && showDirectionsPanel && (
+          {directions && showDirectionsPanel && destination && (
             <DirectionsPanel
               routeData={routeData}
               locationName={locationName}

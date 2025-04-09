@@ -18,8 +18,7 @@ import { mapLayerAttribution, mapLayers } from './MapLayerControl';
 import {
   CustomStartPointMarker,
   DestinationMarker,
-  SearchPinMarker,
-  UserLocationMarker,
+  UserLocationMarker
 } from './MapMarkers';
 
 import { SearchResults } from './SearchResults';
@@ -85,8 +84,12 @@ const mapFeatures = {
   theme: 'Toggle between light and dark mode for better visibility',
 };
 
+// Saint Martin Island coordinates as fallback
+export const fallbackLocation = { lat: 20.6295, lng: 92.3208 };
+
 interface LeafletMapProps {
   center: { lat: number; lng: number };
+  destination: { lat: number; lng: number } | null;
   locationName: string;
   userLocation: { lat: number; lng: number; name?: string } | null;
   searchQuery: string;
@@ -96,10 +99,12 @@ interface LeafletMapProps {
   centerOnUser?: boolean;
   onRouteCalculated?: (routeData: RouteData) => void;
   isCustomStartPoint?: boolean;
+  onSearchResultSelect?: (lat: number, lng: number, name: string) => void;
 }
 
 export default function LeafletMap({
   center,
+  destination,
   locationName,
   userLocation,
   searchQuery,
@@ -109,6 +114,7 @@ export default function LeafletMap({
   centerOnUser,
   onRouteCalculated,
   isCustomStartPoint = false,
+  onSearchResultSelect,
 }: LeafletMapProps) {
   const [searchResults, setSearchResults] = useState<
     {
@@ -129,28 +135,20 @@ export default function LeafletMap({
     Array<{ lat: number; lng: number }>
   >([]);
   const [mapFeatureHelp, setMapFeatureHelp] = useState<string | null>(null);
-  // Add state for search pin
-  const [searchPin, setSearchPin] = useState<{
-    lat: number;
-    lng: number;
-    name: string;
-  } | null>(null);
 
   // Event handlers
   const handleSelectSearchResult = (lat: number, lng: number) => {
     if (mapRef.current) {
       mapRef.current.setView([lat, lng], 15);
 
-      // Set the search pin when selecting a result
+      // Find the selected result
       const selectedResult = searchResults.find(
         (r) => r.lat === lat && r.lng === lng
       );
-      if (selectedResult) {
-        setSearchPin({
-          lat,
-          lng,
-          name: selectedResult.name,
-        });
+
+      if (selectedResult && onSearchResultSelect) {
+        // Use the callback to set this as the destination
+        onSearchResultSelect(lat, lng, selectedResult.name);
       }
 
       setSearchResults([]);
@@ -208,10 +206,6 @@ export default function LeafletMap({
     const fetchSearchResults = async () => {
       if (searchQuery.length < 3) {
         setSearchResults([]);
-        // Clear the search pin when search query is cleared or too short
-        if (searchPin && searchQuery.length === 0) {
-          setSearchPin(null);
-        }
         return;
       }
 
@@ -253,7 +247,7 @@ export default function LeafletMap({
     <TooltipProvider delayDuration={300}>
       <div className="h-full w-full relative">
         <MapContainer
-          center={[center.lat || 0, center.lng || 0]}
+          center={[center.lat || fallbackLocation.lat, center.lng || fallbackLocation.lng]}
           zoom={13}
           style={{ height: '100%', width: '100%' }}
           ref={mapRef}
@@ -269,10 +263,10 @@ export default function LeafletMap({
             }
           />
 
-          {/* Map markers */}
-          {center.lat !== 0 && center.lng !== 0 && (
+          {/* Map markers - only show destination marker if destination exists */}
+          {destination && (
             <DestinationMarker
-              position={center}
+              position={destination}
               locationName={locationName}
               isDarkMode={isDarkMode}
               userLocation={userLocation}
@@ -297,24 +291,15 @@ export default function LeafletMap({
             />
           )}
 
-          {/* Display search pin marker */}
-          {searchPin && (
-            <SearchPinMarker
-              position={{ lat: searchPin.lat, lng: searchPin.lng }}
-              name={searchPin.name}
-              isDarkMode={isDarkMode}
-              onClear={() => setSearchPin(null)}
-            />
-          )}
-
           {/* Map Controller for route directions */}
           <MapController
-            center={center}
+            center={destination || center}
             userLocation={userLocation}
-            directions={directions}
+            directions={directions && !!destination}
             waypoints={waypoints}
             onMapLoaded={onMapLoaded}
             onRouteCalculated={handleRouteCalculated}
+            destination={destination}
           />
 
           {/* Components that require map context */}
@@ -341,7 +326,7 @@ export default function LeafletMap({
           showTraffic={showTraffic}
           toggleTraffic={toggleTraffic}
           isDarkMode={isDarkMode}
-          position={center}
+          position={destination || center}
           locationName={locationName}
         />
 
@@ -357,7 +342,7 @@ export default function LeafletMap({
         )}
 
         {/* Waypoints panel */}
-        {directions && waypoints.length > 0 && (
+        {directions && waypoints.length > 0 && destination && (
           <WaypointsPanel
             waypoints={waypoints}
             removeWaypoint={removeWaypoint}

@@ -73,6 +73,7 @@ const LeafletMap = dynamic(() => import('@/components/maps/LeafletMap'), {
 
 interface MapContainerProps {
   center: { lat: number; lng: number };
+  destination: { lat: number; lng: number } | null;
   locationName: string;
   userLocation: { lat: number; lng: number } | null;
   searchQuery: string;
@@ -81,10 +82,12 @@ interface MapContainerProps {
   centerOnUser?: boolean;
   onRouteCalculated?: (routeData: RouteData) => void;
   isCustomStartPoint?: boolean;
+  onSearchResultSelect?: (lat: number, lng: number, name: string) => void;
 }
 
 export function MapContainer({
   center,
+  destination,
   locationName,
   userLocation,
   searchQuery,
@@ -93,6 +96,7 @@ export function MapContainer({
   centerOnUser,
   onRouteCalculated,
   isCustomStartPoint = false,
+  onSearchResultSelect,
 }: MapContainerProps) {
   const [mapLoaded, setMapLoaded] = useState(false);
   const [infoCardVisible, setInfoCardVisible] = useState(true);
@@ -146,7 +150,7 @@ export function MapContainer({
 
       {/* Location info card */}
       <AnimatePresence>
-        {infoCardVisible && mapLoaded && (
+        {infoCardVisible && mapLoaded && destination && (
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -157,7 +161,7 @@ export function MapContainer({
             <LocationInfoCard
               visible={true}
               locationName={locationName}
-              center={center}
+              center={destination}
               isDarkMode={isDarkMode}
             />
             <Button
@@ -260,6 +264,7 @@ export function MapContainer({
 
       <LeafletMap
         center={center}
+        destination={destination}
         locationName={locationName}
         userLocation={userLocation}
         searchQuery={searchQuery}
@@ -269,6 +274,7 @@ export function MapContainer({
         centerOnUser={centerOnUser}
         onRouteCalculated={onRouteCalculated}
         isCustomStartPoint={isCustomStartPoint}
+        onSearchResultSelect={onSearchResultSelect}
       />
     </div>
   );

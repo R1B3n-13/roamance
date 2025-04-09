@@ -31,6 +31,7 @@ export interface RouteData {
 
 interface MapControllerProps {
   center: { lat: number; lng: number };
+  destination?: { lat: number; lng: number } | null;
   userLocation: { lat: number; lng: number } | null;
   directions: boolean;
   waypoints: Array<{ lat: number; lng: number }>;
@@ -40,6 +41,7 @@ interface MapControllerProps {
 
 export function MapController({
   center,
+  destination,
   userLocation,
   directions,
   waypoints,
@@ -50,19 +52,23 @@ export function MapController({
   const [route, setRoute] = useState<[number, number][]>([]);
   const [hasCalculatedRoute, setHasCalculatedRoute] = useState<boolean>(false);
 
+  // Initialize the map with an appropriate center point
   useEffect(() => {
-    if (center.lat !== 0 && center.lng !== 0) {
+    if (destination) {
+      map.setView([destination.lat, destination.lng], 13);
+    } else if (center.lat !== 0 && center.lng !== 0) {
       map.setView([center.lat, center.lng], 13);
     }
+
     if (onMapLoaded) {
       onMapLoaded();
     }
-  }, [center, map, onMapLoaded]);
+  }, [center, destination, map, onMapLoaded]);
 
   // Reset calculation state when key dependencies change
   useEffect(() => {
     setHasCalculatedRoute(false);
-  }, [directions, userLocation, center, waypoints]);
+  }, [directions, userLocation, destination, waypoints]);
 
   // Generate a simulated direction based on angle between points
   const generateDirection = (from: [number, number], to: [number, number]): string => {
@@ -223,8 +229,10 @@ export function MapController({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Calculate route when all conditions are met
   useEffect(() => {
-    if (!hasCalculatedRoute && directions && userLocation && center.lat !== 0 && center.lng !== 0) {
+    // Only calculate route if we have directions enabled, a user location, and a destination
+    if (!hasCalculatedRoute && directions && userLocation && destination) {
       const points: [number, number][] = [];
 
       // Start with user location
@@ -240,26 +248,38 @@ export function MapController({
       }
 
       // End with destination
-      if (center.lat !== 0 && center.lng !== 0) {
-        points.push([center.lat, center.lng]);
+      if (destination) {
+        points.push([destination.lat, destination.lng]);
       }
 
-      setRoute(points);
+      if (points.length >= 2) {
+        setRoute(points);
 
-      // Create bounds that include all points
-      const bounds = L.latLngBounds(points.map((p) => L.latLng(p[0], p[1])));
-      map.fitBounds(bounds, { padding: [50, 50] });
+        // Create bounds that include all points
+        const bounds = L.latLngBounds(points.map((p) => L.latLng(p[0], p[1])));
+        map.fitBounds(bounds, { padding: [50, 50] });
 
-      // Generate and emit route data if callback is provided
-      if (onRouteCalculated && points.length >= 2) {
-        const routeData = generateRouteData(points, "destination");
-        onRouteCalculated(routeData);
-        setHasCalculatedRoute(true);
+        // Generate and emit route data if callback is provided
+        if (onRouteCalculated) {
+          const routeData = generateRouteData(points, "destination");
+          onRouteCalculated(routeData);
+          setHasCalculatedRoute(true);
+        }
       }
-    } else if (!directions) {
+    } else if (!directions || !destination) {
+      // Clear route when directions are disabled or no destination is set
       setRoute([]);
     }
-  }, [hasCalculatedRoute, directions, userLocation, center, map, waypoints, onRouteCalculated, generateRouteData]);
+  }, [
+    hasCalculatedRoute,
+    directions,
+    userLocation,
+    destination,
+    map,
+    waypoints,
+    onRouteCalculated,
+    generateRouteData
+  ]);
 
   return (
     <>
