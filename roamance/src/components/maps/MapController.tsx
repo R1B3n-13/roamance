@@ -1,4 +1,6 @@
 'use client';
+import 'leaflet/dist/leaflet.css'; // newly added
+import 'leaflet-routing-machine/dist/leaflet-routing-machine.css';
 
 import L from 'leaflet';
 import 'leaflet-routing-machine';
@@ -19,6 +21,15 @@ export function MapController({
   const [hasCalculatedRoute, setHasCalculatedRoute] = useState<boolean>(false);
   const routingControlRef = useRef<L.Routing.Control | null>(null);
 
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.innerHTML = `.leaflet-routing-container { z-index: 9999 !important; }`;
+    document.head.appendChild(style);
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
+
   // Initialize the map with an appropriate center point
   useEffect(() => {
     if (destination) {
@@ -32,21 +43,13 @@ export function MapController({
     }
   }, [center, destination, map, onMapLoaded]);
 
-  // Reset calculation state when key dependencies change
-  useEffect(() => {
-    setHasCalculatedRoute(false);
-  }, [directions, userLocation, destination, waypoints]);
-
   // Calculate route using Leaflet Routing Machine
   useEffect(() => {
-    // Clean up previous routing control if it exists
-    if (routingControlRef.current) {
-      map.removeControl(routingControlRef.current);
-      routingControlRef.current = null;
-    }
+    // If route already calculated, do not re-run effect (prevents removing the routing control)
+    if (hasCalculatedRoute) return;
 
     // Only calculate route if we have directions enabled, a destination, and a user location
-    if (!hasCalculatedRoute && directions && destination && userLocation) {
+    if (directions && destination && userLocation) {
       const routeWaypoints: L.Routing.Waypoint[] = [];
 
       // Start with user location (fixed error: removed reference to userLocation.name)
@@ -126,12 +129,12 @@ export function MapController({
           }
         }
 
-        // Hide the routing container
-        const container = document.querySelector('.leaflet-routing-container');
-        if (container) {
-          container.classList.add('hidden');
-          container.setAttribute('aria-hidden', 'true');
-        }
+        // Removed container hiding to keep the route path visible:
+        // const container = document.querySelector('.leaflet-routing-container');
+        // if (container) {
+        //   container.classList.add('hidden');
+        //   container.setAttribute('aria-hidden', 'true');
+        // }
       });
 
       // Add the routing control to the map
