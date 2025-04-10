@@ -1,16 +1,14 @@
 'use client';
 
 import { searchGeonames } from '@/api/places-api';
-import { RouteData } from '@/components/maps/MapController';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
+import { RouteData, RouteInstructionItem } from '@/types';
 import { Geoname } from '@/types/places';
 import { formatDistance } from '@/utils/format';
 import { motion } from 'framer-motion';
 import {
-  ArrowDown,
-  ArrowDownRight,
   ArrowLeft,
   ArrowRight,
   ArrowUp,
@@ -109,7 +107,7 @@ function getTurnTypeIcon(
 }
 
 // Helper function to get human-readable turn instruction
-function getTurnDescription(instruction: any): string {
+function getTurnDescription(instruction: RouteInstructionItem): string {
   // If the instruction already has a text field, use that
   if (instruction.text) {
     return instruction.text;
@@ -135,7 +133,7 @@ function getTurnDescription(instruction: any): string {
       description = `Merge ${instruction.modifier ? instruction.modifier.toLowerCase() : ''} ${instruction.road ? 'onto ' + instruction.road : ''}`;
       break;
     case 'Roundabout':
-      description = `At the roundabout, take the ${instruction.exit}${getOrdinalSuffix(instruction.exit)} exit ${instruction.road ? 'onto ' + instruction.road : ''}`;
+      description = `At the roundabout, take the ${instruction.exit !== undefined ? instruction.exit + getOrdinalSuffix(instruction.exit) : ''} exit ${instruction.road ? 'onto ' + instruction.road : ''}`;
       break;
     case 'EndOfRoad':
       description = `At the end of the road, turn ${instruction.modifier ? instruction.modifier.toLowerCase() : ''} ${instruction.road ? 'onto ' + instruction.road : ''}`;
