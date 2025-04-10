@@ -88,7 +88,7 @@ public class PostController {
   }
 
   @GetMapping("/saved")
-  public ResponseEntity<PostListResponseDto> getSavedPosts(
+  public ResponseEntity<PostListResponseDto> getSavedPostsByCurrentUser(
       @RequestParam(defaultValue = "0") int pageNumber,
       @RequestParam(defaultValue = "10") int pageSize,
       @RequestParam(defaultValue = "id") String sortBy,

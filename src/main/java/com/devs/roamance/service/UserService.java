@@ -9,9 +9,12 @@ import java.util.UUID;
 
 public interface UserService
     extends BaseService<
-        BaseResponseDto, UserResponseDto, UserCreateRequestDto, UserUpdateRequestDto, UUID> {
-
-  UserListResponseDto getAll(int pageNumber, int pageSize, String sortBy, String sortDir);
+        BaseResponseDto,
+        UserResponseDto,
+        UserListResponseDto,
+        UserCreateRequestDto,
+        UserUpdateRequestDto,
+        UUID> {
 
   UserResponseDto getByEmail(String email);
 

@@ -9,9 +9,13 @@ import java.util.List;
 import java.util.UUID;
 
 public interface PostService
-    extends BaseService<PostResponseDto, PostResponseDto, PostRequestDto, PostRequestDto, UUID> {
-
-  PostListResponseDto getAll(int pageNumber, int pageSize, String sortBy, String sortDir);
+    extends BaseService<
+        PostResponseDto,
+        PostResponseDto,
+        PostListResponseDto,
+        PostRequestDto,
+        PostRequestDto,
+        UUID> {
 
   PostListResponseDto getByIds(List<UUID> postIds, int pageNumber, int pageSize);
 
