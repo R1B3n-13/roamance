@@ -1,5 +1,6 @@
 package com.devs.roamance.model.user;
 
+import com.devs.roamance.model.social.Comment;
 import com.devs.roamance.model.social.Post;
 import com.devs.roamance.model.travel.journal.Journal;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
@@ -68,6 +69,14 @@ public class User {
       fetch = FetchType.LAZY,
       cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
   private Set<Post> likedPosts;
+
+  @JsonIgnore
+  @OneToMany(
+      mappedBy = "user",
+      fetch = FetchType.LAZY,
+      cascade = {CascadeType.ALL},
+      orphanRemoval = true)
+  private List<Comment> comments;
 
   @CreatedDate
   @Column(updatable = false)

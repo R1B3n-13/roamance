@@ -69,4 +69,11 @@ public final class ResponseMessage {
       "You don't have permission to update this post!";
   public static final String POST_DELETE_ACTION_DENIED =
       "You don't have permission to delete this post!";
+
+  // ======================== Comment Related ========================
+
+  public static final String COMMENT_CREATE_SUCCESS = "Comment created successfully.";
+  public static final String COMMENT_FETCH_SUCCESS = "Comment fetched successfully.";
+  public static final String COMMENTS_FETCH_SUCCESS = "Comments fetched successfully.";
+  public static final String COMMENT_NOT_FOUND = "No comment present with id: %s!";
 }

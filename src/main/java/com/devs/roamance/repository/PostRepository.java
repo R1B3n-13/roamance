@@ -70,4 +70,18 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
       value = "UPDATE posts SET likes_count = likes_count - 1 WHERE id = :postId",
       nativeQuery = true)
   void decrementLikeCount(@Param("postId") UUID postId);
+
+  // increment or decrementing comments count
+
+  @Modifying
+  @Query(
+      value = "UPDATE posts SET comments_count = comments_count + 1 WHERE id = :postId",
+      nativeQuery = true)
+  void incrementCommentCount(@Param("postId") UUID postId);
+
+  @Modifying
+  @Query(
+      value = "UPDATE posts SET comments_count = comments_count - 1 WHERE id = :postId",
+      nativeQuery = true)
+  void decrementCommentCount(@Param("postId") UUID postId);
 }

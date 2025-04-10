@@ -18,9 +18,18 @@ public class PostDto {
 
   private UUID id;
   private String text;
+
+  @JsonProperty("image_paths")
   private List<String> imagePaths;
+
+  @JsonProperty("video_paths")
   private List<String> videoPaths;
+
+  @JsonProperty("likes_count")
   private int likesCount;
+
+  @JsonProperty("comments_count")
+  private int commentsCount;
 
   private UserDto user;
 

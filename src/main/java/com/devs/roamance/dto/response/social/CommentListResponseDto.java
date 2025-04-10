@@ -11,11 +11,12 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class PostListResponseDto extends BaseResponseDto {
+public class CommentListResponseDto extends BaseResponseDto {
 
-  private List<PostDto> data;
+  private List<CommentDto> data;
 
-  public PostListResponseDto(int status, boolean success, String message, List<PostDto> data) {
+  public CommentListResponseDto(
+      int status, boolean success, String message, List<CommentDto> data) {
 
     super(status, success, message);
     this.data = data;
