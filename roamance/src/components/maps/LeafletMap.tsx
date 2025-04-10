@@ -4,14 +4,14 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import L from 'leaflet';
 import 'leaflet-draw/dist/leaflet.draw.css';
-import 'leaflet/dist/leaflet.css';
 import 'leaflet-routing-machine/dist/leaflet-routing-machine.css';
+import 'leaflet/dist/leaflet.css';
 import { useRef } from 'react';
 import { MapContainer, TileLayer } from 'react-leaflet';
 
 // Import refactored components
 import { MapControlButtons } from './MapControlButtons';
-import { MapController, RouteData } from './MapController';
+import { MapController } from './MapController';
 import { MapFeatureHelp } from './MapFeatureHelp';
 import { MapInternalControls } from './MapInternalControls';
 import { mapLayerAttribution, mapLayers } from './MapLayerControl';
@@ -22,6 +22,7 @@ import { WaypointsPanel } from './WaypointsPanel';
 // Import custom hooks
 import { useMapFeatures } from '../../hooks/useMapFeatures';
 import { useMapSearch } from '../../hooks/useMapSearch';
+import { RouteData } from '@/types';
 
 // Initialize Leaflet icons
 delete (L.Icon.Default.prototype as { _getIconUrl?: () => string })._getIconUrl;
@@ -36,7 +37,7 @@ if (typeof document !== 'undefined') {
   const styleElement = document.createElement('style');
   styleElement.textContent = `
     .dark-map .leaflet-tile-pane {
-      filter: brightness(0.6) contrast(1.1) saturate(1.1);
+      filter: brightness(0.95) contrast(1.05) saturate(1.1);
     }
     .dark-map .leaflet-control,
     .dark-map .leaflet-control a {
@@ -105,11 +106,8 @@ export default function LeafletMap({
   onSearchResultSelect,
 }: LeafletMapProps) {
   // Use custom hooks for map features and search
-  const {
-    searchResults,
-    isSearching,
-    setSearchResults
-  } = useMapSearch(searchQuery);
+  const { searchResults, isSearching, setSearchResults } =
+    useMapSearch(searchQuery);
 
   const {
     currentMapLayer,
@@ -121,7 +119,7 @@ export default function LeafletMap({
     removeWaypoint,
     clearWaypoints,
     mapFeatureHelp,
-    handleRouteCalculated
+    handleRouteCalculated,
   } = useMapFeatures();
 
   const mapRef = useRef<L.Map | null>(null);
@@ -143,7 +141,10 @@ export default function LeafletMap({
     <TooltipProvider delayDuration={300}>
       <div className="h-full w-full relative">
         <MapContainer
-          center={[center.lat || fallbackLocation.lat, center.lng || fallbackLocation.lng]}
+          center={[
+            center.lat || fallbackLocation.lat,
+            center.lng || fallbackLocation.lng,
+          ]}
           zoom={13}
           style={{ height: '100%', width: '100%' }}
           ref={mapRef}
@@ -211,10 +212,7 @@ export default function LeafletMap({
         />
 
         {/* Feature help component */}
-        <MapFeatureHelp
-          featureName={mapFeatureHelp}
-          isDarkMode={isDarkMode}
-        />
+        <MapFeatureHelp featureName={mapFeatureHelp} isDarkMode={isDarkMode} />
 
         {/* Waypoints panel */}
         {directions && waypoints.length > 0 && destination && (

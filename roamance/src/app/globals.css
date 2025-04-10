@@ -308,11 +308,15 @@
 
 /* Enhance popup transition */
 .leaflet-fade-anim .leaflet-popup {
-  transition: opacity 0.3s ease-in-out, transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+  transition:
+    opacity 0.3s ease-in-out,
+    transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
 }
 
 .leaflet-fade-anim .leaflet-map-pane .leaflet-popup {
-  transition: opacity 0.3s ease-in-out, transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+  transition:
+    opacity 0.3s ease-in-out,
+    transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
 }
 
 /* Hide default Leaflet Routing Machine container */
@@ -329,4 +333,8 @@
 .leaflet-routing-geocoder input {
   width: 100%;
   box-sizing: border-box;
+}
+
+.leaflet-routing-container {
+  display: none !important;
 }

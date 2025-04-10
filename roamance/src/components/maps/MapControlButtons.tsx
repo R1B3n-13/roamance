@@ -68,13 +68,13 @@ export function MapControlButtons({
             className={cn(
               'h-10 w-10 rounded-full backdrop-blur-md shadow-lg',
               isDarkMode
-                ? 'bg-card/90 border-primary/30 text-primary hover:bg-primary/20 hover:border-primary/50'
-                : 'bg-white/90 border-muted hover:bg-white'
+                ? 'bg-card/90 border-primary/40 text-primary hover:bg-primary/30 hover:border-primary/60'
+                : 'bg-white/90 border-primary/40 text-primary/90 hover:bg-primary/10 hover:text-primary'
             )}
             onMouseEnter={() => emitMapControlHover('measure')}
             onMouseLeave={emitMapControlLeave}
           >
-            <Ruler className="h-4 w-4" />
+            <Ruler className={cn("h-4 w-4", isDarkMode ? "text-primary" : "")} />
           </Button>
         </TooltipTrigger>
         <TooltipContent>
@@ -93,13 +93,13 @@ export function MapControlButtons({
               showTraffic
                 ? 'bg-primary text-primary-foreground'
                 : isDarkMode
-                  ? 'bg-card/90 border-primary/30 text-primary hover:bg-primary/20 hover:border-primary/50'
-                  : 'bg-white/90 border-muted hover:bg-white'
+                  ? 'bg-card/90 border-primary/40 text-primary hover:bg-primary/30 hover:border-primary/60'
+                  : 'bg-white/90 border-primary/40 text-primary/90 hover:bg-primary/10 hover:text-primary'
             )}
             onMouseEnter={() => emitMapControlHover('traffic')}
             onMouseLeave={emitMapControlLeave}
           >
-            <TrafficCone className="h-5 w-5" />
+            <TrafficCone className={cn("h-5 w-5", isDarkMode && !showTraffic ? "text-primary" : "")} />
           </Button>
         </TooltipTrigger>
         <TooltipContent>
@@ -116,14 +116,14 @@ export function MapControlButtons({
             className={cn(
               'h-10 w-10 rounded-full backdrop-blur-md shadow-lg relative overflow-hidden',
               isDarkMode
-                ? 'bg-card/90 border-primary/30 text-primary hover:bg-primary/20 hover:border-primary/50'
-                : 'bg-white/90 border-muted hover:bg-white'
+                ? 'bg-card/90 border-primary/40 text-primary hover:bg-primary/30 hover:border-primary/60'
+                : 'bg-white/90 border-primary/40 text-primary/90 hover:bg-primary/10 hover:text-primary'
             )}
             onMouseEnter={() => emitMapControlHover('theme')}
             onMouseLeave={emitMapControlLeave}
           >
-            <Sun className="h-5 w-5 transition-all duration-300 rotate-0 scale-100 dark:-rotate-90 dark:scale-0" />
-            <Moon className="absolute h-5 w-5 transition-all duration-300 rotate-90 scale-0 dark:rotate-0 dark:scale-100" />
+            <Sun className={cn("h-5 w-5 transition-all duration-300 rotate-0 scale-100 dark:-rotate-90 dark:scale-0", isDarkMode ? "text-primary" : "")} />
+            <Moon className={cn("absolute h-5 w-5 transition-all duration-300 rotate-90 scale-0 dark:rotate-0 dark:scale-100", isDarkMode ? "text-primary" : "")} />
           </Button>
         </TooltipTrigger>
         <TooltipContent>

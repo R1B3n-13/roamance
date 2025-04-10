@@ -36,12 +36,12 @@ export function MapControls({
               className={cn(
                 'h-10 w-10 rounded-full backdrop-blur-md shadow-lg',
                 isDarkMode
-                  ? 'bg-card/90 border-primary/30 text-primary hover:bg-primary/20 hover:border-primary/50'
-                  : 'bg-white/90 border-muted hover:bg-white'
+                  ? 'bg-card/90 border-primary/40 text-primary hover:bg-primary/30 hover:border-primary/60'
+                  : 'bg-white/90 border-primary/40 text-primary/90 hover:bg-primary/10 hover:text-primary'
               )}
               onClick={onGetDirections}
             >
-              <Navigation className="h-5 w-5" />
+              <Navigation className={cn("h-5 w-5", isDarkMode ? "text-primary" : "")} />
             </Button>
           </TooltipTrigger>
           <TooltipContent>
@@ -59,12 +59,12 @@ export function MapControls({
               className={cn(
                 'h-10 w-10 rounded-full backdrop-blur-md shadow-lg',
                 isDarkMode
-                  ? 'bg-card/90 border-primary/30 text-primary hover:bg-primary/20 hover:border-primary/50'
-                  : 'bg-white/90 border-muted hover:bg-white'
+                  ? 'bg-card/90 border-primary/40 text-primary hover:bg-primary/30 hover:border-primary/60'
+                  : 'bg-white/90 border-primary/40 text-primary/90 hover:bg-primary/10 hover:text-primary'
               )}
               onClick={onCenterUserLocation}
             >
-              <Home className="h-5 w-5" />
+              <Home className={cn("h-5 w-5", isDarkMode ? "text-primary" : "")} />
             </Button>
           </TooltipTrigger>
           <TooltipContent>
@@ -99,12 +99,12 @@ function ZoomControls({ isDarkMode }: { isDarkMode: boolean }) {
               className={cn(
                 'h-8 w-8 rounded-full backdrop-blur-md shadow-lg',
                 isDarkMode
-                  ? 'bg-card/90 border-primary/30 text-primary hover:bg-primary/20 hover:border-primary/50'
-                  : 'bg-white/90 border-muted hover:bg-white'
+                  ? 'bg-card/90 border-primary/40 text-primary hover:bg-primary/30 hover:border-primary/60'
+                  : 'bg-white/90 border-primary/40 text-primary/90 hover:bg-primary/10 hover:text-primary'
               )}
               onClick={handleZoomIn}
             >
-              <Plus className="h-4 w-4" />
+              <Plus className={cn("h-4 w-4", isDarkMode ? "text-primary" : "")} />
             </Button>
           </TooltipTrigger>
           <TooltipContent>
@@ -120,12 +120,12 @@ function ZoomControls({ isDarkMode }: { isDarkMode: boolean }) {
               className={cn(
                 'h-8 w-8 rounded-full backdrop-blur-md shadow-lg',
                 isDarkMode
-                  ? 'bg-card/90 border-primary/30 text-primary hover:bg-primary/20 hover:border-primary/50'
-                  : 'bg-white/90 border-muted hover:bg-white'
+                  ? 'bg-card/90 border-primary/40 text-primary hover:bg-primary/30 hover:border-primary/60'
+                  : 'bg-white/90 border-primary/40 text-primary/90 hover:bg-primary/10 hover:text-primary'
               )}
               onClick={handleZoomOut}
             >
-              <Minus className="h-4 w-4" />
+              <Minus className={cn("h-4 w-4", isDarkMode ? "text-primary" : "")} />
             </Button>
           </TooltipTrigger>
           <TooltipContent>

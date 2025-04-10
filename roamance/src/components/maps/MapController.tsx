@@ -185,4 +185,7 @@ export function MapController({
     waypoints,
     onRouteCalculated,
   ]);
+
+  // Return null to make this a valid React component
+  return null;
 }

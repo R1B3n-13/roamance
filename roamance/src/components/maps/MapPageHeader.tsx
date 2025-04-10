@@ -56,14 +56,14 @@ export function MapPageHeader({
               size="sm"
               variant="outline"
               className={cn(
-                'flex items-center gap-1.5 h-9 px-3 rounded-full border-primary/20 shadow-sm',
+                'flex items-center gap-1.5 h-9 px-3 rounded-full shadow-lg',
                 isDarkMode
-                  ? 'bg-primary/10 hover:bg-primary/20 text-primary'
-                  : 'bg-primary/5 hover:bg-primary/10 text-primary'
+                  ? 'bg-card/90 border-primary/40 text-primary hover:bg-primary/30 hover:border-primary/60'
+                  : 'bg-white/90 border-primary/40 text-primary/90 hover:bg-primary/10 hover:text-primary'
               )}
               onClick={handleCenterOnUser}
             >
-              <MapPin className="h-3.5 w-3.5" />
+              <MapPin className={cn("h-3.5 w-3.5", isDarkMode ? "text-primary" : "")} />
               <span className="font-medium">Your Location</span>
             </Button>
           </motion.div>

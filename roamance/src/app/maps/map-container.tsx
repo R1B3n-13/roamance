@@ -15,8 +15,8 @@ import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
 
 // Import RouteData type
-import { RouteData } from '@/components/maps/MapController';
 import { Button } from '@/components/ui/button';
+import { RouteData } from '@/types';
 
 // Dynamically import the LeafletMap component to avoid SSR issues
 const LeafletMap = dynamic(() => import('@/components/maps/LeafletMap'), {
@@ -248,11 +248,17 @@ export function MapContainer({
                         "font-medium capitalize flex-shrink-0 px-1.5 py-0.5 rounded text-xs",
                         isDarkMode
                           ? "bg-primary/20 text-primary"
-                          : "bg-primary/10 text-primary-foreground/80"
+                          : "bg-primary/20 text-primary"
                       )}>
                         {key}
                       </span>
-                      <span className="text-muted-foreground">{description}</span>
+                      <span className={cn(
+                        isDarkMode
+                          ? "text-muted-foreground"
+                          : "text-foreground/80"
+                      )}>
+                        {description}
+                      </span>
                     </li>
                   ))}
                 </ul>
