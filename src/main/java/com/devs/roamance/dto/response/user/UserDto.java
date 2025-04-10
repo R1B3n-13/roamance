@@ -1,4 +1,4 @@
-package com.devs.roamance.dto.response;
+package com.devs.roamance.dto.response.user;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.OffsetDateTime;
@@ -21,4 +21,7 @@ public class UserDto {
 
   @JsonProperty("created_at")
   private OffsetDateTime createdAt;
+
+  @JsonProperty("last_modified_at")
+  private OffsetDateTime lastModifiedAt;
 }

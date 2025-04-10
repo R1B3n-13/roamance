@@ -1,5 +1,6 @@
-package com.devs.roamance.dto.response;
+package com.devs.roamance.dto.response.user;
 
+import com.devs.roamance.dto.response.BaseResponseDto;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

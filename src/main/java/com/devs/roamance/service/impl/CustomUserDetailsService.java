@@ -1,6 +1,6 @@
 package com.devs.roamance.service.impl;
 
-import com.devs.roamance.model.User;
+import com.devs.roamance.model.user.User;
 import com.devs.roamance.repository.UserRepository;
 import java.util.Set;
 import java.util.stream.Collectors;

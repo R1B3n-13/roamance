@@ -1,7 +1,7 @@
 package com.devs.roamance.util;
 
 import com.devs.roamance.exception.AuthenticatedUserNotFoundException;
-import com.devs.roamance.model.User;
+import com.devs.roamance.model.user.User;
 import com.devs.roamance.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;

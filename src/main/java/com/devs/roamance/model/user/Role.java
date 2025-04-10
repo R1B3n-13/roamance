@@ -1,4 +1,4 @@
-package com.devs.roamance.model;
+package com.devs.roamance.model.user;
 
 public enum Role {
   USER,

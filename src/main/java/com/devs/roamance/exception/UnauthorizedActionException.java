@@ -4,11 +4,11 @@ import java.io.Serial;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
-public class SubsectionNotFoundException extends RuntimeException {
+public class UnauthorizedActionException extends RuntimeException {
 
   @Serial private static final long serialVersionUID = 1L;
 
-  public SubsectionNotFoundException(String message) {
+  public UnauthorizedActionException(String message) {
     super(message);
   }
 }

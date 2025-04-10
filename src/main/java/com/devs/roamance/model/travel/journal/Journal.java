@@ -1,7 +1,7 @@
 package com.devs.roamance.model.travel.journal;
 
 import com.devs.roamance.model.Location;
-import com.devs.roamance.model.User;
+import com.devs.roamance.model.user.User;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
@@ -101,8 +101,8 @@ public class Journal {
         + subsections.size()
         + ", createdAt="
         + createdAt
-        + ", lastModified="
-        + lastModified
+        + ", lastModifiedAt="
+        + lastModifiedAt
         + '}';
   }
 
@@ -112,7 +112,7 @@ public class Journal {
   @Setter(AccessLevel.NONE)
   private OffsetDateTime createdAt;
 
-  @LastModifiedDate private OffsetDateTime lastModified;
+  @LastModifiedDate private OffsetDateTime lastModifiedAt;
 
   @CreatedBy
   @Setter(AccessLevel.NONE)

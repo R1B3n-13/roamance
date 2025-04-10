@@ -1,5 +1,6 @@
-package com.devs.roamance.model;
+package com.devs.roamance.model.user;
 
+import com.devs.roamance.model.social.Post;
 import com.devs.roamance.model.travel.journal.Journal;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -12,6 +13,7 @@ import java.util.Set;
 import java.util.UUID;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
@@ -45,8 +47,31 @@ public class User {
       orphanRemoval = true)
   private List<Journal> journals;
 
+  @JsonIgnore
+  @OneToMany(
+      mappedBy = "user",
+      fetch = FetchType.LAZY,
+      cascade = {CascadeType.ALL},
+      orphanRemoval = true)
+  private List<Post> posts;
+
+  @JsonIgnore
+  @ManyToMany(
+      mappedBy = "savedBy",
+      fetch = FetchType.LAZY,
+      cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+  private Set<Post> savedPosts;
+
+  @JsonIgnore
+  @ManyToMany(
+      mappedBy = "likedBy",
+      fetch = FetchType.LAZY,
+      cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+  private Set<Post> likedPosts;
+
   @CreatedDate
   @Column(updatable = false)
-  @Setter(AccessLevel.NONE)
   private OffsetDateTime createdAt;
+
+  @LastModifiedDate private OffsetDateTime lastModifiedAt;
 }

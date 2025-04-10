@@ -1,4 +1,4 @@
-package com.devs.roamance.dto.request;
+package com.devs.roamance.dto.request.user;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
