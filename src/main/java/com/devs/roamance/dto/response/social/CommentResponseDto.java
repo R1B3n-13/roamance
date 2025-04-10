@@ -1,7 +1,6 @@
 package com.devs.roamance.dto.response.social;
 
 import com.devs.roamance.dto.response.BaseResponseDto;
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,11 +10,11 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class PostListResponseDto extends BaseResponseDto {
+public class CommentResponseDto extends BaseResponseDto {
 
-  private List<PostDto> data;
+  private CommentDto data;
 
-  public PostListResponseDto(int status, boolean success, String message, List<PostDto> data) {
+  public CommentResponseDto(int status, boolean success, String message, CommentDto data) {
 
     super(status, success, message);
     this.data = data;

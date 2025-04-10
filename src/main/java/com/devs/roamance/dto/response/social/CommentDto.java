@@ -1,6 +1,6 @@
-package com.devs.roamance.dto.response.travel.journal;
+package com.devs.roamance.dto.response.social;
 
-import com.devs.roamance.dto.response.LocationResponseDto;
+import com.devs.roamance.dto.response.user.UserDto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -13,11 +13,18 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class JournalDto {
+public class CommentDto {
+
   private UUID id;
-  private String title;
-  private LocationResponseDto destination;
-  private String description;
+  private String text;
+
+  @JsonProperty("image_path")
+  private String imagePath;
+
+  @JsonProperty("video_path")
+  private String videoPath;
+
+  private UserDto user;
 
   @JsonProperty("created_at")
   private OffsetDateTime createdAt;
@@ -30,7 +37,4 @@ public class JournalDto {
 
   @JsonProperty("last_modified_by")
   private UUID lastModifiedBy;
-
-  @JsonProperty("total_subsections")
-  private int totalSubsections;
 }

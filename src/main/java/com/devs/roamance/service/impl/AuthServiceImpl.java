@@ -9,7 +9,6 @@ import com.devs.roamance.security.JwtUtils;
 import com.devs.roamance.service.AuthService;
 import java.util.ArrayList;
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -22,7 +21,6 @@ public class AuthServiceImpl implements AuthService {
   private final JwtUtils jwtUtils;
   private final AuthenticationManager authenticationManager;
 
-  @Autowired
   public AuthServiceImpl(JwtUtils jwtUtils, AuthenticationManager authenticationManager) {
 
     this.jwtUtils = jwtUtils;

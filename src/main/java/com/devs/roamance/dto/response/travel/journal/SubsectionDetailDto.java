@@ -2,6 +2,7 @@ package com.devs.roamance.dto.response.travel.journal;
 
 import com.devs.roamance.model.travel.journal.SubsectionType;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -21,5 +22,7 @@ public class SubsectionDetailDto {
   private SubsectionType type;
   private List<String> notes = new ArrayList<>();
   private List<String> checklists = new ArrayList<>();
+
+  @JsonProperty("journal_id")
   private UUID journalId;
 }

@@ -1,6 +1,7 @@
 package com.devs.roamance.dto.request.travel.journal;
 
 import com.devs.roamance.model.travel.journal.SubsectionType;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import jakarta.validation.Valid;
@@ -27,6 +28,7 @@ public abstract class SubsectionCreateRequestDto {
 
   @Valid private SubsectionType type;
 
+  @JsonProperty("journal_id")
   @NotNull(message = "Journal ID is required")
   private UUID journalId;
 

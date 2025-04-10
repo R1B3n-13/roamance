@@ -5,10 +5,12 @@ import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Size;
 import java.time.OffsetDateTime;
-import java.util.*;
-import lombok.*;
+import java.util.UUID;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -16,32 +18,24 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
-@Table(name = "posts")
+@Table(name = "comments")
 @EntityListeners(AuditingEntityListener.class)
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
-public class Post {
+public class Comment {
 
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
 
-  @Column(length = 10_000)
+  @Column(length = 4000)
   private String text;
 
-  @Size(max = 50, message = "No more than 50 images are allowed per post")
-  @ElementCollection(fetch = FetchType.LAZY)
-  private List<String> imagePaths = new ArrayList<>();
-
-  @Size(max = 5, message = "No more than 5 videos are allowed per post")
-  @ElementCollection(fetch = FetchType.LAZY)
-  private List<String> videoPaths = new ArrayList<>();
-
-  private int likesCount = 0;
-  private int commentsCount = 0;
+  private String imagePath;
+  private String videoPath;
 
   @JsonIgnore
   @ManyToOne(
@@ -51,32 +45,11 @@ public class Post {
   private User user;
 
   @JsonIgnore
-  @ManyToMany(
+  @ManyToOne(
       fetch = FetchType.LAZY,
-      cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
-  @JoinTable(
-      name = "post_likes",
-      joinColumns = @JoinColumn(name = "post_id"),
-      inverseJoinColumns = @JoinColumn(name = "user_id"))
-  private Set<User> likedBy = new HashSet<>();
-
-  @JsonIgnore
-  @ManyToMany(
-      fetch = FetchType.LAZY,
-      cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
-  @JoinTable(
-      name = "post_saves",
-      joinColumns = @JoinColumn(name = "post_id"),
-      inverseJoinColumns = @JoinColumn(name = "user_id"))
-  private Set<User> savedBy = new HashSet<>();
-
-  @JsonIgnore
-  @OneToMany(
-      mappedBy = "post",
-      fetch = FetchType.LAZY,
-      cascade = {CascadeType.ALL},
-      orphanRemoval = true)
-  private List<Comment> comments;
+      cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH})
+  @JoinColumn(name = "post_id", referencedColumnName = "id")
+  private Post post;
 
   @CreatedDate
   @Column(updatable = false)

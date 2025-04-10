@@ -10,7 +10,6 @@ import com.devs.roamance.dto.response.user.UserDto;
 import com.devs.roamance.dto.response.user.UserListResponseDto;
 import com.devs.roamance.exception.ResourceNotFoundException;
 import com.devs.roamance.exception.UnauthorizedActionException;
-import com.devs.roamance.exception.UserNotFoundException;
 import com.devs.roamance.model.social.Post;
 import com.devs.roamance.model.user.User;
 import com.devs.roamance.repository.PostRepository;
@@ -52,15 +51,7 @@ public class PostServiceImpl implements PostService {
   @Transactional
   public PostResponseDto create(PostRequestDto createRequestDto) {
 
-    UUID userId = userUtil.getAuthenticatedUser().getId();
-
-    User user =
-        userRepository
-            .findById(userId)
-            .orElseThrow(
-                () ->
-                    new UserNotFoundException(
-                        String.format(ResponseMessage.USER_NOT_FOUND_ID, userId)));
+    User user = userUtil.getAuthenticatedUser();
 
     Post post = modelMapper.map(createRequestDto, Post.class);
 
@@ -209,10 +200,6 @@ public class PostServiceImpl implements PostService {
 
     UUID userId = userUtil.getAuthenticatedUser().getId();
 
-    if (!userRepository.existsById(userId)) {
-      throw new UserNotFoundException(String.format(ResponseMessage.USER_NOT_FOUND_ID, userId));
-    }
-
     boolean isSaved = postRepository.isSavedByUser(postId, userId);
 
     if (isSaved) {
@@ -237,10 +224,6 @@ public class PostServiceImpl implements PostService {
     }
 
     UUID userId = userUtil.getAuthenticatedUser().getId();
-
-    if (!userRepository.existsById(userId)) {
-      throw new UserNotFoundException(String.format(ResponseMessage.USER_NOT_FOUND_ID, userId));
-    }
 
     boolean isLiked = postRepository.isLikedByUser(postId, userId);
 

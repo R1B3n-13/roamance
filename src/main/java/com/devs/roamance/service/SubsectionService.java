@@ -10,7 +10,9 @@ public interface SubsectionService
     extends BaseService<
         SubsectionResponseDto,
         SubsectionResponseDto,
-        SubsectionListResponseDto,
         SubsectionCreateRequestDto,
         SubsectionUpdateRequestDto,
-        UUID> {}
+        UUID> {
+
+  SubsectionListResponseDto getAll(int pageNumber, int pageSize, String sortBy, String sortDir);
+}

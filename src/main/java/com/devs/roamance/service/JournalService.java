@@ -10,7 +10,9 @@ public interface JournalService
     extends BaseService<
         JournalResponseDto,
         JournalResponseDto,
-        JournalListResponseDto,
         JournalCreateRequestDto,
         JournalUpdateRequestDto,
-        UUID> {}
+        UUID> {
+
+  JournalListResponseDto getAll(int pageNumber, int pageSize, String sortBy, String sortDir);
+}
