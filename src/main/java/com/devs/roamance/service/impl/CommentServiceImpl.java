@@ -68,7 +68,7 @@ public class CommentServiceImpl implements CommentService {
     Comment savedComment = commentRepository.save(comment);
     CommentDto dto = modelMapper.map(savedComment, CommentDto.class);
 
-    return new CommentResponseDto(200, true, ResponseMessage.COMMENT_CREATE_SUCCESS, dto);
+    return new CommentResponseDto(201, true, ResponseMessage.COMMENT_CREATE_SUCCESS, dto);
   }
 
   @Override
@@ -90,6 +90,10 @@ public class CommentServiceImpl implements CommentService {
   @Override
   public CommentListResponseDto getByPostId(
       UUID postId, Integer pageNumber, Integer pageSize, String sortBy, String sortDir) {
+
+    if (!postRepository.existsById(postId)) {
+      throw new ResourceNotFoundException(String.format(ResponseMessage.POST_NOT_FOUND, postId));
+    }
 
     Pageable pageable =
         PageRequest.of(
