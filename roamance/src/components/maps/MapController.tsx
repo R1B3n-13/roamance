@@ -151,11 +151,8 @@ export function MapController({
         },
         plan: L.Routing.plan(routeWaypoints, {
           createMarker: function () {
-            return null;
+            return false;
           }, // Don't show the default markers
-          waypointIcon: function () {
-            return null;
-          }, // Don't show the default waypoint icons
         }),
         formatter: new L.Routing.Formatter({
           language: 'en',
