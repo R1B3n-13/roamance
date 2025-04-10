@@ -47,7 +47,7 @@ export function MapInternalControls({
 
     map.setView = function (...args) {
       if (userLocationCentered.current) {
-        const [_, zoom, options] = args;
+        const [, zoom, options] = args;
 
         if (zoom !== undefined) {
           const currentCenter = map.getCenter();

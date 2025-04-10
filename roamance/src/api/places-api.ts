@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { touristPlaces } from '@/data/tourist-places';
 import { Geoname, GeoNamesResult, CacheItem } from '@/types/places';
+import { TouristPlace } from '@/types';
 
 const GEONAMES_USERNAME = 'yashrif';
 const API_CACHE_DURATION = 1000 * 60 * 30; // 30 minutes
@@ -27,6 +28,11 @@ export function setCache<T>(key: string, data: T): void {
     data,
     timestamp: Date.now(),
   };
+}
+
+// This function is added to fix the error in globe-showcase.tsx
+export async function getInitialPlaces(): Promise<TouristPlace[]> {
+  return Promise.resolve(touristPlaces);
 }
 
 export async function fetchPopularDestinations(destinations: string[]): Promise<Geoname[]> {

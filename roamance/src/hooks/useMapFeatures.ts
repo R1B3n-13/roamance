@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { mapLayers } from '../components/maps/MapLayerControl';
-import { RouteData } from '../components/maps/MapController';
+import { RouteData } from '../types'; // Fixed import path for RouteData
 
 export interface Waypoint {
   lat: number;

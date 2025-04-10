@@ -8,11 +8,12 @@ import {
 } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import L from 'leaflet';
+import 'leaflet-draw';
 import 'leaflet-draw/dist/leaflet.draw.css';
 import { Ruler } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import { EditControl } from 'react-leaflet-draw';
 import { FeatureGroup, useMap } from 'react-leaflet';
+import { EditControl } from 'react-leaflet-draw';
 
 interface MeasurementControlProps {
   isDarkMode: boolean;
@@ -69,8 +70,9 @@ export function MeasurementTools() {
 
   useEffect(() => {
     if (map) {
-      // Add measurement functionality
-      const drawControl = new L.Control.Draw({
+      const DrawControl = L.Control.Draw;
+
+      const drawControl = new DrawControl({
         draw: {
           polygon: false,
           marker: false,
@@ -111,7 +113,11 @@ export function MeasurementTools() {
         position="topright"
         onCreated={(e) => {
           const layer = e.layer;
-          if (layer instanceof L.Polyline) {
+          if (
+            layer instanceof L.Polyline &&
+            !(layer instanceof L.Polygon) &&
+            !(layer instanceof L.Rectangle)
+          ) {
             const distanceInMeters = calculatePolylineDistance(layer);
             layer
               .bindPopup(`Distance: ${formatDistance(distanceInMeters)}`)

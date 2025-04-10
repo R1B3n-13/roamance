@@ -4,6 +4,7 @@ import { LeafletMap } from '@/components/maps';
 
 interface MapProps {
   center: { lat: number; lng: number };
+  destination: { lat: number; lng: number } | null;
   locationName: string;
   userLocation: { lat: number; lng: number } | null;
   searchQuery: string;
@@ -15,6 +16,7 @@ interface MapProps {
 
 export default function MapComponent({
   center,
+  destination,
   locationName,
   userLocation,
   searchQuery,
@@ -27,6 +29,7 @@ export default function MapComponent({
   return (
     <LeafletMap
       center={center}
+      destination={destination}
       locationName={locationName}
       userLocation={userLocation}
       searchQuery={searchQuery}
