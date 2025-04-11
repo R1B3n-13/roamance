@@ -47,7 +47,7 @@ export function Navbar() {
 
   const handleProfileClick = () => {
     if (isAuthenticated) {
-      router.push('/dashboard');
+      router.push(routes.profile.href);
     } else {
       router.push(routes.signIn.href);
     }

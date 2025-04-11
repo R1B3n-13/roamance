@@ -1,4 +1,5 @@
-// Auth Types
+import { ApiResponse } from './api';
+
 export interface UserAuthForm {
   email: string;
   password: string;
@@ -7,13 +8,6 @@ export interface UserAuthForm {
 export interface UserRegisterForm extends UserAuthForm {
   name: string;
   confirmPassword: string;
-}
-
-// API Response and User interfaces
-export interface ApiResponse {
-  status: number;
-  success: boolean;
-  message: string;
 }
 
 export interface User {
@@ -28,8 +22,6 @@ export interface AuthResponse {
   user: User;
   token: string;
 }
-
-// New interface to extend ApiResponse with a generic data property
 
 export interface ApiAuthUserResponse extends ApiResponse {
   access_token: string;

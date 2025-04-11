@@ -9,6 +9,7 @@ import { FormInput } from '@/components/auth/FormInput';
 import { SocialAuth } from '@/components/auth/SocialAuth';
 import { ErrorBanner } from '@/components/common/error-banner';
 import { LoadingButton } from '@/components/common/loading-button';
+import { routes } from '@/constants';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Cookies from 'js-cookie';
 import { Lock, Mail, RefreshCw, User } from 'lucide-react';
@@ -106,13 +107,13 @@ export default function SignIn() {
               <span>Dashboard</span>
             </div>
           ),
-          onClick: () => router.push('/dashboard'),
+          onClick: () => router.push(routes.profile.href),
         },
         className:
           'bg-white dark:bg-slate-900 border border-green-100 dark:border-green-800 shadow-lg',
         duration: 4000,
       });
-      router.push('/dashboard');
+      router.push(routes.profile.href);
     } catch (err) {
       const errorMessage =
         err instanceof Error

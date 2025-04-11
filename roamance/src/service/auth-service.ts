@@ -1,23 +1,26 @@
 import { AuthResponse, User } from '../types';
 import { STORAGE_KEYS } from '../constants/keys';
 import { ApiError } from '../api/errors';
-import { ApiService } from '../api/roamance-api';
+import { api } from '../api/roamance-api';
 
 export class AuthService {
-  private apiService: ApiService;
+  private apiService: typeof api;
 
-  constructor(apiService: ApiService) {
+  constructor(apiService: typeof api) {
     this.apiService = apiService;
   }
 
   async login(email: string, password: string): Promise<AuthResponse> {
     try {
-      const response = await this.apiService.post<AuthResponse>('/auth/login', {
-        email,
-        password,
-      });
-      this.saveAuthData(response);
-      return response;
+      const response = await this.apiService.post<AuthResponse, { email: string; password: string }>(
+        '/auth/login',
+        {
+          email,
+          password,
+        }
+      );
+      this.saveAuthData(response.data);
+      return response.data;
     } catch (error) {
       if (error instanceof ApiError) {
         throw new Error(`Login failed: ${error.message}`);
@@ -28,12 +31,12 @@ export class AuthService {
 
   async register(userData: Partial<User>): Promise<AuthResponse> {
     try {
-      const response = await this.apiService.post<AuthResponse>(
+      const response = await this.apiService.post<AuthResponse, Partial<User>>(
         '/auth/register',
         userData
       );
-      this.saveAuthData(response);
-      return response;
+      this.saveAuthData(response.data);
+      return response.data;
     } catch (error) {
       if (error instanceof ApiError) {
         throw new Error(`Registration failed: ${error.message}`);
@@ -88,5 +91,5 @@ export class AuthService {
   }
 }
 
-import { apiService } from '../api/roamance-api';
+import { api as apiService } from '../api/roamance-api';
 export const authService = new AuthService(apiService);

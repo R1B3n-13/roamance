@@ -1,15 +1,13 @@
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { USER_ENDPOINTS } from '@/constants/api';
 import {
   ApiAuthUserResponse,
-  ApiResponse,
   UserAuthForm,
   UserRegisterForm,
 } from '@/types/auth';
+import { ApiResponse } from '@/types';
+import { ApiError } from './errors';
 
-/**
- * Register a new user
- */
 export async function registerUser(
   data: UserRegisterForm
 ): Promise<ApiResponse> {
@@ -18,17 +16,20 @@ export async function registerUser(
     return response.data;
   } catch (error) {
     console.error('Failed to register user', error);
-    return {
-      status: 500,
-      success: false,
-      message: 'Failed to register user',
-    };
+
+    // Handle error as ApiResponse
+    if (axios.isAxiosError(error)) {
+      const axiosError = error as AxiosError<ApiResponse>;
+      const errorResponse = axiosError.response?.data;
+      const status = errorResponse?.status || axiosError.response?.status || 500;
+      const message = errorResponse?.message || 'Failed to register user';
+      throw new ApiError(message, status);
+    }
+
+    throw new ApiError('Failed to register user', 500);
   }
 }
 
-/**
- * Login a user
- */
 export async function loginUser(
   data: UserAuthForm
 ): Promise<ApiAuthUserResponse> {
@@ -37,12 +38,16 @@ export async function loginUser(
     return response.data;
   } catch (error) {
     console.error('Failed to login user', error);
-    return {
-      status: 500,
-      success: false,
-      message: 'Failed to login',
-      access_token: '',
-      refresh_token: '',
-    };
+
+    // Handle error as ApiResponse
+    if (axios.isAxiosError(error)) {
+      const axiosError = error as AxiosError<ApiResponse>;
+      const errorResponse = axiosError.response?.data;
+      const status = errorResponse?.status || axiosError.response?.status || 500;
+      const message = errorResponse?.message || 'Failed to login';
+      throw new ApiError(message, status);
+    }
+
+    throw new ApiError('Failed to login', 500);
   }
 }

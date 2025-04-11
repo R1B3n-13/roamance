@@ -1,7 +1,8 @@
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { touristPlaces } from '@/data/tourist-places';
 import { Geoname, GeoNamesResult, CacheItem } from '@/types/places';
-import { TouristPlace } from '@/types';
+import { TouristPlace, ApiResponse } from '@/types';
+import { ApiError } from './errors';
 
 const GEONAMES_USERNAME = 'yashrif';
 const API_CACHE_DURATION = 1000 * 60 * 30; // 30 minutes
@@ -38,57 +39,86 @@ export async function getInitialPlaces(): Promise<TouristPlace[]> {
 export async function fetchPopularDestinations(destinations: string[]): Promise<Geoname[]> {
   console.log(`Attempting to fetch ${destinations.length} popular destinations from Geonames API`);
 
-  const promises = destinations.map(destination =>
-    axios.get<GeoNamesResult>('http://api.geonames.org/search', {
-      params: {
-        q: destination,
-        maxRows: 1,
-        username: GEONAMES_USERNAME,
-        type: 'json',
-        featureClass: 'P',
-        style: 'full',
-      },
-    })
-  );
+  try {
+    const promises = destinations.map(destination =>
+      axios.get<GeoNamesResult>('http://api.geonames.org/search', {
+        params: {
+          q: destination,
+          maxRows: 1,
+          username: GEONAMES_USERNAME,
+          type: 'json',
+          featureClass: 'P',
+          style: 'full',
+        },
+      })
+    );
 
-  const results = await Promise.allSettled(promises);
-  const geonames: Geoname[] = [];
+    const results = await Promise.allSettled(promises);
+    const geonames: Geoname[] = [];
 
-  let successCount = 0;
-  results.forEach((result) => {
-    if (result.status === 'fulfilled' && result.value.data?.geonames?.length > 0) {
-      successCount++;
-      const geoname = result.value.data.geonames[0];
-      if (geoname.name && geoname.lat && geoname.lng) {
-        geonames.push(geoname);
+    let successCount = 0;
+    results.forEach((result) => {
+      if (result.status === 'fulfilled' && result.value.data?.geonames?.length > 0) {
+        successCount++;
+        const geoname = result.value.data.geonames[0];
+        if (geoname.name && geoname.lat && geoname.lng) {
+          geonames.push(geoname);
+        }
       }
-    }
-  });
+    });
 
-  console.log(`Successfully fetched ${successCount} out of ${destinations.length} places from Geonames API`);
-  return geonames;
+    console.log(`Successfully fetched ${successCount}/${destinations.length} destinations`);
+    return geonames;
+  } catch (error) {
+    console.error('Error fetching popular destinations:', error);
+
+    if (axios.isAxiosError(error)) {
+      const axiosError = error as AxiosError<ApiResponse>;
+      const errorResponse = axiosError.response?.data;
+      const status = errorResponse?.status || axiosError.response?.status || 500;
+      const message = errorResponse?.message || 'Failed to fetch popular destinations';
+      throw new ApiError(message, status);
+    }
+
+    throw new ApiError('Failed to fetch popular destinations', 500);
+  }
 }
 
 export async function searchGeonames(query: string, maxRows: number = 10): Promise<Geoname[]> {
   console.log(`Searching Geonames API for: "${query}"`);
-  const response = await axios.get<GeoNamesResult>(
-    'http://api.geonames.org/search',
-    {
-      params: {
-        q: query,
-        maxRows,
-        username: GEONAMES_USERNAME,
-        type: 'json',
-        featureClass: 'P',
-        style: 'full',
-        orderby: 'relevance',
-      },
-    }
-  );
 
-  const geonames = response.data?.geonames || [];
-  console.log(`Found ${geonames.length} results from Geonames API for query "${query}"`);
-  return geonames;
+  try {
+    const response = await axios.get<GeoNamesResult>(
+      'http://api.geonames.org/search',
+      {
+        params: {
+          q: query,
+          maxRows,
+          username: GEONAMES_USERNAME,
+          type: 'json',
+          featureClass: 'P',
+          style: 'full',
+          orderby: 'relevance',
+        },
+      }
+    );
+
+    const geonames = response.data?.geonames || [];
+    console.log(`Found ${geonames.length} results from Geonames API for query "${query}"`);
+    return geonames;
+  } catch (error) {
+    console.error(`Error searching geonames for ${query}:`, error);
+
+    if (axios.isAxiosError(error)) {
+      const axiosError = error as AxiosError<ApiResponse>;
+      const errorResponse = axiosError.response?.data;
+      const status = errorResponse?.status || axiosError.response?.status || 500;
+      const message = errorResponse?.message || `Failed to search locations for "${query}"`;
+      throw new ApiError(message, status);
+    }
+
+    throw new ApiError(`Failed to search locations for "${query}"`, 500);
+  }
 }
 
 export async function getGeoname(placeName: string, countryCode?: string): Promise<Geoname | null> {
@@ -122,7 +152,16 @@ export async function getGeoname(placeName: string, countryCode?: string): Promi
     return null;
   } catch (error) {
     console.error(`Error fetching details for ${placeName}:`, error);
-    return null;
+
+    if (axios.isAxiosError(error)) {
+      const axiosError = error as AxiosError<ApiResponse>;
+      const errorResponse = axiosError.response?.data;
+      const status = errorResponse?.status || axiosError.response?.status || 500;
+      const message = errorResponse?.message || `Failed to fetch details for "${placeName}"`;
+      throw new ApiError(message, status);
+    }
+
+    throw new ApiError(`Failed to fetch details for "${placeName}"`, 500);
   }
 }
 
