@@ -84,4 +84,9 @@ public final class ResponseMessage {
   public static final String CHATS_FETCH_SUCCESS = "Chats fetched successfully.";
   public static final String CHAT_ALREADY_EXIST = "Chat already exists!";
   public static final String CHAT_NOT_FOUND = "No chat present with id: %s!";
+
+  // ========================== Message Related ==========================
+
+  public static final String MESSAGE_CREATE_SUCCESS = "Message created successfully.";
+  public static final String MESSAGES_FETCH_SUCCESS = "Messages fetched successfully.";
 }

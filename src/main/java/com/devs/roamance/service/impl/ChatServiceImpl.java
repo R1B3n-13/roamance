@@ -21,6 +21,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ChatServiceImpl implements ChatService {
@@ -43,6 +44,7 @@ public class ChatServiceImpl implements ChatService {
   }
 
   @Override
+  @Transactional
   public ChatResponseDto create(UUID userId) {
 
     User currentUser = userUtil.getAuthenticatedUser();
@@ -55,7 +57,7 @@ public class ChatServiceImpl implements ChatService {
                     new UserNotFoundException(
                         String.format(ResponseMessage.USER_NOT_FOUND_ID, userId)));
 
-    Chat oldChat = chatRepository.findByUsers(List.of(chatUser, currentUser));
+    Chat oldChat = chatRepository.findByUsers(currentUser, chatUser);
 
     if (oldChat != null) {
 

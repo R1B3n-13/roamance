@@ -1,5 +1,6 @@
 package com.devs.roamance.model.social;
 
+import com.devs.roamance.model.Location;
 import com.devs.roamance.model.user.User;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -39,6 +40,8 @@ public class Post {
   @Size(max = 5, message = "No more than 5 videos are allowed per post")
   @ElementCollection(fetch = FetchType.LAZY)
   private List<String> videoPaths = new ArrayList<>();
+
+  @Embedded private Location location;
 
   private int likesCount = 0;
   private int commentsCount = 0;

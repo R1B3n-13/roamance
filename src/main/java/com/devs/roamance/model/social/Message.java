@@ -5,7 +5,10 @@ import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -34,8 +37,13 @@ public class Message {
   @Column(length = 4000)
   private String text;
 
-  private String imagePath;
-  private String videoPath;
+  @Size(max = 20, message = "No more than 20 images are allowed per message")
+  @ElementCollection(fetch = FetchType.LAZY)
+  private List<String> imagePaths = new ArrayList<>();
+
+  @Size(max = 3, message = "No more than 3 videos are allowed per message")
+  @ElementCollection(fetch = FetchType.LAZY)
+  private List<String> videoPaths = new ArrayList<>();
 
   @JsonIgnore
   @ManyToOne(

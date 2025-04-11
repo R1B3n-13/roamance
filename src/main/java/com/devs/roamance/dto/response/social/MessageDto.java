@@ -1,6 +1,5 @@
 package com.devs.roamance.dto.response.social;
 
-import com.devs.roamance.dto.response.LocationResponseDto;
 import com.devs.roamance.dto.response.user.UserDto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.OffsetDateTime;
@@ -15,7 +14,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class PostDto {
+public class MessageDto {
 
   private UUID id;
   private String text;
@@ -25,14 +24,6 @@ public class PostDto {
 
   @JsonProperty("video_paths")
   private List<String> videoPaths;
-
-  private LocationResponseDto location;
-
-  @JsonProperty("likes_count")
-  private int likesCount;
-
-  @JsonProperty("comments_count")
-  private int commentsCount;
 
   private UserDto user;
 
