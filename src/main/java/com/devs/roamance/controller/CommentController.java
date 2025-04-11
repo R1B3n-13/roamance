@@ -46,7 +46,7 @@ public class CommentController {
       @RequestParam(defaultValue = "0") Integer pageNumber,
       @RequestParam(defaultValue = "10") Integer pageSize,
       @RequestParam(defaultValue = "createdAt") String sortBy,
-      @RequestParam(defaultValue = "desc") String sortDir) {
+      @RequestParam(defaultValue = "asc") String sortDir) {
 
     int[] validatedParams = PaginationSortingUtil.validatePaginationParams(pageNumber, pageSize);
 

@@ -1,6 +1,8 @@
 package com.devs.roamance.model.user;
 
+import com.devs.roamance.model.social.Chat;
 import com.devs.roamance.model.social.Comment;
+import com.devs.roamance.model.social.Message;
 import com.devs.roamance.model.social.Post;
 import com.devs.roamance.model.travel.journal.Journal;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
@@ -77,6 +79,21 @@ public class User {
       cascade = {CascadeType.ALL},
       orphanRemoval = true)
   private List<Comment> comments;
+
+  @JsonIgnore
+  @ManyToMany(
+      mappedBy = "users",
+      fetch = FetchType.LAZY,
+      cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+  private List<Chat> chats;
+
+  @JsonIgnore
+  @OneToMany(
+      mappedBy = "user",
+      fetch = FetchType.LAZY,
+      cascade = {CascadeType.ALL},
+      orphanRemoval = true)
+  private List<Message> messages;
 
   @CreatedDate
   @Column(updatable = false)
