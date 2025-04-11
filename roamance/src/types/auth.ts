@@ -18,12 +18,7 @@ export interface User {
   [key: string]: unknown;
 }
 
-export interface AuthResponse {
-  user: User;
-  token: string;
-}
-
-export interface ApiAuthUserResponse extends ApiResponse {
+export interface AuthResponse extends ApiResponse {
   access_token: string;
   refresh_token: string;
 }
