@@ -2,93 +2,123 @@ import axios, {
   AxiosError,
   AxiosInstance,
   AxiosRequestConfig,
-  AxiosResponse,
+  InternalAxiosRequestConfig,
 } from 'axios';
-import { STORAGE_KEYS } from '../constants/keys';
-import { ApiError } from './errors';
+import { STORAGE_KEYS } from '@/constants/keys';
+import { USER_ENDPOINTS } from '@/constants/api';
 
-export class ApiService {
-  private api: AxiosInstance;
+// Public endpoints that don't require authentication
+const PUBLIC_ENDPOINTS = [USER_ENDPOINTS.LOGIN, USER_ENDPOINTS.REGISTER];
 
-  constructor(
-    baseURL: string = process.env.NEXT_PUBLIC_API_URL ||
-      'http://localhost:5000/api'
-  ) {
-    this.api = axios.create({
-      baseURL,
+class Api {
+  private instance: AxiosInstance;
+  private baseURL: string;
+
+  constructor() {
+    this.baseURL =
+      process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+
+    this.instance = axios.create({
+      baseURL: this.baseURL,
       headers: {
         'Content-Type': 'application/json',
       },
-      timeout: 10000,
+      timeout: 15000, // 15 seconds
     });
 
     this.setupInterceptors();
   }
 
   private setupInterceptors(): void {
-    this.api.interceptors.request.use((config) => {
-      const token = typeof window !== 'undefined' ?
-        localStorage.getItem(STORAGE_KEYS.TOKEN) : null;
+    // Request interceptor
+    this.instance.interceptors.request.use(
+      (config: InternalAxiosRequestConfig) => {
+        // Skip adding token for public endpoints
+        if (this.isPublicEndpoint(config.url || '')) {
+          return config;
+        }
 
-      if (token && config.headers) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
-      return config;
-    });
+        // Add token to request headers if available
+        const token = this.getToken();
+        if (token && config.headers) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
 
-    this.api.interceptors.response.use(
+        return config;
+      },
+      (error: AxiosError) => Promise.reject(error)
+    );
+
+    // Response interceptor
+    this.instance.interceptors.response.use(
       (response) => response,
-      this.handleRequestError
+      async (error: AxiosError) => {
+        const originalRequest = error.config as AxiosRequestConfig & {
+          _retry?: boolean;
+        };
+
+        // Handle 401 Unauthorized errors (token expired)
+        if (
+          error.response?.status === 401 &&
+          originalRequest &&
+          !originalRequest._retry &&
+          !this.isPublicEndpoint(originalRequest.url || '')
+        ) {
+          originalRequest._retry = true;
+
+          // Handle token refresh logic here if you have refresh tokens
+          // For now, just redirecting to login if token is expired
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem(STORAGE_KEYS.TOKEN);
+            localStorage.removeItem(STORAGE_KEYS.TOKEN_EXPIRY);
+            window.location.href = '/auth/sign-in'; // Redirect to login page
+          }
+        }
+
+        return Promise.reject(error);
+      }
     );
   }
 
-  private handleRequestError(error: AxiosError): never {
-    if (error.response) {
-      const message =
-        (error.response.data as { message?: string })?.message ||
-        'An error occurred';
-      throw new ApiError(
-        message,
-        error.response.status,
-        error.response.data
-      );
-    } else if (error.request) {
-      throw new ApiError('No response from server', 503);
-    } else {
-      throw new ApiError(
-        error.message || 'Request configuration error',
-        500
-      );
-    }
+  private isPublicEndpoint(url: string): boolean {
+    return PUBLIC_ENDPOINTS.some((endpoint) => url.includes(endpoint));
   }
 
-  async get<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
-    const response: AxiosResponse<T> = await this.api.get(url, config);
-    return response.data;
+  private getToken(): string | null {
+    if (typeof window === 'undefined') return null;
+
+    const token = localStorage.getItem(STORAGE_KEYS.TOKEN);
+    const expiryStr = localStorage.getItem(STORAGE_KEYS.TOKEN_EXPIRY);
+
+    if (!token || !expiryStr) return null;
+
+    const expiry = new Date(expiryStr);
+    return expiry > new Date() ? token : null;
   }
 
-  async post<T>(
-    url: string,
-    data?: unknown,
-    config?: AxiosRequestConfig
-  ): Promise<T> {
-    const response: AxiosResponse<T> = await this.api.post(url, data, config);
-    return response.data;
+  // Expose the axios instance methods
+  get<T>(url: string, config?: AxiosRequestConfig) {
+    return this.instance.get<T>(url, config);
   }
 
-  async put<T>(
-    url: string,
-    data?: unknown,
-    config?: AxiosRequestConfig
-  ): Promise<T> {
-    const response: AxiosResponse<T> = await this.api.put(url, data, config);
-    return response.data;
+  post<T, K>(url: string, data?: K, config?: AxiosRequestConfig) {
+    return this.instance.post<T>(url, data, config);
   }
 
-  async delete<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
-    const response: AxiosResponse<T> = await this.api.delete(url, config);
-    return response.data;
+  put<T, K>(url: string, data?: K, config?: AxiosRequestConfig) {
+    return this.instance.put<T>(url, data, config);
+  }
+
+  delete<T>(url: string, config?: AxiosRequestConfig) {
+    return this.instance.delete<T>(url, config);
+  }
+
+  // Expose the axios instance directly if needed
+  getInstance() {
+    return this.instance;
   }
 }
 
-export const apiService = new ApiService();
+// Create and export the API singleton
+export const api = new Api();
+export default api;
