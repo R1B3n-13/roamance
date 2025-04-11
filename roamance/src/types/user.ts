@@ -13,3 +13,9 @@ export interface User {
   created_at: string;
   last_modified_at: string;
 }
+
+export interface UserResponse {
+  data: User;
+  message: string;
+  status: number;
+}

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { User } from '@/types/auth';
+import { UserRequest } from '@/types/auth';
 import { motion } from 'framer-motion';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,7 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
 interface ProfileSavedPlacesProps {
-  user: User | null;
+  user: UserRequest | null;
   loading: boolean;
 }
 

@@ -17,7 +17,7 @@ import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { USER_ENDPOINTS } from '@/constants/api';
 import { cn } from '@/lib/utils';
-import { User } from '@/types/auth';
+import { User } from '@/types';
 import { motion } from 'framer-motion';
 import {
   Building2,

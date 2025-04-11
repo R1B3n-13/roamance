@@ -1,26 +1,26 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { User } from '@/types/auth';
-import { motion } from 'framer-motion';
+import { api } from '@/api/roamance-api';
+import { LoadingButton } from '@/components/common/loading-button';
+import { Button } from '@/components/ui/button';
 import {
   Card,
+  CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
-  CardDescription,
-  CardContent,
 } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { LoadingButton } from '@/components/common/loading-button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { toast } from 'sonner';
-import { Mail, Phone, Globe, MapPin, Calendar } from 'lucide-react';
-import { api } from '@/api/roamance-api';
+import { Textarea } from '@/components/ui/textarea';
 import { USER_ENDPOINTS } from '@/constants/api';
 import { cn } from '@/lib/utils';
+import { User } from '@/types';
+import { motion } from 'framer-motion';
+import { Mail } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 
 interface ProfileInfoProps {
   user: User | null;
@@ -34,24 +34,23 @@ export function ProfileInfo({ user, loading }: ProfileInfoProps) {
   const [formData, setFormData] = useState({
     name: user?.name || '',
     email: user?.email || '',
-    phone: user?.phone || '',
-    bio: user?.bio || '',
-    location: user?.location || '',
-    website: user?.website || '',
-    birthday: user?.birthday || '',
+    phone: '',
+    bio: '',
+    location: '',
+    website: '',
+    birthday: '',
   });
 
-  // Update form data when user prop changes
   useEffect(() => {
     if (user) {
       setFormData({
         name: user.name || '',
         email: user.email || '',
-        phone: user.phone || '',
-        bio: user.bio || '',
-        location: user.location || '',
-        website: user.website || '',
-        birthday: user.birthday || '',
+        phone: '',
+        bio: '',
+        location: '',
+        website: '',
+        birthday: '',
       });
     }
   }, [user]);
@@ -232,10 +231,10 @@ export function ProfileInfo({ user, loading }: ProfileInfoProps) {
                   color="ocean"
                 />
 
-                <InfoItem
+                {/* <InfoItem
                   icon={Phone}
                   label="Phone"
-                  value={`${user?.phone}`}
+                  value={`${user?.phone }`}
                   color="sunset"
                   fallback="Not provided"
                 />
@@ -263,15 +262,15 @@ export function ProfileInfo({ user, loading }: ProfileInfoProps) {
                   value={`${user?.birthday}`}
                   color="ocean"
                   fallback="Not provided"
-                />
+                /> */}
               </div>
 
-              <div className="mt-6 pt-4 border-t">
+              {/* <div className="mt-6 pt-4 border-t">
                 <h3 className="text-sm font-medium mb-2">Bio</h3>
                 <p className="text-muted-foreground">
                   {`${user?.bio}` || 'No bio provided. Tell us about yourself!'}
                 </p>
-              </div>
+              </div> */}
             </div>
           )}
         </CardContent>

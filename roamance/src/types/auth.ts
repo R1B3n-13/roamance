@@ -10,12 +10,11 @@ export interface UserRegisterForm extends UserAuthForm {
   confirmPassword: string;
 }
 
-export interface User {
+export interface UserRequest {
   id: string;
   email: string;
   name?: string;
   role?: string;
-  [key: string]: unknown;
 }
 
 export interface AuthResponse extends ApiResponse {

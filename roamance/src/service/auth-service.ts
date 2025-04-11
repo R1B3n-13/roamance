@@ -1,4 +1,4 @@
-import { AuthResponse, User } from '../types';
+import { AuthResponse, UserRequest } from '../types';
 import { COOKIE_KEYS, STORAGE_KEYS } from '../constants/keys';
 import { ApiError } from '../api/errors';
 import { api } from '../api/roamance-api';
@@ -31,9 +31,9 @@ export class AuthService {
     }
   }
 
-  async register(userData: Partial<User>): Promise<AuthResponse> {
+  async register(userData: Partial<UserRequest>): Promise<AuthResponse> {
     try {
-      const response = await this.apiService.post<AuthResponse, Partial<User>>(
+      const response = await this.apiService.post<AuthResponse, Partial<UserRequest>>(
         USER_ENDPOINTS.REGISTER,
         userData
       );
@@ -60,7 +60,7 @@ export class AuthService {
     return !!accessToken;
   }
 
-  getCurrentUser(): User | null {
+  getCurrentUser(): UserRequest | null {
     if (typeof window === 'undefined') return null;
 
     const accessToken = this.getAccessToken();
@@ -70,7 +70,7 @@ export class AuthService {
       return {
         id: 'authenticated',
         email: 'authenticated@user.com'
-      } as User;
+      } as UserRequest;
     } catch (e) {
       console.error('Failed to get current user:', e);
       return null;

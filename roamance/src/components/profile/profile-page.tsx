@@ -1,17 +1,17 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
-import { User } from '@/types/auth';
 import { api } from '@/api/roamance-api';
 import { USER_ENDPOINTS } from '@/constants/api';
+import { User, UserResponse } from '@/types';
+import { motion } from 'framer-motion';
+import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 import { ProfileHeader } from './profile-header';
-import { ProfileTabs } from './profile-tabs';
 import { ProfileInfo } from './profile-info';
 import { ProfilePreferences } from './profile-preferences';
-import { ProfileTrips } from './profile-trips';
 import { ProfileSavedPlaces } from './profile-saved-places';
-import { toast } from 'sonner';
+import { ProfileTabs } from './profile-tabs';
+import { ProfileTrips } from './profile-trips';
 
 export function ProfilePage() {
   const [activeTab, setActiveTab] = useState('info');
@@ -22,8 +22,8 @@ export function ProfilePage() {
     async function fetchUserProfile() {
       try {
         setLoading(true);
-        const response = await api.get(USER_ENDPOINTS.PROFILE);
-        setUser(response.data.user);
+        const response = await api.get<UserResponse>(USER_ENDPOINTS.PROFILE);
+        setUser(response.data.data);
       } catch (error) {
         console.error('Failed to fetch user profile', error);
         toast.error('Failed to load profile information');

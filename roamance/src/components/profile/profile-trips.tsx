@@ -12,7 +12,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
-import { User } from '@/types/auth';
+import { User } from '@/types';
 import { motion } from 'framer-motion';
 import {
   ArrowRight,
