@@ -5,6 +5,7 @@ import com.devs.roamance.dto.response.social.ChatDto;
 import com.devs.roamance.dto.response.social.ChatListResponseDto;
 import com.devs.roamance.dto.response.social.ChatResponseDto;
 import com.devs.roamance.exception.ResourceNotFoundException;
+import com.devs.roamance.exception.UnauthorizedAccessException;
 import com.devs.roamance.exception.UserNotFoundException;
 import com.devs.roamance.model.social.Chat;
 import com.devs.roamance.model.user.User;
@@ -80,6 +81,8 @@ public class ChatServiceImpl implements ChatService {
   @Override
   public ChatResponseDto get(UUID chatId) {
 
+    UUID currentUserId = userUtil.getAuthenticatedUser().getId();
+
     Chat chat =
         chatRepository
             .findById(chatId)
@@ -87,6 +90,12 @@ public class ChatServiceImpl implements ChatService {
                 () ->
                     new ResourceNotFoundException(
                         String.format(ResponseMessage.CHAT_NOT_FOUND, chatId)));
+
+    if (!currentUserId.equals(chat.getUsers().get(0).getId())
+        && !currentUserId.equals(chat.getUsers().get(1).getId())) {
+
+      throw new UnauthorizedAccessException(ResponseMessage.CHAT_ACCESS_DENIED);
+    }
 
     ChatDto dto = modelMapper.map(chat, ChatDto.class);
 

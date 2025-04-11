@@ -21,7 +21,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
-@Table(name = "chats")
+@Table(name = "messages")
 @EntityListeners(AuditingEntityListener.class)
 @Getter
 @Setter

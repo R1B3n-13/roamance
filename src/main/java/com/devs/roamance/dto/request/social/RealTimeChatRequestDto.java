@@ -1,10 +1,7 @@
 package com.devs.roamance.dto.request.social;
 
 import com.devs.roamance.dto.response.user.UserDto;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
-import java.util.List;
+import jakarta.validation.constraints.Null;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,18 +11,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class RealTimeChatRequestDto {
+public class RealTimeChatRequestDto extends MessageRequestDto {
 
-  @NotNull private UserDto user;
-
-  @Size(max = 4000, message = "Message can not contain more than 4000 characters")
-  private String text;
-
-  @JsonProperty("image_paths")
-  @Size(max = 20, message = "No more than 20 images are allowed per message")
-  private List<String> imagePaths;
-
-  @JsonProperty("video_paths")
-  @Size(max = 3, message = "No more than 3 videos are allowed per message")
-  private List<String> videoPaths;
+  @Null private UserDto user;
 }
