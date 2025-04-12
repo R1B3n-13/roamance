@@ -1,9 +1,9 @@
-import { AuthResponse, UserRequest } from '../types';
-import { COOKIE_KEYS, STORAGE_KEYS } from '../constants/keys';
+import Cookies from 'js-cookie';
 import { ApiError } from '../api/errors';
 import { api } from '../api/roamance-api';
 import { USER_ENDPOINTS } from '../constants/api';
-import Cookies from 'js-cookie';
+import { COOKIE_KEYS } from '../constants/keys';
+import { AuthResponse, UserRequest } from '../types';
 
 export class AuthService {
   private apiService: typeof api;
@@ -33,10 +33,10 @@ export class AuthService {
 
   async register(userData: Partial<UserRequest>): Promise<AuthResponse> {
     try {
-      const response = await this.apiService.post<AuthResponse, Partial<UserRequest>>(
-        USER_ENDPOINTS.REGISTER,
-        userData
-      );
+      const response = await this.apiService.post<
+        AuthResponse,
+        Partial<UserRequest>
+      >(USER_ENDPOINTS.REGISTER, userData);
       this.saveAuthData(response.data);
       return response.data;
     } catch (error) {
@@ -50,9 +50,6 @@ export class AuthService {
   logout(): void {
     Cookies.remove(COOKIE_KEYS.ACCESS_TOKEN);
     Cookies.remove(COOKIE_KEYS.REFRESH_TOKEN);
-
-    if (typeof window === 'undefined') return;
-    localStorage.removeItem(STORAGE_KEYS.USER);
   }
 
   isAuthenticated(): boolean {
@@ -61,15 +58,13 @@ export class AuthService {
   }
 
   getCurrentUser(): UserRequest | null {
-    if (typeof window === 'undefined') return null;
-
     const accessToken = this.getAccessToken();
     if (!accessToken) return null;
 
     try {
       return {
         id: 'authenticated',
-        email: 'authenticated@user.com'
+        email: 'authenticated@user.com',
       } as UserRequest;
     } catch (e) {
       console.error('Failed to get current user:', e);
@@ -86,8 +81,6 @@ export class AuthService {
   }
 
   private saveAuthData(authData: AuthResponse): void {
-    if (typeof window === 'undefined') return;
-
     const accessTokenExpiry = new Date(
       new Date().getTime() + 24 * 60 * 60 * 1000
     ); // 24 hours
@@ -96,7 +89,7 @@ export class AuthService {
     ); // 7 days
 
     const cookieOptions = {
-      secure: window.location.protocol === 'https:',  // More reliable than checking NODE_ENV
+      secure: window.location.protocol === 'https:', // More reliable than checking NODE_ENV
       sameSite: 'strict',
       path: '/',
     } as Cookies.CookieAttributes;
@@ -117,5 +110,4 @@ export class AuthService {
   }
 }
 
-import { api as apiService } from '../api/roamance-api';
-export const authService = new AuthService(apiService);
+export const authService = new AuthService(api);
