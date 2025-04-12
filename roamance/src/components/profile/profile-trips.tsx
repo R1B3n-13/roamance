@@ -21,6 +21,12 @@ import {
   Clock,
   Plane,
   Plus,
+  MapPin,
+  Compass,
+  CheckCircle2,
+  Flag,
+  Route,
+  LucideIcon,
 } from 'lucide-react';
 
 interface ProfileTripsProps {
@@ -111,27 +117,36 @@ export function ProfileTrips({ loading }: ProfileTripsProps) {
         return (
           <Badge
             variant="outline"
-            className="bg-forest/10 text-forest border-forest/30"
+            className="bg-forest/10 text-forest border-forest/30 px-2.5 py-0.5 rounded-full font-medium"
           >
-            Confirmed
+            <div className="flex items-center gap-1">
+              <CheckCircle2 className="h-3 w-3" />
+              <span>Confirmed</span>
+            </div>
           </Badge>
         );
       case 'planning':
         return (
           <Badge
             variant="outline"
-            className="bg-ocean/10 text-ocean border-ocean/30"
+            className="bg-ocean/10 text-ocean border-ocean/30 px-2.5 py-0.5 rounded-full font-medium"
           >
-            Planning
+            <div className="flex items-center gap-1">
+              <Route className="h-3 w-3" />
+              <span>Planning</span>
+            </div>
           </Badge>
         );
       case 'completed':
         return (
           <Badge
             variant="outline"
-            className="bg-sunset/10 text-sunset border-sunset/30"
+            className="bg-sunset/10 text-sunset border-sunset/30 px-2.5 py-0.5 rounded-full font-medium"
           >
-            Completed
+            <div className="flex items-center gap-1">
+              <Flag className="h-3 w-3" />
+              <span>Completed</span>
+            </div>
           </Badge>
         );
       default:
@@ -139,134 +154,261 @@ export function ProfileTrips({ loading }: ProfileTripsProps) {
     }
   };
 
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.1
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        type: "spring",
+        stiffness: 260,
+        damping: 20
+      }
+    }
+  };
+
   if (loading) {
     return (
-      <div className="space-y-6">
-        <Skeleton className="h-10 w-full max-w-xs" />
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="space-y-8"
+      >
+        <motion.div variants={itemVariants}>
+          <Skeleton className="h-12 w-full max-w-lg rounded-xl" />
+        </motion.div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Skeleton className="h-52 w-full" />
-          <Skeleton className="h-52 w-full" />
+          {[1, 2].map((i) => (
+            <motion.div key={i} variants={itemVariants}>
+              <Skeleton className="h-60 w-full rounded-xl" />
+            </motion.div>
+          ))}
         </div>
-      </div>
+
+        <motion.div variants={itemVariants}>
+          <Skeleton className="h-40 w-full rounded-xl" />
+        </motion.div>
+      </motion.div>
     );
   }
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="space-y-6"
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      className="space-y-8 relative"
     >
-      <Tabs defaultValue="upcoming" className="w-full">
-        <div className="flex items-center justify-between">
-          <TabsList>
-            <TabsTrigger value="upcoming" className="flex gap-2">
-              <Plane className="h-4 w-4" />
-              <span>Upcoming Trips</span>
-            </TabsTrigger>
-            <TabsTrigger value="past" className="flex gap-2">
-              <Clock className="h-4 w-4" />
-              <span>Past Travels</span>
-            </TabsTrigger>
-          </TabsList>
+      {/* Decorative background elements */}
+      <div className="absolute top-20 right-10 w-64 h-64 bg-gradient-radial from-ocean/5 to-transparent rounded-full blur-3xl -z-10" />
+      <div className="absolute bottom-40 left-10 w-72 h-72 bg-gradient-radial from-forest/5 to-transparent rounded-full blur-3xl -z-10" />
 
-          <Button
-            variant="outline"
-            className="flex items-center gap-2 border-ocean text-ocean hover:bg-ocean/10"
-          >
-            <Plus className="h-4 w-4" />
-            <span>Plan New Trip</span>
-          </Button>
-        </div>
+      <motion.div variants={itemVariants}>
+        <Tabs defaultValue="upcoming" className="w-full">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+            <TabsList className="bg-muted/50 backdrop-blur-sm p-1 rounded-xl">
+              <TabsTrigger
+                value="upcoming"
+                className="flex gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-ocean data-[state=active]:to-forest data-[state=active]:text-white rounded-lg"
+              >
+                <Plane className="h-4 w-4" />
+                <span>Upcoming Trips</span>
+              </TabsTrigger>
+              <TabsTrigger
+                value="past"
+                className="flex gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-sunset data-[state=active]:to-sand data-[state=active]:text-white rounded-lg"
+              >
+                <Clock className="h-4 w-4" />
+                <span>Past Travels</span>
+              </TabsTrigger>
+            </TabsList>
 
-        <TabsContent value="upcoming" className="pt-4">
-          {upcomingTrips.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {upcomingTrips.map((trip) => (
-                <TripCard
-                  key={trip.id}
-                  trip={trip}
-                  formatDate={formatDate}
-                  daysUntil={daysUntil}
-                  tripDuration={tripDuration}
-                  getStatusBadge={getStatusBadge}
-                  isUpcoming
+            <motion.div
+              whileHover={{ scale: 1.05, y: -2 }}
+              whileTap={{ scale: 0.97 }}
+              transition={{ duration: 0.2 }}
+            >
+              <Button
+                variant="outline"
+                className="flex items-center gap-2 border-ocean/30 text-ocean hover:bg-ocean/10 hover:text-ocean-dark transition-all duration-300 shadow-sm"
+              >
+                <Plus className="h-4 w-4" />
+                <span>Plan New Trip</span>
+              </Button>
+            </motion.div>
+          </div>
+
+          <TabsContent value="upcoming" className="pt-2 space-y-8">
+            {upcomingTrips.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {upcomingTrips.map((trip, index) => (
+                  <motion.div
+                    key={trip.id}
+                    variants={itemVariants}
+                    custom={index}
+                  >
+                    <TripCard
+                      trip={trip}
+                      formatDate={formatDate}
+                      daysUntil={daysUntil}
+                      tripDuration={tripDuration}
+                      getStatusBadge={getStatusBadge}
+                      isUpcoming
+                    />
+                  </motion.div>
+                ))}
+              </div>
+            ) : (
+              <motion.div variants={itemVariants}>
+                <EmptyTripsState
+                  title="No upcoming trips"
+                  description="You don't have any upcoming trips planned yet. Start planning your next adventure!"
                 />
-              ))}
-            </div>
-          ) : (
-            <EmptyTripsState
-              title="No upcoming trips"
-              description="You don't have any upcoming trips planned yet. Start planning your next adventure!"
-            />
-          )}
-        </TabsContent>
+              </motion.div>
+            )}
+          </TabsContent>
 
-        <TabsContent value="past" className="pt-4">
-          {pastTrips.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {pastTrips.map((trip) => (
-                <TripCard
-                  key={trip.id}
-                  trip={trip}
-                  formatDate={formatDate}
-                  tripDuration={tripDuration}
-                  getStatusBadge={getStatusBadge}
-                  isUpcoming={false}
+          <TabsContent value="past" className="pt-2 space-y-8">
+            {pastTrips.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {pastTrips.map((trip, index) => (
+                  <motion.div
+                    key={trip.id}
+                    variants={itemVariants}
+                    custom={index}
+                  >
+                    <TripCard
+                      trip={trip}
+                      formatDate={formatDate}
+                      tripDuration={tripDuration}
+                      getStatusBadge={getStatusBadge}
+                      isUpcoming={false}
+                    />
+                  </motion.div>
+                ))}
+              </div>
+            ) : (
+              <motion.div variants={itemVariants}>
+                <EmptyTripsState
+                  title="No travel history"
+                  description="You haven't recorded any past trips yet. Once you complete a trip, it will appear here."
                 />
-              ))}
-            </div>
-          ) : (
-            <EmptyTripsState
-              title="No travel history"
-              description="You haven't recorded any past trips yet. Once you complete a trip, it will appear here."
-            />
-          )}
-        </TabsContent>
-      </Tabs>
+              </motion.div>
+            )}
+          </TabsContent>
+        </Tabs>
+      </motion.div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <CalendarRange className="h-5 w-5 text-ocean" />
-            Travel Stats
-          </CardTitle>
-          <CardDescription>
-            Your travel statistics and achievements
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-ocean/10 rounded-xl p-4 text-center">
-              <p className="text-muted-foreground text-sm">Countries</p>
-              <p className="text-3xl font-bold text-ocean">
-                {pastTrips.length}
-              </p>
+      <motion.div variants={itemVariants}>
+        <Card className="border-muted/40 bg-gradient-to-b from-background to-background/95 backdrop-blur-sm shadow-md overflow-hidden pt-0">
+          <CardHeader className="relative pt-4 pb-2">
+            {/* Decorative accent line */}
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-forest via-ocean to-sunset opacity-80" />
+
+            <div className="pt-4 flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-forest/10 text-forest">
+                <CalendarRange className="h-5 w-5" />
+              </div>
+              <div>
+                <CardTitle>Travel Stats</CardTitle>
+                <CardDescription>
+                  Your travel statistics and achievements
+                </CardDescription>
+              </div>
             </div>
-            <div className="bg-sunset/10 rounded-xl p-4 text-center">
-              <p className="text-muted-foreground text-sm">Total Trips</p>
-              <p className="text-3xl font-bold text-sunset">
-                {pastTrips.length +
+          </CardHeader>
+          <CardContent className="pb-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <StatsCard
+                icon={MapPin}
+                label="Countries"
+                value={pastTrips.length}
+                color="ocean"
+              />
+              <StatsCard
+                icon={Plane}
+                label="Total Trips"
+                value={pastTrips.length +
                   upcomingTrips.filter((t) => t.status === 'confirmed').length}
-              </p>
-            </div>
-            <div className="bg-forest/10 rounded-xl p-4 text-center">
-              <p className="text-muted-foreground text-sm">Days Traveled</p>
-              <p className="text-3xl font-bold text-forest">
-                {pastTrips.reduce(
+                color="sunset"
+              />
+              <StatsCard
+                icon={Calendar}
+                label="Days Traveled"
+                value={pastTrips.reduce(
                   (acc, trip) =>
                     acc + tripDuration(trip.startDate, trip.endDate),
                   0
                 )}
-              </p>
+                color="forest"
+              />
+              <StatsCard
+                icon={Flag}
+                label="Bucket List"
+                value={2}
+                color="sand"
+              />
             </div>
-            <div className="bg-sand/10 rounded-xl p-4 text-center">
-              <p className="text-muted-foreground text-sm">Bucket List</p>
-              <p className="text-3xl font-bold text-sand">2</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+interface StatsCardProps {
+  icon: LucideIcon;
+  label: string;
+  value: number;
+  color: 'ocean' | 'sunset' | 'forest' | 'sand';
+}
+
+function StatsCard({ icon: Icon, label, value, color }: StatsCardProps) {
+  const getColorClass = (colorName: string, type: 'bg' | 'text' | 'border') => {
+    const colorMap: Record<string, Record<string, string>> = {
+      ocean: { bg: 'bg-ocean/10', text: 'text-ocean', border: 'border-ocean/30' },
+      sunset: { bg: 'bg-sunset/10', text: 'text-sunset', border: 'border-sunset/30' },
+      forest: { bg: 'bg-forest/10', text: 'text-forest', border: 'border-forest/30' },
+      sand: { bg: 'bg-sand/10', text: 'text-sand', border: 'border-sand/30' },
+    };
+
+    return colorMap[colorName]?.[type] || '';
+  };
+
+  return (
+    <motion.div
+      whileHover={{ y: -3, scale: 1.02 }}
+      transition={{ duration: 0.2 }}
+      className={cn(
+        "rounded-xl p-4 text-center border",
+        getColorClass(color, 'border'),
+        getColorClass(color, 'bg'),
+        "bg-gradient-to-b from-background/80 to-background/50 backdrop-blur-sm shadow-sm"
+      )}
+    >
+      <div className="flex justify-center mb-2">
+        <div className={cn("p-2 rounded-full bg-white/20 shadow-sm", getColorClass(color, 'text'))}>
+          <Icon className="h-5 w-5" />
+        </div>
+      </div>
+      <p className="text-muted-foreground text-sm font-medium">{label}</p>
+      <p className={cn("text-3xl font-bold mt-1", getColorClass(color, 'text'))}>
+        {value}
+      </p>
     </motion.div>
   );
 }
@@ -286,56 +428,111 @@ function TripCard({
   getStatusBadge: (status: string) => React.ReactNode;
   isUpcoming: boolean;
 }) {
+  // Get gradient based on type
+  const getGradient = () => {
+    if (isUpcoming) {
+      if (trip.status === 'confirmed')
+        return 'from-forest/80 to-forest-dark/80';
+      return 'from-ocean/80 to-ocean-dark/80';
+    } else {
+      return 'from-sunset/80 to-sand/80';
+    }
+  };
+
   return (
-    <Card className="overflow-hidden">
-      <div className="relative h-40 w-full bg-muted">
-        {/* In a real app, you'd have actual trip images */}
-        <div
-          className={cn(
-            'absolute inset-0 flex items-center justify-center bg-gradient-to-r',
-            isUpcoming
-              ? 'from-ocean/50 to-forest/50'
-              : 'from-sunset/50 to-sand/50'
-          )}
-        >
-          <p className="text-white text-xl font-bold">{trip.destination}</p>
-        </div>
-      </div>
+    <motion.div
+      whileHover={{ y: -5 }}
+      transition={{ type: "spring", stiffness: 400, damping: 17 }}
+    >
+      <Card className="overflow-hidden border-muted/40 bg-gradient-to-b from-background to-background/95 backdrop-blur-sm shadow-md transition-all duration-300 hover:shadow-xl py-0">
+        <div className="relative h-44 w-full bg-muted">
+          <div
+            className={cn(
+              'absolute inset-0 flex items-center justify-center bg-gradient-to-r',
+              getGradient()
+            )}
+          >
+            {/* Decorative pattern overlay */}
+            <div className="absolute inset-0 bg-[url('/images/roamance-logo-no-text.png')] bg-repeat-space bg-contain opacity-10 mix-blend-overlay" />
 
-      <div className="p-4">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="font-semibold">{trip.destination}</h3>
-          {getStatusBadge(trip.status)}
-        </div>
-
-        <div className="space-y-2 text-sm">
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <Calendar className="h-4 w-4" />
-            <span>
-              {formatDate(trip.startDate)} - {formatDate(trip.endDate)}
-            </span>
-          </div>
-
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <Clock className="h-4 w-4" />
-            <span>{tripDuration(trip.startDate, trip.endDate)} days</span>
-          </div>
-
-          {isUpcoming && daysUntil && daysUntil(trip.startDate) > 0 && (
-            <div className="mt-3 text-forest font-medium">
-              {daysUntil(trip.startDate)} days until your trip
+            <div className="relative z-10 text-center px-4">
+              <p className="text-white text-2xl font-bold drop-shadow-md">
+                {trip.destination.split(',')[0]}
+              </p>
+              <p className="text-white text-sm opacity-90 mt-1 drop-shadow-md">
+                {trip.destination.split(',')[1]?.trim()}
+              </p>
             </div>
-          )}
+          </div>
+
+          {/* Status badge */}
+          <div className="absolute top-3 right-3 z-10">
+            {getStatusBadge(trip.status)}
+          </div>
         </div>
 
-        <div className="mt-4 pt-3 border-t flex justify-end">
-          <Button variant="ghost" size="sm" className="flex items-center gap-2">
-            <span>View Details</span>
-            <ArrowRight className="h-3.5 w-3.5" />
-          </Button>
+        <div className="p-5">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-semibold text-lg">
+              {trip.destination}
+            </h3>
+          </div>
+
+          <div className="space-y-3 text-sm">
+            <div className="flex items-center gap-2.5">
+              <div className={cn(
+                "p-1.5 rounded-md",
+                isUpcoming ? "bg-ocean/10 text-ocean" : "bg-sunset/10 text-sunset"
+              )}>
+                <Calendar className="h-4 w-4" />
+              </div>
+              <span>
+                {formatDate(trip.startDate)} - {formatDate(trip.endDate)}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2.5">
+              <div className={cn(
+                "p-1.5 rounded-md",
+                isUpcoming ? "bg-ocean/10 text-ocean" : "bg-sunset/10 text-sunset"
+              )}>
+                <Clock className="h-4 w-4" />
+              </div>
+              <span>Duration: {tripDuration(trip.startDate, trip.endDate)} days</span>
+            </div>
+
+            {isUpcoming && daysUntil && daysUntil(trip.startDate) > 0 && (
+              <div className="mt-3 text-forest font-medium flex items-center gap-2.5">
+                <div className="p-1.5 rounded-md bg-forest/10">
+                  <Compass className="h-4 w-4 text-forest" />
+                </div>
+                <span>{daysUntil(trip.startDate)} days until departure</span>
+              </div>
+            )}
+          </div>
+
+          <div className="mt-5 pt-4 border-t border-muted/30 flex justify-end">
+            <motion.div
+              whileHover={{ x: 3 }}
+              whileTap={{ x: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <Button
+                variant="ghost"
+                size="sm"
+                className={cn(
+                  "flex items-center gap-2",
+                  isUpcoming ? "hover:text-ocean hover:bg-ocean/5" : "hover:text-sunset hover:bg-sunset/5"
+                )}
+              >
+                <span>View Details</span>
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Button>
+            </motion.div>
+          </div>
         </div>
-      </div>
-    </Card>
+      </Card>
+    </motion.div>
   );
 }
 
@@ -347,14 +544,31 @@ function EmptyTripsState({
   description: string;
 }) {
   return (
-    <div className="flex flex-col items-center justify-center py-12 border rounded-lg border-dashed text-center px-4">
-      <Plane className="h-12 w-12 text-muted-foreground mb-3 opacity-30" />
-      <h3 className="text-lg font-medium mb-1">{title}</h3>
-      <p className="text-muted-foreground max-w-sm">{description}</p>
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.4 }}
+      className="flex flex-col items-center justify-center py-16 border rounded-xl border-dashed border-muted/50 text-center px-4 bg-muted/5 backdrop-blur-sm"
+    >
+      <div className="w-16 h-16 rounded-full bg-ocean/10 flex items-center justify-center mb-4">
+        <Plane className="h-8 w-8 text-ocean text-opacity-60" />
+      </div>
 
-      <Button className="mt-6 bg-gradient-to-r from-ocean to-ocean-dark">
-        Plan a Trip
-      </Button>
-    </div>
+      <h3 className="text-xl font-medium mb-2">{title}</h3>
+      <p className="text-muted-foreground max-w-sm mb-8">{description}</p>
+
+      <motion.div
+        whileHover={{ scale: 1.05, y: -2 }}
+        whileTap={{ scale: 0.97 }}
+      >
+        <Button
+          variant="default"
+          className="flex items-center gap-2 bg-gradient-to-r from-ocean to-ocean-dark hover:opacity-90 transition-all duration-300 text-white shadow-md"
+        >
+          <Plus className="h-4 w-4" />
+          Plan a Trip
+        </Button>
+      </motion.div>
+    </motion.div>
   );
 }

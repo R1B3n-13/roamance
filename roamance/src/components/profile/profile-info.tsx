@@ -16,14 +16,22 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
 import { USER_ENDPOINTS } from '@/constants/api';
 import { cn } from '@/lib/utils';
-import { User } from '@/types';
+import { User as UserType } from '@/types';
 import { motion } from 'framer-motion';
-import { Mail } from 'lucide-react';
+import {
+  Calendar,
+  Edit2,
+  Globe,
+  Mail,
+  MapPin,
+  Phone,
+  User,
+} from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 interface ProfileInfoProps {
-  user: User | null;
+  user: UserType | null;
   loading: boolean;
 }
 
@@ -79,20 +87,47 @@ export function ProfileInfo({ user, loading }: ProfileInfoProps) {
     }
   };
 
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.07,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 10 },
+    visible: { opacity: 1, y: 0 },
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="space-y-6"
+      transition={{ duration: 0.5, ease: 'easeOut' }}
+      className="space-y-8"
     >
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
+      {/* Decorative elements */}
+      <div className="absolute top-1/4 right-1/3 w-64 h-64 bg-gradient-radial from-ocean/5 to-transparent rounded-full blur-3xl -z-10" />
+      <div className="absolute bottom-1/3 left-1/4 w-48 h-48 bg-gradient-radial from-sunset/5 to-transparent rounded-full blur-2xl -z-10" />
+
+      <Card className="border-muted/40 bg-gradient-to-b from-background to-background/90 backdrop-blur-sm shadow-md overflow-hidden pt-0">
+        <CardHeader className="relative px-6 pt-4 pb-0">
+          {/* Decorative accent line on top of the card */}
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-ocean via-sunset to-forest opacity-80" />
+
+          <div className="flex items-center justify-between pt-4">
             <div>
               <CardTitle className="text-xl flex items-center gap-2">
-                Personal Information
+                <span className="bg-ocean/10 p-1.5 rounded-md">
+                  <User className="h-5 w-5 text-ocean" />
+                </span>
+                <span>Personal Information</span>
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="mt-1.5">
                 Update your personal details and contact information
               </CardDescription>
             </div>
@@ -101,42 +136,70 @@ export function ProfileInfo({ user, loading }: ProfileInfoProps) {
               <Button
                 onClick={() => setIsEditing(true)}
                 variant="outline"
-                className="bg-background border-ocean hover:bg-ocean/10"
+                size="sm"
+                className="bg-background/80 border-ocean/30 text-ocean hover:bg-ocean/10 hover:text-ocean-dark transition-all duration-300 flex gap-1.5 items-center"
               >
-                Edit Information
+                <Edit2 className="h-3.5 w-3.5" />
+                <span>Edit Info</span>
               </Button>
             )}
           </div>
         </CardHeader>
 
-        <CardContent>
+        <CardContent className="px-6 pt-6">
           {loading ? (
-            <div className="space-y-4">
+            <motion.div
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+              className="space-y-5"
+            >
               {Array(5)
                 .fill(0)
                 .map((_, i) => (
-                  <div key={i} className="flex flex-col space-y-2">
+                  <motion.div
+                    key={i}
+                    variants={itemVariants}
+                    className="flex flex-col space-y-2"
+                  >
                     <Skeleton className="h-4 w-24" />
                     <Skeleton className="h-10 w-full" />
-                  </div>
+                  </motion.div>
                 ))}
-            </div>
+            </motion.div>
           ) : isEditing ? (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Full Name</Label>
+            <motion.form
+              onSubmit={handleSubmit}
+              className="space-y-6"
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <motion.div variants={itemVariants} className="space-y-2.5">
+                  <Label
+                    htmlFor="name"
+                    className="text-sm font-medium text-muted-foreground"
+                  >
+                    Full Name
+                  </Label>
                   <Input
                     id="name"
                     name="name"
                     value={formData.name}
                     onChange={handleChange}
                     placeholder="John Doe"
+                    className="border-muted/50 focus:border-ocean focus:ring-1 focus:ring-ocean/30 bg-background/80 backdrop-blur-sm transition-colors"
                   />
-                </div>
+                </motion.div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email Address</Label>
+                <motion.div variants={itemVariants} className="space-y-2.5">
+                  <Label
+                    htmlFor="email"
+                    className="text-sm font-medium text-muted-foreground"
+                  >
+                    Email Address
+                  </Label>
                   <Input
                     id="email"
                     name="email"
@@ -144,97 +207,142 @@ export function ProfileInfo({ user, loading }: ProfileInfoProps) {
                     value={formData.email}
                     onChange={handleChange}
                     placeholder="john@example.com"
+                    className="border-muted/50 focus:border-ocean focus:ring-1 focus:ring-ocean/30 bg-background/80 backdrop-blur-sm transition-colors"
                   />
-                </div>
+                </motion.div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Phone Number</Label>
+                <motion.div variants={itemVariants} className="space-y-2.5">
+                  <Label
+                    htmlFor="phone"
+                    className="text-sm font-medium text-muted-foreground"
+                  >
+                    Phone Number
+                  </Label>
                   <Input
                     id="phone"
                     name="phone"
-                    value={`${formData.phone}`}
+                    value={formData.phone}
                     onChange={handleChange}
                     placeholder="+1 (555) 123-4567"
+                    className="border-muted/50 focus:border-sunset focus:ring-1 focus:ring-sunset/30 bg-background/80 backdrop-blur-sm transition-colors"
                   />
-                </div>
+                </motion.div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="location">Location</Label>
+                <motion.div variants={itemVariants} className="space-y-2.5">
+                  <Label
+                    htmlFor="location"
+                    className="text-sm font-medium text-muted-foreground"
+                  >
+                    Location
+                  </Label>
                   <Input
                     id="location"
                     name="location"
-                    value={`${formData.location}`}
+                    value={formData.location}
                     onChange={handleChange}
                     placeholder="New York, USA"
+                    className="border-muted/50 focus:border-forest focus:ring-1 focus:ring-forest/30 bg-background/80 backdrop-blur-sm transition-colors"
                   />
-                </div>
+                </motion.div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="website">Website</Label>
+                <motion.div variants={itemVariants} className="space-y-2.5">
+                  <Label
+                    htmlFor="website"
+                    className="text-sm font-medium text-muted-foreground"
+                  >
+                    Website
+                  </Label>
                   <Input
                     id="website"
                     name="website"
-                    value={`${formData.website}`}
+                    value={formData.website}
                     onChange={handleChange}
                     placeholder="https://yourwebsite.com"
+                    className="border-muted/50 focus:border-sand focus:ring-1 focus:ring-sand/30 bg-background/80 backdrop-blur-sm transition-colors"
                   />
-                </div>
+                </motion.div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="birthday">Birthday</Label>
+                <motion.div variants={itemVariants} className="space-y-2.5">
+                  <Label
+                    htmlFor="birthday"
+                    className="text-sm font-medium text-muted-foreground"
+                  >
+                    Birthday
+                  </Label>
                   <Input
                     id="birthday"
                     name="birthday"
                     type="date"
-                    value={`${formData.birthday}`}
+                    value={formData.birthday}
                     onChange={handleChange}
+                    className="border-muted/50 focus:border-mountain focus:ring-1 focus:ring-mountain/30 bg-background/80 backdrop-blur-sm transition-colors"
                   />
-                </div>
+                </motion.div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="bio">Bio</Label>
+              <motion.div variants={itemVariants} className="space-y-2.5">
+                <Label
+                  htmlFor="bio"
+                  className="text-sm font-medium text-muted-foreground"
+                >
+                  Bio
+                </Label>
                 <Textarea
                   id="bio"
                   name="bio"
-                  value={`${formData.bio}`}
+                  value={formData.bio}
                   onChange={handleChange}
                   placeholder="Tell us about yourself and your travel interests..."
                   rows={4}
+                  className="border-muted/50 focus:border-ocean focus:ring-1 focus:ring-ocean/30 bg-background/80 backdrop-blur-sm transition-colors resize-none"
                 />
-              </div>
+              </motion.div>
 
-              <div className="flex justify-end gap-3 pt-2">
+              <motion.div
+                variants={itemVariants}
+                className="flex justify-end gap-3 border-t border-muted/30 mt-6 pt-4"
+              >
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => setIsEditing(false)}
+                  className="border-muted/50 hover:bg-muted/20"
                 >
                   Cancel
                 </Button>
                 <LoadingButton
                   type="submit"
+                  variant="default"
                   isLoading={isSaving}
                   loadingText="Saving..."
+                  className="bg-gradient-to-r from-ocean to-ocean-dark hover:opacity-90 text-white shadow-md"
                 >
                   Save Changes
                 </LoadingButton>
-              </div>
-            </form>
+              </motion.div>
+            </motion.form>
           ) : (
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <motion.div
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+              className="space-y-8"
+            >
+              <motion.div
+                variants={itemVariants}
+                className="grid grid-cols-1 md:grid-cols-2 gap-6"
+              >
                 <InfoItem
                   icon={Mail}
                   label="Email"
-                  value={user?.email}
+                  value={user?.email || ''}
                   color="ocean"
                 />
 
-                {/* <InfoItem
+                <InfoItem
                   icon={Phone}
                   label="Phone"
-                  value={`${user?.phone }`}
+                  value={''}
                   color="sunset"
                   fallback="Not provided"
                 />
@@ -242,7 +350,7 @@ export function ProfileInfo({ user, loading }: ProfileInfoProps) {
                 <InfoItem
                   icon={MapPin}
                   label="Location"
-                  value={`${user?.location}`}
+                  value={''}
                   color="forest"
                   fallback="Not specified"
                 />
@@ -250,7 +358,7 @@ export function ProfileInfo({ user, loading }: ProfileInfoProps) {
                 <InfoItem
                   icon={Globe}
                   label="Website"
-                  value={`${user?.website}`}
+                  value={''}
                   color="sand"
                   isLink
                   fallback="Not provided"
@@ -259,19 +367,29 @@ export function ProfileInfo({ user, loading }: ProfileInfoProps) {
                 <InfoItem
                   icon={Calendar}
                   label="Birthday"
-                  value={`${user?.birthday}`}
-                  color="ocean"
+                  value={''}
+                  color="mountain"
                   fallback="Not provided"
-                /> */}
-              </div>
+                />
+              </motion.div>
 
-              {/* <div className="mt-6 pt-4 border-t">
-                <h3 className="text-sm font-medium mb-2">Bio</h3>
-                <p className="text-muted-foreground">
-                  {`${user?.bio}` || 'No bio provided. Tell us about yourself!'}
+              <motion.div
+                variants={itemVariants}
+                className="mt-8 pt-6 border-t border-muted/30"
+              >
+                <h3 className="text-sm font-medium text-ocean mb-3 flex items-center gap-2">
+                  <span className="bg-ocean/10 p-1 rounded-md">
+                    <User className="h-4 w-4 text-ocean" />
+                  </span>
+                  Biography
+                </h3>
+                <p className="text-muted-foreground leading-relaxed bg-muted/5 p-4 rounded-lg border border-muted/20 italic">
+                  {
+                    'No bio provided. Tell us about yourself and your travel interests!'
+                  }
                 </p>
-              </div> */}
-            </div>
+              </motion.div>
+            </motion.div>
           )}
         </CardContent>
       </Card>
@@ -319,6 +437,19 @@ const getHoverColorClass = (
   return classMap[color];
 };
 
+const getBorderColorClass = (
+  color: 'ocean' | 'sunset' | 'forest' | 'sand' | 'mountain'
+) => {
+  const classMap = {
+    ocean: 'border-ocean/30',
+    sunset: 'border-sunset/30',
+    forest: 'border-forest/30',
+    sand: 'border-sand/30',
+    mountain: 'border-mountain/30',
+  };
+  return classMap[color];
+};
+
 interface InfoItemProps {
   icon: React.FC<React.SVGProps<SVGSVGElement>>;
   label: string;
@@ -337,18 +468,23 @@ function InfoItem({
   fallback = 'Not available',
 }: InfoItemProps) {
   return (
-    <div className="flex items-start gap-3">
-      <div
-        className={cn(
-          'p-2 rounded-full mt-0.5',
-          getBackgroundColorClass(color)
-        )}
-      >
+    <motion.div
+      whileHover={{ y: -2 }}
+      transition={{ duration: 0.2 }}
+      className={cn(
+        'flex items-start gap-3 p-4 rounded-lg border',
+        getBorderColorClass(color),
+        'bg-gradient-to-b from-background to-background/50 backdrop-blur-sm'
+      )}
+    >
+      <div className={cn('p-2 rounded-full', getBackgroundColorClass(color))}>
         <Icon className={cn('h-4 w-4', getTextColorClass(color))} />
       </div>
 
       <div>
-        <p className="text-xs text-muted-foreground mb-1">{label}</p>
+        <p className="text-xs text-muted-foreground mb-1 font-medium">
+          {label}
+        </p>
 
         {isLink && value ? (
           <a
@@ -367,6 +503,6 @@ function InfoItem({
           <p className="text-sm font-medium">{value || fallback}</p>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 }

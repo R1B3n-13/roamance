@@ -232,6 +232,15 @@
   @apply animate-[zoom_4s_ease-in-out_infinite];
 }
 
+/* Scrollbar Hide Utility */
+.scrollbar-hide {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none; /* Chrome, Safari and Opera */
+}
+
 /* Map Marker Popup Styles */
 .leaflet-popup-content-wrapper {
   @apply p-0 rounded-xl overflow-hidden;
@@ -291,13 +300,15 @@
 .leaflet-fade-anim .leaflet-popup {
   @apply transition-opacity duration-300 ease-in-out;
   transition-property: opacity, transform;
-  transition-timing-function: ease-in-out, cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition-timing-function:
+    ease-in-out, cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .leaflet-fade-anim .leaflet-map-pane .leaflet-popup {
   @apply transition-opacity duration-300 ease-in-out;
   transition-property: opacity, transform;
-  transition-timing-function: ease-in-out, cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition-timing-function:
+    ease-in-out, cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 /* Hide default Leaflet Routing Machine container */
