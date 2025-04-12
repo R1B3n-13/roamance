@@ -2,7 +2,7 @@ name: Spotless Check
 
 on:
   push:
-    branches: [ "**" ]
+    branches: ["**"]
   pull_request:
     branches:
       - develop
@@ -16,7 +16,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up JDK 21
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: 'adopt'
           java-version: '21'
