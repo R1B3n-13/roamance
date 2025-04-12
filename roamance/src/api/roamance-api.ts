@@ -8,6 +8,8 @@ import axios, {
 } from 'axios';
 import { ApiError } from './errors';
 import { ApiResponse } from '@/types';
+import { routes } from '@/constants';
+import { ENV_VARS } from '@/constants/keys';
 
 // Public endpoints that don't require authentication
 const PUBLIC_ENDPOINTS = [USER_ENDPOINTS.LOGIN, USER_ENDPOINTS.REGISTER];
@@ -17,8 +19,7 @@ class Api {
   private baseURL: string;
 
   constructor() {
-    this.baseURL =
-      process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
+    this.baseURL = ENV_VARS.API_URL;
 
     this.instance = axios.create({
       baseURL: this.baseURL,
@@ -60,7 +61,8 @@ class Api {
       (error: AxiosError<ApiResponse>) => {
         const errorResponse = error.response?.data;
         const status = errorResponse?.status || error.response?.status || 500;
-        const message = errorResponse?.message || error.message || 'Unknown error occurred';
+        const message =
+          errorResponse?.message || error.message || 'Unknown error occurred';
         return Promise.reject(new ApiError(message, status));
       }
     );
@@ -89,17 +91,25 @@ class Api {
               'access_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
             document.cookie =
               'refresh_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-            window.location.href = '/auth/sign-in'; // Redirect to login page
+            window.location.href = routes.signIn.href;
           }
         }
 
         // Standard error handling using ApiResponse type
         const errorResponse = error.response?.data;
         const status = errorResponse?.status || error.response?.status || 500;
-        const message = errorResponse?.message || error.message || 'Unknown error occurred';
+        const message =
+          errorResponse?.message || error.message || 'Unknown error occurred';
         const success = errorResponse?.success || false;
 
-        console.error('API Error:', message, 'Status:', status, 'Success:', success);
+        console.error(
+          'API Error:',
+          message,
+          'Status:',
+          status,
+          'Success:',
+          success
+        );
         return Promise.reject(new ApiError(message, status));
       }
     );

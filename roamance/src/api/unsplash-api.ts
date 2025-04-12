@@ -1,9 +1,10 @@
 import { createApi } from 'unsplash-js';
 import { ApiError } from './errors';
 import { ApiResponse } from '@/types';
+import { ENV_VARS } from '@/constants/keys';
 import axios, { AxiosError } from 'axios';
 
-const UNSPLASH_ACCESS_KEY = process.env.NEXT_PUBLIC_UNSPLASH_ACCESS_KEY || '';
+const UNSPLASH_ACCESS_KEY = ENV_VARS.UNSPLASH_ACCESS_KEY;
 
 const unsplashApi = createApi({
   accessKey: UNSPLASH_ACCESS_KEY,

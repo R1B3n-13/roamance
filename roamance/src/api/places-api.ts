@@ -3,8 +3,8 @@ import { touristPlaces } from '@/data/tourist-places';
 import { Geoname, GeoNamesResult, CacheItem } from '@/types/places';
 import { TouristPlace, ApiResponse } from '@/types';
 import { ApiError } from './errors';
+import { ENV_VARS } from '@/constants/keys';
 
-const GEONAMES_USERNAME = 'yashrif';
 const API_CACHE_DURATION = 1000 * 60 * 30; // 30 minutes
 
 const cache: {
@@ -45,7 +45,7 @@ export async function fetchPopularDestinations(destinations: string[]): Promise<
         params: {
           q: destination,
           maxRows: 1,
-          username: GEONAMES_USERNAME,
+          username: ENV_VARS.GEONAMES_USERNAME,
           type: 'json',
           featureClass: 'P',
           style: 'full',
@@ -94,7 +94,7 @@ export async function searchGeonames(query: string, maxRows: number = 10): Promi
         params: {
           q: query,
           maxRows,
-          username: GEONAMES_USERNAME,
+          username: ENV_VARS.GEONAMES_USERNAME,
           type: 'json',
           featureClass: 'P',
           style: 'full',
@@ -134,7 +134,7 @@ export async function getGeoname(placeName: string, countryCode?: string): Promi
     const params: GeonamesParams = {
       q: placeName,
       maxRows: 1,
-      username: GEONAMES_USERNAME,
+      username: ENV_VARS.GEONAMES_USERNAME,
       type: 'json',
       style: 'full',
     };

@@ -1,6 +1,7 @@
 import { UserEndpoints } from '@/types';
+import { ENV_VARS } from './keys';
 
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+export const API_BASE_URL = ENV_VARS.API_URL;
 
 export const USER_ENDPOINTS: UserEndpoints = {
   REGISTER: `${API_BASE_URL}/users/register`,
