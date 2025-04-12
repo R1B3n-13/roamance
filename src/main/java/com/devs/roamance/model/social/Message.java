@@ -37,11 +37,11 @@ public class Message {
   @Column(length = 4000)
   private String text;
 
-  @Size(max = 20, message = "No more than 20 images are allowed per message")
+  @Size(max = 20)
   @ElementCollection(fetch = FetchType.LAZY)
   private List<String> imagePaths = new ArrayList<>();
 
-  @Size(max = 3, message = "No more than 3 videos are allowed per message")
+  @Size(max = 3)
   @ElementCollection(fetch = FetchType.LAZY)
   private List<String> videoPaths = new ArrayList<>();
 

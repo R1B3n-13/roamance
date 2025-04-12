@@ -16,7 +16,7 @@ import com.devs.roamance.dto.response.travel.journal.SubsectionListResponseDto;
 import com.devs.roamance.dto.response.travel.journal.SubsectionResponseDto;
 import com.devs.roamance.exception.ResourceNotFoundException;
 import com.devs.roamance.exception.UnauthorizedAccessException;
-import com.devs.roamance.model.Location;
+import com.devs.roamance.model.travel.Location;
 import com.devs.roamance.model.travel.journal.ActivitySubsection;
 import com.devs.roamance.model.travel.journal.Journal;
 import com.devs.roamance.model.travel.journal.RouteSubsection;

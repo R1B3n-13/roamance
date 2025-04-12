@@ -85,25 +85,6 @@ public class GlobalExceptionHandler {
         new BaseResponseDto(401, false, ex.getMessage()), HttpStatus.UNAUTHORIZED);
   }
 
-  // ==================== General Exceptions ====================
-
-  @ExceptionHandler(IllegalArgumentException.class)
-  public ResponseEntity<BaseResponseDto> handleIllegalArgumentException(
-      IllegalArgumentException ex) {
-
-    log.error("IllegalArgumentException: {}", ex.getMessage(), ex);
-
-    return new ResponseEntity<>(
-        new BaseResponseDto(
-            400,
-            false,
-            (ResponseMessage.INVALID_TOKEN_TYPE.equals(ex.getMessage())
-                    || ResponseMessage.JWT_CLAIMS_EMPTY.equals(ex.getMessage()))
-                ? ex.getMessage()
-                : "Illegal argument!"),
-        HttpStatus.BAD_REQUEST);
-  }
-
   // ==================== Validation Related Exceptions ====================
 
   @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -248,6 +229,37 @@ public class GlobalExceptionHandler {
       SubsectionTypeDeserializationException ex) {
 
     log.error("SubsectionTypeDeserializationException: {}", ex.getMessage(), ex);
+
+    return new ResponseEntity<>(
+        new BaseResponseDto(400, false, ex.getMessage()), HttpStatus.BAD_REQUEST);
+  }
+
+  // ==================== General Exceptions ====================
+
+  @ExceptionHandler(IllegalArgumentException.class)
+  public ResponseEntity<BaseResponseDto> handleIllegalArgumentException(
+      IllegalArgumentException ex) {
+
+    log.error("IllegalArgumentException: {}", ex.getMessage(), ex);
+
+    return new ResponseEntity<>(
+        new BaseResponseDto(400, false, ex.getMessage()), HttpStatus.BAD_REQUEST);
+  }
+
+  @ExceptionHandler(DateOutOfRangeException.class)
+  public ResponseEntity<BaseResponseDto> handleDateOutOfRangeException(DateOutOfRangeException ex) {
+
+    log.error("DateOutOfRangeException: {}", ex.getMessage(), ex);
+
+    return new ResponseEntity<>(
+        new BaseResponseDto(400, false, ex.getMessage()), HttpStatus.BAD_REQUEST);
+  }
+
+  @ExceptionHandler(ScheduleCollisionException.class)
+  public ResponseEntity<BaseResponseDto> handleScheduleCollisionException(
+      ScheduleCollisionException ex) {
+
+    log.error("ScheduleCollisionException: {}", ex.getMessage(), ex);
 
     return new ResponseEntity<>(
         new BaseResponseDto(400, false, ex.getMessage()), HttpStatus.BAD_REQUEST);

@@ -4,11 +4,13 @@ import com.devs.roamance.model.social.Chat;
 import com.devs.roamance.model.social.Comment;
 import com.devs.roamance.model.social.Message;
 import com.devs.roamance.model.social.Post;
+import com.devs.roamance.model.travel.itinerary.Itinerary;
 import com.devs.roamance.model.travel.journal.Journal;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import java.time.OffsetDateTime;
 import java.util.HashSet;
 import java.util.List;
@@ -33,9 +35,9 @@ public class User {
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
 
-  private String name;
-  private String email;
-  @JsonIgnore private String password;
+  @NotNull private String name;
+  @NotNull private String email;
+  @JsonIgnore @NotNull private String password;
 
   @ElementCollection(fetch = FetchType.EAGER)
   @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
@@ -94,6 +96,14 @@ public class User {
       cascade = {CascadeType.ALL},
       orphanRemoval = true)
   private List<Message> messages;
+
+  @JsonIgnore
+  @OneToMany(
+      mappedBy = "user",
+      fetch = FetchType.LAZY,
+      cascade = {CascadeType.ALL},
+      orphanRemoval = true)
+  private List<Itinerary> itineraries;
 
   @CreatedDate
   @Column(updatable = false)
