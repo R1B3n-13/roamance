@@ -1,9 +1,9 @@
 package com.devs.roamance.dto.response.social;
 
-import com.devs.roamance.dto.response.LocationResponseDto;
 import com.devs.roamance.dto.response.user.UserDto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -15,26 +15,13 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class PostDto {
+public class ChatDto {
 
   private UUID id;
-  private String text;
+  private List<UserDto> users = new ArrayList<>();
 
-  @JsonProperty("image_paths")
-  private List<String> imagePaths;
-
-  @JsonProperty("video_paths")
-  private List<String> videoPaths;
-
-  private LocationResponseDto location;
-
-  @JsonProperty("likes_count")
-  private int likesCount;
-
-  @JsonProperty("comments_count")
-  private int commentsCount;
-
-  private UserDto user;
+  @JsonProperty("last_text")
+  private String lastText;
 
   @JsonProperty("created_at")
   private OffsetDateTime createdAt;
