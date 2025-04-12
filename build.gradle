@@ -3,6 +3,8 @@ plugins {
     id 'org.springframework.boot' version '3.4.2'
     id 'io.spring.dependency-management' version '1.1.7'
     id "com.diffplug.spotless" version "7.0.2"
+    id "org.sonarqube" version "6.0.1.5171"
+    id 'jacoco'
 }
 
 group = 'com.devs'
@@ -41,4 +43,30 @@ spotless.java {
 
 tasks.named('test') {
     useJUnitPlatform()
+    finalizedBy jacocoTestReport
+}
+
+sonarqube {
+    properties {
+        property "sonar.projectKey", "Learnathon-By-Geeky-Solutions_devs"
+        property "sonar.organization", "learnathon-by-geeky-solutions"
+        property "sonar.host.url", System.getenv("SONAR_HOST_URL") ?: "https://sonarcloud.io"
+        property "sonar.token", System.getenv("SONARCLOUD_TOKEN")
+        property "sonar.sources", "src/main/java"
+        property "sonar.tests", "src/test/java"
+        property "sonar.java.binaries", "build/classes/java/main"
+        property "sonar.coverage.jacoco.xmlReportPaths", "build/reports/jacoco/test/jacocoTestReport.xml"
+    }
+}
+
+jacocoTestReport {
+    dependsOn test
+    reports {
+        xml.required = true
+        html.required = true
+    }
+}
+
+jacoco {
+    toolVersion = "0.8.12"
 }
