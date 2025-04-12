@@ -57,7 +57,6 @@ export function ProfileHeader({
     try {
       setIsUploading(true);
 
-      // Send request to update user profile with new image URL
       await api.put(USER_ENDPOINTS.UPDATE, {
         profileImage: result.secure_url,
       });
@@ -65,7 +64,6 @@ export function ProfileHeader({
       toast.success('Profile picture updated successfully');
       setIsUploadDialogOpen(false);
 
-      // Trigger profile refresh
       if (onProfileUpdate) {
         onProfileUpdate();
       }
@@ -84,16 +82,16 @@ export function ProfileHeader({
 
   return (
     <div className="relative">
-      {/* Enhanced decorative background elements */}
       <div className="absolute top-0 right-0 w-1/3 h-64 rounded-full opacity-30 blur-3xl -z-10 bg-gradient-to-br from-ocean via-sunset to-forest animate-pulse-slow" />
       <div className="absolute bottom-0 left-0 w-1/4 h-48 rounded-full opacity-25 blur-3xl -z-10 bg-gradient-to-tr from-forest via-sand to-sunset animate-pulse-slow" />
       <div className="absolute top-1/3 left-1/4 w-32 h-32 rounded-full opacity-20 blur-3xl -z-10 bg-gradient-to-r from-mountain to-ocean animate-float" />
 
-      {/* Upload profile picture dialog */}
       <Dialog open={isUploadDialogOpen} onOpenChange={setIsUploadDialogOpen}>
         <DialogContent className="sm:max-w-md border border-muted/30 bg-gradient-to-b from-background to-background/95 backdrop-blur-sm">
           <DialogHeader>
-            <DialogTitle className="text-xl font-semibold">Update Profile Picture</DialogTitle>
+            <DialogTitle className="text-xl font-semibold">
+              Update Profile Picture
+            </DialogTitle>
             <DialogDescription className="text-muted-foreground">
               Upload a new profile picture from your device or camera
             </DialogDescription>
@@ -104,30 +102,27 @@ export function ProfileHeader({
               onError={handleUploadError}
               value={user?.profileImage}
               publicId={user?.id ? `user-${user.id}` : undefined}
-              buttonText={isUploading ? "Updating..." : "Select Image"}
+              buttonText={isUploading ? 'Updating...' : 'Select Image'}
               className="w-full"
             />
           </div>
         </DialogContent>
       </Dialog>
 
-      {/* Profile header card - enhanced with more elegant design */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
+        transition={{ duration: 0.6, ease: 'easeOut' }}
         className={cn(
           'relative overflow-hidden rounded-2xl border border-muted/30',
           'bg-gradient-to-r from-background via-background to-background/90',
           'backdrop-blur-sm shadow-xl'
         )}
       >
-        {/* Enhanced gradient header with artistic pattern overlay */}
         <div className="h-28 relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-r from-ocean via-sunset to-forest opacity-90" />
           <div className="absolute inset-0 opacity-30 bg-[url('/images/roamance-logo-no-text.png')] bg-repeat-space bg-contain mix-blend-overlay" />
 
-          {/* Navigation buttons positioned elegantly in the top-right with refined styling */}
           <div className="absolute top-4 right-4 flex items-center gap-2">
             <div className="h-9 w-9 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-sm border border-white/20 transition-all duration-300 shadow-sm hover:shadow-md flex items-center justify-center overflow-hidden">
               <ThemeToggle className="h-full w-full text-white bg-transparent hover:bg-transparent border-none shadow-none" />
@@ -156,7 +151,6 @@ export function ProfileHeader({
         </div>
 
         <div className="flex flex-col md:flex-row px-6 pb-8 -mt-14 md:items-end gap-6">
-          {/* Enhanced Avatar with more refined styling and animations */}
           <div className="flex-shrink-0 relative group">
             {loading ? (
               <Skeleton className="w-28 h-28 md:w-36 md:h-36 rounded-full border-4 border-background shadow-xl" />
@@ -176,7 +170,6 @@ export function ProfileHeader({
                     {getInitials(user?.name)}
                   </AvatarFallback>
                 </Avatar>
-                {/* Enhanced overlay for uploading new image */}
                 <div
                   className={`absolute inset-0 bg-black/30 rounded-full transition-all duration-300 flex items-center justify-center backdrop-blur-sm ${isUploading ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} ${isUploading ? 'cursor-wait' : 'cursor-pointer'}`}
                   onClick={() => !isUploading && setIsUploadDialogOpen(true)}
@@ -184,7 +177,7 @@ export function ProfileHeader({
                   <motion.div
                     initial={{ scale: 0.8 }}
                     animate={{ scale: 1 }}
-                    transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                    transition={{ type: 'spring', stiffness: 400, damping: 17 }}
                     className="bg-white/30 p-3 rounded-full backdrop-blur-md shadow-lg"
                   >
                     {isUploading ? (
@@ -198,7 +191,6 @@ export function ProfileHeader({
             )}
           </div>
 
-          {/* Enhanced Profile info with more spacing and elegant typography */}
           <div className="flex-grow space-y-4 mt-2">
             {loading ? (
               <>
