@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Positive;
-
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -18,8 +17,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RouteSubsectionUpdateRequestDto extends LocationUpdateRequestDto {
-  @Valid
-  private List<LocationUpdateRequestDto> locations = new ArrayList<>();
+  @Valid private List<LocationUpdateRequestDto> locations = new ArrayList<>();
 
   @JsonProperty("total_time")
   @Min(value = 1, message = "Total time must be at least 1 minute")

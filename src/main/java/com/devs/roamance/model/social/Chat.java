@@ -23,20 +23,28 @@ import lombok.Setter;
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Chat extends BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.UUID)
+  private UUID id;
 
-    @JsonIgnore
-    @ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST,
-            CascadeType.REFRESH })
-    @JoinTable(name = "chat_users", joinColumns = @JoinColumn(name = "chat_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
-    private List<User> users = new ArrayList<>();
+  @JsonIgnore
+  @ManyToMany(
+      fetch = FetchType.LAZY,
+      cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+  @JoinTable(
+      name = "chat_users",
+      joinColumns = @JoinColumn(name = "chat_id"),
+      inverseJoinColumns = @JoinColumn(name = "user_id"))
+  private List<User> users = new ArrayList<>();
 
-    @JsonIgnore
-    @OneToMany(mappedBy = "chat", fetch = FetchType.LAZY, cascade = { CascadeType.ALL }, orphanRemoval = true)
-    private List<Message> messages=new ArrayList<>();
+  @JsonIgnore
+  @OneToMany(
+      mappedBy = "chat",
+      fetch = FetchType.LAZY,
+      cascade = {CascadeType.ALL},
+      orphanRemoval = true)
+  private List<Message> messages = new ArrayList<>();
 
-    @Column(length = 4000)
-    private String lastText;
+  @Column(length = 4000)
+  private String lastText;
 }

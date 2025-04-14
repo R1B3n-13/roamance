@@ -1,7 +1,6 @@
 package com.devs.roamance.dto.response.user;
 
 import com.devs.roamance.dto.response.BaseResponseDto;
-
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -15,7 +14,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class UserListResponseDto extends BaseResponseDto {
 
-  private List<UserDto> data =new ArrayList<>();
+  private List<UserDto> data = new ArrayList<>();
 
   public UserListResponseDto(int status, boolean success, String message, List<UserDto> data) {
 

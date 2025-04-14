@@ -1,11 +1,9 @@
 package com.devs.roamance.dto.response.social;
 
-import java.util.UUID;
-
 import com.devs.roamance.dto.response.AuditDto;
 import com.devs.roamance.dto.response.user.UserDto;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -27,5 +25,4 @@ public class CommentDto extends AuditDto {
   private String videoPath;
 
   private UserDto user;
-
 }

@@ -1,23 +1,5 @@
 package com.devs.roamance.service.impl;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
-import org.modelmapper.ModelMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.devs.roamance.constant.ResponseMessage;
 import com.devs.roamance.dto.request.travel.journal.ActivitySubsectionCreateRequestDto;
 import com.devs.roamance.dto.request.travel.journal.JournalCreateRequestDto;
@@ -45,6 +27,22 @@ import com.devs.roamance.repository.UserRepository;
 import com.devs.roamance.service.JournalService;
 import com.devs.roamance.util.PaginationSortingUtil;
 import com.devs.roamance.util.UserUtil;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class JournalServiceImpl implements JournalService {
@@ -81,19 +79,20 @@ public class JournalServiceImpl implements JournalService {
 
       if (!requestDto.getSubsections().isEmpty()) {
         for (SubsectionCreateRequestDto subsectionDto : requestDto.getSubsections()) {
-          Subsection subsection = switch (subsectionDto) {
-            case ActivitySubsectionCreateRequestDto activitySubsectionCreateRequestDto ->
-              modelMapper.map(subsectionDto, ActivitySubsection.class);
-            case SightseeingSubsectionCreateRequestDto sightseeingSubsectionCreateRequestDto ->
-              modelMapper.map(subsectionDto, SightseeingSubsection.class);
-            case RouteSubsectionCreateRequestDto routeSubsectionCreateRequestDto ->
-              modelMapper.map(subsectionDto, RouteSubsection.class);
-            case null, default -> {
-              assert subsectionDto != null;
-              throw new IllegalArgumentException(
-                  "Unknown subsection type: " + subsectionDto.getClass().getName());
-            }
-          };
+          Subsection subsection =
+              switch (subsectionDto) {
+                case ActivitySubsectionCreateRequestDto activitySubsectionCreateRequestDto ->
+                    modelMapper.map(subsectionDto, ActivitySubsection.class);
+                case SightseeingSubsectionCreateRequestDto sightseeingSubsectionCreateRequestDto ->
+                    modelMapper.map(subsectionDto, SightseeingSubsection.class);
+                case RouteSubsectionCreateRequestDto routeSubsectionCreateRequestDto ->
+                    modelMapper.map(subsectionDto, RouteSubsection.class);
+                case null, default -> {
+                  assert subsectionDto != null;
+                  throw new IllegalArgumentException(
+                      "Unknown subsection type: " + subsectionDto.getClass().getName());
+                }
+              };
           journal.addSubsection(subsection);
         }
         logger.info(
@@ -106,15 +105,18 @@ public class JournalServiceImpl implements JournalService {
       Journal savedJournal = journalRepository.save(journal);
       journalRepository.flush();
 
-      Journal dto = journalRepository
-          .findById(savedJournal.getId())
-          .orElseThrow(
-              () -> new ResourceNotFoundException(
-                  String.format(ResponseMessage.JOURNAL_NOT_FOUND, savedJournal.getId())));
+      Journal dto =
+          journalRepository
+              .findById(savedJournal.getId())
+              .orElseThrow(
+                  () ->
+                      new ResourceNotFoundException(
+                          String.format(ResponseMessage.JOURNAL_NOT_FOUND, savedJournal.getId())));
 
       JournalDetailDto journalDetailDto = modelMapper.map(dto, JournalDetailDto.class);
 
-      return new JournalResponseDto(201, true, ResponseMessage.JOURNAL_CREATE_SUCCESS, journalDetailDto);
+      return new JournalResponseDto(
+          201, true, ResponseMessage.JOURNAL_CREATE_SUCCESS, journalDetailDto);
 
     } catch (DataIntegrityViolationException e) {
       throw new ResourceAlreadyExistException(
@@ -126,10 +128,12 @@ public class JournalServiceImpl implements JournalService {
   public JournalListResponseDto getAll(
       int pageNumber, int pageSize, String sortBy, String sortDir) {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    boolean isAdmin = authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"));
+    boolean isAdmin =
+        authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"));
 
-    Pageable pageable = PageRequest.of(
-        pageNumber, pageSize, Sort.by(PaginationSortingUtil.getSortDirection(sortDir), sortBy));
+    Pageable pageable =
+        PageRequest.of(
+            pageNumber, pageSize, Sort.by(PaginationSortingUtil.getSortDirection(sortDir), sortBy));
 
     Page<Journal> journalPage;
 
@@ -150,16 +154,19 @@ public class JournalServiceImpl implements JournalService {
       }
     }
 
-    List<JournalBriefDto> journalDtos = journalPage.getContent().stream()
-        .map(
-            journal -> {
-              Journal journalWithSubsections = journalRepository.findById(journal.getId()).orElse(journal);
+    List<JournalBriefDto> journalDtos =
+        journalPage.getContent().stream()
+            .map(
+                journal -> {
+                  Journal journalWithSubsections =
+                      journalRepository.findById(journal.getId()).orElse(journal);
 
-              JournalBriefDto dto = modelMapper.map(journalWithSubsections, JournalBriefDto.class);
-              dto.setTotalSubsections(journalWithSubsections.getSubsections().size());
-              return dto;
-            })
-        .toList();
+                  JournalBriefDto dto =
+                      modelMapper.map(journalWithSubsections, JournalBriefDto.class);
+                  dto.setTotalSubsections(journalWithSubsections.getSubsections().size());
+                  return dto;
+                })
+            .toList();
 
     return new JournalListResponseDto(
         200, true, ResponseMessage.JOURNALS_FETCH_SUCCESS, journalDtos);
@@ -168,15 +175,18 @@ public class JournalServiceImpl implements JournalService {
   @Override
   public JournalResponseDto get(UUID id) {
     logger.info("Fetching journal with id: {} using JOIN FETCH for subsections", id);
-    Journal journal = journalRepository
-        .findById(id)
-        .orElseThrow(
-            () -> new ResourceNotFoundException(
-                String.format(ResponseMessage.JOURNAL_NOT_FOUND, id)));
+    Journal journal =
+        journalRepository
+            .findById(id)
+            .orElseThrow(
+                () ->
+                    new ResourceNotFoundException(
+                        String.format(ResponseMessage.JOURNAL_NOT_FOUND, id)));
 
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     User currentUser = userUtil.getAuthenticatedUser();
-    boolean isAdmin = authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"));
+    boolean isAdmin =
+        authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"));
 
     if (!isAdmin && !journal.getUser().getId().equals(currentUser.getId())) {
       logger.warn(
@@ -211,7 +221,8 @@ public class JournalServiceImpl implements JournalService {
 
     JournalDetailDto journalDetailDto = modelMapper.map(savedJournal, JournalDetailDto.class);
 
-    return new JournalResponseDto(200, true, ResponseMessage.JOURNAL_UPDATE_SUCCESS, journalDetailDto);
+    return new JournalResponseDto(
+        200, true, ResponseMessage.JOURNAL_UPDATE_SUCCESS, journalDetailDto);
   }
 
   @Override

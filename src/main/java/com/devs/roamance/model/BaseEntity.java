@@ -20,21 +20,21 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Setter
 public abstract class BaseEntity {
 
-    @CreatedDate
-    @Column(name = "created_at", updatable = false)
-    @Setter(AccessLevel.NONE)
-    private OffsetDateTime createdAt;
+  @CreatedDate
+  @Column(name = "created_at", updatable = false)
+  @Setter(AccessLevel.NONE)
+  private OffsetDateTime createdAt;
 
-    @LastModifiedDate
-    @Column(name = "last_modified_at")
-    private OffsetDateTime lastModifiedAt;
+  @LastModifiedDate
+  @Column(name = "last_modified_at")
+  private OffsetDateTime lastModifiedAt;
 
-    @CreatedBy
-    @Column(name = "created_by", updatable = false)
-    @Setter(AccessLevel.NONE)
-    private UUID createdBy;
+  @CreatedBy
+  @Column(name = "created_by", updatable = false)
+  @Setter(AccessLevel.NONE)
+  private UUID createdBy;
 
-    @LastModifiedBy
-    @Column(name = "last_modified_by")
-    private UUID lastModifiedBy;
+  @LastModifiedBy
+  @Column(name = "last_modified_by")
+  private UUID lastModifiedBy;
 }

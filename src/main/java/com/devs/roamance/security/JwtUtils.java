@@ -42,13 +42,15 @@ public class JwtUtils {
 
   private String generateToken(Authentication authentication, int expiresIn, String tokenType) {
 
-    String userId = authentication.getDetails() != null ? authentication.getDetails().toString() : null;
+    String userId =
+        authentication.getDetails() != null ? authentication.getDetails().toString() : null;
 
     return Jwts.builder()
         .subject(authentication.getName())
         .issuer("roamance.com")
         .claim("type", tokenType)
-        .claim("roles",
+        .claim(
+            "roles",
             authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList())
         .claim("userId", userId)
         .issuedAt(new Date())

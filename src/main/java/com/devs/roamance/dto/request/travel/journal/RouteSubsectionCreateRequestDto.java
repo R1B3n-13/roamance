@@ -4,7 +4,6 @@ import com.devs.roamance.dto.request.LocationCreateRequestDto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
-
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;

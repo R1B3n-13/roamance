@@ -20,46 +20,58 @@ import lombok.*;
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Post extends BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.UUID)
+  private UUID id;
 
-    @Column(length = 10_000)
-    private String text;
+  @Column(length = 10_000)
+  private String text;
 
-    @Size(max = 50, message = "No more than 50 images are allowed per post")
-    @ElementCollection(fetch = FetchType.LAZY)
-    private List<String> imagePaths = new ArrayList<>();
+  @Size(max = 50, message = "No more than 50 images are allowed per post")
+  @ElementCollection(fetch = FetchType.LAZY)
+  private List<String> imagePaths = new ArrayList<>();
 
-    @Size(max = 5, message = "No more than 5 videos are allowed per post")
-    @ElementCollection(fetch = FetchType.LAZY)
-    private List<String> videoPaths = new ArrayList<>();
+  @Size(max = 5, message = "No more than 5 videos are allowed per post")
+  @ElementCollection(fetch = FetchType.LAZY)
+  private List<String> videoPaths = new ArrayList<>();
 
-    @Embedded
-    private Location location;
+  @Embedded private Location location;
 
-    private int likesCount = 0;
-    private int commentsCount = 0;
+  private int likesCount = 0;
+  private int commentsCount = 0;
 
-    @JsonIgnore
-    @ManyToOne(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH,
-            CascadeType.REFRESH })
-    @JoinColumn(name = "user_id", referencedColumnName = "id")
-    private User user;
+  @JsonIgnore
+  @ManyToOne(
+      fetch = FetchType.LAZY,
+      cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH})
+  @JoinColumn(name = "user_id", referencedColumnName = "id")
+  private User user;
 
-    @JsonIgnore
-    @ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST,
-            CascadeType.REFRESH })
-    @JoinTable(name = "post_likes", joinColumns = @JoinColumn(name = "post_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
-    private Set<User> likedBy = new HashSet<>();
+  @JsonIgnore
+  @ManyToMany(
+      fetch = FetchType.LAZY,
+      cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+  @JoinTable(
+      name = "post_likes",
+      joinColumns = @JoinColumn(name = "post_id"),
+      inverseJoinColumns = @JoinColumn(name = "user_id"))
+  private Set<User> likedBy = new HashSet<>();
 
-    @JsonIgnore
-    @ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST,
-            CascadeType.REFRESH })
-    @JoinTable(name = "post_saves", joinColumns = @JoinColumn(name = "post_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
-    private Set<User> savedBy = new HashSet<>();
+  @JsonIgnore
+  @ManyToMany(
+      fetch = FetchType.LAZY,
+      cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+  @JoinTable(
+      name = "post_saves",
+      joinColumns = @JoinColumn(name = "post_id"),
+      inverseJoinColumns = @JoinColumn(name = "user_id"))
+  private Set<User> savedBy = new HashSet<>();
 
-    @JsonIgnore
-    @OneToMany(mappedBy = "post", fetch = FetchType.LAZY, cascade = { CascadeType.ALL }, orphanRemoval = true)
-    private List<Comment> comments;
+  @JsonIgnore
+  @OneToMany(
+      mappedBy = "post",
+      fetch = FetchType.LAZY,
+      cascade = {CascadeType.ALL},
+      orphanRemoval = true)
+  private List<Comment> comments;
 }

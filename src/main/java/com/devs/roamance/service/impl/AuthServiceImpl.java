@@ -26,7 +26,9 @@ public class AuthServiceImpl implements AuthService {
   private final AuthenticationManager authenticationManager;
   private final UserRepository userRepository;
 
-  public AuthServiceImpl(JwtUtils jwtUtils, AuthenticationManager authenticationManager,
+  public AuthServiceImpl(
+      JwtUtils jwtUtils,
+      AuthenticationManager authenticationManager,
       UserRepository userRepository) {
     this.jwtUtils = jwtUtils;
     this.authenticationManager = authenticationManager;
@@ -37,17 +39,19 @@ public class AuthServiceImpl implements AuthService {
   public AuthResponseDto login(AuthRequestDto requestDto) {
 
     try {
-      Authentication authentication = authenticationManager.authenticate(
-          new UsernamePasswordAuthenticationToken(
-              requestDto.getEmail(), requestDto.getPassword()));
+      Authentication authentication =
+          authenticationManager.authenticate(
+              new UsernamePasswordAuthenticationToken(
+                  requestDto.getEmail(), requestDto.getPassword()));
 
       Optional<User> userOptional = userRepository.findByEmail(requestDto.getEmail());
       if (userOptional.isPresent()) {
         User user = userOptional.get();
-        Authentication authWithUserId = new UsernamePasswordAuthenticationToken(
-            authentication.getPrincipal(),
-            authentication.getCredentials(),
-            authentication.getAuthorities());
+        Authentication authWithUserId =
+            new UsernamePasswordAuthenticationToken(
+                authentication.getPrincipal(),
+                authentication.getCredentials(),
+                authentication.getAuthorities());
         ((UsernamePasswordAuthenticationToken) authWithUserId).setDetails(user.getId().toString());
 
         SecurityContextHolder.getContext().setAuthentication(authWithUserId);
@@ -85,7 +89,8 @@ public class AuthServiceImpl implements AuthService {
 
     List<GrantedAuthority> authorities = new ArrayList<>();
 
-    Authentication authentication = new UsernamePasswordAuthenticationToken(email, null, authorities);
+    Authentication authentication =
+        new UsernamePasswordAuthenticationToken(email, null, authorities);
     ((UsernamePasswordAuthenticationToken) authentication).setDetails(userId);
 
     String newAccessToken = jwtUtils.generateAccessToken(authentication);

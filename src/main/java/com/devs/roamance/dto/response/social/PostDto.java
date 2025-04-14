@@ -1,14 +1,12 @@
 package com.devs.roamance.dto.response.social;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
 import com.devs.roamance.dto.response.AuditDto;
 import com.devs.roamance.dto.response.LocationResponseDto;
 import com.devs.roamance.dto.response.user.UserDto;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,10 +22,10 @@ public class PostDto extends AuditDto {
   private String text;
 
   @JsonProperty("image_paths")
-  private List<String> imagePaths=new ArrayList<>();
+  private List<String> imagePaths = new ArrayList<>();
 
   @JsonProperty("video_paths")
-  private List<String> videoPaths=new ArrayList<>();
+  private List<String> videoPaths = new ArrayList<>();
 
   private LocationResponseDto location;
 
@@ -38,5 +36,4 @@ public class PostDto extends AuditDto {
   private int commentsCount;
 
   private UserDto user;
-
 }

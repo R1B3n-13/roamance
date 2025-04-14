@@ -35,9 +35,9 @@ import lombok.Setter;
 @DiscriminatorColumn(name = "subsection_type", discriminatorType = DiscriminatorType.STRING)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 @JsonSubTypes({
-    @JsonSubTypes.Type(value = SightseeingSubsection.class, name = "Sightseeing"),
-    @JsonSubTypes.Type(value = ActivitySubsection.class, name = "Activity"),
-    @JsonSubTypes.Type(value = RouteSubsection.class, name = "Route")
+  @JsonSubTypes.Type(value = SightseeingSubsection.class, name = "Sightseeing"),
+  @JsonSubTypes.Type(value = ActivitySubsection.class, name = "Activity"),
+  @JsonSubTypes.Type(value = RouteSubsection.class, name = "Route")
 })
 @Getter
 @Setter
@@ -50,18 +50,16 @@ public abstract class Subsection {
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
 
-  @NonNull
-  private String title;
+  @NonNull private String title;
 
-  @ElementCollection
-  private List<String> notes = new ArrayList<>();
+  @ElementCollection private List<String> notes = new ArrayList<>();
 
-  @ElementCollection
-  private List<String> checklists = new ArrayList<>();
+  @ElementCollection private List<String> checklists = new ArrayList<>();
 
   @JsonIgnore
-  @ManyToOne(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH,
-      CascadeType.REFRESH })
+  @ManyToOne(
+      fetch = FetchType.LAZY,
+      cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH})
   @JoinColumn(name = "journal_id", referencedColumnName = "id")
   private Journal journal;
 

@@ -1,7 +1,6 @@
 package com.devs.roamance.dto.response.social;
 
 import com.devs.roamance.dto.response.BaseResponseDto;
-
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;

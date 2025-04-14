@@ -30,55 +30,75 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class User {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.UUID)
+  private UUID id;
 
-    private String name;
-    private String email;
-    @JsonIgnore
-    private String password;
+  private String name;
+  private String email;
+  @JsonIgnore private String password;
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
-    @Enumerated(EnumType.STRING)
-    private Set<Role> roles = new HashSet<>();
+  @ElementCollection(fetch = FetchType.EAGER)
+  @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
+  @Enumerated(EnumType.STRING)
+  private Set<Role> roles = new HashSet<>();
 
-    @JsonIgnore
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = { CascadeType.ALL }, orphanRemoval = true)
-    private List<Journal> journals = new ArrayList<>();
+  @JsonIgnore
+  @OneToMany(
+      mappedBy = "user",
+      fetch = FetchType.LAZY,
+      cascade = {CascadeType.ALL},
+      orphanRemoval = true)
+  private List<Journal> journals = new ArrayList<>();
 
-    @JsonIgnore
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = { CascadeType.ALL }, orphanRemoval = true)
-    private List<Post> posts = new ArrayList<>();
+  @JsonIgnore
+  @OneToMany(
+      mappedBy = "user",
+      fetch = FetchType.LAZY,
+      cascade = {CascadeType.ALL},
+      orphanRemoval = true)
+  private List<Post> posts = new ArrayList<>();
 
-    @JsonIgnore
-    @ManyToMany(mappedBy = "savedBy", fetch = FetchType.LAZY, cascade = { CascadeType.DETACH, CascadeType.MERGE,
-            CascadeType.PERSIST, CascadeType.REFRESH })
-    private Set<Post> savedPosts;
+  @JsonIgnore
+  @ManyToMany(
+      mappedBy = "savedBy",
+      fetch = FetchType.LAZY,
+      cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+  private Set<Post> savedPosts;
 
-    @JsonIgnore
-    @ManyToMany(mappedBy = "likedBy", fetch = FetchType.LAZY, cascade = { CascadeType.DETACH, CascadeType.MERGE,
-            CascadeType.PERSIST, CascadeType.REFRESH })
-    private Set<Post> likedPosts=new HashSet<>();
+  @JsonIgnore
+  @ManyToMany(
+      mappedBy = "likedBy",
+      fetch = FetchType.LAZY,
+      cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+  private Set<Post> likedPosts = new HashSet<>();
 
-    @JsonIgnore
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = { CascadeType.ALL }, orphanRemoval = true)
-    private List<Comment> comments = new ArrayList<>();
+  @JsonIgnore
+  @OneToMany(
+      mappedBy = "user",
+      fetch = FetchType.LAZY,
+      cascade = {CascadeType.ALL},
+      orphanRemoval = true)
+  private List<Comment> comments = new ArrayList<>();
 
-    @JsonIgnore
-    @ManyToMany(mappedBy = "users", fetch = FetchType.LAZY, cascade = { CascadeType.DETACH, CascadeType.MERGE,
-            CascadeType.PERSIST, CascadeType.REFRESH })
-    private List<Chat> chats = new ArrayList<>();
+  @JsonIgnore
+  @ManyToMany(
+      mappedBy = "users",
+      fetch = FetchType.LAZY,
+      cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+  private List<Chat> chats = new ArrayList<>();
 
-    @JsonIgnore
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = { CascadeType.ALL }, orphanRemoval = true)
-    private List<Message> messages = new ArrayList<>();
+  @JsonIgnore
+  @OneToMany(
+      mappedBy = "user",
+      fetch = FetchType.LAZY,
+      cascade = {CascadeType.ALL},
+      orphanRemoval = true)
+  private List<Message> messages = new ArrayList<>();
 
-    @CreatedDate
-    @Column(updatable = false)
-    private OffsetDateTime createdAt;
+  @CreatedDate
+  @Column(updatable = false)
+  private OffsetDateTime createdAt;
 
-    @LastModifiedDate
-    private OffsetDateTime lastModifiedAt;
+  @LastModifiedDate private OffsetDateTime lastModifiedAt;
 }

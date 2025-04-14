@@ -27,14 +27,16 @@ public class AuditorAwareImpl implements AuditorAware<UUID> {
       return Optional.empty();
     }
 
-    if (authentication.getDetails() != null && authentication instanceof UsernamePasswordAuthenticationToken) {
+    if (authentication.getDetails() != null
+        && authentication instanceof UsernamePasswordAuthenticationToken) {
       try {
         String userIdString = authentication.getDetails().toString();
         UUID userId = UUID.fromString(userIdString);
         logger.debug("Retrieved user UUID: {} directly from authentication details", userId);
         return Optional.of(userId);
       } catch (IllegalArgumentException e) {
-        logger.warn("Could not parse UUID from authentication details: {}", authentication.getDetails());
+        logger.warn(
+            "Could not parse UUID from authentication details: {}", authentication.getDetails());
       }
     }
 
