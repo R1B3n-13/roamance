@@ -14,7 +14,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class AuditResponseDto {
+public class AuditDto {
 
     @JsonProperty("created_at")
     private OffsetDateTime createdAt;

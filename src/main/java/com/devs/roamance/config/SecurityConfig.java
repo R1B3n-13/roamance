@@ -3,7 +3,6 @@ package com.devs.roamance.config;
 import com.devs.roamance.security.AuthTokenFilter;
 import java.util.Arrays;
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -30,7 +29,6 @@ public class SecurityConfig {
 
   private final AuthTokenFilter authTokenFilter;
 
-  @Autowired
   public SecurityConfig(AuthTokenFilter authTokenFilter) {
 
     this.authTokenFilter = authTokenFilter;
