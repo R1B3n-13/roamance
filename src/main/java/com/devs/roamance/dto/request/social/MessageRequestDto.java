@@ -2,6 +2,7 @@ package com.devs.roamance.dto.request.social;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Size;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -19,9 +20,9 @@ public class MessageRequestDto {
 
   @JsonProperty("image_paths")
   @Size(max = 20, message = "No more than 20 images are allowed per message")
-  private List<String> imagePaths;
+  private List<String> imagePaths = new ArrayList<>();
 
   @JsonProperty("video_paths")
   @Size(max = 3, message = "No more than 3 videos are allowed per message")
-  private List<String> videoPaths;
+  private List<String> videoPaths = new ArrayList<>();
 }
