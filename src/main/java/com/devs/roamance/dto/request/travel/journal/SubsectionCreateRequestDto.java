@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import lombok.Getter;
@@ -33,8 +34,9 @@ public abstract class SubsectionCreateRequestDto {
   private UUID journalId;
 
   @Size(max = 10, message = "Maximum 10 notes allowed")
-  private List<@NotBlank(message = "Note cannot be empty") String> notes;
+  private List<@NotBlank(message = "Note cannot be empty") String> notes = new ArrayList<>();
 
   @Size(max = 10, message = "Maximum 10 checklist items allowed")
-  private List<@NotBlank(message = "Checklist item cannot be empty") String> checklists;
+  private List<@NotBlank(message = "Checklist item cannot be empty") String> checklists =
+      new ArrayList<>();
 }

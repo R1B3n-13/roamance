@@ -8,7 +8,8 @@ import com.devs.roamance.dto.request.travel.journal.RouteSubsectionCreateRequest
 import com.devs.roamance.dto.request.travel.journal.SightseeingSubsectionCreateRequestDto;
 import com.devs.roamance.dto.request.travel.journal.SubsectionCreateRequestDto;
 import com.devs.roamance.dto.response.BaseResponseDto;
-import com.devs.roamance.dto.response.travel.journal.JournalDto;
+import com.devs.roamance.dto.response.travel.journal.JournalBriefDto;
+import com.devs.roamance.dto.response.travel.journal.JournalDetailDto;
 import com.devs.roamance.dto.response.travel.journal.JournalListResponseDto;
 import com.devs.roamance.dto.response.travel.journal.JournalResponseDto;
 import com.devs.roamance.exception.ResourceAlreadyExistException;
@@ -112,7 +113,10 @@ public class JournalServiceImpl implements JournalService {
                       new ResourceNotFoundException(
                           String.format(ResponseMessage.JOURNAL_NOT_FOUND, savedJournal.getId())));
 
-      return new JournalResponseDto(201, true, ResponseMessage.JOURNAL_CREATE_SUCCESS, dto);
+      JournalDetailDto journalDetailDto = modelMapper.map(dto, JournalDetailDto.class);
+
+      return new JournalResponseDto(
+          201, true, ResponseMessage.JOURNAL_CREATE_SUCCESS, journalDetailDto);
 
     } catch (DataIntegrityViolationException e) {
       throw new ResourceAlreadyExistException(
@@ -150,14 +154,15 @@ public class JournalServiceImpl implements JournalService {
       }
     }
 
-    List<JournalDto> journalDtos =
+    List<JournalBriefDto> journalDtos =
         journalPage.getContent().stream()
             .map(
                 journal -> {
                   Journal journalWithSubsections =
                       journalRepository.findById(journal.getId()).orElse(journal);
 
-                  JournalDto dto = modelMapper.map(journalWithSubsections, JournalDto.class);
+                  JournalBriefDto dto =
+                      modelMapper.map(journalWithSubsections, JournalBriefDto.class);
                   dto.setTotalSubsections(journalWithSubsections.getSubsections().size());
                   return dto;
                 })
@@ -193,13 +198,16 @@ public class JournalServiceImpl implements JournalService {
         "Successfully fetched journal with title: '{}' and {} subsections",
         journal.getTitle(),
         journal.getSubsections().size());
-    return new JournalResponseDto(200, true, ResponseMessage.JOURNAL_FETCH_SUCCESS, journal);
+
+    JournalDetailDto journalDto = modelMapper.map(journal, JournalDetailDto.class);
+
+    return new JournalResponseDto(200, true, ResponseMessage.JOURNAL_FETCH_SUCCESS, journalDto);
   }
 
   @Override
   @Transactional
   public JournalResponseDto update(JournalUpdateRequestDto requestDto, UUID id) {
-    Journal journal = get(id).getData();
+    Journal journal = modelMapper.map(get(id).getData(), Journal.class);
 
     journal.setTitle(requestDto.getTitle());
     journal.setDescription(requestDto.getDescription());
@@ -211,13 +219,16 @@ public class JournalServiceImpl implements JournalService {
     Journal savedJournal = journalRepository.save(journal);
     journalRepository.flush();
 
-    return new JournalResponseDto(200, true, ResponseMessage.JOURNAL_UPDATE_SUCCESS, savedJournal);
+    JournalDetailDto journalDetailDto = modelMapper.map(savedJournal, JournalDetailDto.class);
+
+    return new JournalResponseDto(
+        200, true, ResponseMessage.JOURNAL_UPDATE_SUCCESS, journalDetailDto);
   }
 
   @Override
   @Transactional
   public BaseResponseDto delete(UUID id) {
-    Journal journal = get(id).getData();
+    Journal journal = modelMapper.map(get(id).getData(), Journal.class);
 
     journalRepository.delete(journal);
 

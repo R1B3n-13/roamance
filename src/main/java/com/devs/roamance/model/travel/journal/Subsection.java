@@ -63,7 +63,6 @@ public abstract class Subsection {
   @JoinColumn(name = "journal_id", referencedColumnName = "id")
   private Journal journal;
 
-  // Methods
   @Transient
   public String getType() {
     return this.getClass().getAnnotation(DiscriminatorValue.class).value();

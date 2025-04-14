@@ -12,6 +12,7 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -50,7 +51,7 @@ public class User {
       fetch = FetchType.LAZY,
       cascade = {CascadeType.ALL},
       orphanRemoval = true)
-  private List<Journal> journals;
+  private List<Journal> journals = new ArrayList<>();
 
   @JsonIgnore
   @OneToMany(
@@ -58,7 +59,7 @@ public class User {
       fetch = FetchType.LAZY,
       cascade = {CascadeType.ALL},
       orphanRemoval = true)
-  private List<Post> posts;
+  private List<Post> posts = new ArrayList<>();
 
   @JsonIgnore
   @ManyToMany(
@@ -72,7 +73,7 @@ public class User {
       mappedBy = "likedBy",
       fetch = FetchType.LAZY,
       cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
-  private Set<Post> likedPosts;
+  private Set<Post> likedPosts = new HashSet<>();
 
   @JsonIgnore
   @OneToMany(
@@ -80,14 +81,14 @@ public class User {
       fetch = FetchType.LAZY,
       cascade = {CascadeType.ALL},
       orphanRemoval = true)
-  private List<Comment> comments;
+  private List<Comment> comments = new ArrayList<>();
 
   @JsonIgnore
   @ManyToMany(
       mappedBy = "users",
       fetch = FetchType.LAZY,
       cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
-  private List<Chat> chats;
+  private List<Chat> chats = new ArrayList<>();
 
   @JsonIgnore
   @OneToMany(
@@ -95,7 +96,7 @@ public class User {
       fetch = FetchType.LAZY,
       cascade = {CascadeType.ALL},
       orphanRemoval = true)
-  private List<Message> messages;
+  private List<Message> messages = new ArrayList<>();
 
   @JsonIgnore
   @OneToMany(

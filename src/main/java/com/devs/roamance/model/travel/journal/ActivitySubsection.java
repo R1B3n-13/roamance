@@ -13,7 +13,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ActivitySubsection extends Subsection {
-  @Embedded @NonNull private Location location;
+  @Embedded private Location location;
 
-  @NonNull private String activityName;
+  private String activityName;
 }

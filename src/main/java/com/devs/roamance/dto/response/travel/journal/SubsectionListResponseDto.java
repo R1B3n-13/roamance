@@ -1,6 +1,7 @@
 package com.devs.roamance.dto.response.travel.journal;
 
 import com.devs.roamance.dto.response.BaseResponseDto;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -12,7 +13,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SubsectionListResponseDto extends BaseResponseDto {
-  private List<SubsectionDto> data;
+  private List<SubsectionDto> data = new ArrayList<>();
 
   public SubsectionListResponseDto(
       Integer status, Boolean success, String message, List<SubsectionDto> data) {

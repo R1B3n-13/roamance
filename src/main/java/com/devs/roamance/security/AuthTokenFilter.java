@@ -10,7 +10,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -29,7 +28,6 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 
   private final JwtUtils jwtUtils;
 
-  @Autowired
   public AuthTokenFilter(
       @Qualifier("handlerExceptionResolver") HandlerExceptionResolver exceptionResolver,
       JwtUtils jwtUtil) {
