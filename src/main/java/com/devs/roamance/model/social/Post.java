@@ -1,29 +1,24 @@
 package com.devs.roamance.model.social;
 
+import com.devs.roamance.model.BaseEntity;
+import com.devs.roamance.model.Location;
 import com.devs.roamance.model.user.User;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
-import java.time.OffsetDateTime;
 import java.util.*;
 import lombok.*;
-import org.springframework.data.annotation.CreatedBy;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedBy;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @Table(name = "posts")
-@EntityListeners(AuditingEntityListener.class)
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
-public class Post {
+public class Post extends BaseEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
@@ -40,7 +35,10 @@ public class Post {
   @ElementCollection(fetch = FetchType.LAZY)
   private List<String> videoPaths = new ArrayList<>();
 
+  @Embedded private Location location;
+
   private int likesCount = 0;
+  private int commentsCount = 0;
 
   @JsonIgnore
   @ManyToOne(
@@ -69,15 +67,11 @@ public class Post {
       inverseJoinColumns = @JoinColumn(name = "user_id"))
   private Set<User> savedBy = new HashSet<>();
 
-  @CreatedDate
-  @Column(updatable = false)
-  private OffsetDateTime createdAt;
-
-  @LastModifiedDate private OffsetDateTime lastModifiedAt;
-
-  @CreatedBy
-  @Column(name = "created_by", updatable = false)
-  private UUID createdBy;
-
-  @LastModifiedBy private UUID lastModifiedBy;
+  @JsonIgnore
+  @OneToMany(
+      mappedBy = "post",
+      fetch = FetchType.LAZY,
+      cascade = {CascadeType.ALL},
+      orphanRemoval = true)
+  private List<Comment> comments;
 }

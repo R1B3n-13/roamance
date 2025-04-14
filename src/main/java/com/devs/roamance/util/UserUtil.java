@@ -18,8 +18,10 @@ public class UserUtil {
   }
 
   public User getAuthenticatedUser() {
+
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     String email = authentication.getName();
+
     return userRepository
         .findByEmail(email)
         .orElseThrow(() -> new AuthenticatedUserNotFoundException("No authenticated user found!"));
