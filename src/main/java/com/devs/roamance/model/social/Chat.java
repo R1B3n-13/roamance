@@ -35,7 +35,7 @@ public class Chat extends BaseEntity {
 
     @JsonIgnore
     @OneToMany(mappedBy = "chat", fetch = FetchType.LAZY, cascade = { CascadeType.ALL }, orphanRemoval = true)
-    private List<Message> messages;
+    private List<Message> messages=new ArrayList<>();
 
     @Column(length = 4000)
     private String lastText;

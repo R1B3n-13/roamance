@@ -1,5 +1,6 @@
 package com.devs.roamance.dto.response.social;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -23,10 +24,10 @@ public class PostDto extends AuditDto {
   private String text;
 
   @JsonProperty("image_paths")
-  private List<String> imagePaths;
+  private List<String> imagePaths=new ArrayList<>();
 
   @JsonProperty("video_paths")
-  private List<String> videoPaths;
+  private List<String> videoPaths=new ArrayList<>();
 
   private LocationResponseDto location;
 

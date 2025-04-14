@@ -1,5 +1,6 @@
 package com.devs.roamance.dto.response;
 
+import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -12,7 +13,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ValidationErrorResponseDto extends BaseResponseDto {
 
-  private List<ValidationErrorDto> errors;
+  private List<ValidationErrorDto> errors = new ArrayList<>();
 
   public ValidationErrorResponseDto(
       int status, boolean success, String message, List<ValidationErrorDto> errors) {

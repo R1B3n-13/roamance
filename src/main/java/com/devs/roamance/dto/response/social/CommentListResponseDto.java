@@ -1,6 +1,8 @@
 package com.devs.roamance.dto.response.social;
 
 import com.devs.roamance.dto.response.BaseResponseDto;
+
+import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,7 +15,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class CommentListResponseDto extends BaseResponseDto {
 
-  private List<CommentDto> data;
+  private List<CommentDto> data=new ArrayList<>();
 
   public CommentListResponseDto(
       int status, boolean success, String message, List<CommentDto> data) {
