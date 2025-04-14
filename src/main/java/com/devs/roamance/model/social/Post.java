@@ -1,7 +1,7 @@
 package com.devs.roamance.model.social;
 
 import com.devs.roamance.model.BaseEntity;
-import com.devs.roamance.model.Location;
+import com.devs.roamance.model.travel.Location;
 import com.devs.roamance.model.user.User;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -27,12 +27,12 @@ public class Post extends BaseEntity {
   @Column(length = 10_000)
   private String text;
 
-  @Size(max = 50, message = "No more than 50 images are allowed per post")
-  @ElementCollection(fetch = FetchType.LAZY)
+  @Size(max = 50)
+  @ElementCollection(fetch = FetchType.EAGER)
   private List<String> imagePaths = new ArrayList<>();
 
-  @Size(max = 5, message = "No more than 5 videos are allowed per post")
-  @ElementCollection(fetch = FetchType.LAZY)
+  @Size(max = 5)
+  @ElementCollection(fetch = FetchType.EAGER)
   private List<String> videoPaths = new ArrayList<>();
 
   @Embedded private Location location;
@@ -42,7 +42,7 @@ public class Post extends BaseEntity {
 
   @JsonIgnore
   @ManyToOne(
-      fetch = FetchType.LAZY,
+      fetch = FetchType.EAGER,
       cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH})
   @JoinColumn(name = "user_id", referencedColumnName = "id")
   private User user;

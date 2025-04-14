@@ -32,16 +32,16 @@ public class Message extends BaseEntity {
   private String text;
 
   @Size(max = 20)
-  @ElementCollection(fetch = FetchType.LAZY)
+  @ElementCollection(fetch = FetchType.EAGER)
   private List<String> imagePaths = new ArrayList<>();
 
   @Size(max = 3)
-  @ElementCollection(fetch = FetchType.LAZY)
+  @ElementCollection(fetch = FetchType.EAGER)
   private List<String> videoPaths = new ArrayList<>();
 
   @JsonIgnore
   @ManyToOne(
-      fetch = FetchType.LAZY,
+      fetch = FetchType.EAGER,
       cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH})
   @JoinColumn(name = "user_id", referencedColumnName = "id")
   private User user;

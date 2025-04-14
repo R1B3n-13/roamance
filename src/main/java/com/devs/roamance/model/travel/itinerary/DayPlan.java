@@ -1,10 +1,12 @@
 package com.devs.roamance.model.travel.itinerary;
 
 import com.devs.roamance.exception.ScheduleCollisionException;
+import com.devs.roamance.model.user.User;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
@@ -46,10 +48,11 @@ public class DayPlan {
   @Size(max = 50)
   private List<Activity> activities = new ArrayList<>();
 
-  @Embedded RoutePlan routePlan;
+  @Embedded private RoutePlan routePlan;
 
-  @Size(max = 10_000)
-  private String notes;
+  @Size(max = 10)
+  @ElementCollection(fetch = FetchType.LAZY)
+  private List<@NotBlank @Size(max = 10_000) String> notes = new ArrayList<>();
 
   @Formula("(SELECT COALESCE(SUM(a.cost), 0) FROM activities a WHERE a.day_plan_id = id)")
   private BigDecimal totalCost = BigDecimal.ZERO;
@@ -60,6 +63,13 @@ public class DayPlan {
       cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH})
   @JoinColumn(name = "itinerary_id", referencedColumnName = "id")
   private Itinerary itinerary;
+
+  @JsonIgnore
+  @ManyToOne(
+      fetch = FetchType.EAGER,
+      cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH})
+  @JoinColumn(name = "user_id", referencedColumnName = "id")
+  private User user;
 
   @PrePersist
   @PreUpdate

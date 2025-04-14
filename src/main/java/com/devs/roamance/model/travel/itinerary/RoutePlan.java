@@ -28,7 +28,7 @@ public class RoutePlan {
 
   private String routeDescription;
 
-  @Size(min = 1, max = 100)
-  @ElementCollection(fetch = FetchType.LAZY)
+  @Size(min = 1, max = 30)
+  @ElementCollection(fetch = FetchType.EAGER)
   private List<Location> locations = new ArrayList<>();
 }

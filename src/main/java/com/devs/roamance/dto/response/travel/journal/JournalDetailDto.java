@@ -14,5 +14,5 @@ import lombok.Setter;
 @AllArgsConstructor
 public class JournalDetailDto extends JournalDto {
   @JsonProperty("subsections")
-  private List<SubsectionDto> subsections = new ArrayList<>();
+  private List<SubsectionBriefDto> subsections = new ArrayList<>();
 }

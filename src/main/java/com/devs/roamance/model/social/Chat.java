@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -29,12 +30,13 @@ public class Chat extends BaseEntity {
 
   @JsonIgnore
   @ManyToMany(
-      fetch = FetchType.LAZY,
+      fetch = FetchType.EAGER, // Although a List, But only two users per chat for now (one to one)
       cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
   @JoinTable(
       name = "chat_users",
       joinColumns = @JoinColumn(name = "chat_id"),
       inverseJoinColumns = @JoinColumn(name = "user_id"))
+  @Size(min = 2, max = 2)
   private List<User> users = new ArrayList<>();
 
   @JsonIgnore

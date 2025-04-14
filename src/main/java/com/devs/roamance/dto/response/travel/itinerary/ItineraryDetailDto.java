@@ -1,6 +1,5 @@
-package com.devs.roamance.dto.response.travel.journal;
+package com.devs.roamance.dto.response.travel.itinerary;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -12,8 +11,8 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@JsonInclude(JsonInclude.Include.NON_NULL)
-public class SubsectionDetailDto extends SubsectionBriefDto {
+public class ItineraryDetailDto extends ItineraryBriefDto {
+
   private List<String> notes = new ArrayList<>();
-  private List<String> checklists = new ArrayList<>();
+  private List<DayPlanBriefDto> dayPlans = new ArrayList<>();
 }

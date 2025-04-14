@@ -10,8 +10,8 @@ import com.devs.roamance.dto.request.travel.journal.SightseeingSubsectionUpdateR
 import com.devs.roamance.dto.request.travel.journal.SubsectionCreateRequestDto;
 import com.devs.roamance.dto.request.travel.journal.SubsectionUpdateRequestDto;
 import com.devs.roamance.dto.response.BaseResponseDto;
+import com.devs.roamance.dto.response.travel.journal.SubsectionBriefDto;
 import com.devs.roamance.dto.response.travel.journal.SubsectionDetailDto;
-import com.devs.roamance.dto.response.travel.journal.SubsectionDto;
 import com.devs.roamance.dto.response.travel.journal.SubsectionListResponseDto;
 import com.devs.roamance.dto.response.travel.journal.SubsectionResponseDto;
 import com.devs.roamance.exception.ResourceNotFoundException;
@@ -113,13 +113,14 @@ public class SubsectionServiceImpl implements SubsectionService {
     Page<Subsection> subsectionPage =
         subsectionRepository.findAllByJournalCreatedBy(authenticatedUser.getId(), pageable);
 
-    List<SubsectionDto> subsections =
+    List<SubsectionBriefDto> subsections =
         subsectionPage.getContent().stream()
             .map(
                 subsection -> {
-                  SubsectionDto subsectionDto = modelMapper.map(subsection, SubsectionDto.class);
-                  subsectionDto.setJournalId(subsection.getJournal().getId());
-                  return subsectionDto;
+                  SubsectionBriefDto subsectionBriefDto =
+                      modelMapper.map(subsection, SubsectionBriefDto.class);
+                  subsectionBriefDto.setJournalId(subsection.getJournal().getId());
+                  return subsectionBriefDto;
                 })
             .toList();
 

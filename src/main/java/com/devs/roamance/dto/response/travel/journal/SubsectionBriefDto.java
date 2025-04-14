@@ -14,7 +14,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class SubsectionDto {
+public class SubsectionBriefDto {
   private UUID id;
   private String title;
   private SubsectionType type;
