@@ -1,12 +1,12 @@
 package com.devs.roamance.config;
 
-import com.devs.roamance.repository.UserRepository;
 import java.util.Optional;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.lang.NonNull;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -14,12 +14,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class AuditorAwareImpl implements AuditorAware<UUID> {
   private static final Logger logger = LoggerFactory.getLogger(AuditorAwareImpl.class);
-
-  private final UserRepository userRepository;
-
-  public AuditorAwareImpl(UserRepository userRepository) {
-    this.userRepository = userRepository;
-  }
 
   @Override
   @NonNull
@@ -33,16 +27,18 @@ public class AuditorAwareImpl implements AuditorAware<UUID> {
       return Optional.empty();
     }
 
-    String email = authentication.getName();
-    logger.debug("Getting auditor UUID for user with email: {}", email);
+    if (authentication.getDetails() != null && authentication instanceof UsernamePasswordAuthenticationToken) {
+      try {
+        String userIdString = authentication.getDetails().toString();
+        UUID userId = UUID.fromString(userIdString);
+        logger.debug("Retrieved user UUID: {} directly from authentication details", userId);
+        return Optional.of(userId);
+      } catch (IllegalArgumentException e) {
+        logger.warn("Could not parse UUID from authentication details: {}", authentication.getDetails());
+      }
+    }
 
-    return userRepository
-        .findByEmail(email)
-        .map(
-            user -> {
-              UUID userId = user.getId();
-              logger.debug("Found user UUID: {} for email: {}", userId, email);
-              return userId;
-            });
+    logger.debug("User ID not found in authentication details");
+    return Optional.empty();
   }
 }

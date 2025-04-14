@@ -42,13 +42,15 @@ public class JwtUtils {
 
   private String generateToken(Authentication authentication, int expiresIn, String tokenType) {
 
+    String userId = authentication.getDetails() != null ? authentication.getDetails().toString() : null;
+
     return Jwts.builder()
         .subject(authentication.getName())
         .issuer("roamance.com")
         .claim("type", tokenType)
-        .claim(
-            "roles",
+        .claim("roles",
             authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList())
+        .claim("userId", userId)
         .issuedAt(new Date())
         .expiration(new Date((new Date()).getTime() + expiresIn))
         .signWith(key())
@@ -84,6 +86,11 @@ public class JwtUtils {
   public List<String> getRolesFromToken(String token) {
 
     return getTokenPayload(token).get("roles", List.class);
+  }
+
+  public String getUserIdFromToken(String token) {
+
+    return getTokenPayload(token).get("userId", String.class);
   }
 
   private Claims getTokenPayload(String token) {
