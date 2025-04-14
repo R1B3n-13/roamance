@@ -15,7 +15,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class MessageListResponseDto extends BaseResponseDto {
 
-  private List<MessageDto> data=new ArrayList<>();
+  private List<MessageDto> data = new ArrayList<>();
 
   public MessageListResponseDto(
       int status, boolean success, String message, List<MessageDto> data) {

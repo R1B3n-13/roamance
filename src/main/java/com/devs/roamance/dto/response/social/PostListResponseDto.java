@@ -15,7 +15,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class PostListResponseDto extends BaseResponseDto {
 
-  private List<PostDto> data=new ArrayList<>();
+  private List<PostDto> data = new ArrayList<>();
 
   public PostListResponseDto(int status, boolean success, String message, List<PostDto> data) {
 

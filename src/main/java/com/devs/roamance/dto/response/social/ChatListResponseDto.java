@@ -15,7 +15,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ChatListResponseDto extends BaseResponseDto {
 
-  private List<ChatDto> data=new ArrayList<>();
+  private List<ChatDto> data = new ArrayList<>();
 
   public ChatListResponseDto(int status, boolean success, String message, List<ChatDto> data) {
 

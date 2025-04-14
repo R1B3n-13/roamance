@@ -1,6 +1,8 @@
 package com.devs.roamance.dto.response.travel.journal;
 
 import com.devs.roamance.dto.response.LocationResponseDto;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -15,5 +17,7 @@ import lombok.Setter;
 public class RouteSubsectionResponseDto extends SubsectionResponseDto {
   private List<LocationResponseDto> locations = new ArrayList<>();
   private Integer totalTime;
+
+  @JsonProperty("total_distance")
   private Double totalDistance;
 }
