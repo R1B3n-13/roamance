@@ -1,9 +1,10 @@
 package com.devs.roamance.dto.response.travel.journal;
 
-import com.devs.roamance.dto.response.LocationResponseDto;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import java.time.OffsetDateTime;
 import java.util.UUID;
+
+import com.devs.roamance.dto.response.AuditResponseDto;
+import com.devs.roamance.dto.response.LocationResponseDto;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,24 +14,9 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class JournalDto {
+public class JournalDto extends AuditResponseDto {
   private UUID id;
   private String title;
   private LocationResponseDto destination;
   private String description;
-
-  @JsonProperty("created_at")
-  private OffsetDateTime createdAt;
-
-  @JsonProperty("last_modified_at")
-  private OffsetDateTime lastModifiedAt;
-
-  @JsonProperty("created_by")
-  private UUID createdBy;
-
-  @JsonProperty("last_modified_by")
-  private UUID lastModifiedBy;
-
-  @JsonProperty("total_subsections")
-  private int totalSubsections;
 }
