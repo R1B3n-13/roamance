@@ -14,6 +14,7 @@ interface FileUploaderProps {
   className?: string;
   multiple?: boolean;
   showPreview?: boolean;
+  onClose?: () => void; // New prop to handle dialog closure
 }
 
 /**
@@ -29,6 +30,7 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
   className = '',
   multiple = false,
   showPreview = true,
+  onClose,
 }) => {
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -89,6 +91,13 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
     setProgress(0);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
+    }
+  };
+
+  // New handler for close button that calls the onClose prop
+  const handleClose = () => {
+    if (onClose) {
+      onClose();
     }
   };
 
@@ -211,12 +220,20 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
               <h4 className="text-sm font-medium text-green-800 dark:text-green-400">
                 Upload successful!
               </h4>
-              <button
-                onClick={resetUpload}
-                className="px-2 py-1 text-xs font-medium text-white bg-green-600 rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 dark:bg-green-700 dark:hover:bg-green-600"
-              >
-                New Upload
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={resetUpload}
+                  className="px-2 py-1 text-xs font-medium text-white bg-green-600 rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 dark:bg-green-700 dark:hover:bg-green-600"
+                >
+                  New Upload
+                </button>
+                <button
+                  onClick={handleClose}
+                  className="px-2 py-1 text-xs font-medium text-white bg-blue-600 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:bg-blue-700 dark:hover:bg-blue-600"
+                >
+                  Done
+                </button>
+              </div>
             </div>
 
             {/* Image preview */}
