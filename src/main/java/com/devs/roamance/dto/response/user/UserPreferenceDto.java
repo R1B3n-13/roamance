@@ -1,6 +1,7 @@
 package com.devs.roamance.dto.response.user;
 
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -24,5 +25,11 @@ public class UserPreferenceDto {
 
     @JsonProperty("user_id")
     private UUID userId;
+
+    @JsonProperty("created_at")
+    private OffsetDateTime createdAt;
+
+    @JsonProperty("last_modified_at")
+    private OffsetDateTime lastModifiedAt;
 
 }
