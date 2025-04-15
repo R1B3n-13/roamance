@@ -6,7 +6,7 @@ import com.devs.roamance.dto.response.user.UserPreferenceListResponseDto;
 import com.devs.roamance.dto.response.user.UserPreferenceResponseDto;
 import java.util.UUID;
 
-public interface UserPreferenceService
+public interface UserInfoService
     extends BaseService<
         UserPreferenceResponseDto,
         UserPreferenceResponseDto,

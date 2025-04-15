@@ -22,11 +22,11 @@ public final class ResponseMessage {
 
   // ==================== User Preference Related ====================
 
-  public static final String USER_PREFERENCE_FETCH_SUCCESS = "User preference fetched successfully.";
-  public static final String USER_PREFERENCE_CREATE_SUCCESS = "User preference created successfully.";
-  public static final String USER_PREFERENCE_UPDATE_SUCCESS = "User preference updated successfully.";
-  public static final String USER_PREFERENCE_DELETE_SUCCESS = "User preference deleted successfully.";
-  public static final String USER_PREFERENCE_NOT_FOUND = "No preference found for user with id: %s!";
+  public static final String USER_INFO_FETCH_SUCCESS = "User info fetched successfully.";
+  public static final String USER_INFO_CREATE_SUCCESS = "User info created successfully.";
+  public static final String USER_INFO_UPDATE_SUCCESS = "User info updated successfully.";
+  public static final String USER_INFO_DELETE_SUCCESS = "User info deleted successfully.";
+  public static final String USER_INFO_NOT_FOUND = "No info found for user with id: %s!";
 
   // ==================== Authentication Related ====================
 
