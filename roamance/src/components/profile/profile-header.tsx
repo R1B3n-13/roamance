@@ -1,6 +1,5 @@
 'use client';
 
-import { CloudinaryUploadResult } from '@/api/cloudinary-api';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -22,8 +21,9 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { ThemeToggle } from '@/components/common/theme-toggle';
-import { CloudinaryUploader } from '@/components/common/cloudinary-uploader';
+import { FileUploader } from '@/components/common/file-uploader';
 import { userService } from '@/service/user-service';
+import { CloudinaryUploadResult } from '@/service/cloudinary-service';
 
 interface ProfileHeaderProps {
   user: User | null;
@@ -60,8 +60,8 @@ export function ProfileHeader({
 
       // Update user info with new profile image
       await userService.updateUserInfo({
-        user_id: user.id,
-        profile_image: result.secure_url,
+        ...userInfo,
+        profile_image: result.url,
       });
 
       toast.success('Profile picture updated successfully');
@@ -100,13 +100,14 @@ export function ProfileHeader({
             </DialogDescription>
           </DialogHeader>
           <div className="py-6">
-            <CloudinaryUploader
-              onUpload={handleUploadSuccess}
-              onError={handleUploadError}
-              value={userInfo?.profile_image || ''}
-              publicId={user?.id ? `user-${user.id}` : undefined}
-              buttonText={isUploading ? 'Updating...' : 'Select Image'}
+            <FileUploader
+              onUploadSuccess={handleUploadSuccess}
+              onUploadError={handleUploadError}
+              acceptedFileTypes="image/*"
+              maxSizeMB={5}
+              buttonText={isUploading ? 'Uploading...' : 'Select Profile Image'}
               className="w-full"
+              showPreview={true}
             />
           </div>
         </DialogContent>
