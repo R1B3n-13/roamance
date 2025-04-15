@@ -12,7 +12,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
-import { User } from '@/types';
+import { User, UserInfo } from '@/types';
 import { motion } from 'framer-motion';
 import {
   ArrowRight,
@@ -31,6 +31,7 @@ import {
 
 interface ProfileTripsProps {
   user: User | null;
+  userInfo: UserInfo | null;
   loading: boolean;
 }
 
@@ -81,7 +82,11 @@ const pastTrips = [
   },
 ];
 
-export function ProfileTrips({ loading }: ProfileTripsProps) {
+export function ProfileTrips({ user, userInfo, loading }: ProfileTripsProps) {
+  // Use trips from userInfo if available, otherwise fallback to mock data
+  const userUpcomingTrips = userInfo?.upcoming_trips || upcomingTrips;
+  const userPastTrips = userInfo?.past_trips || pastTrips;
+
   // Format date to display in a more readable format
   const formatDate = (dateString: string) => {
     const options: Intl.DateTimeFormatOptions = {
@@ -253,9 +258,9 @@ export function ProfileTrips({ loading }: ProfileTripsProps) {
           </div>
 
           <TabsContent value="upcoming" className="pt-2 space-y-8">
-            {upcomingTrips.length > 0 ? (
+            {userUpcomingTrips.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {upcomingTrips.map((trip, index) => (
+                {userUpcomingTrips.map((trip, index) => (
                   <motion.div
                     key={trip.id}
                     variants={itemVariants}
@@ -283,9 +288,9 @@ export function ProfileTrips({ loading }: ProfileTripsProps) {
           </TabsContent>
 
           <TabsContent value="past" className="pt-2 space-y-8">
-            {pastTrips.length > 0 ? (
+            {userPastTrips.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {pastTrips.map((trip, index) => (
+                {userPastTrips.map((trip, index) => (
                   <motion.div
                     key={trip.id}
                     variants={itemVariants}
@@ -336,20 +341,20 @@ export function ProfileTrips({ loading }: ProfileTripsProps) {
               <StatsCard
                 icon={MapPin}
                 label="Countries"
-                value={pastTrips.length}
+                value={userInfo?.stats?.countries_visited || userPastTrips.length}
                 color="ocean"
               />
               <StatsCard
                 icon={Plane}
                 label="Total Trips"
-                value={pastTrips.length +
-                  upcomingTrips.filter((t) => t.status === 'confirmed').length}
+                value={userInfo?.stats?.total_trips || (userPastTrips.length +
+                  userUpcomingTrips.filter((t) => t.status === 'confirmed').length)}
                 color="sunset"
               />
               <StatsCard
                 icon={Calendar}
                 label="Days Traveled"
-                value={pastTrips.reduce(
+                value={userInfo?.stats?.days_traveled || userPastTrips.reduce(
                   (acc, trip) =>
                     acc + tripDuration(trip.startDate, trip.endDate),
                   0
@@ -359,7 +364,7 @@ export function ProfileTrips({ loading }: ProfileTripsProps) {
               <StatsCard
                 icon={Flag}
                 label="Bucket List"
-                value={2}
+                value={userInfo?.stats?.bucket_list_count || 2}
                 color="sand"
               />
             </div>
@@ -398,8 +403,7 @@ function StatsCard({ icon: Icon, label, value, color }: StatsCardProps) {
         getColorClass(color, 'border'),
         getColorClass(color, 'bg'),
         "bg-gradient-to-b from-background/80 to-background/50 backdrop-blur-sm shadow-sm"
-      )}
-    >
+      )}>
       <div className="flex justify-center mb-2">
         <div className={cn("p-2 rounded-full bg-white/20 shadow-sm", getColorClass(color, 'text'))}>
           <Icon className="h-5 w-5" />

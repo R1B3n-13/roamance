@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { UserRequest } from '@/types/auth';
+import { User, UserInfo } from '@/types';
 import { motion } from 'framer-motion';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,7 +12,8 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
 interface ProfileSavedPlacesProps {
-  user: UserRequest | null;
+  user: User | null;
+  userInfo: UserInfo | null;
   loading: boolean;
 }
 
@@ -82,9 +83,12 @@ const mockSavedPlaces = [
   },
 ];
 
-export function ProfileSavedPlaces({ loading }: ProfileSavedPlacesProps) {
+export function ProfileSavedPlaces({ user, userInfo, loading }: ProfileSavedPlacesProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
+
+  // Use saved places from userInfo if available, otherwise fallback to mock data
+  const savedPlaces = userInfo?.saved_places || mockSavedPlaces;
 
   const filters = [
     { id: 'all', label: 'All Places', icon: Globe },
@@ -95,7 +99,7 @@ export function ProfileSavedPlaces({ loading }: ProfileSavedPlacesProps) {
   ];
 
   // Filter places based on search term and category filter
-  const filteredPlaces = mockSavedPlaces.filter((place) => {
+  const filteredPlaces = savedPlaces.filter((place) => {
     const matchesSearch =
       place.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       place.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -356,8 +360,7 @@ function SavedPlaceCard({ place }: SavedPlaceCardProps) {
             className={cn(
               'absolute inset-0 flex items-center justify-center bg-gradient-to-tr',
               getGradient()
-            )}
-          >
+            )}>
             {/* Decorative pattern overlay */}
             <div className="absolute inset-0 bg-[url('/images/roamance-logo-no-text.png')] bg-repeat-space bg-contain opacity-10 mix-blend-overlay" />
 

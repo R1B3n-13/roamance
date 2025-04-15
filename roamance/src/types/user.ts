@@ -1,22 +1,31 @@
-export interface UserEndpoints {
-  REGISTER: string;
-  LOGIN: string;
-  UPDATE: string;
-  DELETE: string;
-  PROFILE: string;
-}
+import { Audit } from './audit';
 
-export interface User {
+export interface User extends Audit {
   id: string;
   email: string;
   name: string;
-  profileImage?: string;
-  created_at: string;
-  last_modified_at: string;
 }
 
 export interface UserResponse {
   data: User;
+  message: string;
+  status: number;
+}
+
+export interface UserInfo extends Audit {
+  id: string;
+  phone: string | null;
+  bio: string | null;
+  location: string | null;
+  website: string | null;
+  birthday: string | null;
+  profile_image: string | null;
+  cover_image: string | null;
+  user_id: string;
+}
+
+export interface UserInfoResponse {
+  data: UserInfo;
   message: string;
   status: number;
 }

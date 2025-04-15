@@ -1,11 +1,10 @@
-import { api } from '@/api/roamance-api';
 import { LoadingButton } from '@/components/common/loading-button';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { USER_ENDPOINTS } from '@/constants/api';
-import { User as UserType } from '@/types';
+import { User as UserType, UserInfo } from '@/types';
+import { userService } from '@/service/user-service';
 import { motion } from 'framer-motion';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
@@ -28,34 +27,45 @@ const itemVariants = {
 
 interface ProfileEditFormProps {
   user: UserType | null;
+  userInfo: UserInfo | null;
   onCancel: () => void;
+  onComplete?: () => void;
 }
 
-export function ProfileEditForm({ user, onCancel }: ProfileEditFormProps) {
+export function ProfileEditForm({ user, userInfo, onCancel, onComplete }: ProfileEditFormProps) {
   const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState({
     name: user?.name || '',
     email: user?.email || '',
-    phone: '',
-    bio: '',
-    location: '',
-    website: '',
-    birthday: '',
+    phone: userInfo?.phone || '',
+    bio: userInfo?.bio || '',
+    location: userInfo?.location || '',
+    website: userInfo?.website || '',
+    birthday: userInfo?.birthday || '',
   });
 
   useEffect(() => {
     if (user) {
-      setFormData({
+      setFormData(prevState => ({
+        ...prevState,
         name: user.name || '',
         email: user.email || '',
-        phone: '',
-        bio: '',
-        location: '',
-        website: '',
-        birthday: '',
-      });
+      }));
     }
   }, [user]);
+
+  useEffect(() => {
+    if (userInfo) {
+      setFormData(prevState => ({
+        ...prevState,
+        phone: userInfo.phone || '',
+        bio: userInfo.bio || '',
+        location: userInfo.location || '',
+        website: userInfo.website || '',
+        birthday: userInfo.birthday || '',
+      }));
+    }
+  }, [userInfo]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -69,10 +79,27 @@ export function ProfileEditForm({ user, onCancel }: ProfileEditFormProps) {
 
     try {
       setIsSaving(true);
-      await api.put(USER_ENDPOINTS.UPDATE, formData);
+
+      // Extract user info data from form
+      const userInfoData: Partial<UserInfo> = {
+        phone: formData.phone,
+        bio: formData.bio,
+        location: formData.location,
+        website: formData.website,
+        birthday: formData.birthday,
+        user_id: user?.id,
+      };
+
+      // Update user info using our service
+      await userService.updateUserInfo(userInfoData);
 
       toast.success('Your profile has been updated');
-      onCancel(); // Exit editing mode
+
+      if (onComplete) {
+        onComplete();
+      } else {
+        onCancel(); // Exit editing mode
+      }
     } catch (error) {
       console.error('Failed to update profile', error);
       toast.error('Failed to update your profile');
@@ -122,6 +149,8 @@ export function ProfileEditForm({ user, onCancel }: ProfileEditFormProps) {
             onChange={handleChange}
             placeholder="john@example.com"
             className="border-muted/50 focus:border-ocean focus:ring-1 focus:ring-ocean/30 bg-background/80 backdrop-blur-sm transition-colors"
+            disabled={true}
+            title="Email address cannot be changed"
           />
         </motion.div>
 

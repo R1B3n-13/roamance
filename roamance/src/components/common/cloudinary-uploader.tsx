@@ -110,42 +110,13 @@ export function CloudinaryUploader({
             </div>
           </div>
         </motion.div>
-      ) : (
-        <motion.div
-          className={cn(
-            "w-full border-2 border-dashed rounded-lg p-8 flex flex-col items-center justify-center text-center gap-3",
-            isHovered
-              ? "border-primary/50 bg-primary/5"
-              : "border-muted/60 bg-muted/5"
-          )}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
-        >
-          <div className={cn(
-            "p-4 rounded-full transition-colors duration-300",
-            isHovered ? "bg-primary/20" : "bg-muted/20"
-          )}>
-            <ImageIcon className={cn(
-              "h-8 w-8 transition-colors duration-300",
-              isHovered ? "text-primary" : "text-muted-foreground/60"
-            )} />
-          </div>
-          <div className="space-y-1">
-            <h3 className="text-base font-medium">Upload your image</h3>
-            <p className="text-sm text-muted-foreground">
-              Drag and drop or click to browse
-            </p>
-          </div>
-        </motion.div>
-      )}
+      ) : null}
 
       {isReady && effectiveUploadPreset && (
         <CldUploadWidget
           onOpen={handleOpen}
           uploadPreset={effectiveUploadPreset}
+          signatureEndpoint="/api/cloudinary/signature"
           onSuccess={(result) => {
             if (result.info && typeof result.info === 'object') {
               // Add type assertion to handle the structure mismatch
@@ -169,39 +140,90 @@ export function CloudinaryUploader({
             maxFiles: 1,
             clientAllowedFormats: ['jpg', 'jpeg', 'png', 'webp'],
             maxFileSize: 10000000, // 10MB
+            cloudName: signature?.cloudName,
+            apiKey: signature?.apiKey,
+            folder: 'roamance_uploads'
           }}
         >
           {({ open }) => (
-            <motion.div
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
-              className="w-full max-w-xs mx-auto"
-            >
-              <Button
-                type="button"
-                variant="outline"
-                size="lg"
-                onClick={() => open()}
-                disabled={isLoading}
-                className={cn(
-                  "w-full rounded-full font-medium hover:shadow-md transition-all",
-                  "border-primary/30 bg-gradient-to-r from-background via-background to-background/80",
-                  isLoading ? "" : "hover:bg-primary/10 hover:border-primary/50"
-                )}
+            <>
+              {!value && (
+                <motion.div
+                  className={cn(
+                    "w-full border-2 border-dashed rounded-lg p-8 flex flex-col items-center justify-center text-center gap-3 cursor-pointer",
+                    isHovered
+                      ? "border-primary/50 bg-primary/5"
+                      : "border-muted/60 bg-muted/5"
+                  )}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5 }}
+                  onMouseEnter={() => setIsHovered(true)}
+                  onMouseLeave={() => setIsHovered(false)}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    open();
+                  }}
+                  tabIndex={0}
+                  role="button"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      open();
+                    }
+                  }}
+                >
+                  <div className={cn(
+                    "p-4 rounded-full transition-colors duration-300",
+                    isHovered ? "bg-primary/20" : "bg-muted/20"
+                  )}>
+                    <ImageIcon className={cn(
+                      "h-8 w-8 transition-colors duration-300",
+                      isHovered ? "text-primary" : "text-muted-foreground/60"
+                    )} />
+                  </div>
+                  <div className="space-y-1">
+                    <h3 className="text-base font-medium">Upload your image</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Drag and drop or click to browse
+                    </p>
+                  </div>
+                </motion.div>
+              )}
+              <motion.div
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+                className="w-full max-w-xs mx-auto mt-4"
               >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin text-primary" />
-                    <span className="text-muted-foreground">Loading...</span>
-                  </>
-                ) : (
-                  <>
-                    <Upload className="mr-2 h-4 w-4 text-primary" />
-                    {value ? 'Change Image' : buttonText}
-                  </>
-                )}
-              </Button>
-            </motion.div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="lg"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    open();
+                  }}
+                  disabled={isLoading}
+                  className={cn(
+                    "w-full rounded-full font-medium hover:shadow-md transition-all",
+                    "border-primary/30 bg-gradient-to-r from-background via-background to-background/80",
+                    isLoading ? "" : "hover:bg-primary/10 hover:border-primary/50"
+                  )}
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin text-primary" />
+                      <span className="text-muted-foreground">Loading...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="mr-2 h-4 w-4 text-primary" />
+                      {value ? 'Change Image' : buttonText}
+                    </>
+                  )}
+                </Button>
+              </motion.div>
+            </>
           )}
         </CldUploadWidget>
       )}

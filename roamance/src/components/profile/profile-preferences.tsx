@@ -1,6 +1,5 @@
 'use client';
 
-import { api } from '@/api/roamance-api';
 import { LoadingButton } from '@/components/common/loading-button';
 import {
   Card,
@@ -15,9 +14,8 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
-import { USER_ENDPOINTS } from '@/constants/api';
 import { cn } from '@/lib/utils';
-import { User } from '@/types';
+import { User, UserInfo } from '@/types';
 import { motion } from 'framer-motion';
 import {
   Building2,
@@ -43,9 +41,11 @@ import {
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
+import { userService } from '@/service/user-service';
 
 interface ProfilePreferencesProps {
   user: User | null;
+  userInfo: UserInfo | null;
   loading: boolean;
 }
 
@@ -65,25 +65,25 @@ interface PreferencesData {
   };
 }
 
-export function ProfilePreferences({ user, loading }: ProfilePreferencesProps) {
+export function ProfilePreferences({ user, userInfo, loading }: ProfilePreferencesProps) {
   const [isSaving, setIsSaving] = useState(false);
 
-  // Default preferences or loaded from user
+  // Default preferences or loaded from user info
   const [preferences, setPreferences] = useState<PreferencesData>({
-    travelStyle: user?.preferences?.travelStyle || 'balanced',
-    accommodationTypes: user?.preferences?.accommodationTypes || [
+    travelStyle: userInfo?.preferences?.travelStyle || 'balanced',
+    accommodationTypes: userInfo?.preferences?.accommodationTypes || [
       'hotel',
       'apartment',
     ],
-    activities: user?.preferences?.activities || [
+    activities: userInfo?.preferences?.activities || [
       'sightseeing',
       'nature',
       'food',
     ],
-    cuisines: user?.preferences?.cuisines || ['local', 'international'],
-    climatePreference: user?.preferences?.climatePreference || 'warm',
-    budgetLevel: user?.preferences?.budgetLevel || 2,
-    notificationPreferences: user?.preferences?.notificationPreferences || {
+    cuisines: userInfo?.preferences?.cuisines || ['local', 'international'],
+    climatePreference: userInfo?.preferences?.climatePreference || 'warm',
+    budgetLevel: userInfo?.preferences?.budgetLevel || 2,
+    notificationPreferences: userInfo?.preferences?.notificationPreferences || {
       deals: true,
       tripReminders: true,
       newsletters: false,
@@ -92,9 +92,14 @@ export function ProfilePreferences({ user, loading }: ProfilePreferencesProps) {
   });
 
   const handleSavePreferences = async () => {
+    if (!user) return;
+
     try {
       setIsSaving(true);
-      await api.put(USER_ENDPOINTS.UPDATE, {
+
+      // Update user preferences using our service
+      await userService.updateUserInfo({
+        user_id: user.id,
         preferences,
       });
 

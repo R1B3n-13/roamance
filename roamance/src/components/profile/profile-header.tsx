@@ -1,9 +1,6 @@
 'use client';
 
 import { CloudinaryUploadResult } from '@/api/cloudinary-api';
-import { api } from '@/api/roamance-api';
-import { CloudinaryUploader } from '@/components/common/cloudinary-uploader';
-import { ThemeToggle } from '@/components/common/theme-toggle';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -15,25 +12,29 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
-import { USER_ENDPOINTS } from '@/constants/api';
 import { routes } from '@/constants/routes';
 import { cn } from '@/lib/utils';
-import { User } from '@/types';
+import { User, UserInfo } from '@/types';
 import { getDateParts, getMonthName } from '@/utils/format';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Calendar, Camera, Home } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { ThemeToggle } from '@/components/common/theme-toggle';
+import { CloudinaryUploader } from '@/components/common/cloudinary-uploader';
+import { userService } from '@/service/user-service';
 
 interface ProfileHeaderProps {
   user: User | null;
+  userInfo: UserInfo | null;
   loading: boolean;
   onProfileUpdate?: () => void;
 }
 
 export function ProfileHeader({
   user,
+  userInfo,
   loading,
   onProfileUpdate,
 }: ProfileHeaderProps) {
@@ -57,8 +58,10 @@ export function ProfileHeader({
     try {
       setIsUploading(true);
 
-      await api.put(USER_ENDPOINTS.UPDATE, {
-        profileImage: result.secure_url,
+      // Update user info with new profile image
+      await userService.updateUserInfo({
+        user_id: user.id,
+        profile_image: result.secure_url,
       });
 
       toast.success('Profile picture updated successfully');
@@ -100,7 +103,7 @@ export function ProfileHeader({
             <CloudinaryUploader
               onUpload={handleUploadSuccess}
               onError={handleUploadError}
-              value={user?.profileImage}
+              value={userInfo?.profile_image || ''}
               publicId={user?.id ? `user-${user.id}` : undefined}
               buttonText={isUploading ? 'Updating...' : 'Select Image'}
               className="w-full"
@@ -162,7 +165,7 @@ export function ProfileHeader({
               >
                 <Avatar className="w-28 h-28 md:w-36 md:h-36 border-4 border-background shadow-xl ring-2 ring-muted/30 ring-offset-2 ring-offset-background">
                   <AvatarImage
-                    src={user?.profileImage || undefined}
+                    src={userInfo?.profile_image || undefined}
                     alt={user?.name || 'User'}
                     className="object-cover"
                   />
@@ -207,6 +210,9 @@ export function ProfileHeader({
                   <h1 className="text-2xl md:text-3xl font-bold text-foreground tracking-tight">
                     {user?.name || 'Traveler'}
                   </h1>
+                  {userInfo?.location && (
+                    <p className="text-muted-foreground">{userInfo.location}</p>
+                  )}
                 </div>
 
                 <div className="flex flex-wrap gap-3">

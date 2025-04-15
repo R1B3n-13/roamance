@@ -1,8 +1,5 @@
 'use client';
 
-import { api } from '@/api/roamance-api';
-import { USER_ENDPOINTS } from '@/constants/api';
-import { User, UserResponse } from '@/types';
 import { motion } from 'framer-motion';
 import { useEffect, useState, useCallback } from 'react';
 import { toast } from 'sonner';
@@ -12,17 +9,21 @@ import { ProfilePreferences } from './profile-preferences';
 import { ProfileSavedPlaces } from './profile-saved-places';
 import { ProfileTabs } from './profile-tabs';
 import { ProfileTrips } from './profile-trips';
+import { User, UserInfo } from '@/types';
+import { userService } from '@/service/user-service';
 
 export function ProfilePage() {
   const [activeTab, setActiveTab] = useState('info');
   const [user, setUser] = useState<User | null>(null);
+  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const [loading, setLoading] = useState(true);
 
   const fetchUserProfile = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await api.get<UserResponse>(USER_ENDPOINTS.PROFILE);
-      setUser(response.data.data);
+      const { user, userInfo } = await userService.getFullUserProfile();
+      setUser(user);
+      setUserInfo(userInfo);
     } catch (error) {
       console.error('Failed to fetch user profile', error);
       toast.error('Failed to load profile information');
@@ -38,15 +39,43 @@ export function ProfilePage() {
   const renderTabContent = () => {
     switch (activeTab) {
       case 'info':
-        return <ProfileInfo user={user} loading={loading} />;
+        return (
+          <ProfileInfo
+            user={user}
+            userInfo={userInfo}
+            loading={loading}
+            onProfileUpdate={fetchUserProfile}
+          />
+        );
       case 'preferences':
-        return <ProfilePreferences user={user} loading={loading} />;
+        return (
+          <ProfilePreferences
+            user={user}
+            userInfo={userInfo}
+            loading={loading}
+          />
+        );
       case 'trips':
-        return <ProfileTrips user={user} loading={loading} />;
+        return (
+          <ProfileTrips user={user} userInfo={userInfo} loading={loading} />
+        );
       case 'saved':
-        return <ProfileSavedPlaces user={user} loading={loading} />;
+        return (
+          <ProfileSavedPlaces
+            user={user}
+            userInfo={userInfo}
+            loading={loading}
+          />
+        );
       default:
-        return <ProfileInfo user={user} loading={loading} />;
+        return (
+          <ProfileInfo
+            user={user}
+            userInfo={userInfo}
+            loading={loading}
+            onProfileUpdate={fetchUserProfile}
+          />
+        );
     }
   };
 
@@ -58,8 +87,8 @@ export function ProfilePage() {
       transition: {
         staggerChildren: 0.15,
         delayChildren: 0.1,
-      }
-    }
+      },
+    },
   };
 
   const itemVariants = {
@@ -68,11 +97,11 @@ export function ProfilePage() {
       opacity: 1,
       y: 0,
       transition: {
-        type: "spring",
+        type: 'spring',
         stiffness: 260,
-        damping: 20
-      }
-    }
+        damping: 20,
+      },
+    },
   };
 
   return (
@@ -94,7 +123,12 @@ export function ProfilePage() {
         className="container max-w-5xl px-4 py-12 mx-auto"
       >
         <motion.div variants={itemVariants}>
-          <ProfileHeader user={user} loading={loading} onProfileUpdate={fetchUserProfile} />
+          <ProfileHeader
+            user={user}
+            userInfo={userInfo}
+            loading={loading}
+            onProfileUpdate={fetchUserProfile}
+          />
         </motion.div>
 
         <motion.div variants={itemVariants} className="mt-8">
@@ -107,10 +141,10 @@ export function ProfilePage() {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -30 }}
           transition={{
-            type: "spring",
+            type: 'spring',
             stiffness: 300,
             damping: 25,
-            duration: 0.4
+            duration: 0.4,
           }}
           className="mt-8"
         >

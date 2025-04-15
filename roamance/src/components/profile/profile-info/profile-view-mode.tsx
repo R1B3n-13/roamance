@@ -1,4 +1,4 @@
-import { User as UserType } from '@/types';
+import { User as UserType, UserInfo } from '@/types';
 import { motion } from 'framer-motion';
 import { Calendar, Globe, Mail, MapPin, Phone, User } from 'lucide-react';
 import { InfoItem } from './info-item';
@@ -21,9 +21,10 @@ const itemVariants = {
 
 interface ProfileViewModeProps {
   user: UserType | null;
+  userInfo: UserInfo | null;
 }
 
-export function ProfileViewMode({ user }: ProfileViewModeProps) {
+export function ProfileViewMode({ user, userInfo }: ProfileViewModeProps) {
   return (
     <motion.div
       variants={containerVariants}
@@ -45,7 +46,7 @@ export function ProfileViewMode({ user }: ProfileViewModeProps) {
         <InfoItem
           icon={Phone}
           label="Phone"
-          value={''}
+          value={userInfo?.phone || ''}
           color="sunset"
           fallback="Not provided"
         />
@@ -53,7 +54,7 @@ export function ProfileViewMode({ user }: ProfileViewModeProps) {
         <InfoItem
           icon={MapPin}
           label="Location"
-          value={''}
+          value={userInfo?.location || ''}
           color="forest"
           fallback="Not specified"
         />
@@ -61,7 +62,7 @@ export function ProfileViewMode({ user }: ProfileViewModeProps) {
         <InfoItem
           icon={Globe}
           label="Website"
-          value={''}
+          value={userInfo?.website || ''}
           color="sand"
           isLink
           fallback="Not provided"
@@ -70,7 +71,7 @@ export function ProfileViewMode({ user }: ProfileViewModeProps) {
         <InfoItem
           icon={Calendar}
           label="Birthday"
-          value={''}
+          value={userInfo?.birthday || ''}
           color="mountain"
           fallback="Not provided"
         />
@@ -87,7 +88,8 @@ export function ProfileViewMode({ user }: ProfileViewModeProps) {
           Biography
         </h3>
         <p className="text-muted-foreground leading-relaxed bg-muted/5 p-4 rounded-lg border border-muted/20 italic">
-          {'No bio provided. Tell us about yourself and your travel interests!'}
+          {userInfo?.bio ||
+            'No bio provided. Tell us about yourself and your travel interests!'}
         </p>
       </motion.div>
     </motion.div>

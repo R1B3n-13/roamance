@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { User as UserType } from '@/types';
+import { User as UserType, UserInfo } from '@/types';
 import { motion } from 'framer-motion';
 import { Edit2, User } from 'lucide-react';
 import { useState } from 'react';
@@ -18,10 +18,12 @@ import { ProfileViewMode } from './profile-view-mode';
 
 interface ProfileInfoProps {
   user: UserType | null;
+  userInfo: UserInfo | null;
   loading: boolean;
+  onProfileUpdate?: () => void;
 }
 
-export function ProfileInfo({ user, loading }: ProfileInfoProps) {
+export function ProfileInfo({ user, userInfo, loading, onProfileUpdate }: ProfileInfoProps) {
   const [isEditing, setIsEditing] = useState(false);
 
   // Animation variants for loading state
@@ -38,6 +40,13 @@ export function ProfileInfo({ user, loading }: ProfileInfoProps) {
   const itemVariants = {
     hidden: { opacity: 0, y: 10 },
     visible: { opacity: 1, y: 0 },
+  };
+
+  const handleEditComplete = () => {
+    setIsEditing(false);
+    if (onProfileUpdate) {
+      onProfileUpdate();
+    }
   };
 
   return (
@@ -105,9 +114,14 @@ export function ProfileInfo({ user, loading }: ProfileInfoProps) {
                 ))}
             </motion.div>
           ) : isEditing ? (
-            <ProfileEditForm user={user} onCancel={() => setIsEditing(false)} />
+            <ProfileEditForm
+              user={user}
+              userInfo={userInfo}
+              onCancel={() => setIsEditing(false)}
+              onComplete={handleEditComplete}
+            />
           ) : (
-            <ProfileViewMode user={user} />
+            <ProfileViewMode user={user} userInfo={userInfo} />
           )}
         </CardContent>
       </Card>
