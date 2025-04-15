@@ -17,7 +17,6 @@ export interface UserInfo extends Audit {
   phone: string | null;
   bio: string | null;
   location: string | null;
-  website: string | null;
   birthday: string | null;
   profile_image: string | null;
   cover_image: string | null;

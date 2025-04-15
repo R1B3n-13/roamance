@@ -1,6 +1,6 @@
-import { User as UserType, UserInfo } from '@/types';
+import { UserInfo, User as UserType } from '@/types';
 import { motion } from 'framer-motion';
-import { Calendar, Globe, Mail, MapPin, Phone, User } from 'lucide-react';
+import { Calendar, Mail, MapPin, Phone, User } from 'lucide-react';
 import { InfoItem } from './info-item';
 
 // Animation variants
@@ -57,15 +57,6 @@ export function ProfileViewMode({ user, userInfo }: ProfileViewModeProps) {
           value={userInfo?.location || ''}
           color="forest"
           fallback="Not specified"
-        />
-
-        <InfoItem
-          icon={Globe}
-          label="Website"
-          value={userInfo?.website || ''}
-          color="sand"
-          isLink
-          fallback="Not provided"
         />
 
         <InfoItem

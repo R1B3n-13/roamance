@@ -151,6 +151,15 @@ export function ProfileHeader({
   // Handle cover FileUploader's close button click
   const handleCoverUploaderClose = () => {
     setIsCoverUploadDialogOpen(false);
+
+    // When closed with successful upload, refresh the profile
+    if (coverUploadSuccessful) {
+      if (onProfileUpdate) {
+        onProfileUpdate();
+      }
+      // Reset the flag
+      setCoverUploadSuccessful(false);
+    }
   };
 
   const handleCoverUploadError = (error: Error) => {
