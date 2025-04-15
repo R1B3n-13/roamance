@@ -20,6 +20,14 @@ public final class ResponseMessage {
   public static final String USER_NOT_FOUND_EMAIL = "No user present with email: %s!";
   public static final String USER_ALREADY_EXIST = "User already exists with email: %s!";
 
+  // ==================== User Preference Related ====================
+
+  public static final String USER_PREFERENCE_FETCH_SUCCESS = "User preference fetched successfully.";
+  public static final String USER_PREFERENCE_CREATE_SUCCESS = "User preference created successfully.";
+  public static final String USER_PREFERENCE_UPDATE_SUCCESS = "User preference updated successfully.";
+  public static final String USER_PREFERENCE_DELETE_SUCCESS = "User preference deleted successfully.";
+  public static final String USER_PREFERENCE_NOT_FOUND = "No preference found for user with id: %s!";
+
   // ==================== Authentication Related ====================
 
   public static final String AUTHENTICATION_FAILED = "Authentication failed!";
