@@ -5,6 +5,7 @@ import com.devs.roamance.model.social.Comment;
 import com.devs.roamance.model.social.Message;
 import com.devs.roamance.model.social.Post;
 import com.devs.roamance.model.travel.journal.Journal;
+import com.devs.roamance.model.user.preference.UserPreferences;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
@@ -45,6 +46,13 @@ public class User {
 
   @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
   private UserInfo info;
+
+  @OneToOne(
+      mappedBy = "user",
+      fetch = FetchType.LAZY,
+      cascade = CascadeType.ALL,
+      orphanRemoval = true)
+  private UserPreferences preferences;
 
   @JsonIgnore
   @OneToMany(
