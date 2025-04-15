@@ -26,6 +26,8 @@ public class UserPreferenceRequestDto {
 
     @Pattern(regexp = "^$|^(https?:\\/\\/)?([\\w-]+\\.)+[\\w-]+(\\/[\\w- ./?%&=]*)?$", message = "Website URL format is invalid")
     private String website;
+    private String profile_image;
+    private String cover_image;
 
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate birthday;

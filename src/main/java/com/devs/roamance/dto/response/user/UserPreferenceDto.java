@@ -23,6 +23,12 @@ public class UserPreferenceDto {
     private String website;
     private LocalDate birthday;
 
+    @JsonProperty("profile_image")
+    private String profile_image;
+
+    @JsonProperty("cover_image")
+    private String cover_image;
+
     @JsonProperty("user_id")
     private UUID userId;
 

@@ -44,6 +44,8 @@ public class UserPreference {
     private String location;
     private String website;
     private LocalDate birthday;
+    private String profileImage;
+    private String coverImage;
 
     @JsonIgnore
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)

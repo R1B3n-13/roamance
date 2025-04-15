@@ -61,6 +61,8 @@ public class UserPreferenceServiceImpl implements UserPreferenceService {
         preference.setLocation(createRequestDto.getLocation());
         preference.setWebsite(createRequestDto.getWebsite());
         preference.setBirthday(createRequestDto.getBirthday());
+        preference.setProfileImage(createRequestDto.getProfile_image());
+        preference.setCoverImage(createRequestDto.getCover_image());
 
         UserPreference savedPreference = preferenceRepository.save(preference);
         UserPreferenceDto dto = mapToDto(savedPreference);
@@ -146,6 +148,8 @@ public class UserPreferenceServiceImpl implements UserPreferenceService {
         preference.setLocation(updateRequestDto.getLocation());
         preference.setWebsite(updateRequestDto.getWebsite());
         preference.setBirthday(updateRequestDto.getBirthday());
+        preference.setProfileImage(updateRequestDto.getProfile_image());
+        preference.setCoverImage(updateRequestDto.getCover_image());
 
         UserPreference savedPreference = preferenceRepository.save(preference);
         UserPreferenceDto dto = mapToDto(savedPreference);
