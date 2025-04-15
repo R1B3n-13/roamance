@@ -13,10 +13,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.devs.roamance.dto.request.user.UserPreferenceRequestDto;
+import com.devs.roamance.dto.request.user.UserInfoRequestDto;
 import com.devs.roamance.dto.response.BaseResponseDto;
-import com.devs.roamance.dto.response.user.UserPreferenceListResponseDto;
-import com.devs.roamance.dto.response.user.UserPreferenceResponseDto;
+import com.devs.roamance.dto.response.user.UserInfoListResponseDto;
+import com.devs.roamance.dto.response.user.UserInfoResponseDto;
 import com.devs.roamance.service.UserInfoService;
 import com.devs.roamance.util.UserUtil;
 
@@ -36,64 +36,64 @@ public class UserInfoController {
     }
 
     @GetMapping
-    public ResponseEntity<UserPreferenceListResponseDto> getAllPreferences(
+    public ResponseEntity<UserInfoListResponseDto> getAllUsersInfo(
             @RequestParam(defaultValue = "0") int pageNumber,
             @RequestParam(defaultValue = "10") int pageSize,
             @RequestParam(defaultValue = "id") String sortBy,
             @RequestParam(defaultValue = "asc") String sortDir) {
-        UserPreferenceListResponseDto responseDto = userInfoService.getAll(pageNumber, pageSize, sortBy, sortDir);
+        UserInfoListResponseDto responseDto = userInfoService.getAll(pageNumber, pageSize, sortBy, sortDir);
         return ResponseEntity.status(responseDto.getStatus()).body(responseDto);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserPreferenceResponseDto> getPreferenceById(
+    public ResponseEntity<UserInfoResponseDto> getUserInfoById(
             @PathVariable @NotNull UUID id) {
-        UserPreferenceResponseDto responseDto = userInfoService.get(id);
+        UserInfoResponseDto responseDto = userInfoService.get(id);
         return ResponseEntity.status(responseDto.getStatus()).body(responseDto);
     }
 
     @GetMapping("/me")
-    public ResponseEntity<UserPreferenceResponseDto> getUserProfile() {
+    public ResponseEntity<UserInfoResponseDto> getUserProfile() {
 
         UUID userId = userUtil.getAuthenticatedUser().getId();
 
-        UserPreferenceResponseDto responseDto = userInfoService.getByUserId(userId);
+        UserInfoResponseDto responseDto = userInfoService.getByUserId(userId);
 
         return ResponseEntity.ok(responseDto);
     }
 
     @PostMapping
-    public ResponseEntity<UserPreferenceResponseDto> createPreference(
-            @Valid @RequestBody UserPreferenceRequestDto requestDto) {
-        UserPreferenceResponseDto responseDto = userInfoService.create(requestDto);
+    public ResponseEntity<UserInfoResponseDto> createUserInfo(
+            @Valid @RequestBody UserInfoRequestDto requestDto) {
+        UserInfoResponseDto responseDto = userInfoService.create(requestDto);
         return ResponseEntity.status(responseDto.getStatus()).body(responseDto);
     }
 
     @PutMapping
-    public ResponseEntity<UserPreferenceResponseDto> updatePreference(
-            @Valid @RequestBody UserPreferenceRequestDto requestDto) {
+    public ResponseEntity<UserInfoResponseDto> updateUserInfo(
+            @Valid @RequestBody UserInfoRequestDto requestDto) {
         UUID userId = userUtil.getAuthenticatedUser().getId();
-        UserPreferenceResponseDto responseDto = userInfoService.updateByUserId(requestDto, userId);
+        UserInfoResponseDto responseDto = userInfoService.updateByUserId(requestDto, userId);
         return ResponseEntity.status(responseDto.getStatus()).body(responseDto);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UserPreferenceResponseDto> updatePreferenceById(
+    public ResponseEntity<UserInfoResponseDto> updateUserInfoById(
             @PathVariable @NotNull UUID id,
-            @Valid @RequestBody UserPreferenceRequestDto requestDto) {
-        UserPreferenceResponseDto responseDto = userInfoService.update(requestDto, id);
+            @Valid @RequestBody UserInfoRequestDto requestDto) {
+        UserInfoResponseDto responseDto = userInfoService.update(requestDto, id);
         return ResponseEntity.status(responseDto.getStatus()).body(responseDto);
     }
 
     @DeleteMapping
-    public ResponseEntity<BaseResponseDto> deletePreference() {
+    public ResponseEntity<BaseResponseDto> deleteUserInfo() {
         UUID userId = userUtil.getAuthenticatedUser().getId();
         BaseResponseDto responseDto = userInfoService.deleteByUserId(userId);
         return ResponseEntity.status(responseDto.getStatus()).body(responseDto);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<BaseResponseDto> deletePreferenceById(@PathVariable @NotNull UUID id) {
+    public ResponseEntity<BaseResponseDto> deleteUserInfoById(@PathVariable @NotNull UUID id) {
         BaseResponseDto responseDto = userInfoService.delete(id);
         return ResponseEntity.status(responseDto.getStatus()).body(responseDto);
     }

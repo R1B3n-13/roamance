@@ -20,7 +20,7 @@ public final class ResponseMessage {
   public static final String USER_NOT_FOUND_EMAIL = "No user present with email: %s!";
   public static final String USER_ALREADY_EXIST = "User already exists with email: %s!";
 
-  // ==================== User Preference Related ====================
+  // ==================== User Info Related ====================
 
   public static final String USER_INFO_FETCH_SUCCESS = "User info fetched successfully.";
   public static final String USER_INFO_CREATE_SUCCESS = "User info created successfully.";

@@ -13,11 +13,11 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserPreferenceListResponseDto extends BaseResponseDto {
+public class UserInfoListResponseDto extends BaseResponseDto {
 
-    private List<UserPreferenceDto> data = new ArrayList<>();
+    private List<UserInfoDto> data = new ArrayList<>();
 
-    public UserPreferenceListResponseDto(int status, boolean success, String message, List<UserPreferenceDto> data) {
+    public UserInfoListResponseDto(int status, boolean success, String message, List<UserInfoDto> data) {
         super(status, success, message);
         this.data = data;
     }

@@ -13,11 +13,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.devs.roamance.constant.ResponseMessage;
-import com.devs.roamance.dto.request.user.UserPreferenceRequestDto;
+import com.devs.roamance.dto.request.user.UserInfoRequestDto;
 import com.devs.roamance.dto.response.BaseResponseDto;
-import com.devs.roamance.dto.response.user.UserPreferenceDto;
-import com.devs.roamance.dto.response.user.UserPreferenceListResponseDto;
-import com.devs.roamance.dto.response.user.UserPreferenceResponseDto;
+import com.devs.roamance.dto.response.user.UserInfoDto;
+import com.devs.roamance.dto.response.user.UserInfoListResponseDto;
+import com.devs.roamance.dto.response.user.UserInfoResponseDto;
 import com.devs.roamance.exception.ResourceNotFoundException;
 import com.devs.roamance.exception.UnauthorizedAccessException;
 import com.devs.roamance.exception.UserAlreadyExistException;
@@ -47,10 +47,10 @@ public class UserInfoServiceImpl implements UserInfoService {
 
     @Override
     @Transactional
-    public UserPreferenceResponseDto create(UserPreferenceRequestDto createRequestDto) {
+    public UserInfoResponseDto create(UserInfoRequestDto createRequestDto) {
         User currentUser = userUtil.getAuthenticatedUser();
 
-        userInfoRepository.findByUserId(currentUser.getId()).ifPresent(existingPreference -> {
+        userInfoRepository.findByUserId(currentUser.getId()).ifPresent(existingUserInfo -> {
             throw new UserAlreadyExistException("User's information already exist. Use the update endpoint instead.");
         });
 
@@ -61,17 +61,17 @@ public class UserInfoServiceImpl implements UserInfoService {
         userInfo.setLocation(createRequestDto.getLocation());
         userInfo.setWebsite(createRequestDto.getWebsite());
         userInfo.setBirthday(createRequestDto.getBirthday());
-        userInfo.setProfileImage(createRequestDto.getProfile_image());
-        userInfo.setCoverImage(createRequestDto.getCover_image());
+        userInfo.setProfileImage(createRequestDto.getProfileImage());
+        userInfo.setCoverImage(createRequestDto.getCoverImage());
 
-        UserInfo savedPreference = userInfoRepository.save(userInfo);
-        UserPreferenceDto dto = mapToDto(savedPreference);
+        UserInfo savedUserInfo = userInfoRepository.save(userInfo);
+        UserInfoDto dto = mapToDto(savedUserInfo);
 
-        return new UserPreferenceResponseDto(201, true, ResponseMessage.USER_INFO_CREATE_SUCCESS, dto);
+        return new UserInfoResponseDto(201, true, ResponseMessage.USER_INFO_CREATE_SUCCESS, dto);
     }
 
     @Override
-    public UserPreferenceListResponseDto getAll(int pageNumber, int pageSize, String sortBy, String sortDir) {
+    public UserInfoListResponseDto getAll(int pageNumber, int pageSize, String sortBy, String sortDir) {
         User currentUser = userUtil.getAuthenticatedUser();
         boolean isAdmin = isAdmin(currentUser);
 
@@ -92,11 +92,11 @@ public class UserInfoServiceImpl implements UserInfoService {
                     .orElse(List.of());
         }
 
-        List<UserPreferenceDto> userInfoDtos = info.stream()
+        List<UserInfoDto> userInfoDtos = info.stream()
                 .map(this::mapToDto)
                 .collect(Collectors.toList());
 
-        return new UserPreferenceListResponseDto(
+        return new UserInfoListResponseDto(
                 200,
                 true,
                 ResponseMessage.USER_INFO_FETCH_SUCCESS,
@@ -104,21 +104,21 @@ public class UserInfoServiceImpl implements UserInfoService {
     }
 
     @Override
-    public UserPreferenceResponseDto get(UUID id) {
-        UserInfo userInfo = findPreferenceById(id);
+    public UserInfoResponseDto get(UUID id) {
+        UserInfo userInfo = findUserInfoById(id);
 
         User currentUser = userUtil.getAuthenticatedUser();
         if (!userInfo.getUser().getId().equals(currentUser.getId()) && !isAdmin(currentUser)) {
             throw new UnauthorizedAccessException("You don't have permission to access this user's information");
         }
 
-        UserPreferenceDto dto = mapToDto(userInfo);
-        return new UserPreferenceResponseDto(
+        UserInfoDto dto = mapToDto(userInfo);
+        return new UserInfoResponseDto(
                 200, true, ResponseMessage.USER_INFO_FETCH_SUCCESS, dto);
     }
 
     @Override
-    public UserPreferenceResponseDto getByUserId(UUID id) {
+    public UserInfoResponseDto getByUserId(UUID id) {
         User currentUser = userUtil.getAuthenticatedUser();
         boolean isAdmin = isAdmin(currentUser);
 
@@ -126,41 +126,35 @@ public class UserInfoServiceImpl implements UserInfoService {
             throw new UnauthorizedAccessException("You don't have permission to access this user's information");
         }
 
-        UserInfo userInfo = findPreferenceByUserId(id);
+        UserInfo userInfo = findUserInfoByUserId(id);
 
-        UserPreferenceDto dto = mapToDto(userInfo);
-        return new UserPreferenceResponseDto(
+        UserInfoDto dto = mapToDto(userInfo);
+        return new UserInfoResponseDto(
                 200, true, ResponseMessage.USER_INFO_FETCH_SUCCESS, dto);
     }
 
     @Override
     @Transactional
-    public UserPreferenceResponseDto update(UserPreferenceRequestDto updateRequestDto, UUID id) {
-        UserInfo userInfo = findPreferenceById(id);
+    public UserInfoResponseDto update(UserInfoRequestDto updateRequestDto, UUID id) {
+        UserInfo userInfo = findUserInfoById(id);
 
         User currentUser = userUtil.getAuthenticatedUser();
         if (!userInfo.getUser().getId().equals(currentUser.getId()) && !isAdmin(currentUser)) {
             throw new UnauthorizedAccessException("You don't have permission to update this user's information");
         }
 
-        userInfo.setPhone(updateRequestDto.getPhone());
-        userInfo.setBio(updateRequestDto.getBio());
-        userInfo.setLocation(updateRequestDto.getLocation());
-        userInfo.setWebsite(updateRequestDto.getWebsite());
-        userInfo.setBirthday(updateRequestDto.getBirthday());
-        userInfo.setProfileImage(updateRequestDto.getProfile_image());
-        userInfo.setCoverImage(updateRequestDto.getCover_image());
+        updateUserInfoProperties(userInfo, updateRequestDto);
 
-        UserInfo savedPreference = userInfoRepository.save(userInfo);
-        UserPreferenceDto dto = mapToDto(savedPreference);
+        UserInfo savedUserInfo = userInfoRepository.save(userInfo);
+        UserInfoDto dto = mapToDto(savedUserInfo);
 
-        return new UserPreferenceResponseDto(200, true, ResponseMessage.USER_INFO_UPDATE_SUCCESS, dto);
+        return new UserInfoResponseDto(200, true, ResponseMessage.USER_INFO_UPDATE_SUCCESS, dto);
     }
 
     @Override
     @Transactional
     public BaseResponseDto delete(UUID id) {
-        UserInfo userInfo = findPreferenceById(id);
+        UserInfo userInfo = findUserInfoById(id);
 
         User currentUser = userUtil.getAuthenticatedUser();
         if (!userInfo.getUser().getId().equals(currentUser.getId()) && !isAdmin(currentUser)) {
@@ -173,31 +167,41 @@ public class UserInfoServiceImpl implements UserInfoService {
 
     @Override
     @Transactional
-    public UserPreferenceResponseDto updateByUserId(UserPreferenceRequestDto updateRequestDto, UUID userId) {
-        UserInfo userInfo = findPreferenceByUserId(userId);
+    public UserInfoResponseDto updateByUserId(UserInfoRequestDto updateRequestDto, UUID userId) {
+        UserInfo userInfo = findUserInfoByUserId(userId);
         return update(updateRequestDto, userInfo.getId());
     }
 
     @Override
     @Transactional
     public BaseResponseDto deleteByUserId(UUID userId) {
-        UserInfo userInfo = findPreferenceByUserId(userId);
+        UserInfo userInfo = findUserInfoByUserId(userId);
         return delete(userInfo.getId());
     }
 
-    private UserPreferenceDto mapToDto(UserInfo userInfo) {
-        UserPreferenceDto dto = modelMapper.map(userInfo, UserPreferenceDto.class);
+    private void updateUserInfoProperties(UserInfo userInfo, UserInfoRequestDto requestDto) {
+        userInfo.setPhone(requestDto.getPhone());
+        userInfo.setBio(requestDto.getBio());
+        userInfo.setLocation(requestDto.getLocation());
+        userInfo.setWebsite(requestDto.getWebsite());
+        userInfo.setBirthday(requestDto.getBirthday());
+        userInfo.setProfileImage(requestDto.getProfileImage());
+        userInfo.setCoverImage(requestDto.getCoverImage());
+    }
+
+    private UserInfoDto mapToDto(UserInfo userInfo) {
+        UserInfoDto dto = modelMapper.map(userInfo, UserInfoDto.class);
         dto.setUserId(userInfo.getUser().getId());
         return dto;
     }
 
-    private UserInfo findPreferenceById(UUID id) {
+    private UserInfo findUserInfoById(UUID id) {
         return userInfoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         String.format("No user's information found with id: %s", id)));
     }
 
-    private UserInfo findPreferenceByUserId(UUID userId) {
+    private UserInfo findUserInfoByUserId(UUID userId) {
         return userInfoRepository.findByUserId(userId)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         String.format("No user's information found for user with id: %s", userId)));

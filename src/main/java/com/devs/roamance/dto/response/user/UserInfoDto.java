@@ -15,7 +15,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserPreferenceDto {
+public class UserInfoDto {
     private UUID id;
     private String phone;
     private String bio;
@@ -24,10 +24,10 @@ public class UserPreferenceDto {
     private LocalDate birthday;
 
     @JsonProperty("profile_image")
-    private String profile_image;
+    private String profileImage;
 
     @JsonProperty("cover_image")
-    private String cover_image;
+    private String coverImage;
 
     @JsonProperty("user_id")
     private UUID userId;
