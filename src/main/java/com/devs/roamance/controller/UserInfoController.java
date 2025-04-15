@@ -24,7 +24,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
 @RestController
-@RequestMapping("/info")
+@RequestMapping("/users/info")
 public class UserInfoController {
 
     private final UserInfoService userInfoService;
