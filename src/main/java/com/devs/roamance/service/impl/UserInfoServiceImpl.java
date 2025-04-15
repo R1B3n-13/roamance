@@ -56,13 +56,7 @@ public class UserInfoServiceImpl implements UserInfoService {
 
         UserInfo userInfo = new UserInfo();
         userInfo.setUser(currentUser);
-        userInfo.setPhone(createRequestDto.getPhone());
-        userInfo.setBio(createRequestDto.getBio());
-        userInfo.setLocation(createRequestDto.getLocation());
-        userInfo.setWebsite(createRequestDto.getWebsite());
-        userInfo.setBirthday(createRequestDto.getBirthday());
-        userInfo.setProfileImage(createRequestDto.getProfileImage());
-        userInfo.setCoverImage(createRequestDto.getCoverImage());
+        updateUserInfoProperties(userInfo, createRequestDto);
 
         UserInfo savedUserInfo = userInfoRepository.save(userInfo);
         UserInfoDto dto = mapToDto(savedUserInfo);
@@ -183,7 +177,6 @@ public class UserInfoServiceImpl implements UserInfoService {
         userInfo.setPhone(requestDto.getPhone());
         userInfo.setBio(requestDto.getBio());
         userInfo.setLocation(requestDto.getLocation());
-        userInfo.setWebsite(requestDto.getWebsite());
         userInfo.setBirthday(requestDto.getBirthday());
         userInfo.setProfileImage(requestDto.getProfileImage());
         userInfo.setCoverImage(requestDto.getCoverImage());

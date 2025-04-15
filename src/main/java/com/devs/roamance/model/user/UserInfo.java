@@ -46,7 +46,6 @@ public class UserInfo {
     private String bio;
 
     private String location;
-    private String website;
     private LocalDate birthday;
 
     @JsonProperty("profile_image")
