@@ -6,6 +6,7 @@ export const paths = {
   destinations: 'destinations',
   activities: 'activities',
   plans: 'plans',
+  profile: 'profile',
 
   auth: 'auth',
   signIn: 'sign-in',
@@ -27,6 +28,7 @@ export const pathTitles = {
   destinations: 'Destinations',
   activities: 'Activities',
   plans: 'Plans',
+  profile: 'Profile',
 
   signIn: 'Sign In',
   signUp: 'Sign Up',
@@ -61,6 +63,10 @@ export const routes: Record<string, RouteItem> = {
   plans: {
     title: pathTitles.plans,
     href: `/${paths.plans}`,
+  },
+  profile: {
+    title: pathTitles.profile,
+    href: `/${paths.profile}`,
   },
 
   signIn: {

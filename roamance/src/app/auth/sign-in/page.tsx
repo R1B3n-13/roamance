@@ -1,6 +1,5 @@
 'use client';
 
-import { loginUser } from '@/api';
 import { AuthForm } from '@/components/auth/AuthForm';
 import { AuthHero } from '@/components/auth/AuthHero';
 import { AuthLayout } from '@/components/auth/AuthLayout';
@@ -9,8 +8,9 @@ import { FormInput } from '@/components/auth/FormInput';
 import { SocialAuth } from '@/components/auth/SocialAuth';
 import { ErrorBanner } from '@/components/common/error-banner';
 import { LoadingButton } from '@/components/common/loading-button';
+import { routes } from '@/constants';
+import { authService } from '@/service/auth-service';
 import { zodResolver } from '@hookform/resolvers/zod';
-import Cookies from 'js-cookie';
 import { Lock, Mail, RefreshCw, User } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -64,36 +64,8 @@ export default function SignIn() {
     setError('');
 
     try {
-      const responseData = await loginUser({
-        email: data.email,
-        password: data.password,
-      });
+      await authService.login(data.email, data.password);
 
-      if (!responseData.success) {
-        throw new Error(
-          responseData.message || 'Authentication failed. Please try again.'
-        );
-      }
-
-      // Store tokens in cookies
-      const accessTokenExpiry = new Date(
-        new Date().getTime() + 24 * 60 * 60 * 1000
-      );
-      const refreshTokenExpiry = new Date(
-        new Date().getTime() + 7 * 24 * 60 * 60 * 1000
-      );
-      Cookies.set('access_token', responseData.access_token, {
-        expires: accessTokenExpiry,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
-        path: '/',
-      });
-      Cookies.set('refresh_token', responseData.refresh_token, {
-        expires: refreshTokenExpiry,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
-        path: '/',
-      });
       toast.success('Login successful', {
         description: (
           <p className="text-gray-600 dark:text-gray-400">
@@ -106,13 +78,15 @@ export default function SignIn() {
               <span>Dashboard</span>
             </div>
           ),
-          onClick: () => router.push('/dashboard'),
+          onClick: () => router.push(routes.profile.href),
         },
         className:
           'bg-white dark:bg-slate-900 border border-green-100 dark:border-green-800 shadow-lg',
         duration: 4000,
       });
-      router.push('/dashboard');
+
+      // Redirect to profile page
+      router.push(routes.profile.href);
     } catch (err) {
       const errorMessage =
         err instanceof Error

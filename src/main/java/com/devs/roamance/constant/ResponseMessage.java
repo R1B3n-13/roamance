@@ -20,6 +20,14 @@ public final class ResponseMessage {
   public static final String USER_NOT_FOUND_EMAIL = "No user present with email: %s!";
   public static final String USER_ALREADY_EXIST = "User already exists with email: %s!";
 
+  // ==================== User Info Related ====================
+
+  public static final String USER_INFO_FETCH_SUCCESS = "User info fetched successfully.";
+  public static final String USER_INFO_CREATE_SUCCESS = "User info created successfully.";
+  public static final String USER_INFO_UPDATE_SUCCESS = "User info updated successfully.";
+  public static final String USER_INFO_DELETE_SUCCESS = "User info deleted successfully.";
+  public static final String USER_INFO_NOT_FOUND = "No info found for user with id: %s!";
+
   // ==================== Authentication Related ====================
 
   public static final String AUTHENTICATION_FAILED = "Authentication failed!";

@@ -1,6 +1,10 @@
 import { createApi } from 'unsplash-js';
+import { ApiError } from './errors';
+import { ApiResponse } from '@/types';
+import { ENV_VARS } from '@/constants/keys';
+import axios, { AxiosError } from 'axios';
 
-const UNSPLASH_ACCESS_KEY = process.env.NEXT_PUBLIC_UNSPLASH_ACCESS_KEY || '';
+const UNSPLASH_ACCESS_KEY = ENV_VARS.UNSPLASH_ACCESS_KEY;
 
 const unsplashApi = createApi({
   accessKey: UNSPLASH_ACCESS_KEY,
@@ -28,13 +32,38 @@ export async function fetchImages(
     return [];
   } catch (error) {
     console.error(`Error fetching Unsplash images for ${query}:`, error);
-    return [];
+
+    // Handle potential axios error with ApiResponse type
+    if (axios.isAxiosError(error)) {
+      const axiosError = error as AxiosError<ApiResponse>;
+      const errorResponse = axiosError.response?.data;
+      const status = errorResponse?.status || axiosError.response?.status || 500;
+      const message = errorResponse?.message || `Failed to fetch images for "${query}"`;
+      throw new ApiError(message, status);
+    }
+
+    throw new ApiError(`Failed to fetch images for "${query}"`, 500);
   }
 }
 
 export async function fetchImage(query: string): Promise<string | undefined> {
-  const images = await fetchImages(query, 1);
-  return images.length > 0 ? images[0] : undefined;
+  try {
+    const images = await fetchImages(query, 1);
+    return images.length > 0 ? images[0] : undefined;
+  } catch (error) {
+    console.error(`Error fetching Unsplash image for ${query}:`, error);
+
+    // Handle potential axios error with ApiResponse type
+    if (axios.isAxiosError(error)) {
+      const axiosError = error as AxiosError<ApiResponse>;
+      const errorResponse = axiosError.response?.data;
+      const status = errorResponse?.status || axiosError.response?.status || 500;
+      const message = errorResponse?.message || `Failed to fetch image for "${query}"`;
+      throw new ApiError(message, status);
+    }
+
+    throw new ApiError(`Failed to fetch image for "${query}"`, 500);
+  }
 }
 
 export async function getRandomTravelImage(): Promise<string | undefined> {
@@ -45,15 +74,24 @@ export async function getRandomTravelImage(): Promise<string | undefined> {
     });
 
     if (result.response && Array.isArray(result.response)) {
-      return result.response[0].urls.regular;
-    } else if (result.response) {
-      return (result.response as { urls: { regular: string } }).urls.regular;
+      const photo = result.response[0];
+      return photo.urls.regular;
     }
 
     return undefined;
   } catch (error) {
     console.error('Error fetching random travel image:', error);
-    return undefined;
+
+    // Handle potential axios error with ApiResponse type
+    if (axios.isAxiosError(error)) {
+      const axiosError = error as AxiosError<ApiResponse>;
+      const errorResponse = axiosError.response?.data;
+      const status = errorResponse?.status || axiosError.response?.status || 500;
+      const message = errorResponse?.message || 'Failed to fetch random travel image';
+      throw new ApiError(message, status);
+    }
+
+    throw new ApiError('Failed to fetch random travel image', 500);
   }
 }
 

@@ -1,4 +1,5 @@
-export interface UserEndpoints {
-  REGISTER: string;
-  LOGIN: string;
-}
+export interface ApiResponse {
+    status: number;
+    success: boolean;
+    message: string;
+  }
