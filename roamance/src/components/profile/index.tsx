@@ -5,7 +5,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { toast } from 'sonner';
 import { ProfileHeader } from './profile-header';
 import { ProfileInfo } from './profile-info';
-import { ProfilePreferences } from './profile-preferences';
+import { ProfilePreferences } from './preferences';
 import { ProfileSavedPlaces } from './profile-saved-places';
 import { ProfileTabs } from './profile-tabs';
 import { ProfileTrips } from './profile-trips';
