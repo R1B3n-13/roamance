@@ -74,6 +74,7 @@ export const ClimateSection = ({
                   selectedClimate === climate.id &&
                     'border-mountain/50 bg-mountain/5'
                 )}
+                onClick={() => onClimateChange(climate.id)}
               >
                 <RadioGroupItem
                   value={climate.id}

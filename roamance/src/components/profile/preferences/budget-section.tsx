@@ -99,11 +99,12 @@ export const BudgetSection = ({
             <div className="grid grid-cols-5 gap-2 text-center">
               <motion.div
                 className={cn(
-                  'text-sm p-3 rounded-lg border-2 border-transparent transition-all',
+                  'text-sm p-3 rounded-lg border-2 border-transparent transition-all cursor-pointer',
                   budgetLevel === BudgetLevel.BUDGET &&
                     'border-ocean/30 bg-ocean/5'
                 )}
                 whileHover={{ y: -3 }}
+                onClick={() => onBudgetChange(BudgetLevel.BUDGET)}
               >
                 <div className="font-medium">Budget</div>
                 <div className="text-muted-foreground text-xs mt-1">
@@ -112,11 +113,12 @@ export const BudgetSection = ({
               </motion.div>
               <motion.div
                 className={cn(
-                  'text-sm p-3 rounded-lg border-2 border-transparent transition-all',
+                  'text-sm p-3 rounded-lg border-2 border-transparent transition-all cursor-pointer',
                   budgetLevel === BudgetLevel.ECONOMIC &&
                     'border-ocean/30 bg-ocean/5'
                 )}
                 whileHover={{ y: -3 }}
+                onClick={() => onBudgetChange(BudgetLevel.ECONOMIC)}
               >
                 <div className="font-medium">Economic</div>
                 <div className="text-muted-foreground text-xs mt-1">
@@ -125,11 +127,12 @@ export const BudgetSection = ({
               </motion.div>
               <motion.div
                 className={cn(
-                  'text-sm p-3 rounded-lg border-2 border-transparent transition-all',
+                  'text-sm p-3 rounded-lg border-2 border-transparent transition-all cursor-pointer',
                   budgetLevel === BudgetLevel.MODERATE &&
                     'border-ocean/30 bg-ocean/5'
                 )}
                 whileHover={{ y: -3 }}
+                onClick={() => onBudgetChange(BudgetLevel.MODERATE)}
               >
                 <div className="font-medium">Moderate</div>
                 <div className="text-muted-foreground text-xs mt-1">
@@ -138,11 +141,12 @@ export const BudgetSection = ({
               </motion.div>
               <motion.div
                 className={cn(
-                  'text-sm p-3 rounded-lg border-2 border-transparent transition-all',
+                  'text-sm p-3 rounded-lg border-2 border-transparent transition-all cursor-pointer',
                   budgetLevel === BudgetLevel.PREMIUM &&
                     'border-ocean/30 bg-ocean/5'
                 )}
                 whileHover={{ y: -3 }}
+                onClick={() => onBudgetChange(BudgetLevel.PREMIUM)}
               >
                 <div className="font-medium">Premium</div>
                 <div className="text-muted-foreground text-xs mt-1">
@@ -151,11 +155,12 @@ export const BudgetSection = ({
               </motion.div>
               <motion.div
                 className={cn(
-                  'text-sm p-3 rounded-lg border-2 border-transparent transition-all',
+                  'text-sm p-3 rounded-lg border-2 border-transparent transition-all cursor-pointer',
                   budgetLevel === BudgetLevel.LUXURY &&
                     'border-ocean/30 bg-ocean/5'
                 )}
                 whileHover={{ y: -3 }}
+                onClick={() => onBudgetChange(BudgetLevel.LUXURY)}
               >
                 <div className="font-medium">Luxury</div>
                 <div className="text-muted-foreground text-xs mt-1">

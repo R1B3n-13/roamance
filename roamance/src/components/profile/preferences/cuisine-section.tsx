@@ -71,10 +71,11 @@ export const CuisineSection = ({
                 whileHover={{ x: 3 }}
                 transition={{ duration: 0.2 }}
                 className={cn(
-                  'flex items-center space-x-3 p-2.5 rounded-lg border border-transparent',
+                  'flex items-center space-x-3 p-2.5 rounded-lg border border-transparent cursor-pointer',
                   selectedTypes.includes(type.id) &&
                     'bg-sand/5 border-sand/20'
                 )}
+                onClick={() => handleCheckChange(!selectedTypes.includes(type.id), type.id)}
               >
                 <Checkbox
                   id={`cuisine-${type.id}`}

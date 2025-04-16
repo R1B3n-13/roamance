@@ -83,10 +83,11 @@ export const ActivitiesSection = ({
                 whileHover={{ x: 3 }}
                 transition={{ duration: 0.2 }}
                 className={cn(
-                  'flex items-center space-x-3 p-2.5 rounded-lg border border-transparent',
+                  'flex items-center space-x-3 p-2.5 rounded-lg border border-transparent cursor-pointer',
                   selectedTypes.includes(type.id) &&
                     'bg-forest/5 border-forest/20'
                 )}
+                onClick={() => handleCheckChange(!selectedTypes.includes(type.id), type.id)}
               >
                 <Checkbox
                   id={`activity-${type.id}`}
