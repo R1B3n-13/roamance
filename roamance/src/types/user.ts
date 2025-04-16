@@ -67,15 +67,31 @@ export enum BudgetLevel {
   LUXURY = 'LUXURY'
 }
 
-export interface UserPreferences extends Audit {
+
+/* ---------------------------- User Preferences ---------------------------- */
+
+
+export interface UserPreferences {
+  travel_style: TravelStyle;
+  accommodation_types: AccommodationType[];
+  activity_types: ActivityType[];
+  cuisine_types: CuisineType[];
+  climate_preference: ClimatePreference;
+  budget_level: BudgetLevel;
+}
+
+export interface UserPreferencesWithAudit extends UserPreferences, Audit {
   id: string;
-  travelStyle: TravelStyle;
-  accommodationTypes: AccommodationType[];
-  activityTypes: ActivityType[];
-  cuisineTypes: CuisineType[];
-  climatePreference: ClimatePreference;
-  budgetLevel: BudgetLevel;
   user_id: string;
 }
 
-export type UserPreferencesResponse = BaseResponse<UserPreferences>;
+export type UserPreferencesResponse = BaseResponse<UserPreferencesWithAudit>;
+
+export interface UserPreferencesUpdateRequest {
+  travel_style?: TravelStyle;
+  accommodation_types?: AccommodationType[];
+  activity_types?: ActivityType[];
+  cuisine_types?: CuisineType[];
+  climate_preference?: ClimatePreference;
+  budget_level?: BudgetLevel;
+}

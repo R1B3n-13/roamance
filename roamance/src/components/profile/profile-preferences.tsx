@@ -1,6 +1,7 @@
 'use client';
 
 import { LoadingButton } from '@/components/common/loading-button';
+import { Badge } from '@/components/ui/badge';
 import {
   Card,
   CardContent,
@@ -13,9 +14,19 @@ import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Slider } from '@/components/ui/slider';
-import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
-import { User, UserInfo } from '@/types';
+import { userService } from '@/service/user-service';
+import {
+  AccommodationType,
+  ActivityType,
+  BudgetLevel,
+  ClimatePreference,
+  CuisineType,
+  TravelStyle,
+  User,
+  UserInfo,
+  UserPreferences
+} from '@/types';
 import { motion } from 'framer-motion';
 import {
   Building2,
@@ -29,19 +40,15 @@ import {
   Map,
   Mountain,
   Plane,
+  Settings,
   Snowflake,
   Sun,
   Tent,
   Umbrella,
   Utensils,
-  Settings,
-  Calendar,
-  Mail,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { Badge } from '@/components/ui/badge';
-import { userService } from '@/service/user-service';
 
 interface ProfilePreferencesProps {
   user: User | null;
@@ -49,47 +56,69 @@ interface ProfilePreferencesProps {
   loading: boolean;
 }
 
-// Types for user preferences
-interface PreferencesData {
-  travelStyle: string;
-  accommodationTypes: string[];
-  activities: string[];
-  cuisines: string[];
-  climatePreference: string;
-  budgetLevel: number;
-  notificationPreferences: {
-    deals: boolean;
-    tripReminders: boolean;
-    newsletters: boolean;
-    newDestinations: boolean;
-  };
-}
-
-export function ProfilePreferences({ user, userInfo, loading }: ProfilePreferencesProps) {
+export function ProfilePreferences({ user, loading }: ProfilePreferencesProps) {
   const [isSaving, setIsSaving] = useState(false);
+  const [isLoadingPreferences, setIsLoadingPreferences] = useState(false);
 
   // Default preferences or loaded from user info
-  const [preferences, setPreferences] = useState<PreferencesData>({
-    travelStyle: userInfo?.preferences?.travelStyle || 'balanced',
-    accommodationTypes: userInfo?.preferences?.accommodationTypes || [
-      'hotel',
-      'apartment',
+  const [preferences, setPreferences] = useState<UserPreferences>({
+    travel_style: TravelStyle.BALANCED,
+    accommodation_types: [
+      AccommodationType.HOTELS,
+      AccommodationType.APARTMENTS,
     ],
-    activities: userInfo?.preferences?.activities || [
-      'sightseeing',
-      'nature',
-      'food',
+    activity_types: [
+      ActivityType.SIGHTSEEING,
+      ActivityType.NATURE_AND_OUTDOORS,
+      ActivityType.FOOD_AND_DINING,
     ],
-    cuisines: userInfo?.preferences?.cuisines || ['local', 'international'],
-    climatePreference: userInfo?.preferences?.climatePreference || 'warm',
-    budgetLevel: userInfo?.preferences?.budgetLevel || 2,
-    notificationPreferences: userInfo?.preferences?.notificationPreferences || {
-      deals: true,
-      tripReminders: true,
-      newsletters: false,
-      newDestinations: true,
-    },
+    cuisine_types: [CuisineType.LOCAL_CUISINE, CuisineType.INTERNATIONAL],
+    climate_preference: ClimatePreference.WARM_AND_SUNNY,
+    budget_level: BudgetLevel.MODERATE,
   });
+
+  // Fetch user preferences when component mounts
+  useEffect(() => {
+    const fetchUserPreferences = async () => {
+      if (!user) return;
+
+      try {
+        setIsLoadingPreferences(true);
+        const userPreferences = await userService.getUserPreferences();
+
+        // Map API preferences to our UI model
+        setPreferences({
+          travel_style: userPreferences.travel_style || TravelStyle.BALANCED,
+          accommodation_types: Array.isArray(userPreferences.accommodation_types)
+            ? userPreferences.accommodation_types
+            : [AccommodationType.HOTELS, AccommodationType.APARTMENTS],
+          activity_types: Array.isArray(userPreferences.activity_types)
+            ? userPreferences.activity_types
+            : [
+                ActivityType.SIGHTSEEING,
+                ActivityType.NATURE_AND_OUTDOORS,
+                ActivityType.FOOD_AND_DINING,
+              ],
+          cuisine_types: Array.isArray(userPreferences.cuisine_types)
+            ? userPreferences.cuisine_types
+            : [CuisineType.LOCAL_CUISINE, CuisineType.INTERNATIONAL],
+          climate_preference:
+            userPreferences.climate_preference ||
+            ClimatePreference.WARM_AND_SUNNY,
+          budget_level: userPreferences.budget_level || BudgetLevel.MODERATE,
+        });
+
+        toast.success('Your preferences have been loaded');
+      } catch (error) {
+        console.error('Failed to fetch user preferences', error);
+        toast.error('Failed to load your preferences');
+      } finally {
+        setIsLoadingPreferences(false);
+      }
+    };
+
+    fetchUserPreferences();
+  }, [user]);
 
   const handleSavePreferences = async () => {
     if (!user) return;
@@ -98,9 +127,14 @@ export function ProfilePreferences({ user, userInfo, loading }: ProfilePreferenc
       setIsSaving(true);
 
       // Update user preferences using our service
-      await userService.updateUserInfo({
-        user_id: user.id,
-        preferences,
+      // The service will handle conversion from camelCase to snake_case for us
+      await userService.updateUserPreferences({
+        travel_style: preferences.travel_style,
+        accommodation_types: preferences.accommodation_types,
+        activity_types: preferences.activity_types,
+        cuisine_types: preferences.cuisine_types,
+        climate_preference: preferences.climate_preference,
+        budget_level: preferences.budget_level,
       });
 
       toast.success('Your travel preferences have been updated');
@@ -112,21 +146,22 @@ export function ProfilePreferences({ user, userInfo, loading }: ProfilePreferenc
     }
   };
 
+  // Map our enum values to UI-friendly values for the components
   const travelStyles = [
     {
-      id: 'relaxed',
+      id: TravelStyle.RELAXED,
       label: 'Relaxed & Easy',
       icon: Umbrella,
       description: 'Take it slow and enjoy the moment',
     },
     {
-      id: 'balanced',
+      id: TravelStyle.BALANCED,
       label: 'Balanced Mix',
       icon: Map,
       description: 'Balance between activities and relaxation',
     },
     {
-      id: 'adventurous',
+      id: TravelStyle.ADVENTUROUS,
       label: 'Adventurous',
       icon: Mountain,
       description: 'Seek thrills and unique experiences',
@@ -134,35 +169,74 @@ export function ProfilePreferences({ user, userInfo, loading }: ProfilePreferenc
   ];
 
   const accommodationTypes = [
-    { id: 'hotel', label: 'Hotels', icon: Building2 },
-    { id: 'resort', label: 'Resorts', icon: Umbrella },
-    { id: 'apartment', label: 'Apartments', icon: Building2 },
-    { id: 'hostel', label: 'Hostels', icon: Building2 },
-    { id: 'camping', label: 'Camping', icon: Tent },
+    { id: AccommodationType.HOTELS, label: 'Hotels', icon: Building2 },
+    { id: AccommodationType.RESORTS, label: 'Resorts', icon: Umbrella },
+    { id: AccommodationType.APARTMENTS, label: 'Apartments', icon: Building2 },
+    { id: AccommodationType.HOSTELS, label: 'Hostels', icon: Building2 },
+    { id: AccommodationType.CAMPING, label: 'Camping', icon: Tent },
   ];
 
   const activityTypes = [
-    { id: 'sightseeing', label: 'Sightseeing', icon: Camera },
-    { id: 'nature', label: 'Nature & Outdoors', icon: Mountain },
-    { id: 'culture', label: 'Cultural Experiences', icon: Landmark },
-    { id: 'food', label: 'Food & Dining', icon: Utensils },
-    { id: 'entertainment', label: 'Entertainment', icon: Film },
+    { id: ActivityType.SIGHTSEEING, label: 'Sightseeing', icon: Camera },
+    {
+      id: ActivityType.NATURE_AND_OUTDOORS,
+      label: 'Nature & Outdoors',
+      icon: Mountain,
+    },
+    {
+      id: ActivityType.CULTURAL_EXPERIENCE,
+      label: 'Cultural Experiences',
+      icon: Landmark,
+    },
+    {
+      id: ActivityType.FOOD_AND_DINING,
+      label: 'Food & Dining',
+      icon: Utensils,
+    },
+    { id: ActivityType.ENTERTAINMENT, label: 'Entertainment', icon: Film },
   ];
 
   const cuisineTypes = [
-    { id: 'local', label: 'Local Cuisine', icon: ChefHat },
-    { id: 'international', label: 'International', icon: Globe },
-    { id: 'fine-dining', label: 'Fine Dining', icon: Utensils },
-    { id: 'street-food', label: 'Street Food', icon: Coffee },
-    { id: 'vegetarian', label: 'Vegetarian/Vegan', icon: Utensils },
+    { id: CuisineType.LOCAL_CUISINE, label: 'Local Cuisine', icon: ChefHat },
+    { id: CuisineType.INTERNATIONAL, label: 'International', icon: Globe },
+    { id: CuisineType.FINE_DINING, label: 'Fine Dining', icon: Utensils },
+    { id: CuisineType.STREET_FOOD, label: 'Street Food', icon: Coffee },
+    { id: CuisineType.VEGAN, label: 'Vegetarian/Vegan', icon: Utensils },
   ];
 
   const climatePreferences = [
-    { id: 'warm', label: 'Warm & Sunny', icon: Sun },
-    { id: 'cold', label: 'Cold & Snowy', icon: Snowflake },
-    { id: 'moderate', label: 'Moderate', icon: CloudRain },
-    { id: 'any', label: 'Any Climate', icon: Globe },
+    { id: ClimatePreference.WARM_AND_SUNNY, label: 'Warm & Sunny', icon: Sun },
+    {
+      id: ClimatePreference.COLD_AND_SNOWY,
+      label: 'Cold & Snowy',
+      icon: Snowflake,
+    },
+    { id: ClimatePreference.MODERATE, label: 'Moderate', icon: CloudRain },
+    { id: ClimatePreference.ANY_CLIMATE, label: 'Any Climate', icon: Globe },
   ];
+
+  // Map budget level to UI values
+  const getBudgetIndex = (level: BudgetLevel): number => {
+    const budgetMap: Record<BudgetLevel, number> = {
+      [BudgetLevel.BUDGET]: 0,
+      [BudgetLevel.ECONOMIC]: 1,
+      [BudgetLevel.MODERATE]: 2,
+      [BudgetLevel.PREMIUM]: 3,
+      [BudgetLevel.LUXURY]: 4,
+    };
+    return budgetMap[level];
+  };
+
+  const getBudgetLevelFromIndex = (index: number): BudgetLevel => {
+    const indexMap: Record<number, BudgetLevel> = {
+      0: BudgetLevel.BUDGET,
+      1: BudgetLevel.ECONOMIC,
+      2: BudgetLevel.MODERATE,
+      3: BudgetLevel.PREMIUM,
+      4: BudgetLevel.LUXURY,
+    };
+    return indexMap[index];
+  };
 
   // Animation variants for staggered children
   const containerVariants = {
@@ -189,7 +263,7 @@ export function ProfilePreferences({ user, userInfo, loading }: ProfilePreferenc
     },
   };
 
-  if (loading) {
+  if (loading || isLoadingPreferences) {
     return (
       <motion.div
         variants={containerVariants}
@@ -260,9 +334,12 @@ export function ProfilePreferences({ user, userInfo, loading }: ProfilePreferenc
           </CardHeader>
           <CardContent className="pt-2">
             <RadioGroup
-              value={preferences.travelStyle}
+              value={preferences.travel_style}
               onValueChange={(value) =>
-                setPreferences((prev) => ({ ...prev, travelStyle: value }))
+                setPreferences((prev) => ({
+                  ...prev,
+                  travel_style: value as TravelStyle,
+                }))
               }
               className="grid grid-cols-1 sm:grid-cols-3 gap-4"
             >
@@ -276,7 +353,7 @@ export function ProfilePreferences({ user, userInfo, loading }: ProfilePreferenc
                     htmlFor={style.id}
                     className={cn(
                       'flex flex-col items-center justify-center rounded-xl border-2 border-muted/50 bg-gradient-to-b from-background/80 to-background/60 backdrop-blur-sm p-5 cursor-pointer hover:shadow-md transition-all duration-300',
-                      preferences.travelStyle === style.id &&
+                      preferences.travel_style === style.id &&
                         'border-sunset/70 bg-sunset/5 shadow-lg ring-1 ring-sunset/30'
                     )}
                   >
@@ -288,7 +365,7 @@ export function ProfilePreferences({ user, userInfo, loading }: ProfilePreferenc
                     <div
                       className={cn(
                         'w-12 h-12 rounded-full flex items-center justify-center mb-3',
-                        preferences.travelStyle === style.id
+                        preferences.travel_style === style.id
                           ? 'bg-sunset/20'
                           : 'bg-muted/20'
                       )}
@@ -296,7 +373,7 @@ export function ProfilePreferences({ user, userInfo, loading }: ProfilePreferenc
                       <style.icon
                         className={cn(
                           'h-6 w-6',
-                          preferences.travelStyle === style.id
+                          preferences.travel_style === style.id
                             ? 'text-sunset'
                             : 'text-muted-foreground'
                         )}
@@ -305,7 +382,7 @@ export function ProfilePreferences({ user, userInfo, loading }: ProfilePreferenc
                     <span
                       className={cn(
                         'font-medium text-base',
-                        preferences.travelStyle === style.id && 'text-sunset'
+                        preferences.travel_style === style.id && 'text-sunset'
                       )}
                     >
                       {style.label}
@@ -345,25 +422,25 @@ export function ProfilePreferences({ user, userInfo, loading }: ProfilePreferenc
                     transition={{ duration: 0.2 }}
                     className={cn(
                       'flex items-center space-x-3 p-2.5 rounded-lg border border-transparent',
-                      preferences.accommodationTypes.includes(type.id) &&
+                      preferences.accommodation_types.includes(type.id) &&
                         'bg-ocean/5 border-ocean/20'
                     )}
                   >
                     <Checkbox
                       id={`accommodation-${type.id}`}
-                      checked={preferences.accommodationTypes.includes(type.id)}
+                      checked={preferences.accommodation_types.includes(type.id)}
                       onCheckedChange={(checked) => {
                         setPreferences((prev) => ({
                           ...prev,
-                          accommodationTypes: checked
-                            ? [...prev.accommodationTypes, type.id]
-                            : prev.accommodationTypes.filter(
+                          accommodation_types: checked
+                            ? [...prev.accommodation_types, type.id]
+                            : prev.accommodation_types.filter(
                                 (item) => item !== type.id
                               ),
                         }));
                       }}
                       className={cn(
-                        preferences.accommodationTypes.includes(type.id) &&
+                        preferences.accommodation_types.includes(type.id) &&
                           'border-ocean text-ocean'
                       )}
                     />
@@ -371,7 +448,7 @@ export function ProfilePreferences({ user, userInfo, loading }: ProfilePreferenc
                       <div
                         className={cn(
                           'p-1.5 rounded-md',
-                          preferences.accommodationTypes.includes(type.id)
+                          preferences.accommodation_types.includes(type.id)
                             ? 'bg-ocean/10'
                             : 'bg-muted/20'
                         )}
@@ -379,7 +456,7 @@ export function ProfilePreferences({ user, userInfo, loading }: ProfilePreferenc
                         <type.icon
                           className={cn(
                             'h-4 w-4',
-                            preferences.accommodationTypes.includes(type.id)
+                            preferences.accommodation_types.includes(type.id)
                               ? 'text-ocean'
                               : 'text-muted-foreground'
                           )}
@@ -389,7 +466,7 @@ export function ProfilePreferences({ user, userInfo, loading }: ProfilePreferenc
                         htmlFor={`accommodation-${type.id}`}
                         className={cn(
                           'text-sm font-medium leading-none cursor-pointer',
-                          preferences.accommodationTypes.includes(type.id) &&
+                          preferences.accommodation_types.includes(type.id) &&
                             'text-ocean'
                         )}
                       >
@@ -426,25 +503,25 @@ export function ProfilePreferences({ user, userInfo, loading }: ProfilePreferenc
                     transition={{ duration: 0.2 }}
                     className={cn(
                       'flex items-center space-x-3 p-2.5 rounded-lg border border-transparent',
-                      preferences.activities.includes(type.id) &&
+                      preferences.activity_types.includes(type.id) &&
                         'bg-forest/5 border-forest/20'
                     )}
                   >
                     <Checkbox
                       id={`activity-${type.id}`}
-                      checked={preferences.activities.includes(type.id)}
+                      checked={preferences.activity_types.includes(type.id)}
                       onCheckedChange={(checked) => {
                         setPreferences((prev) => ({
                           ...prev,
-                          activities: checked
-                            ? [...prev.activities, type.id]
-                            : prev.activities.filter(
+                          activity_types: checked
+                            ? [...prev.activity_types, type.id]
+                            : prev.activity_types.filter(
                                 (item) => item !== type.id
                               ),
                         }));
                       }}
                       className={cn(
-                        preferences.activities.includes(type.id) &&
+                        preferences.activity_types.includes(type.id) &&
                           'border-forest text-forest'
                       )}
                     />
@@ -452,7 +529,7 @@ export function ProfilePreferences({ user, userInfo, loading }: ProfilePreferenc
                       <div
                         className={cn(
                           'p-1.5 rounded-md',
-                          preferences.activities.includes(type.id)
+                          preferences.activity_types.includes(type.id)
                             ? 'bg-forest/10'
                             : 'bg-muted/20'
                         )}
@@ -460,7 +537,7 @@ export function ProfilePreferences({ user, userInfo, loading }: ProfilePreferenc
                         <type.icon
                           className={cn(
                             'h-4 w-4',
-                            preferences.activities.includes(type.id)
+                            preferences.activity_types.includes(type.id)
                               ? 'text-forest'
                               : 'text-muted-foreground'
                           )}
@@ -470,7 +547,7 @@ export function ProfilePreferences({ user, userInfo, loading }: ProfilePreferenc
                         htmlFor={`activity-${type.id}`}
                         className={cn(
                           'text-sm font-medium leading-none cursor-pointer',
-                          preferences.activities.includes(type.id) &&
+                          preferences.activity_types.includes(type.id) &&
                             'text-forest'
                         )}
                       >
@@ -507,23 +584,25 @@ export function ProfilePreferences({ user, userInfo, loading }: ProfilePreferenc
                     transition={{ duration: 0.2 }}
                     className={cn(
                       'flex items-center space-x-3 p-2.5 rounded-lg border border-transparent',
-                      preferences.cuisines.includes(type.id) &&
+                      preferences.cuisine_types.includes(type.id) &&
                         'bg-sand/5 border-sand/20'
                     )}
                   >
                     <Checkbox
                       id={`cuisine-${type.id}`}
-                      checked={preferences.cuisines.includes(type.id)}
+                      checked={preferences.cuisine_types.includes(type.id)}
                       onCheckedChange={(checked) => {
                         setPreferences((prev) => ({
                           ...prev,
-                          cuisines: checked
-                            ? [...prev.cuisines, type.id]
-                            : prev.cuisines.filter((item) => item !== type.id),
+                          cuisine_types: checked
+                            ? [...prev.cuisine_types, type.id]
+                            : prev.cuisine_types.filter(
+                                (item) => item !== type.id
+                              ),
                         }));
                       }}
                       className={cn(
-                        preferences.cuisines.includes(type.id) &&
+                        preferences.cuisine_types.includes(type.id) &&
                           'border-sand text-sand'
                       )}
                     />
@@ -531,7 +610,7 @@ export function ProfilePreferences({ user, userInfo, loading }: ProfilePreferenc
                       <div
                         className={cn(
                           'p-1.5 rounded-md',
-                          preferences.cuisines.includes(type.id)
+                          preferences.cuisine_types.includes(type.id)
                             ? 'bg-sand/10'
                             : 'bg-muted/20'
                         )}
@@ -539,7 +618,7 @@ export function ProfilePreferences({ user, userInfo, loading }: ProfilePreferenc
                         <type.icon
                           className={cn(
                             'h-4 w-4',
-                            preferences.cuisines.includes(type.id)
+                            preferences.cuisine_types.includes(type.id)
                               ? 'text-sand'
                               : 'text-muted-foreground'
                           )}
@@ -549,7 +628,8 @@ export function ProfilePreferences({ user, userInfo, loading }: ProfilePreferenc
                         htmlFor={`cuisine-${type.id}`}
                         className={cn(
                           'text-sm font-medium leading-none cursor-pointer',
-                          preferences.cuisines.includes(type.id) && 'text-sand'
+                          preferences.cuisine_types.includes(type.id) &&
+                            'text-sand'
                         )}
                       >
                         {type.label}
@@ -578,11 +658,11 @@ export function ProfilePreferences({ user, userInfo, loading }: ProfilePreferenc
             </CardHeader>
             <CardContent className="pt-2">
               <RadioGroup
-                value={preferences.climatePreference}
+                value={preferences.climate_preference}
                 onValueChange={(value) =>
                   setPreferences((prev) => ({
                     ...prev,
-                    climatePreference: value,
+                    climate_preference: value as ClimatePreference,
                   }))
                 }
                 className="grid grid-cols-2 gap-3"
@@ -594,7 +674,7 @@ export function ProfilePreferences({ user, userInfo, loading }: ProfilePreferenc
                     transition={{ duration: 0.2 }}
                     className={cn(
                       'relative flex items-center p-3 rounded-lg border-2 border-muted/50 cursor-pointer',
-                      preferences.climatePreference === climate.id &&
+                      preferences.climate_preference === climate.id &&
                         'border-mountain/50 bg-mountain/5'
                     )}
                   >
@@ -607,7 +687,7 @@ export function ProfilePreferences({ user, userInfo, loading }: ProfilePreferenc
                       <div
                         className={cn(
                           'p-1.5 rounded-md',
-                          preferences.climatePreference === climate.id
+                          preferences.climate_preference === climate.id
                             ? 'bg-mountain/10'
                             : 'bg-muted/20'
                         )}
@@ -615,7 +695,7 @@ export function ProfilePreferences({ user, userInfo, loading }: ProfilePreferenc
                         <climate.icon
                           className={cn(
                             'h-4 w-4',
-                            preferences.climatePreference === climate.id
+                            preferences.climate_preference === climate.id
                               ? 'text-mountain'
                               : 'text-muted-foreground'
                           )}
@@ -625,7 +705,7 @@ export function ProfilePreferences({ user, userInfo, loading }: ProfilePreferenc
                         htmlFor={`climate-${climate.id}`}
                         className={cn(
                           'text-sm font-medium cursor-pointer',
-                          preferences.climatePreference === climate.id &&
+                          preferences.climate_preference === climate.id &&
                             'text-mountain'
                         )}
                       >
@@ -663,17 +743,21 @@ export function ProfilePreferences({ user, userInfo, loading }: ProfilePreferenc
                       variant="outline"
                       className="border-ocean/30 bg-ocean/5 text-ocean"
                     >
-                      Budget Level: {preferences.budgetLevel + 1}/5
+                      Budget Level:{' '}
+                      {getBudgetIndex(preferences.budget_level) + 1}/5
                     </Badge>
                   </div>
                 </div>
                 <Slider
-                  value={[preferences.budgetLevel]}
+                  value={[getBudgetIndex(preferences.budget_level)]}
                   min={0}
                   max={4}
                   step={1}
                   onValueChange={([value]) =>
-                    setPreferences((prev) => ({ ...prev, budgetLevel: value }))
+                    setPreferences((prev) => ({
+                      ...prev,
+                      budget_level: getBudgetLevelFromIndex(value),
+                    }))
                   }
                   className="py-4"
                 />
@@ -683,7 +767,7 @@ export function ProfilePreferences({ user, userInfo, loading }: ProfilePreferenc
                 <motion.div
                   className={cn(
                     'text-sm p-3 rounded-lg border-2 border-transparent transition-all',
-                    preferences.budgetLevel === 0 &&
+                    preferences.budget_level === BudgetLevel.BUDGET &&
                       'border-ocean/30 bg-ocean/5'
                   )}
                   whileHover={{ y: -3 }}
@@ -696,7 +780,7 @@ export function ProfilePreferences({ user, userInfo, loading }: ProfilePreferenc
                 <motion.div
                   className={cn(
                     'text-sm p-3 rounded-lg border-2 border-transparent transition-all',
-                    preferences.budgetLevel === 1 &&
+                    preferences.budget_level === BudgetLevel.ECONOMIC &&
                       'border-ocean/30 bg-ocean/5'
                   )}
                   whileHover={{ y: -3 }}
@@ -709,7 +793,7 @@ export function ProfilePreferences({ user, userInfo, loading }: ProfilePreferenc
                 <motion.div
                   className={cn(
                     'text-sm p-3 rounded-lg border-2 border-transparent transition-all',
-                    preferences.budgetLevel === 2 &&
+                    preferences.budget_level === BudgetLevel.MODERATE &&
                       'border-ocean/30 bg-ocean/5'
                   )}
                   whileHover={{ y: -3 }}
@@ -722,7 +806,7 @@ export function ProfilePreferences({ user, userInfo, loading }: ProfilePreferenc
                 <motion.div
                   className={cn(
                     'text-sm p-3 rounded-lg border-2 border-transparent transition-all',
-                    preferences.budgetLevel === 3 &&
+                    preferences.budget_level === BudgetLevel.PREMIUM &&
                       'border-ocean/30 bg-ocean/5'
                   )}
                   whileHover={{ y: -3 }}
@@ -735,7 +819,7 @@ export function ProfilePreferences({ user, userInfo, loading }: ProfilePreferenc
                 <motion.div
                   className={cn(
                     'text-sm p-3 rounded-lg border-2 border-transparent transition-all',
-                    preferences.budgetLevel === 4 &&
+                    preferences.budget_level === BudgetLevel.LUXURY &&
                       'border-ocean/30 bg-ocean/5'
                   )}
                   whileHover={{ y: -3 }}
@@ -746,218 +830,6 @@ export function ProfilePreferences({ user, userInfo, loading }: ProfilePreferenc
                   </div>
                 </motion.div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-      </motion.div>
-
-      <motion.div variants={itemVariants}>
-        <Card className="border-sunset/30 overflow-hidden bg-gradient-to-b from-background to-background/95 backdrop-blur-sm shadow-md pt-0">
-          <CardHeader className="relative pt-8 pb-3">
-            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-sunset to-sunset-dark opacity-80" />
-            <CardTitle className="text-xl flex items-center gap-2">
-              <div className="p-2 rounded-lg bg-sunset/10">
-                <Globe className="h-5 w-5 text-sunset" />
-              </div>
-              <span>Notification Preferences</span>
-            </CardTitle>
-            <CardDescription>
-              Manage what notifications you receive
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="pt-3">
-            <div className="space-y-5">
-              <motion.div
-                whileHover={{ x: 3 }}
-                transition={{ duration: 0.2 }}
-                className="flex items-center justify-between p-3 rounded-lg border border-muted/30 bg-muted/5"
-              >
-                <div className="space-y-1">
-                  <Label
-                    htmlFor="deals"
-                    className="flex items-center gap-2 text-base"
-                  >
-                    <span
-                      className={cn(
-                        'p-1.5 rounded-md',
-                        preferences.notificationPreferences.deals
-                          ? 'bg-sunset/10'
-                          : 'bg-muted/20'
-                      )}
-                    >
-                      <Plane
-                        className={cn(
-                          'h-4 w-4',
-                          preferences.notificationPreferences.deals
-                            ? 'text-sunset'
-                            : 'text-muted-foreground'
-                        )}
-                      />
-                    </span>
-                    Travel Deals & Discounts
-                  </Label>
-                  <p className="text-muted-foreground text-xs ml-8">
-                    Get notified about special offers and promotions
-                  </p>
-                </div>
-                <Switch
-                  id="deals"
-                  checked={preferences.notificationPreferences.deals}
-                  onCheckedChange={(checked) => {
-                    setPreferences((prev) => ({
-                      ...prev,
-                      notificationPreferences: {
-                        ...prev.notificationPreferences,
-                        deals: checked,
-                      },
-                    }));
-                  }}
-                />
-              </motion.div>
-
-              <motion.div
-                whileHover={{ x: 3 }}
-                transition={{ duration: 0.2 }}
-                className="flex items-center justify-between p-3 rounded-lg border border-muted/30 bg-muted/5"
-              >
-                <div className="space-y-1">
-                  <Label
-                    htmlFor="trip-reminders"
-                    className="flex items-center gap-2 text-base"
-                  >
-                    <span
-                      className={cn(
-                        'p-1.5 rounded-md',
-                        preferences.notificationPreferences.tripReminders
-                          ? 'bg-forest/10'
-                          : 'bg-muted/20'
-                      )}
-                    >
-                      <Calendar
-                        className={cn(
-                          'h-4 w-4',
-                          preferences.notificationPreferences.tripReminders
-                            ? 'text-forest'
-                            : 'text-muted-foreground'
-                        )}
-                      />
-                    </span>
-                    Trip Reminders
-                  </Label>
-                  <p className="text-muted-foreground text-xs ml-8">
-                    Get reminders about your upcoming trips
-                  </p>
-                </div>
-                <Switch
-                  id="trip-reminders"
-                  checked={preferences.notificationPreferences.tripReminders}
-                  onCheckedChange={(checked) => {
-                    setPreferences((prev) => ({
-                      ...prev,
-                      notificationPreferences: {
-                        ...prev.notificationPreferences,
-                        tripReminders: checked,
-                      },
-                    }));
-                  }}
-                />
-              </motion.div>
-
-              <motion.div
-                whileHover={{ x: 3 }}
-                transition={{ duration: 0.2 }}
-                className="flex items-center justify-between p-3 rounded-lg border border-muted/30 bg-muted/5"
-              >
-                <div className="space-y-1">
-                  <Label
-                    htmlFor="newsletter"
-                    className="flex items-center gap-2 text-base"
-                  >
-                    <span
-                      className={cn(
-                        'p-1.5 rounded-md',
-                        preferences.notificationPreferences.newsletters
-                          ? 'bg-ocean/10'
-                          : 'bg-muted/20'
-                      )}
-                    >
-                      <Mail
-                        className={cn(
-                          'h-4 w-4',
-                          preferences.notificationPreferences.newsletters
-                            ? 'text-ocean'
-                            : 'text-muted-foreground'
-                        )}
-                      />
-                    </span>
-                    Newsletters
-                  </Label>
-                  <p className="text-muted-foreground text-xs ml-8">
-                    Receive our monthly travel newsletter
-                  </p>
-                </div>
-                <Switch
-                  id="newsletter"
-                  checked={preferences.notificationPreferences.newsletters}
-                  onCheckedChange={(checked) => {
-                    setPreferences((prev) => ({
-                      ...prev,
-                      notificationPreferences: {
-                        ...prev.notificationPreferences,
-                        newsletters: checked,
-                      },
-                    }));
-                  }}
-                />
-              </motion.div>
-
-              <motion.div
-                whileHover={{ x: 3 }}
-                transition={{ duration: 0.2 }}
-                className="flex items-center justify-between p-3 rounded-lg border border-muted/30 bg-muted/5"
-              >
-                <div className="space-y-1">
-                  <Label
-                    htmlFor="new-destinations"
-                    className="flex items-center gap-2 text-base"
-                  >
-                    <span
-                      className={cn(
-                        'p-1.5 rounded-md',
-                        preferences.notificationPreferences.newDestinations
-                          ? 'bg-mountain/10'
-                          : 'bg-muted/20'
-                      )}
-                    >
-                      <Globe
-                        className={cn(
-                          'h-4 w-4',
-                          preferences.notificationPreferences.newDestinations
-                            ? 'text-mountain'
-                            : 'text-muted-foreground'
-                        )}
-                      />
-                    </span>
-                    New Destinations
-                  </Label>
-                  <p className="text-muted-foreground text-xs ml-8">
-                    Get notified when we add new destinations
-                  </p>
-                </div>
-                <Switch
-                  id="new-destinations"
-                  checked={preferences.notificationPreferences.newDestinations}
-                  onCheckedChange={(checked) => {
-                    setPreferences((prev) => ({
-                      ...prev,
-                      notificationPreferences: {
-                        ...prev.notificationPreferences,
-                        newDestinations: checked,
-                      },
-                    }));
-                  }}
-                />
-              </motion.div>
             </div>
           </CardContent>
         </Card>
