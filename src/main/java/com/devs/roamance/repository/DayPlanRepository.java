@@ -14,14 +14,20 @@ import org.springframework.lang.NonNull;
 public interface DayPlanRepository extends JpaRepository<DayPlan, UUID> {
 
   @NonNull
-  @EntityGraph(attributePaths = {"notes"})
+  @EntityGraph(attributePaths = {"notes"}) // necessary fields from detail dto
+  @Query("SELECT d FROM DayPlan d WHERE d.id = :id")
   Optional<DayPlan> findById(@NonNull UUID id);
 
   @Query("SELECT d FROM DayPlan d WHERE d.id = :id")
-  Optional<DayPlan> findByIdLite(@Param("id") UUID id);
+  Optional<DayPlan> findByIdLite(UUID id);
 
   @NonNull
-  @EntityGraph(attributePaths = {"notes", "itinerary"})
+  @EntityGraph(attributePaths = {"activities"}) // for validating activity collisions
+  @Query("SELECT d FROM DayPlan d WHERE d.id = :id")
+  Optional<DayPlan> findByIdWithActivities(@Param("id") @NonNull UUID id);
+
+  @NonNull
+  @EntityGraph(attributePaths = {"notes", "itinerary"}) // notes for dto & itinerary for validation
   @Query("SELECT d FROM DayPlan d WHERE d.id = :id")
   Optional<DayPlan> findByIdWithItinerary(@Param("id") @NonNull UUID id);
 

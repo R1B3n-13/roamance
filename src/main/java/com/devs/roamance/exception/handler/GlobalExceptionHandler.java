@@ -234,17 +234,7 @@ public class GlobalExceptionHandler {
         new BaseResponseDto(400, false, ex.getMessage()), HttpStatus.BAD_REQUEST);
   }
 
-  // ==================== General Exceptions ====================
-
-  @ExceptionHandler(IllegalArgumentException.class)
-  public ResponseEntity<BaseResponseDto> handleIllegalArgumentException(
-      IllegalArgumentException ex) {
-
-    log.error("IllegalArgumentException: {}", ex.getMessage(), ex);
-
-    return new ResponseEntity<>(
-        new BaseResponseDto(400, false, ex.getMessage()), HttpStatus.BAD_REQUEST);
-  }
+  // ==================== Itinerary related Exceptions ====================
 
   @ExceptionHandler(DateOutOfRangeException.class)
   public ResponseEntity<BaseResponseDto> handleDateOutOfRangeException(DateOutOfRangeException ex) {
@@ -260,6 +250,28 @@ public class GlobalExceptionHandler {
       ScheduleCollisionException ex) {
 
     log.error("ScheduleCollisionException: {}", ex.getMessage(), ex);
+
+    return new ResponseEntity<>(
+        new BaseResponseDto(400, false, ex.getMessage()), HttpStatus.BAD_REQUEST);
+  }
+
+  @ExceptionHandler(InvalidDateTimeException.class)
+  public ResponseEntity<BaseResponseDto> handleInvalidDateTimeException(
+      InvalidDateTimeException ex) {
+
+    log.error("InvalidDateTimeException: {}", ex.getMessage(), ex);
+
+    return new ResponseEntity<>(
+        new BaseResponseDto(400, false, ex.getMessage()), HttpStatus.BAD_REQUEST);
+  }
+
+  // ==================== General Exceptions ====================
+
+  @ExceptionHandler(IllegalArgumentException.class)
+  public ResponseEntity<BaseResponseDto> handleIllegalArgumentException(
+      IllegalArgumentException ex) {
+
+    log.error("IllegalArgumentException: {}", ex.getMessage(), ex);
 
     return new ResponseEntity<>(
         new BaseResponseDto(400, false, ex.getMessage()), HttpStatus.BAD_REQUEST);

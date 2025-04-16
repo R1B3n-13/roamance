@@ -65,10 +65,10 @@ public class DayPlanServiceImpl implements DayPlanService {
 
     DayPlan dayPlan = modelMapper.map(createRequestDto, DayPlan.class);
 
+    itinerary.validateDayPlanDate(dayPlan);
+
     dayPlan.setItinerary(itinerary);
     dayPlan.setUser(user);
-
-    itinerary.validateDayPlanDateRange(dayPlan);
 
     try {
       DayPlan savedDayPlan = dayPlanRepository.save(dayPlan);
@@ -137,6 +137,9 @@ public class DayPlanServiceImpl implements DayPlanService {
 
     if (updateRequestDto.getDate() != null) {
       existingDayPlan.setDate(updateRequestDto.getDate());
+
+      // fetched with itinerary for this validation to avoid n+1 problem
+      existingDayPlan.getItinerary().validateDayPlanDate(existingDayPlan);
     }
     if (updateRequestDto.getRoutePlan() != null) {
       existingDayPlan.setRoutePlan(updateRequestDto.getRoutePlan());
@@ -144,10 +147,6 @@ public class DayPlanServiceImpl implements DayPlanService {
     if (updateRequestDto.getNotes() != null && !updateRequestDto.getNotes().isEmpty()) {
       existingDayPlan.setNotes(updateRequestDto.getNotes());
     }
-
-    existingDayPlan
-        .getItinerary()
-        .validateDayPlanDateRange(existingDayPlan); // fetched with itinerary for this validation
 
     try {
       DayPlan savedDayPlan = dayPlanRepository.save(existingDayPlan);

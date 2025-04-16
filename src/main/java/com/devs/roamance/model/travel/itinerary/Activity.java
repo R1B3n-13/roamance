@@ -1,5 +1,6 @@
 package com.devs.roamance.model.travel.itinerary;
 
+import com.devs.roamance.exception.InvalidDateTimeException;
 import com.devs.roamance.model.BaseEntity;
 import com.devs.roamance.model.travel.Location;
 import com.devs.roamance.model.user.User;
@@ -59,4 +60,14 @@ public class Activity extends BaseEntity {
       cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH})
   @JoinColumn(name = "user_id", referencedColumnName = "id")
   private User user;
+
+  @PrePersist
+  @PreUpdate
+  private void validateActivityTime() {
+
+    if (startTime != null && endTime != null && endTime.isBefore(startTime)) {
+
+      throw new InvalidDateTimeException("Start time must be before end time");
+    }
+  }
 }

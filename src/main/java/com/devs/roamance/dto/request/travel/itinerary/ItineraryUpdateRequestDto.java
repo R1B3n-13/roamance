@@ -5,8 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,7 +18,7 @@ import lombok.Setter;
 public class ItineraryUpdateRequestDto {
 
   @Size(max = 30, message = "There should be at most 30 locations")
-  private List<LocationUpdateRequestDto> locations;
+  private Set<LocationUpdateRequestDto> locations = new LinkedHashSet<>();
 
   @Size(max = 100, message = "Title must be less than 100 characters")
   private String title;

@@ -6,8 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,7 +19,7 @@ import lombok.Setter;
 public class ItineraryCreateRequestDto {
 
   @Size(min = 1, max = 30, message = "There should be at least 1 and at most 30 locations")
-  private List<LocationCreateRequestDto> locations;
+  private Set<LocationCreateRequestDto> locations = new LinkedHashSet<>();
 
   @NotBlank(message = "Title is required")
   @Size(max = 100, message = "Title must be less than 100 characters")

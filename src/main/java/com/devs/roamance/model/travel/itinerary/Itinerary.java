@@ -1,6 +1,7 @@
 package com.devs.roamance.model.travel.itinerary;
 
 import com.devs.roamance.exception.DateOutOfRangeException;
+import com.devs.roamance.exception.InvalidDateTimeException;
 import com.devs.roamance.model.BaseEntity;
 import com.devs.roamance.model.travel.Location;
 import com.devs.roamance.model.user.User;
@@ -13,9 +14,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -37,7 +36,7 @@ public class Itinerary extends BaseEntity {
 
   @Size(min = 1, max = 30)
   @ElementCollection(fetch = FetchType.LAZY)
-  private List<Location> locations = new ArrayList<>();
+  private Set<Location> locations = new LinkedHashSet<>();
 
   @NotBlank
   @Size(max = 100)
@@ -85,15 +84,26 @@ public class Itinerary extends BaseEntity {
 
   @PrePersist
   @PreUpdate
-  private void validateItineraryDateRange() {
+  private void validateItineraryDate() {
 
-    if (startDate != null && endDate != null && endDate.isAfter(startDate.plusYears(1))) {
+    if (startDate == null || endDate == null) {
+      return;
+    }
 
+    if ((endDate.isAfter(startDate.plusYears(1)))) {
       throw new DateOutOfRangeException("Itinerary date range must not exceed one year");
+    }
+
+    if (endDate.isBefore(startDate)) {
+      throw new InvalidDateTimeException("Start date must be before end date");
     }
   }
 
-  public void validateDayPlanDateRange(DayPlan dayPlan) {
+  public void validateDayPlanDate(DayPlan dayPlan) {
+
+    if (startDate == null || endDate == null || dayPlan.getDate() == null) {
+      return;
+    }
 
     if (dayPlan.getDate().isBefore(startDate) || dayPlan.getDate().isAfter(endDate)) {
 

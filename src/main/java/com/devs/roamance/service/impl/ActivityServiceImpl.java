@@ -55,7 +55,7 @@ public class ActivityServiceImpl implements ActivityService {
 
     DayPlan dayPlan =
         dayPlanRepository
-            .findByIdLite(createRequestDto.getDayPlanId())
+            .findByIdWithActivities(createRequestDto.getDayPlanId()) // with activities to avoid n+1
             .orElseThrow(
                 () ->
                     new ResourceNotFoundException(
@@ -63,6 +63,9 @@ public class ActivityServiceImpl implements ActivityService {
                             ResponseMessage.ACTIVITY_NOT_FOUND, createRequestDto.getDayPlanId())));
 
     Activity activity = modelMapper.map(createRequestDto, Activity.class);
+
+    // DayPlan was fetched with activities eagerly to avoid n+1 inside this validation method
+    dayPlan.validateNoTimeCollisions(activity);
 
     activity.setDayPlan(dayPlan);
     activity.setUser(user);
@@ -115,7 +118,7 @@ public class ActivityServiceImpl implements ActivityService {
 
     Activity existingActivity =
         activityRepository
-            .findById(activityId)
+            .findByIdWithDayPlan(activityId) // fetched with DayPlan to avoid n+1 problem
             .orElseThrow(
                 () ->
                     new ResourceNotFoundException(
@@ -130,12 +133,6 @@ public class ActivityServiceImpl implements ActivityService {
     if (updateRequestDto.getLocation() != null) {
       existingActivity.setLocation(modelMapper.map(updateRequestDto.getLocation(), Location.class));
     }
-    if (updateRequestDto.getStartTime() != null) {
-      existingActivity.setStartTime(updateRequestDto.getStartTime());
-    }
-    if (updateRequestDto.getEndTime() != null) {
-      existingActivity.setEndTime(updateRequestDto.getEndTime());
-    }
     if (updateRequestDto.getType() != null) {
       setActivityType(existingActivity, updateRequestDto.getType());
     }
@@ -144,6 +141,27 @@ public class ActivityServiceImpl implements ActivityService {
     }
     if (updateRequestDto.getCost() != null) {
       existingActivity.setCost(updateRequestDto.getCost());
+    }
+
+    if (updateRequestDto.getStartTime() != null && updateRequestDto.getEndTime() != null) {
+
+      existingActivity.setStartTime(updateRequestDto.getStartTime());
+      existingActivity.setEndTime(updateRequestDto.getEndTime());
+
+      // Activity was fetched with DayPlan & activities eagerly to avoid n+1 for this validation
+      existingActivity.getDayPlan().validateNoTimeCollisions(existingActivity);
+
+    } else if (updateRequestDto.getStartTime() != null) {
+
+      existingActivity.setStartTime(updateRequestDto.getStartTime());
+
+      existingActivity.getDayPlan().validateNoTimeCollisions(existingActivity);
+
+    } else if (updateRequestDto.getEndTime() != null) {
+
+      existingActivity.setEndTime(updateRequestDto.getEndTime());
+
+      existingActivity.getDayPlan().validateNoTimeCollisions(existingActivity);
     }
 
     Activity savedActivity = activityRepository.save(existingActivity);
@@ -186,11 +204,7 @@ public class ActivityServiceImpl implements ActivityService {
 
     // Set otherTypeName only for custom OTHER types
     String otherTypeName =
-        (activityType == ActivityType.OTHER
-                && inputType != null
-                && !ActivityType.fromString(inputType).equals(ActivityType.OTHER))
-            ? inputType
-            : null;
+        (activityType == ActivityType.OTHER && inputType != null) ? inputType : null;
 
     activity.setOtherTypeName(otherTypeName);
   }

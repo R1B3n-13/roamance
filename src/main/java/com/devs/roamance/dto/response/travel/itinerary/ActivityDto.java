@@ -3,6 +3,7 @@ package com.devs.roamance.dto.response.travel.itinerary;
 import com.devs.roamance.dto.response.AuditDto;
 import com.devs.roamance.model.travel.Location;
 import com.devs.roamance.model.travel.itinerary.ActivityType;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.math.BigDecimal;
 import java.time.LocalTime;
 import java.util.UUID;
@@ -19,10 +20,18 @@ public class ActivityDto extends AuditDto {
 
   private UUID id;
   private Location location;
+
+  @JsonProperty("start_time")
   private LocalTime startTime;
+
+  @JsonProperty("end_time")
   private LocalTime endTime;
+
   private ActivityType type;
+
+  @JsonProperty("other_type_name")
   private String otherTypeName;
+
   private String note;
   private BigDecimal cost;
 }

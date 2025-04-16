@@ -13,7 +13,6 @@ import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -72,30 +71,27 @@ public class DayPlan extends BaseEntity {
   @JoinColumn(name = "user_id", referencedColumnName = "id")
   private User user;
 
-  @PrePersist
-  @PreUpdate
-  private void validateNoTimeCollisions() {
+  public void validateNoTimeCollisions(Activity currentActivity) {
 
-    List<Activity> sortedActivities = new ArrayList<>(activities);
-    sortedActivities.sort(Comparator.comparing(Activity::getStartTime));
+    if (currentActivity.getStartTime() == null || currentActivity.getEndTime() == null) return;
 
-    for (int i = 0; i < sortedActivities.size() - 1; i++) {
+    // need to fetch activities EAGERLY with DayPlan using entity graph to avoid n+1 problem
+    for (Activity otherActivity : activities) {
 
-      Activity current = sortedActivities.get(i);
-      Activity next = sortedActivities.get(i + 1);
+      if (currentActivity.getId().equals(otherActivity.getId())
+          || otherActivity.getStartTime() == null
+          || otherActivity.getEndTime() == null) continue;
 
-      if (current.getEndTime() != null
-          && next.getStartTime() != null
-          && !current.getEndTime().isBefore(next.getStartTime())) {
+      boolean startsBeforeEnd = !currentActivity.getStartTime().isAfter(otherActivity.getEndTime());
+      boolean endsAfterStart = !currentActivity.getEndTime().isBefore(otherActivity.getStartTime());
+
+      if (startsBeforeEnd && endsAfterStart) {
 
         throw new ScheduleCollisionException(
-            "Activity schedule collision detected between '"
-                + (current.getType().getName() != null
-                    ? current.getType().getName()
-                    : current.getType())
-                + "' and '"
-                + (next.getType().getName() != null ? next.getType().getName() : next.getType())
-                + "'");
+            "Activity schedule collision detected with start time : "
+                + otherActivity.getStartTime()
+                + " and end time : "
+                + otherActivity.getEndTime());
       }
     }
   }
