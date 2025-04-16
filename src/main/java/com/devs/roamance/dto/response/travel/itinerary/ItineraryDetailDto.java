@@ -1,8 +1,8 @@
 package com.devs.roamance.dto.response.travel.itinerary;
 
-import com.devs.roamance.model.travel.Location;
+import com.devs.roamance.dto.response.travel.LocationResponseDto;
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import lombok.AllArgsConstructor;
@@ -16,7 +16,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ItineraryDetailDto extends ItineraryBriefDto {
 
-  private Set<Location> locations = new LinkedHashSet<>();
+  private Set<LocationResponseDto> locations = new HashSet<>();
 
   private List<String> notes = new ArrayList<>();
 }

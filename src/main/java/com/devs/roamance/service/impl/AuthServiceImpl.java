@@ -1,9 +1,9 @@
 package com.devs.roamance.service.impl;
 
 import com.devs.roamance.constant.ResponseMessage;
-import com.devs.roamance.dto.request.AuthRequestDto;
-import com.devs.roamance.dto.request.RefreshTokenRequestDto;
-import com.devs.roamance.dto.response.AuthResponseDto;
+import com.devs.roamance.dto.request.auth.AuthRequestDto;
+import com.devs.roamance.dto.request.auth.RefreshTokenRequestDto;
+import com.devs.roamance.dto.response.auth.AuthResponseDto;
 import com.devs.roamance.exception.WrongCredentialsException;
 import com.devs.roamance.model.user.User;
 import com.devs.roamance.repository.UserRepository;

@@ -1,6 +1,5 @@
 package com.devs.roamance.dto.request.travel.itinerary;
 
-import com.devs.roamance.model.travel.itinerary.RoutePlan;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -28,7 +27,7 @@ public class DayPlanCreateRequestDto {
   private LocalDate date;
 
   @JsonProperty("route_plan")
-  private RoutePlan routePlan;
+  private RoutePlanRequestDto routePlan;
 
   @Size(max = 10, message = "Maximum 10 notes allowed")
   private List<

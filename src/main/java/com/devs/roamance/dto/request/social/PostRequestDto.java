@@ -1,6 +1,6 @@
 package com.devs.roamance.dto.request.social;
 
-import com.devs.roamance.dto.request.LocationCreateRequestDto;
+import com.devs.roamance.dto.request.travel.LocationCreateRequestDto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Size;
 import java.util.ArrayList;

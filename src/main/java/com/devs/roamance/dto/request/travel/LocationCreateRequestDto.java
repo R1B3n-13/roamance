@@ -1,4 +1,4 @@
-package com.devs.roamance.dto.request;
+package com.devs.roamance.dto.request.travel;
 
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;

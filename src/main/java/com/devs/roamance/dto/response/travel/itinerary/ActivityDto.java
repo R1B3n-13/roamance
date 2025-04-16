@@ -1,7 +1,7 @@
 package com.devs.roamance.dto.response.travel.itinerary;
 
 import com.devs.roamance.dto.response.AuditDto;
-import com.devs.roamance.model.travel.Location;
+import com.devs.roamance.dto.response.travel.LocationResponseDto;
 import com.devs.roamance.model.travel.itinerary.ActivityType;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.math.BigDecimal;
@@ -19,7 +19,7 @@ import lombok.Setter;
 public class ActivityDto extends AuditDto {
 
   private UUID id;
-  private Location location;
+  private LocationResponseDto location;
 
   @JsonProperty("start_time")
   private LocalTime startTime;

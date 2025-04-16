@@ -4,6 +4,7 @@ import com.devs.roamance.model.travel.Location;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.OrderColumn;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 import java.util.ArrayList;
@@ -28,6 +29,7 @@ public class RoutePlan {
 
   private String routeDescription;
 
+  @OrderColumn
   @Size(min = 1, max = 30)
   @ElementCollection(fetch = FetchType.EAGER)
   private List<Location> routeLocations = new ArrayList<>();

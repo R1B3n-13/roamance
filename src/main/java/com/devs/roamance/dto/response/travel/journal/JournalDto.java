@@ -1,7 +1,7 @@
 package com.devs.roamance.dto.response.travel.journal;
 
 import com.devs.roamance.dto.response.AuditDto;
-import com.devs.roamance.dto.response.LocationResponseDto;
+import com.devs.roamance.dto.response.travel.LocationResponseDto;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

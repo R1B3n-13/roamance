@@ -2,8 +2,8 @@ package com.devs.roamance.exception.handler;
 
 import com.devs.roamance.constant.ResponseMessage;
 import com.devs.roamance.dto.response.BaseResponseDto;
-import com.devs.roamance.dto.response.ValidationErrorDto;
-import com.devs.roamance.dto.response.ValidationErrorResponseDto;
+import com.devs.roamance.dto.response.validation.ValidationErrorDto;
+import com.devs.roamance.dto.response.validation.ValidationErrorResponseDto;
 import com.devs.roamance.exception.*;
 import jakarta.validation.ConstraintViolationException;
 import java.util.List;

@@ -1,6 +1,5 @@
 package com.devs.roamance.dto.response.travel.itinerary;
 
-import com.devs.roamance.model.travel.itinerary.RoutePlan;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +15,7 @@ import lombok.Setter;
 public class DayPlanDetailDto extends DayPlanBriefDto {
 
   @JsonProperty("route_plan")
-  private RoutePlan routePlan;
+  private RoutePlanResponseDto routePlan;
 
   private List<String> notes = new ArrayList<>();
 }

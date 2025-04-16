@@ -17,7 +17,7 @@ import com.devs.roamance.repository.ItineraryRepository;
 import com.devs.roamance.service.ItineraryService;
 import com.devs.roamance.util.PaginationSortingUtil;
 import com.devs.roamance.util.UserUtil;
-import java.util.LinkedHashSet;
+import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 import org.modelmapper.ModelMapper;
@@ -134,7 +134,7 @@ public class ItineraryServiceImpl implements ItineraryService {
     if (updateRequestDto.getLocations() != null && !updateRequestDto.getLocations().isEmpty()) {
 
       existingItinerary.setLocations(
-          new LinkedHashSet<>(
+          new HashSet<>(
               updateRequestDto.getLocations().stream()
                   .map(location -> modelMapper.map(location, Location.class))
                   .toList()));

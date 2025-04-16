@@ -10,6 +10,7 @@ import com.devs.roamance.exception.ResourceNotFoundException;
 import com.devs.roamance.exception.UnauthorizedActionException;
 import com.devs.roamance.model.travel.itinerary.DayPlan;
 import com.devs.roamance.model.travel.itinerary.Itinerary;
+import com.devs.roamance.model.travel.itinerary.RoutePlan;
 import com.devs.roamance.model.user.User;
 import com.devs.roamance.repository.DayPlanRepository;
 import com.devs.roamance.repository.ItineraryRepository;
@@ -142,7 +143,8 @@ public class DayPlanServiceImpl implements DayPlanService {
       existingDayPlan.getItinerary().validateDayPlanDate(existingDayPlan);
     }
     if (updateRequestDto.getRoutePlan() != null) {
-      existingDayPlan.setRoutePlan(updateRequestDto.getRoutePlan());
+      existingDayPlan.setRoutePlan(
+          modelMapper.map(updateRequestDto.getRoutePlan(), RoutePlan.class));
     }
     if (updateRequestDto.getNotes() != null && !updateRequestDto.getNotes().isEmpty()) {
       existingDayPlan.setNotes(updateRequestDto.getNotes());

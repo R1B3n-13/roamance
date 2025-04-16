@@ -36,7 +36,7 @@ public class Itinerary extends BaseEntity {
 
   @Size(min = 1, max = 30)
   @ElementCollection(fetch = FetchType.LAZY)
-  private Set<Location> locations = new LinkedHashSet<>();
+  private Set<Location> locations = new HashSet<>();
 
   @NotBlank
   @Size(max = 100)
