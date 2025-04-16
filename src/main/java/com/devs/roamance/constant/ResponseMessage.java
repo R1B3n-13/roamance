@@ -109,11 +109,25 @@ public final class ResponseMessage {
   public static final String DAY_PLAN_CREATE_SUCCESS = "Day plan created successfully.";
   public static final String DAY_PLAN_FETCH_SUCCESS = "Day plan fetched successfully.";
   public static final String DAY_PLANS_FETCH_SUCCESS = "Day plans fetched successfully.";
-  public static final String DAY_PLAN_UPDATE_SUCCESS = "Day plans updated successfully.";
-  public static final String DAY_PLAN_DELETE_SUCCESS = "Day plans deleted successfully.";
+  public static final String DAY_PLAN_UPDATE_SUCCESS = "Day plan updated successfully.";
+  public static final String DAY_PLAN_DELETE_SUCCESS = "Day plan deleted successfully.";
   public static final String DAY_PLAN_NOT_FOUND = "No Day plan present with id: %s!";
   public static final String DAY_PLAN_UPDATE_ACTION_DENIED =
       "You don't have permission to update this Day Plan!";
   public static final String DAY_PLAN_DELETE_ACTION_DENIED =
       "You don't have permission to delete this Day Plan!";
+  public static final String DAY_PLAN_ALREADY_EXIST = "Day plan already exists with date: %s!";
+
+  // ========================== Activity Related ==========================
+
+  public static final String ACTIVITY_CREATE_SUCCESS = "Activity created successfully.";
+  public static final String ACTIVITY_FETCH_SUCCESS = "Activity fetched successfully.";
+  public static final String ACTIVITIES_FETCH_SUCCESS = "Activities fetched successfully.";
+  public static final String ACTIVITY_UPDATE_SUCCESS = "Activity updated successfully.";
+  public static final String ACTIVITY_DELETE_SUCCESS = "Activity deleted successfully.";
+  public static final String ACTIVITY_NOT_FOUND = "No activity present with id: %s!";
+  public static final String ACTIVITY_UPDATE_ACTION_DENIED =
+      "You don't have permission to update this Activity!";
+  public static final String ACTIVITY_DELETE_ACTION_DENIED =
+      "You don't have permission to delete this Activity!";
 }

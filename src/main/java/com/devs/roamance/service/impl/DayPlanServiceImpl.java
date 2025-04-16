@@ -5,6 +5,7 @@ import com.devs.roamance.dto.request.travel.itinerary.DayPlanCreateRequestDto;
 import com.devs.roamance.dto.request.travel.itinerary.DayPlanUpdateRequestDto;
 import com.devs.roamance.dto.response.BaseResponseDto;
 import com.devs.roamance.dto.response.travel.itinerary.*;
+import com.devs.roamance.exception.ResourceAlreadyExistException;
 import com.devs.roamance.exception.ResourceNotFoundException;
 import com.devs.roamance.exception.UnauthorizedActionException;
 import com.devs.roamance.model.travel.itinerary.DayPlan;
@@ -18,6 +19,7 @@ import com.devs.roamance.util.UserUtil;
 import java.util.List;
 import java.util.UUID;
 import org.modelmapper.ModelMapper;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -53,7 +55,7 @@ public class DayPlanServiceImpl implements DayPlanService {
 
     Itinerary itinerary =
         itineraryRepository
-            .findById(createRequestDto.getItineraryId())
+            .findByIdLite(createRequestDto.getItineraryId())
             .orElseThrow(
                 () ->
                     new ResourceNotFoundException(
@@ -66,12 +68,21 @@ public class DayPlanServiceImpl implements DayPlanService {
     dayPlan.setItinerary(itinerary);
     dayPlan.setUser(user);
 
-    DayPlan savedDayPlan = dayPlanRepository.save(dayPlan);
-    dayPlanRepository.flush();
+    itinerary.validateDayPlanDateRange(dayPlan);
 
-    DayPlanDetailDto dto = modelMapper.map(savedDayPlan, DayPlanDetailDto.class);
+    try {
+      DayPlan savedDayPlan = dayPlanRepository.save(dayPlan);
+      dayPlanRepository.flush();
 
-    return new DayPlanResponseDto(201, true, ResponseMessage.DAY_PLAN_CREATE_SUCCESS, dto);
+      DayPlanDetailDto dto = modelMapper.map(savedDayPlan, DayPlanDetailDto.class);
+
+      return new DayPlanResponseDto(201, true, ResponseMessage.DAY_PLAN_CREATE_SUCCESS, dto);
+
+    } catch (DataIntegrityViolationException e) {
+
+      throw new ResourceAlreadyExistException(
+          String.format(ResponseMessage.DAY_PLAN_ALREADY_EXIST, createRequestDto.getDate()));
+    }
   }
 
   @Override
@@ -112,7 +123,7 @@ public class DayPlanServiceImpl implements DayPlanService {
 
     DayPlan existingDayPlan =
         dayPlanRepository
-            .findById(dayPlanId)
+            .findByIdWithItinerary(dayPlanId) // to avoid n+1 problem later in this method
             .orElseThrow(
                 () ->
                     new ResourceNotFoundException(
@@ -121,7 +132,6 @@ public class DayPlanServiceImpl implements DayPlanService {
     UUID userId = userUtil.getAuthenticatedUser().getId();
 
     if (!existingDayPlan.getUser().getId().equals(userId)) {
-
       throw new UnauthorizedActionException(ResponseMessage.DAY_PLAN_UPDATE_ACTION_DENIED);
     }
 
@@ -135,12 +145,23 @@ public class DayPlanServiceImpl implements DayPlanService {
       existingDayPlan.setNotes(updateRequestDto.getNotes());
     }
 
-    DayPlan savedDayPlan = dayPlanRepository.save(existingDayPlan);
-    dayPlanRepository.flush();
+    existingDayPlan
+        .getItinerary()
+        .validateDayPlanDateRange(existingDayPlan); // fetched with itinerary for this validation
 
-    DayPlanDetailDto dto = modelMapper.map(savedDayPlan, DayPlanDetailDto.class);
+    try {
+      DayPlan savedDayPlan = dayPlanRepository.save(existingDayPlan);
+      dayPlanRepository.flush();
 
-    return new DayPlanResponseDto(200, true, ResponseMessage.DAY_PLAN_UPDATE_SUCCESS, dto);
+      DayPlanDetailDto dto = modelMapper.map(savedDayPlan, DayPlanDetailDto.class);
+
+      return new DayPlanResponseDto(200, true, ResponseMessage.DAY_PLAN_UPDATE_SUCCESS, dto);
+
+    } catch (DataIntegrityViolationException e) {
+
+      throw new ResourceAlreadyExistException(
+          String.format(ResponseMessage.DAY_PLAN_ALREADY_EXIST, updateRequestDto.getDate()));
+    }
   }
 
   @Override
@@ -149,7 +170,7 @@ public class DayPlanServiceImpl implements DayPlanService {
 
     DayPlan dayPlan =
         dayPlanRepository
-            .findById(dayPlanId)
+            .findByIdLite(dayPlanId)
             .orElseThrow(
                 () ->
                     new ResourceNotFoundException(
@@ -158,7 +179,6 @@ public class DayPlanServiceImpl implements DayPlanService {
     UUID userId = userUtil.getAuthenticatedUser().getId();
 
     if (!dayPlan.getUser().getId().equals(userId)) {
-
       throw new UnauthorizedActionException(ResponseMessage.DAY_PLAN_DELETE_ACTION_DENIED);
     }
 

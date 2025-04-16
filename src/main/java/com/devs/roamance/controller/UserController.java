@@ -44,7 +44,7 @@ public class UserController {
   public ResponseEntity<UserListResponseDto> getAllUsers(
       @RequestParam(defaultValue = "0") int pageNumber,
       @RequestParam(defaultValue = "10") int pageSize,
-      @RequestParam(defaultValue = "id") String sortBy,
+      @RequestParam(defaultValue = "name") String sortBy,
       @RequestParam(defaultValue = "asc") String sortDir) {
 
     int[] validatedParams = PaginationSortingUtil.validatePaginationParams(pageNumber, pageSize);

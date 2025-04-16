@@ -21,14 +21,14 @@ import lombok.Setter;
 public class RoutePlan {
 
   @Min(0)
-  private Double totalDistance;
+  private Double routeTotalDistance;
 
   @Min(0)
-  private Integer totalTime;
+  private Integer routeTotalTime;
 
   private String routeDescription;
 
   @Size(min = 1, max = 30)
   @ElementCollection(fetch = FetchType.EAGER)
-  private List<Location> locations = new ArrayList<>();
+  private List<Location> routeLocations = new ArrayList<>();
 }

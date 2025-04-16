@@ -53,7 +53,18 @@ public class Itinerary extends BaseEntity {
   @ElementCollection(fetch = FetchType.LAZY)
   private List<@NotBlank @Size(max = 10_000) String> notes = new ArrayList<>();
 
-  @Formula("(SELECT COALESCE(SUM(dp.total_cost), 0) FROM day_plans dp WHERE dp.itinerary_id = id)")
+  @Formula(
+      """
+  (
+    SELECT COALESCE(SUM(
+      (SELECT COALESCE(SUM(a.cost), 0)
+       FROM activities a
+       WHERE a.day_plan_id = dp.id)
+    ), 0)
+    FROM day_plans dp
+    WHERE dp.itinerary_id = id
+  )
+  """)
   private BigDecimal totalCost = BigDecimal.ZERO;
 
   @JsonIgnore
@@ -74,19 +85,19 @@ public class Itinerary extends BaseEntity {
 
   @PrePersist
   @PreUpdate
-  private void validateDateRange() {
+  private void validateItineraryDateRange() {
 
     if (startDate != null && endDate != null && endDate.isAfter(startDate.plusYears(1))) {
 
-      throw new DateOutOfRangeException("The date range must not exceed one year");
+      throw new DateOutOfRangeException("Itinerary date range must not exceed one year");
     }
+  }
 
-    for (DayPlan plan : dayPlans) {
+  public void validateDayPlanDateRange(DayPlan dayPlan) {
 
-      if (plan.getDate().isBefore(startDate) || plan.getDate().isAfter(endDate)) {
+    if (dayPlan.getDate().isBefore(startDate) || dayPlan.getDate().isAfter(endDate)) {
 
-        throw new DateOutOfRangeException("DayPlan date must be within itinerary date range");
-      }
+      throw new DateOutOfRangeException("DayPlan date must be within itinerary date range");
     }
   }
 }

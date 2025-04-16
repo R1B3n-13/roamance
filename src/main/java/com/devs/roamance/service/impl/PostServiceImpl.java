@@ -170,7 +170,7 @@ public class PostServiceImpl implements PostService {
 
     UUID userId = userUtil.getAuthenticatedUser().getId();
 
-    if (!existingPost.getCreatedBy().equals(userId)) {
+    if (!existingPost.getUser().getId().equals(userId)) {
       throw new UnauthorizedActionException(ResponseMessage.POST_UPDATE_ACTION_DENIED);
     }
 
@@ -258,7 +258,7 @@ public class PostServiceImpl implements PostService {
 
     UUID userId = userUtil.getAuthenticatedUser().getId();
 
-    if (!post.getCreatedBy().equals(userId)) {
+    if (!post.getUser().getId().equals(userId)) {
 
       throw new UnauthorizedActionException(ResponseMessage.POST_DELETE_ACTION_DENIED);
     }

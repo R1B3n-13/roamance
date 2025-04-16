@@ -1,6 +1,7 @@
 package com.devs.roamance.model.travel.itinerary;
 
 import com.devs.roamance.exception.ScheduleCollisionException;
+import com.devs.roamance.model.BaseEntity;
 import com.devs.roamance.model.user.User;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -30,7 +31,7 @@ import org.hibernate.annotations.Formula;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
-public class DayPlan {
+public class DayPlan extends BaseEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)

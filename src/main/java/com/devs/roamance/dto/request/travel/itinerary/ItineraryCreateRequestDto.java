@@ -1,6 +1,6 @@
 package com.devs.roamance.dto.request.travel.itinerary;
 
-import com.devs.roamance.model.travel.Location;
+import com.devs.roamance.dto.request.LocationCreateRequestDto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -20,7 +20,7 @@ import lombok.Setter;
 public class ItineraryCreateRequestDto {
 
   @Size(min = 1, max = 30, message = "There should be at least 1 and at most 30 locations")
-  private List<Location> locations;
+  private List<LocationCreateRequestDto> locations;
 
   @NotBlank(message = "Title is required")
   @Size(max = 100, message = "Title must be less than 100 characters")

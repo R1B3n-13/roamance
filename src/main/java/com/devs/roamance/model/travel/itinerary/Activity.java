@@ -1,11 +1,14 @@
 package com.devs.roamance.model.travel.itinerary;
 
+import com.devs.roamance.model.BaseEntity;
 import com.devs.roamance.model.travel.Location;
+import com.devs.roamance.model.user.User;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.time.LocalTime;
 import java.util.UUID;
@@ -21,7 +24,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
-public class Activity {
+public class Activity extends BaseEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
@@ -29,14 +32,17 @@ public class Activity {
 
   @Embedded private Location location;
 
+  @NotNull private LocalTime startTime;
+  @NotNull private LocalTime endTime;
+
   @Enumerated(EnumType.STRING)
   @NotNull
   private ActivityType type;
 
   private String otherTypeName; // Set only when type is OTHER otherwise null
 
-  @NotNull private LocalTime startTime;
-  @NotNull private LocalTime endTime;
+  @Size(max = 10_000)
+  private String note;
 
   private BigDecimal cost = BigDecimal.ZERO;
 
@@ -46,4 +52,11 @@ public class Activity {
       cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH})
   @JoinColumn(name = "day_plan_id", referencedColumnName = "id")
   private DayPlan dayPlan;
+
+  @JsonIgnore
+  @ManyToOne(
+      fetch = FetchType.EAGER,
+      cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH})
+  @JoinColumn(name = "user_id", referencedColumnName = "id")
+  private User user;
 }

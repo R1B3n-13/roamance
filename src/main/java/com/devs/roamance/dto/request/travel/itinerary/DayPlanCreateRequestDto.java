@@ -24,7 +24,8 @@ public class DayPlanCreateRequestDto {
   @NotNull(message = "Itinerary id is required")
   private UUID itineraryId;
 
-  @NotNull private LocalDate date;
+  @NotNull(message = "Date is required")
+  private LocalDate date;
 
   @JsonProperty("route_plan")
   private RoutePlan routePlan;

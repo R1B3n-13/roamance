@@ -15,13 +15,15 @@ public enum ActivityType {
   public static ActivityType fromString(String input) {
 
     if (input == null) {
-
       return OTHER;
     }
 
+    String trimmedInput = input.trim();
+
     for (ActivityType type : ActivityType.values()) {
 
-      if (type.getName().equalsIgnoreCase(input)) {
+      if (type.name().equalsIgnoreCase(trimmedInput)
+          || type.getName().equalsIgnoreCase(trimmedInput)) {
 
         return type;
       }

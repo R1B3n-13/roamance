@@ -7,13 +7,18 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.lang.NonNull;
 
 public interface ItineraryRepository extends JpaRepository<Itinerary, UUID> {
 
   @NonNull
-  @EntityGraph(attributePaths = {"notes", "dayPlans"})
+  @EntityGraph(attributePaths = {"locations", "notes"})
   Optional<Itinerary> findById(@NonNull UUID id);
+
+  @Query("SELECT i FROM Itinerary i WHERE i.id = :id")
+  Optional<Itinerary> findByIdLite(@Param("id") UUID id);
 
   Page<Itinerary> findAllByUserId(UUID userId, Pageable pageable);
 }

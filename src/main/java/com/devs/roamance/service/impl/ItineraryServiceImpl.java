@@ -10,12 +10,14 @@ import com.devs.roamance.dto.response.travel.itinerary.ItineraryListResponseDto;
 import com.devs.roamance.dto.response.travel.itinerary.ItineraryResponseDto;
 import com.devs.roamance.exception.ResourceNotFoundException;
 import com.devs.roamance.exception.UnauthorizedActionException;
+import com.devs.roamance.model.travel.Location;
 import com.devs.roamance.model.travel.itinerary.Itinerary;
 import com.devs.roamance.model.user.User;
 import com.devs.roamance.repository.ItineraryRepository;
 import com.devs.roamance.service.ItineraryService;
 import com.devs.roamance.util.PaginationSortingUtil;
 import com.devs.roamance.util.UserUtil;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import org.modelmapper.ModelMapper;
@@ -60,22 +62,6 @@ public class ItineraryServiceImpl implements ItineraryService {
   }
 
   @Override
-  public ItineraryResponseDto get(UUID itineraryId) {
-
-    Itinerary itinerary =
-        itineraryRepository
-            .findById(itineraryId)
-            .orElseThrow(
-                () ->
-                    new ResourceNotFoundException(
-                        String.format(ResponseMessage.ITINERARY_NOT_FOUND, itineraryId)));
-
-    ItineraryDetailDto dto = modelMapper.map(itinerary, ItineraryDetailDto.class);
-
-    return new ItineraryResponseDto(200, true, ResponseMessage.ITINERARY_FETCH_SUCCESS, dto);
-  }
-
-  @Override
   public ItineraryListResponseDto getAll(
       int pageNumber, int pageSize, String sortBy, String sortDir) {
 
@@ -91,6 +77,22 @@ public class ItineraryServiceImpl implements ItineraryService {
             .toList();
 
     return new ItineraryListResponseDto(200, true, ResponseMessage.ITINERARIES_FETCH_SUCCESS, dtos);
+  }
+
+  @Override
+  public ItineraryResponseDto get(UUID itineraryId) {
+
+    Itinerary itinerary =
+        itineraryRepository
+            .findById(itineraryId)
+            .orElseThrow(
+                () ->
+                    new ResourceNotFoundException(
+                        String.format(ResponseMessage.ITINERARY_NOT_FOUND, itineraryId)));
+
+    ItineraryDetailDto dto = modelMapper.map(itinerary, ItineraryDetailDto.class);
+
+    return new ItineraryResponseDto(200, true, ResponseMessage.ITINERARY_FETCH_SUCCESS, dto);
   }
 
   @Override
@@ -125,13 +127,17 @@ public class ItineraryServiceImpl implements ItineraryService {
 
     UUID userId = userUtil.getAuthenticatedUser().getId();
 
-    if (!existingItinerary.getCreatedBy().equals(userId)) {
-
+    if (!existingItinerary.getUser().getId().equals(userId)) {
       throw new UnauthorizedActionException(ResponseMessage.ITINERARY_UPDATE_ACTION_DENIED);
     }
 
     if (updateRequestDto.getLocations() != null && !updateRequestDto.getLocations().isEmpty()) {
-      existingItinerary.setLocations(updateRequestDto.getLocations());
+
+      existingItinerary.setLocations(
+          new ArrayList<>(
+              updateRequestDto.getLocations().stream()
+                  .map(location -> modelMapper.map(location, Location.class))
+                  .toList()));
     }
     if (updateRequestDto.getTitle() != null && !updateRequestDto.getTitle().isEmpty()) {
       existingItinerary.setTitle(updateRequestDto.getTitle());
@@ -163,7 +169,7 @@ public class ItineraryServiceImpl implements ItineraryService {
 
     Itinerary itinerary =
         itineraryRepository
-            .findById(itineraryId)
+            .findByIdLite(itineraryId)
             .orElseThrow(
                 () ->
                     new ResourceNotFoundException(
@@ -171,7 +177,7 @@ public class ItineraryServiceImpl implements ItineraryService {
 
     UUID userId = userUtil.getAuthenticatedUser().getId();
 
-    if (!itinerary.getCreatedBy().equals(userId)) {
+    if (!itinerary.getUser().getId().equals(userId)) {
 
       throw new UnauthorizedActionException(ResponseMessage.ITINERARY_DELETE_ACTION_DENIED);
     }

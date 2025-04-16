@@ -4,6 +4,7 @@ import com.devs.roamance.model.social.Chat;
 import com.devs.roamance.model.social.Comment;
 import com.devs.roamance.model.social.Message;
 import com.devs.roamance.model.social.Post;
+import com.devs.roamance.model.travel.itinerary.Activity;
 import com.devs.roamance.model.travel.itinerary.DayPlan;
 import com.devs.roamance.model.travel.itinerary.Itinerary;
 import com.devs.roamance.model.travel.journal.Journal;
@@ -111,6 +112,14 @@ public class User {
       cascade = {CascadeType.ALL},
       orphanRemoval = true)
   private List<DayPlan> dayPlans = new ArrayList<>();
+
+  @JsonIgnore
+  @OneToMany(
+      mappedBy = "user",
+      fetch = FetchType.LAZY,
+      cascade = {CascadeType.ALL},
+      orphanRemoval = true)
+  private List<Activity> activities = new ArrayList<>();
 
   @CreatedDate
   @Column(updatable = false)
