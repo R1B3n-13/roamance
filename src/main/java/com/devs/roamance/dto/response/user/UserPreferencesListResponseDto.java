@@ -14,10 +14,11 @@ import lombok.Setter;
 @AllArgsConstructor
 public class UserPreferencesListResponseDto extends BaseResponseDto {
 
-    private List<UserPreferencesDto> data = new ArrayList<>();
+  private List<UserPreferencesDto> data = new ArrayList<>();
 
-    public UserPreferencesListResponseDto(int status, boolean success, String message, List<UserPreferencesDto> data) {
-        super(status, success, message);
-        this.data = data;
-    }
+  public UserPreferencesListResponseDto(
+      int status, boolean success, String message, List<UserPreferencesDto> data) {
+    super(status, success, message);
+    this.data = data;
+  }
 }

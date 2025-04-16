@@ -28,6 +28,23 @@ public final class ResponseMessage {
   public static final String USER_INFO_DELETE_SUCCESS = "User info deleted successfully.";
   public static final String USER_INFO_NOT_FOUND = "No info found for user with id: %s!";
 
+  // ==================== User Preferences Related ====================
+
+  public static final String USER_PREFERENCES_FETCH_SUCCESS =
+      "User preferences fetched successfully.";
+  public static final String USER_PREFERENCES_CREATE_SUCCESS =
+      "User preferences created successfully.";
+  public static final String USER_PREFERENCES_UPDATE_SUCCESS =
+      "User preferences updated successfully.";
+  public static final String USER_PREFERENCES_DELETE_SUCCESS =
+      "User preferences deleted successfully.";
+  public static final String USER_PREFERENCES_NOT_FOUND =
+      "No preferences found for user with id: %s!";
+  public static final String USER_PREFERENCES_ALREADY_EXIST =
+      "User preferences already exist for user with id: %s!";
+  public static final String USER_PREFERENCES_ACCESS_DENIED =
+      "You don't have permission to access this user's preferences!";
+
   // ==================== Authentication Related ====================
 
   public static final String AUTHENTICATION_FAILED = "Authentication failed!";

@@ -14,7 +14,8 @@ public class UserPreferencesResponseDto extends BaseResponseDto {
 
   private UserPreferencesDto data;
 
-  public UserPreferencesResponseDto(int status, boolean success, String message, UserPreferencesDto data) {
+  public UserPreferencesResponseDto(
+      int status, boolean success, String message, UserPreferencesDto data) {
     super(status, success, message);
     this.data = data;
   }

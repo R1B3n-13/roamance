@@ -1,15 +1,8 @@
 package com.devs.roamance.model.user.preference;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
-
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
 import com.devs.roamance.model.BaseEntity;
 import com.devs.roamance.model.user.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
@@ -24,10 +17,14 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @Table(name = "user_preferences")
@@ -38,42 +35,46 @@ import lombok.Setter;
 @AllArgsConstructor
 public class UserPreferences extends BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.UUID)
+  private UUID id;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "travel_style")
-    private TravelStyle travelStyle = TravelStyle.BALANCED;
+  @Enumerated(EnumType.STRING)
+  @Column(name = "travel_style")
+  private TravelStyle travelStyle = TravelStyle.BALANCED;
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @Enumerated(EnumType.STRING)
-    @CollectionTable(name = "user_accommodation_types", joinColumns = @JoinColumn(name = "user_preferences_id"))
-    @Column(name = "accommodation_type")
-    private Set<AccommodationType> accommodationTypes = new HashSet<>();
+  @ElementCollection(fetch = FetchType.EAGER)
+  @Enumerated(EnumType.STRING)
+  @CollectionTable(
+      name = "user_accommodation_types",
+      joinColumns = @JoinColumn(name = "user_preferences_id"))
+  @Column(name = "accommodation_types")
+  private Set<AccommodationType> accommodationTypes = new HashSet<>();
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @Enumerated(EnumType.STRING)
-    @CollectionTable(name = "user_activities", joinColumns = @JoinColumn(name = "user_preferences_id"))
-    @Column(name = "activity_type")
-    private Set<ActivityType> activities = new HashSet<>();
+  @ElementCollection(fetch = FetchType.EAGER)
+  @Enumerated(EnumType.STRING)
+  @CollectionTable(
+      name = "user_activities",
+      joinColumns = @JoinColumn(name = "user_preferences_id"))
+  @Column(name = "activity_types")
+  private Set<ActivityType> activityTypes = new HashSet<>();
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @Enumerated(EnumType.STRING)
-    @CollectionTable(name = "user_cuisines", joinColumns = @JoinColumn(name = "user_preferences_id"))
-    @Column(name = "cuisine_type")
-    private Set<CuisineType> cuisines = new HashSet<>();
+  @ElementCollection(fetch = FetchType.EAGER)
+  @Enumerated(EnumType.STRING)
+  @CollectionTable(name = "user_cuisines", joinColumns = @JoinColumn(name = "user_preferences_id"))
+  @Column(name = "cuisine_type")
+  private Set<CuisineType> cuisineTypes = new HashSet<>();
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "climate_preference")
-    private ClimatePreference climatePreference = ClimatePreference.ANY_CLIMATE;
+  @Enumerated(EnumType.STRING)
+  @Column(name = "climate_preference")
+  private ClimatePreference climatePreference = ClimatePreference.ANY_CLIMATE;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "budget_level")
-    private BudgetLevel budgetLevel = BudgetLevel.MODERATE;
+  @Enumerated(EnumType.STRING)
+  @Column(name = "budget_level")
+  private BudgetLevel budgetLevel = BudgetLevel.MODERATE;
 
-    @JsonIgnore
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", referencedColumnName = "id")
-    private User user;
+  @JsonIgnore
+  @OneToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "user_id", referencedColumnName = "id")
+  private User user;
 }
