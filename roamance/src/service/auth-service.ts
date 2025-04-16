@@ -1,7 +1,7 @@
 import Cookies from 'js-cookie';
 import { ApiError } from '../api/errors';
 import { api } from '../api/roamance-api';
-import { USER_ENDPOINTS } from '../constants/api';
+import { USER_AUTH_ENDPOINTS, USER_ENDPOINTS } from '../constants/api';
 import { COOKIE_KEYS } from '../constants/keys';
 import { AuthResponse, UserRequest } from '../types';
 
@@ -17,7 +17,7 @@ export class AuthService {
       const response = await this.apiService.post<
         AuthResponse,
         { email: string; password: string }
-      >(USER_ENDPOINTS.LOGIN, {
+      >(USER_AUTH_ENDPOINTS.LOGIN, {
         email,
         password,
       });
