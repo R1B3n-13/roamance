@@ -14,14 +14,14 @@ public class RestUtil {
   public CompletableFuture<byte[]> downloadMedia(String url) {
 
     try {
-      if (url == null) {
+      if (url == null || url.isEmpty()) {
         throw new IllegalArgumentException("Invalid media URL!");
       }
 
       RestTemplate restTemplate = new RestTemplate();
       byte[] imageBytes = restTemplate.getForObject(new URI(url), byte[].class);
 
-      if (imageBytes == null) {
+      if (imageBytes == null || imageBytes.length == 0) {
         throw new IOException("Failed to download media!");
       }
 
