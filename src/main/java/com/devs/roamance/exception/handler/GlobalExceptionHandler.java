@@ -234,7 +234,7 @@ public class GlobalExceptionHandler {
         new BaseResponseDto(400, false, ex.getMessage()), HttpStatus.BAD_REQUEST);
   }
 
-  // ==================== Itinerary related Exceptions ====================
+  // ==================== DateTime related Exceptions ====================
 
   @ExceptionHandler(DateOutOfRangeException.class)
   public ResponseEntity<BaseResponseDto> handleDateOutOfRangeException(DateOutOfRangeException ex) {

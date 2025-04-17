@@ -37,6 +37,9 @@ public class Post extends BaseEntity {
 
   @Embedded private Location location;
 
+  private Boolean isSafe;
+  private String tidbits;
+
   private int likesCount = 0;
   private int commentsCount = 0;
 
