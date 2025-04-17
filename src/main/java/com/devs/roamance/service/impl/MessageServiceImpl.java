@@ -80,9 +80,10 @@ public class MessageServiceImpl implements MessageService {
     newMessage.setUser(user);
     newMessage.setChat(chat);
 
-    Message message = messageRepository.save(newMessage);
+    Message savedMessage = messageRepository.save(newMessage);
+    messageRepository.flush();
 
-    MessageDto dto = modelMapper.map(message, MessageDto.class);
+    MessageDto dto = modelMapper.map(savedMessage, MessageDto.class);
 
     return new MessageResponseDto(201, true, ResponseMessage.MESSAGE_CREATE_SUCCESS, dto);
   }
@@ -95,7 +96,7 @@ public class MessageServiceImpl implements MessageService {
         PageRequest.of(
             pageNumber, pageSize, Sort.by(PaginationSortingUtil.getSortDirection(sortDir), sortBy));
 
-    Page<Message> messages = messageRepository.findByChatId(chatId, pageable);
+    Page<Message> messages = messageRepository.findAllByChatId(chatId, pageable);
 
     List<MessageDto> dtos =
         messages.stream().map(message -> modelMapper.map(message, MessageDto.class)).toList();

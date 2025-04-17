@@ -1,7 +1,7 @@
 package com.devs.roamance.model.travel.journal;
 
 import com.devs.roamance.model.BaseEntity;
-import com.devs.roamance.model.Location;
+import com.devs.roamance.model.travel.Location;
 import com.devs.roamance.model.user.User;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;

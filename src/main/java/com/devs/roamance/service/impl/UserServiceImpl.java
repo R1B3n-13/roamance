@@ -44,7 +44,7 @@ public class UserServiceImpl implements UserService {
 
   @Override
   @Transactional
-  public BaseResponseDto create(UserCreateRequestDto requestDto) {
+  public UserResponseDto create(UserCreateRequestDto requestDto) {
 
     try {
       requestDto.setPassword(passwordEncoder.encode(requestDto.getPassword()));
@@ -53,10 +53,12 @@ public class UserServiceImpl implements UserService {
 
       user.setRoles(Set.of(Role.USER));
 
-      userRepository.save(user);
+      User savedUser = userRepository.save(user);
       userRepository.flush();
 
-      return new BaseResponseDto(201, true, ResponseMessage.REGISTRATION_SUCCESS);
+      UserDto dto = modelMapper.map(savedUser, UserDto.class);
+
+      return new UserResponseDto(201, true, ResponseMessage.REGISTRATION_SUCCESS, dto);
 
     } catch (DataIntegrityViolationException e) {
 
@@ -127,7 +129,7 @@ public class UserServiceImpl implements UserService {
 
   @Override
   @Transactional
-  public BaseResponseDto update(UserUpdateRequestDto requestDto, UUID userId) {
+  public UserResponseDto update(UserUpdateRequestDto requestDto, UUID userId) {
 
     User existingUser =
         userRepository
@@ -147,9 +149,12 @@ public class UserServiceImpl implements UserService {
       existingUser.setPassword(passwordEncoder.encode(requestDto.getPassword()));
     }
 
-    userRepository.save(existingUser);
+    User savedUser = userRepository.save(existingUser);
+    userRepository.flush();
 
-    return new BaseResponseDto(200, true, ResponseMessage.USER_UPDATE_SUCCESS);
+    UserDto dto = modelMapper.map(savedUser, UserDto.class);
+
+    return new UserResponseDto(200, true, ResponseMessage.USER_UPDATE_SUCCESS, dto);
   }
 
   @Override

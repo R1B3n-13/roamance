@@ -13,10 +13,10 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SubsectionListResponseDto extends BaseResponseDto {
-  private List<SubsectionDto> data = new ArrayList<>();
+  private List<SubsectionBriefDto> data = new ArrayList<>();
 
   public SubsectionListResponseDto(
-      Integer status, Boolean success, String message, List<SubsectionDto> data) {
+      Integer status, Boolean success, String message, List<SubsectionBriefDto> data) {
     super(status, success, message);
     this.data = data;
   }

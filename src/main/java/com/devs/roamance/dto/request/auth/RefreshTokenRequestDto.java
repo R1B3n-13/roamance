@@ -1,4 +1,4 @@
-package com.devs.roamance.dto.request;
+package com.devs.roamance.dto.request.auth;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;

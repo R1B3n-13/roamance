@@ -2,8 +2,8 @@ package com.devs.roamance.exception.handler;
 
 import com.devs.roamance.constant.ResponseMessage;
 import com.devs.roamance.dto.response.BaseResponseDto;
-import com.devs.roamance.dto.response.ValidationErrorDto;
-import com.devs.roamance.dto.response.ValidationErrorResponseDto;
+import com.devs.roamance.dto.response.validation.ValidationErrorDto;
+import com.devs.roamance.dto.response.validation.ValidationErrorResponseDto;
 import com.devs.roamance.exception.*;
 import jakarta.validation.ConstraintViolationException;
 import java.util.List;
@@ -83,25 +83,6 @@ public class GlobalExceptionHandler {
 
     return new ResponseEntity<>(
         new BaseResponseDto(401, false, ex.getMessage()), HttpStatus.UNAUTHORIZED);
-  }
-
-  // ==================== General Exceptions ====================
-
-  @ExceptionHandler(IllegalArgumentException.class)
-  public ResponseEntity<BaseResponseDto> handleIllegalArgumentException(
-      IllegalArgumentException ex) {
-
-    log.error("IllegalArgumentException: {}", ex.getMessage(), ex);
-
-    return new ResponseEntity<>(
-        new BaseResponseDto(
-            400,
-            false,
-            (ResponseMessage.INVALID_TOKEN_TYPE.equals(ex.getMessage())
-                    || ResponseMessage.JWT_CLAIMS_EMPTY.equals(ex.getMessage()))
-                ? ex.getMessage()
-                : "Illegal argument!"),
-        HttpStatus.BAD_REQUEST);
   }
 
   // ==================== Validation Related Exceptions ====================
@@ -248,6 +229,49 @@ public class GlobalExceptionHandler {
       SubsectionTypeDeserializationException ex) {
 
     log.error("SubsectionTypeDeserializationException: {}", ex.getMessage(), ex);
+
+    return new ResponseEntity<>(
+        new BaseResponseDto(400, false, ex.getMessage()), HttpStatus.BAD_REQUEST);
+  }
+
+  // ==================== Itinerary related Exceptions ====================
+
+  @ExceptionHandler(DateOutOfRangeException.class)
+  public ResponseEntity<BaseResponseDto> handleDateOutOfRangeException(DateOutOfRangeException ex) {
+
+    log.error("DateOutOfRangeException: {}", ex.getMessage(), ex);
+
+    return new ResponseEntity<>(
+        new BaseResponseDto(400, false, ex.getMessage()), HttpStatus.BAD_REQUEST);
+  }
+
+  @ExceptionHandler(ScheduleCollisionException.class)
+  public ResponseEntity<BaseResponseDto> handleScheduleCollisionException(
+      ScheduleCollisionException ex) {
+
+    log.error("ScheduleCollisionException: {}", ex.getMessage(), ex);
+
+    return new ResponseEntity<>(
+        new BaseResponseDto(400, false, ex.getMessage()), HttpStatus.BAD_REQUEST);
+  }
+
+  @ExceptionHandler(InvalidDateTimeException.class)
+  public ResponseEntity<BaseResponseDto> handleInvalidDateTimeException(
+      InvalidDateTimeException ex) {
+
+    log.error("InvalidDateTimeException: {}", ex.getMessage(), ex);
+
+    return new ResponseEntity<>(
+        new BaseResponseDto(400, false, ex.getMessage()), HttpStatus.BAD_REQUEST);
+  }
+
+  // ==================== General Exceptions ====================
+
+  @ExceptionHandler(IllegalArgumentException.class)
+  public ResponseEntity<BaseResponseDto> handleIllegalArgumentException(
+      IllegalArgumentException ex) {
+
+    log.error("IllegalArgumentException: {}", ex.getMessage(), ex);
 
     return new ResponseEntity<>(
         new BaseResponseDto(400, false, ex.getMessage()), HttpStatus.BAD_REQUEST);

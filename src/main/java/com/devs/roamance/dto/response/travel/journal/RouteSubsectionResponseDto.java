@@ -1,6 +1,6 @@
 package com.devs.roamance.dto.response.travel.journal;
 
-import com.devs.roamance.dto.response.LocationResponseDto;
+import com.devs.roamance.dto.response.travel.LocationResponseDto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
 import java.util.List;

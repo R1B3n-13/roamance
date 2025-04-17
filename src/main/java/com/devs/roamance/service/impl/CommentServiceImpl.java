@@ -66,6 +66,8 @@ public class CommentServiceImpl implements CommentService {
     postRepository.incrementCommentCount(postId);
 
     Comment savedComment = commentRepository.save(comment);
+    commentRepository.flush();
+
     CommentDto dto = modelMapper.map(savedComment, CommentDto.class);
 
     return new CommentResponseDto(201, true, ResponseMessage.COMMENT_CREATE_SUCCESS, dto);

@@ -1,5 +1,6 @@
-package com.devs.roamance.dto.response;
+package com.devs.roamance.dto.response.auth;
 
+import com.devs.roamance.dto.response.BaseResponseDto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

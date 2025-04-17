@@ -4,17 +4,18 @@ import com.devs.roamance.model.social.Chat;
 import com.devs.roamance.model.social.Comment;
 import com.devs.roamance.model.social.Message;
 import com.devs.roamance.model.social.Post;
+import com.devs.roamance.model.travel.itinerary.Activity;
+import com.devs.roamance.model.travel.itinerary.DayPlan;
+import com.devs.roamance.model.travel.itinerary.Itinerary;
 import com.devs.roamance.model.travel.journal.Journal;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import java.time.OffsetDateTime;
+import java.util.*;
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -34,9 +35,9 @@ public class User {
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
 
-  private String name;
-  private String email;
-  @JsonIgnore private String password;
+  @NotNull private String name;
+  @NotNull private String email;
+  @JsonIgnore @NotNull private String password;
 
   @ElementCollection(fetch = FetchType.EAGER)
   @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
@@ -98,6 +99,30 @@ public class User {
       cascade = {CascadeType.ALL},
       orphanRemoval = true)
   private List<Message> messages = new ArrayList<>();
+
+  @JsonIgnore
+  @OneToMany(
+      mappedBy = "user",
+      fetch = FetchType.LAZY,
+      cascade = {CascadeType.ALL},
+      orphanRemoval = true)
+  private List<Itinerary> itineraries = new ArrayList<>();
+
+  @JsonIgnore
+  @OneToMany(
+      mappedBy = "user",
+      fetch = FetchType.LAZY,
+      cascade = {CascadeType.ALL},
+      orphanRemoval = true)
+  private List<DayPlan> dayPlans = new ArrayList<>();
+
+  @JsonIgnore
+  @OneToMany(
+      mappedBy = "user",
+      fetch = FetchType.LAZY,
+      cascade = {CascadeType.ALL},
+      orphanRemoval = true)
+  private List<Activity> activities = new ArrayList<>();
 
   @CreatedDate
   @Column(updatable = false)

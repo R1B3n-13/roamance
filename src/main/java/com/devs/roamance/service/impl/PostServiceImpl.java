@@ -57,9 +57,10 @@ public class PostServiceImpl implements PostService {
 
     post.setUser(user);
 
-    postRepository.save(post);
+    Post savedPost = postRepository.save(post);
+    postRepository.flush();
 
-    PostDto dto = modelMapper.map(post, PostDto.class);
+    PostDto dto = modelMapper.map(savedPost, PostDto.class);
 
     return new PostResponseDto(201, true, ResponseMessage.POST_CREATE_SUCCESS, dto);
   }
@@ -177,13 +178,14 @@ public class PostServiceImpl implements PostService {
       existingPost.setText(updateRequestDto.getText());
     }
     if (updateRequestDto.getImagePaths() != null && !updateRequestDto.getImagePaths().isEmpty()) {
-      existingPost.getImagePaths().addAll(updateRequestDto.getImagePaths());
+      existingPost.setImagePaths(updateRequestDto.getImagePaths());
     }
     if (updateRequestDto.getVideoPaths() != null && !updateRequestDto.getVideoPaths().isEmpty()) {
-      existingPost.getVideoPaths().addAll(updateRequestDto.getVideoPaths());
+      existingPost.setVideoPaths(updateRequestDto.getVideoPaths());
     }
 
     Post savedPost = postRepository.save(existingPost);
+    postRepository.flush();
 
     PostDto dto = modelMapper.map(savedPost, PostDto.class);
 
@@ -243,6 +245,7 @@ public class PostServiceImpl implements PostService {
   }
 
   @Override
+  @Transactional
   public BaseResponseDto delete(UUID postId) {
 
     Post post =

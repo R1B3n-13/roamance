@@ -13,7 +13,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class SubsectionDetailDto extends SubsectionDto {
+public class SubsectionDetailDto extends SubsectionBriefDto {
   private List<String> notes = new ArrayList<>();
   private List<String> checklists = new ArrayList<>();
 }
