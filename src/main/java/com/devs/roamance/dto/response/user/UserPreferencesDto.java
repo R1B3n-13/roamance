@@ -25,21 +25,21 @@ public class UserPreferencesDto extends AuditDto {
   @JsonProperty("travel_style")
   private TravelStyle travelStyle;
 
+    @JsonProperty("activity_types")
+    private Set<ActivityType> activityTypes;
+
   @JsonProperty("accommodation_types")
   private Set<AccommodationType> accommodationTypes;
-
-  @JsonProperty("activity_types")
-  private Set<ActivityType> activityTypes;
 
   @JsonProperty("cuisine_types")
   private Set<CuisineType> cuisineTypes;
 
-  @JsonProperty("climate_preference")
-  private ClimatePreference climatePreference;
+  @JsonProperty("user_id")
+  private UUID userId;
 
   @JsonProperty("budget_level")
   private BudgetLevel budgetLevel;
 
-  @JsonProperty("user_id")
-  private UUID userId;
+  @JsonProperty("climate_preference")
+  private ClimatePreference climatePreference;
 }
