@@ -25,8 +25,8 @@ public class UserPreferencesDto extends AuditDto {
   @JsonProperty("travel_style")
   private TravelStyle travelStyle;
 
-    @JsonProperty("activity_types")
-    private Set<ActivityType> activityTypes;
+  @JsonProperty("activity_types")
+  private Set<ActivityType> activityTypes;
 
   @JsonProperty("accommodation_types")
   private Set<AccommodationType> accommodationTypes;
