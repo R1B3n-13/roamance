@@ -36,7 +36,7 @@ export class CloudinaryService {
     if (options.folder) formData.append('folder', options.folder);
     if (options.tags) formData.append('tags', options.tags.join(','));
 
-    const response = await fetch('/api/upload', {
+    const response = await fetch('/api/cloudinary/upload', {
       method: 'POST',
       body: formData,
     });

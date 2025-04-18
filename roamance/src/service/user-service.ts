@@ -1,7 +1,7 @@
 import { ApiError } from '../api/errors';
 import { api } from '../api/roamance-api';
-import { USER_ENDPOINTS, USER_INFO_ENDPOINTS } from '../constants/api';
-import { User, UserInfo, UserInfoResponse, UserResponse } from '../types';
+import { USER_ENDPOINTS, USER_INFO_ENDPOINTS, USER_PREFERENCES_ENDPOINTS } from '../constants/api';
+import { User, UserInfo, UserInfoResponse, UserPreferencesWithAudit, UserPreferencesResponse, UserPreferencesUpdateRequest, UserResponse } from '../types';
 
 export class UserService {
   private apiService: typeof api;
@@ -75,6 +75,40 @@ export class UserService {
     } catch (error) {
       if (error instanceof ApiError) {
         throw new Error(`Failed to update user info: ${error.message}`);
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Fetches user preferences
+   */
+  async getUserPreferences(): Promise<UserPreferencesWithAudit> {
+    try {
+      const response = await this.apiService.get<UserPreferencesResponse>(USER_PREFERENCES_ENDPOINTS.ME);
+      return response.data.data;
+    } catch (error) {
+      if (error instanceof ApiError) {
+        throw new Error(`Failed to fetch user preferences: ${error.message}`);
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Updates user preferences
+   * Converts camelCase properties to snake_case for API compatibility
+   */
+  async updateUserPreferences(preferences: Partial<UserPreferencesWithAudit>): Promise<UserPreferencesWithAudit> {
+    try {
+      const response = await this.apiService.put<UserPreferencesResponse, Partial<UserPreferencesUpdateRequest>>(
+        USER_PREFERENCES_ENDPOINTS.UPDATE,
+        preferences
+      );
+      return response.data.data;
+    } catch (error) {
+      if (error instanceof ApiError) {
+        throw new Error(`Failed to update user preferences: ${error.message}`);
       }
       throw error;
     }

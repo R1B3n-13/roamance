@@ -8,6 +8,7 @@ import com.devs.roamance.model.travel.itinerary.Activity;
 import com.devs.roamance.model.travel.itinerary.DayPlan;
 import com.devs.roamance.model.travel.itinerary.Itinerary;
 import com.devs.roamance.model.travel.journal.Journal;
+import com.devs.roamance.model.user.preference.UserPreferences;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
@@ -46,6 +47,13 @@ public class User {
 
   @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
   private UserInfo info;
+
+  @OneToOne(
+      mappedBy = "user",
+      fetch = FetchType.LAZY,
+      cascade = CascadeType.ALL,
+      orphanRemoval = true)
+  private UserPreferences preferences;
 
   @JsonIgnore
   @OneToMany(
