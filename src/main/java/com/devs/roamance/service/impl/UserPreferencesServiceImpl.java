@@ -21,7 +21,6 @@ import com.devs.roamance.util.UserUtil;
 import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -103,8 +102,7 @@ public class UserPreferencesServiceImpl implements UserPreferencesService {
               .orElse(List.of());
     }
 
-    List<UserPreferencesDto> preferencesDto =
-        preferences.stream().map(this::mapToDto).collect(Collectors.toList());
+    List<UserPreferencesDto> preferencesDto = preferences.stream().map(this::mapToDto).toList();
 
     return new UserPreferencesListResponseDto(
         200, true, ResponseMessage.USER_PREFERENCES_FETCH_SUCCESS, preferencesDto);
