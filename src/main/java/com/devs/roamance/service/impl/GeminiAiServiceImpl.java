@@ -14,16 +14,21 @@ import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.model.output.FinishReason;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-@Slf4j
 @Service
+@Slf4j
 public class GeminiAiServiceImpl implements GeminiAiService {
+
+  @Value("${application.gemini.api-key}")
+  private String apiKey;
 
   private final RestUtil restUtil;
   private final GeminiAiUtil geminiAiUtil;
@@ -39,28 +44,39 @@ public class GeminiAiServiceImpl implements GeminiAiService {
   public CompletableFuture<TidbitsAndSafetyResponseDto> getTidbitsAndSafety(
       MultiModalAiRequestDto requestDto) {
 
-    byte[] mediaBytes = null;
+    Map<String, RestUtil.Media> mediaBytes = new HashMap<>();
 
     try {
-      mediaBytes = restUtil.downloadMedia(requestDto.getMediaUrl()).get(10, TimeUnit.SECONDS);
+      mediaBytes =
+          restUtil
+              .downloadMultipleMediaWithMime(requestDto.getMediaUrls())
+              .get(10, TimeUnit.SECONDS);
 
     } catch (Exception e) {
       log.error("Media download failed: {}", e.getMessage(), e);
       Thread.currentThread().interrupt();
     }
 
-    ChatLanguageModel model =
-        geminiAiUtil.geminiModelBuilder(
-            "",
-            "gemini-2.0-flash",
-            builder ->
-                builder.safetySettings(
-                    Map.of(
-                        HARM_CATEGORY_HARASSMENT, BLOCK_MEDIUM_AND_ABOVE,
-                        HARM_CATEGORY_DANGEROUS_CONTENT, BLOCK_MEDIUM_AND_ABOVE,
-                        HARM_CATEGORY_SEXUALLY_EXPLICIT, BLOCK_MEDIUM_AND_ABOVE,
-                        HARM_CATEGORY_HATE_SPEECH, BLOCK_MEDIUM_AND_ABOVE,
-                        HARM_CATEGORY_CIVIC_INTEGRITY, BLOCK_MEDIUM_AND_ABOVE)));
+    ChatLanguageModel model;
+
+    try {
+      model =
+          geminiAiUtil.geminiModelBuilder(
+              apiKey,
+              "gemini-2.0-flash",
+              builder ->
+                  builder.safetySettings(
+                      Map.of(
+                          HARM_CATEGORY_HARASSMENT, BLOCK_MEDIUM_AND_ABOVE,
+                          HARM_CATEGORY_DANGEROUS_CONTENT, BLOCK_MEDIUM_AND_ABOVE,
+                          HARM_CATEGORY_SEXUALLY_EXPLICIT, BLOCK_MEDIUM_AND_ABOVE,
+                          HARM_CATEGORY_HATE_SPEECH, BLOCK_MEDIUM_AND_ABOVE,
+                          HARM_CATEGORY_CIVIC_INTEGRITY, BLOCK_MEDIUM_AND_ABOVE)));
+    } catch (Exception e) {
+      log.error("Gemini model build failed: {}", e.getMessage(), e);
+      return CompletableFuture.completedFuture(
+          new TidbitsAndSafetyResponseDto(null, FinishReason.OTHER));
+    }
 
     ChatResponse chatResponse = generateResponse(model, mediaBytes, requestDto.getText());
 
@@ -75,9 +91,10 @@ public class GeminiAiServiceImpl implements GeminiAiService {
             chatResponse.aiMessage().text(), chatResponse.finishReason()));
   }
 
-  private ChatResponse generateResponse(ChatLanguageModel model, byte[] mediaBytes, String text) {
+  private ChatResponse generateResponse(
+      ChatLanguageModel model, Map<String, RestUtil.Media> mediaBytes, String text) {
 
-    if ((text == null || text.isEmpty()) && (mediaBytes == null || mediaBytes.length == 0)) {
+    if ((text == null || text.isEmpty()) && (mediaBytes == null || mediaBytes.isEmpty())) {
 
       return null;
     }
@@ -91,9 +108,9 @@ public class GeminiAiServiceImpl implements GeminiAiService {
         userMessageBuilder.addContent(TextContent.from(text));
       }
 
-      if (mediaBytes != null && mediaBytes.length > 0) {
-        String base64Image = Base64.getEncoder().encodeToString(mediaBytes);
-        ImageContent imageContent = ImageContent.from(base64Image);
+      for (Map.Entry<String, RestUtil.Media> entry : mediaBytes.entrySet()) {
+        String base64Image = Base64.getEncoder().encodeToString(entry.getValue().content());
+        ImageContent imageContent = ImageContent.from(base64Image, entry.getValue().mimeType());
         userMessageBuilder.addContent(imageContent);
       }
 
@@ -101,6 +118,16 @@ public class GeminiAiServiceImpl implements GeminiAiService {
 
       return model.chat(systemMessage, userMessage);
 
+    } catch (NullPointerException e) {
+      /* This is quite hacky. But due to a bug in langchain4j, currently this is the only solution that I came up with
+       * I have opened an issue in langchain4j's GitHub repo
+       * See here: https://github.com/langchain4j/langchain4j/issues/2893
+       */
+      log.error("AI response generation failed: {}", e.getMessage(), e);
+      return ChatResponse.builder()
+          .aiMessage(new AiMessage(""))
+          .finishReason(FinishReason.CONTENT_FILTER)
+          .build();
     } catch (Exception e) {
       log.error("AI response generation failed: {}", e.getMessage(), e);
       return null;

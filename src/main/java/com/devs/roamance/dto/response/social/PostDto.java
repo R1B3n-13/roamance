@@ -29,6 +29,9 @@ public class PostDto extends AuditDto {
 
   private LocationResponseDto location;
 
+  private Boolean isSafe;
+  private String tidbits;
+
   @JsonProperty("likes_count")
   private int likesCount;
 
