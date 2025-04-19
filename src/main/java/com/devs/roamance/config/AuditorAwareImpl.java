@@ -10,10 +10,19 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import com.devs.roamance.security.JwtUtils;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 @Component
 public class AuditorAwareImpl implements AuditorAware<UUID> {
   private static final Logger logger = LoggerFactory.getLogger(AuditorAwareImpl.class);
+  private final JwtUtils jwtUtils;
+
+  public AuditorAwareImpl(JwtUtils jwtUtils) {
+    this.jwtUtils = jwtUtils;
+  }
 
   @Override
   @NonNull
@@ -40,7 +49,23 @@ public class AuditorAwareImpl implements AuditorAware<UUID> {
       }
     }
 
-    logger.debug("User ID not found in authentication details");
+    ServletRequestAttributes attrs = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+    if (attrs != null) {
+      HttpServletRequest request = attrs.getRequest();
+      String token = jwtUtils.getTokenFromHeader(request.getHeader("Authorization"));
+      if (token != null) {
+        try {
+          String userIdString = jwtUtils.getUserIdFromToken(token);
+          UUID userId = UUID.fromString(userIdString);
+          logger.debug("Retrieved user UUID: {} from JWT token", userId);
+          return Optional.of(userId);
+        } catch (IllegalArgumentException e) {
+          logger.warn("Could not parse UUID from JWT token: {}", token);
+        }
+      }
+    }
+
+    logger.debug("User ID not found in authentication details or token");
     return Optional.empty();
   }
 }
