@@ -1,7 +1,7 @@
 package com.devs.roamance.model.travel.itinerary;
 
 import com.devs.roamance.exception.InvalidDateTimeException;
-import com.devs.roamance.model.BaseEntity;
+import com.devs.roamance.model.Audit;
 import com.devs.roamance.model.travel.Location;
 import com.devs.roamance.model.user.User;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
@@ -17,6 +17,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @Table(name = "activities")
@@ -25,16 +26,20 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
-public class Activity extends BaseEntity {
+@EntityListeners(AuditingEntityListener.class)
+public class Activity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
 
-  @Embedded private Location location;
+  @Embedded
+  private Location location;
 
-  @NotNull private LocalTime startTime;
-  @NotNull private LocalTime endTime;
+  @NotNull
+  private LocalTime startTime;
+  @NotNull
+  private LocalTime endTime;
 
   @Enumerated(EnumType.STRING)
   @NotNull
@@ -48,16 +53,14 @@ public class Activity extends BaseEntity {
   private BigDecimal cost = BigDecimal.ZERO;
 
   @JsonIgnore
-  @ManyToOne(
-      fetch = FetchType.LAZY,
-      cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH})
+  @ManyToOne(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH,
+      CascadeType.REFRESH })
   @JoinColumn(name = "day_plan_id", referencedColumnName = "id")
   private DayPlan dayPlan;
 
   @JsonIgnore
-  @ManyToOne(
-      fetch = FetchType.EAGER,
-      cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH})
+  @ManyToOne(fetch = FetchType.EAGER, cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH,
+      CascadeType.REFRESH })
   @JoinColumn(name = "user_id", referencedColumnName = "id")
   private User user;
 
@@ -70,4 +73,7 @@ public class Activity extends BaseEntity {
       throw new InvalidDateTimeException("Start time must be before end time");
     }
   }
+
+  @Embedded
+  private Audit audit = new Audit();
 }

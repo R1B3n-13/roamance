@@ -16,5 +16,5 @@ public interface SubsectionRepository extends JpaRepository<Subsection, UUID> {
   List<Subsection> findByJournalId(UUID journalId);
 
   @EntityGraph(attributePaths = {"journal"})
-  Page<Subsection> findAllByJournalCreatedBy(UUID userId, Pageable pageable);
+  Page<Subsection> findAllByJournal_Audit_CreatedBy(UUID userId, Pageable pageable);
 }

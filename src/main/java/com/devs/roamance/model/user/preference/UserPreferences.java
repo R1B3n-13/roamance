@@ -1,11 +1,12 @@
 package com.devs.roamance.model.user.preference;
 
-import com.devs.roamance.model.BaseEntity;
+import com.devs.roamance.model.Audit;
 import com.devs.roamance.model.user.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
@@ -27,13 +28,13 @@ import lombok.Setter;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
-@Table(name = "user_preferences")
 @EntityListeners(AuditingEntityListener.class)
+@Table(name = "user_preferences")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserPreferences extends BaseEntity {
+public class UserPreferences {
 
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
@@ -45,17 +46,13 @@ public class UserPreferences extends BaseEntity {
 
   @ElementCollection(fetch = FetchType.EAGER)
   @Enumerated(EnumType.STRING)
-  @CollectionTable(
-      name = "user_accommodation_types",
-      joinColumns = @JoinColumn(name = "user_preferences_id"))
+  @CollectionTable(name = "user_accommodation_types", joinColumns = @JoinColumn(name = "user_preferences_id"))
   @Column(name = "accommodation_types")
   private Set<AccommodationType> accommodationTypes = new HashSet<>();
 
   @ElementCollection(fetch = FetchType.EAGER)
   @Enumerated(EnumType.STRING)
-  @CollectionTable(
-      name = "user_activities",
-      joinColumns = @JoinColumn(name = "user_preferences_id"))
+  @CollectionTable(name = "user_activities", joinColumns = @JoinColumn(name = "user_preferences_id"))
   @Column(name = "activity_types")
   private Set<ActivityType> activityTypes = new HashSet<>();
 
@@ -77,4 +74,7 @@ public class UserPreferences extends BaseEntity {
   @OneToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "user_id", referencedColumnName = "id")
   private User user;
+
+  @Embedded
+  private Audit audit = new Audit();
 }

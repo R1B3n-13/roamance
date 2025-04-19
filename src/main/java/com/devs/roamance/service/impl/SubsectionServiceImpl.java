@@ -111,7 +111,7 @@ public class SubsectionServiceImpl implements SubsectionService {
             pageNumber, pageSize, Sort.by(PaginationSortingUtil.getSortDirection(sortDir), sortBy));
 
     Page<Subsection> subsectionPage =
-        subsectionRepository.findAllByJournalCreatedBy(authenticatedUser.getId(), pageable);
+        subsectionRepository.findAllByJournal_Audit_CreatedBy(authenticatedUser.getId(), pageable);
 
     List<SubsectionBriefDto> subsections =
         subsectionPage.getContent().stream()
@@ -210,7 +210,7 @@ public class SubsectionServiceImpl implements SubsectionService {
 
   private void validateUserAccess(Journal journal, String operation, UUID resourceId) {
     User authenticatedUser = userUtil.getAuthenticatedUser();
-    if (!journal.getCreatedBy().equals(authenticatedUser.getId())) {
+    if (!journal.getAudit().getCreatedBy().equals(authenticatedUser.getId())) {
       logger.error(
           "User {} not authorized to {} resource {}",
           authenticatedUser.getId(),

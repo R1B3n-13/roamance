@@ -46,14 +46,14 @@ public class User {
   private Set<Role> roles = new HashSet<>();
 
   @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-  private UserInfo info;
+  private UserInfo info = new UserInfo();
 
   @OneToOne(
       mappedBy = "user",
       fetch = FetchType.LAZY,
       cascade = CascadeType.ALL,
       orphanRemoval = true)
-  private UserPreferences preferences;
+  private UserPreferences preferences = new UserPreferences();
 
   @JsonIgnore
   @OneToMany(

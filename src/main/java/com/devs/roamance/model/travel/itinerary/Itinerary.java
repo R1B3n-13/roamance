@@ -2,7 +2,7 @@ package com.devs.roamance.model.travel.itinerary;
 
 import com.devs.roamance.exception.DateOutOfRangeException;
 import com.devs.roamance.exception.InvalidDateTimeException;
-import com.devs.roamance.model.BaseEntity;
+import com.devs.roamance.model.Audit;
 import com.devs.roamance.model.travel.Location;
 import com.devs.roamance.model.user.User;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
@@ -20,6 +20,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.Formula;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @Table(name = "itineraries")
@@ -28,7 +29,8 @@ import org.hibernate.annotations.Formula;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
-public class Itinerary extends BaseEntity {
+@EntityListeners(AuditingEntityListener.class)
+public class Itinerary {
 
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
@@ -45,42 +47,41 @@ public class Itinerary extends BaseEntity {
   @Size(max = 10_000)
   private String description;
 
-  @NotNull private LocalDate startDate;
-  @NotNull private LocalDate endDate;
+  @NotNull
+  private LocalDate startDate;
+  @NotNull
+  private LocalDate endDate;
 
   @Size(max = 10)
   @ElementCollection(fetch = FetchType.LAZY)
   private List<@NotBlank @Size(max = 10_000) String> notes = new ArrayList<>();
 
-  @Formula(
-      """
-  (
-    SELECT COALESCE(SUM(
-      (SELECT COALESCE(SUM(a.cost), 0)
-       FROM activities a
-       WHERE a.day_plan_id = dp.id)
-    ), 0)
-    FROM day_plans dp
-    WHERE dp.itinerary_id = id
-  )
-  """)
+  @Formula("""
+      (
+        SELECT COALESCE(SUM(
+          (SELECT COALESCE(SUM(a.cost), 0)
+           FROM activities a
+           WHERE a.day_plan_id = dp.id)
+        ), 0)
+        FROM day_plans dp
+        WHERE dp.itinerary_id = id
+      )
+      """)
   private BigDecimal totalCost = BigDecimal.ZERO;
 
   @JsonIgnore
-  @ManyToOne(
-      fetch = FetchType.EAGER,
-      cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH})
+  @ManyToOne(fetch = FetchType.EAGER, cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH,
+      CascadeType.REFRESH })
   @JoinColumn(name = "user_id", referencedColumnName = "id")
   private User user;
 
   @JsonIgnore
-  @OneToMany(
-      mappedBy = "itinerary",
-      fetch = FetchType.LAZY,
-      cascade = {CascadeType.ALL},
-      orphanRemoval = true)
+  @OneToMany(mappedBy = "itinerary", fetch = FetchType.LAZY, cascade = { CascadeType.ALL }, orphanRemoval = true)
   @OrderBy("date ASC")
   private List<DayPlan> dayPlans = new ArrayList<>();
+
+  @Embedded
+  private Audit audit = new Audit();
 
   @PrePersist
   @PreUpdate
