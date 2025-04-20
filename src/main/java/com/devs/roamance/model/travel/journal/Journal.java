@@ -39,34 +39,36 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Entity
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 @EntityListeners(AuditingEntityListener.class)
-@Table(name = "journals", uniqueConstraints = @UniqueConstraint(columnNames = { "title", "audit.created_by" }))
+@Table(
+    name = "journals",
+    uniqueConstraints = @UniqueConstraint(columnNames = {"title", "audit.created_by"}))
 public class Journal {
 
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
 
-  @NonNull
-  private String title;
+  @NonNull private String title;
 
-  @NonNull
-  @Embedded
-  private Location destination;
+  @NonNull @Embedded private Location destination;
 
-  @Nullable
-  private String description;
+  @Nullable private String description;
 
-  @OneToMany(mappedBy = "journal", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+  @OneToMany(
+      mappedBy = "journal",
+      fetch = FetchType.LAZY,
+      cascade = CascadeType.ALL,
+      orphanRemoval = true)
   private List<Subsection> subsections = new ArrayList<>();
 
   @JsonIgnore
-  @ManyToOne(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH,
-      CascadeType.REFRESH })
+  @ManyToOne(
+      fetch = FetchType.LAZY,
+      cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH})
   @JoinColumn(name = "user_id", referencedColumnName = "id")
   private User user;
 
-  @Embedded
-  private Audit audit = new Audit();
+  @Embedded private Audit audit = new Audit();
 
   public void addSubsection(Subsection subsection) {
     subsections.add(subsection);

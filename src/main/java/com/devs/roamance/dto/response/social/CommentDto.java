@@ -3,6 +3,7 @@ package com.devs.roamance.dto.response.social;
 import com.devs.roamance.dto.response.AuditDto;
 import com.devs.roamance.dto.response.user.UserDto;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.Embedded;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,7 +14,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CommentDto extends AuditDto {
+public class CommentDto {
 
   private UUID id;
   private String text;
@@ -25,4 +26,6 @@ public class CommentDto extends AuditDto {
   private String videoPath;
 
   private UserDto user;
+
+  @Embedded private AuditDto audit = new AuditDto();
 }

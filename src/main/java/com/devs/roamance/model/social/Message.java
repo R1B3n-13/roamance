@@ -42,17 +42,18 @@ public class Message {
   private List<String> videoPaths = new ArrayList<>();
 
   @JsonIgnore
-  @ManyToOne(fetch = FetchType.EAGER, cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH,
-      CascadeType.REFRESH })
+  @ManyToOne(
+      fetch = FetchType.EAGER,
+      cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH})
   @JoinColumn(name = "user_id", referencedColumnName = "id")
   private User user;
 
   @JsonIgnore
-  @ManyToOne(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH,
-      CascadeType.REFRESH })
+  @ManyToOne(
+      fetch = FetchType.LAZY,
+      cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH})
   @JoinColumn(name = "chat_id", referencedColumnName = "id")
   private Chat chat;
 
-  @Embedded
-  private Audit audit = new Audit();
+  @Embedded private Audit audit = new Audit();
 }

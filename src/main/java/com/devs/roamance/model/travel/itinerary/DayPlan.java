@@ -23,7 +23,9 @@ import org.hibernate.annotations.Formula;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
-@Table(name = "day_plans", uniqueConstraints = @UniqueConstraint(columnNames = { "itinerary_id", "date" }))
+@Table(
+    name = "day_plans",
+    uniqueConstraints = @UniqueConstraint(columnNames = {"itinerary_id", "date"}))
 @Getter
 @Setter
 @NoArgsConstructor
@@ -36,17 +38,19 @@ public class DayPlan {
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
 
-  @NotNull
-  private LocalDate date;
+  @NotNull private LocalDate date;
 
   @JsonIgnore
-  @OneToMany(mappedBy = "dayPlan", fetch = FetchType.LAZY, cascade = { CascadeType.ALL }, orphanRemoval = true)
+  @OneToMany(
+      mappedBy = "dayPlan",
+      fetch = FetchType.LAZY,
+      cascade = {CascadeType.ALL},
+      orphanRemoval = true)
   @OrderBy("startTime ASC")
   @Size(max = 50)
   private List<Activity> activities = new ArrayList<>();
 
-  @Embedded
-  private RoutePlan routePlan;
+  @Embedded private RoutePlan routePlan;
 
   @Size(max = 10)
   @ElementCollection(fetch = FetchType.LAZY)
@@ -56,24 +60,24 @@ public class DayPlan {
   private BigDecimal totalCost = BigDecimal.ZERO;
 
   @JsonIgnore
-  @ManyToOne(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH,
-      CascadeType.REFRESH })
+  @ManyToOne(
+      fetch = FetchType.LAZY,
+      cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH})
   @JoinColumn(name = "itinerary_id", referencedColumnName = "id")
   private Itinerary itinerary;
 
   @JsonIgnore
-  @ManyToOne(fetch = FetchType.EAGER, cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH,
-      CascadeType.REFRESH })
+  @ManyToOne(
+      fetch = FetchType.EAGER,
+      cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH})
   @JoinColumn(name = "user_id", referencedColumnName = "id")
   private User user;
 
-  @Embedded
-  private Audit audit = new Audit();
+  @Embedded private Audit audit = new Audit();
 
   public void validateNoTimeCollisions(Activity currentActivity) {
 
-    if (currentActivity.getStartTime() == null || currentActivity.getEndTime() == null)
-      return;
+    if (currentActivity.getStartTime() == null || currentActivity.getEndTime() == null) return;
 
     // need to fetch activities EAGERLY with DayPlan using entity graph to avoid n+1
     // problem
@@ -81,8 +85,7 @@ public class DayPlan {
 
       if (currentActivity.getId().equals(otherActivity.getId())
           || otherActivity.getStartTime() == null
-          || otherActivity.getEndTime() == null)
-        continue;
+          || otherActivity.getEndTime() == null) continue;
 
       boolean startsBeforeEnd = !currentActivity.getStartTime().isAfter(otherActivity.getEndTime());
       boolean endsAfterStart = !currentActivity.getEndTime().isBefore(otherActivity.getStartTime());

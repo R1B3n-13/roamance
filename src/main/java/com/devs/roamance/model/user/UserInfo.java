@@ -1,9 +1,11 @@
 package com.devs.roamance.model.user;
 
+import com.devs.roamance.model.Audit;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.FetchType;
@@ -14,14 +16,11 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
@@ -56,9 +55,5 @@ public class UserInfo {
   @JoinColumn(name = "user_id", referencedColumnName = "id")
   private User user;
 
-  @CreatedDate
-  @Column(updatable = false)
-  private OffsetDateTime createdAt;
-
-  @LastModifiedDate private OffsetDateTime lastModifiedAt;
+  @Embedded private Audit audit = new Audit();
 }

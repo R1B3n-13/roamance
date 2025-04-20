@@ -1,8 +1,9 @@
 package com.devs.roamance.dto.response.user;
 
+import com.devs.roamance.dto.response.AuditDto;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.Embedded;
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -29,9 +30,5 @@ public class UserInfoDto {
   @JsonProperty("user_id")
   private UUID userId;
 
-  @JsonProperty("created_at")
-  private OffsetDateTime createdAt;
-
-  @JsonProperty("last_modified_at")
-  private OffsetDateTime lastModifiedAt;
+  @Embedded private AuditDto audit = new AuditDto();
 }

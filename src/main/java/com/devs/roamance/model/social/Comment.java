@@ -8,12 +8,12 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.EntityListeners;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @Table(name = "comments")
@@ -36,17 +36,18 @@ public class Comment {
   private String videoPath;
 
   @JsonIgnore
-  @ManyToOne(fetch = FetchType.EAGER, cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH,
-      CascadeType.REFRESH })
+  @ManyToOne(
+      fetch = FetchType.EAGER,
+      cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH})
   @JoinColumn(name = "user_id", referencedColumnName = "id")
   private User user;
 
   @JsonIgnore
-  @ManyToOne(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH,
-      CascadeType.REFRESH })
+  @ManyToOne(
+      fetch = FetchType.LAZY,
+      cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH})
   @JoinColumn(name = "post_id", referencedColumnName = "id")
   private Post post;
 
-  @Embedded
-  private Audit audit = new Audit();
+  @Embedded private Audit audit = new Audit();
 }

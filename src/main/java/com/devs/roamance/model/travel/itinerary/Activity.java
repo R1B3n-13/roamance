@@ -33,13 +33,10 @@ public class Activity {
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
 
-  @Embedded
-  private Location location;
+  @Embedded private Location location;
 
-  @NotNull
-  private LocalTime startTime;
-  @NotNull
-  private LocalTime endTime;
+  @NotNull private LocalTime startTime;
+  @NotNull private LocalTime endTime;
 
   @Enumerated(EnumType.STRING)
   @NotNull
@@ -53,14 +50,16 @@ public class Activity {
   private BigDecimal cost = BigDecimal.ZERO;
 
   @JsonIgnore
-  @ManyToOne(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH,
-      CascadeType.REFRESH })
+  @ManyToOne(
+      fetch = FetchType.LAZY,
+      cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH})
   @JoinColumn(name = "day_plan_id", referencedColumnName = "id")
   private DayPlan dayPlan;
 
   @JsonIgnore
-  @ManyToOne(fetch = FetchType.EAGER, cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH,
-      CascadeType.REFRESH })
+  @ManyToOne(
+      fetch = FetchType.EAGER,
+      cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH})
   @JoinColumn(name = "user_id", referencedColumnName = "id")
   private User user;
 
@@ -74,6 +73,5 @@ public class Activity {
     }
   }
 
-  @Embedded
-  private Audit audit = new Audit();
+  @Embedded private Audit audit = new Audit();
 }

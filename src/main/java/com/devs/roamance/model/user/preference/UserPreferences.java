@@ -46,13 +46,17 @@ public class UserPreferences {
 
   @ElementCollection(fetch = FetchType.EAGER)
   @Enumerated(EnumType.STRING)
-  @CollectionTable(name = "user_accommodation_types", joinColumns = @JoinColumn(name = "user_preferences_id"))
+  @CollectionTable(
+      name = "user_accommodation_types",
+      joinColumns = @JoinColumn(name = "user_preferences_id"))
   @Column(name = "accommodation_types")
   private Set<AccommodationType> accommodationTypes = new HashSet<>();
 
   @ElementCollection(fetch = FetchType.EAGER)
   @Enumerated(EnumType.STRING)
-  @CollectionTable(name = "user_activities", joinColumns = @JoinColumn(name = "user_preferences_id"))
+  @CollectionTable(
+      name = "user_activities",
+      joinColumns = @JoinColumn(name = "user_preferences_id"))
   @Column(name = "activity_types")
   private Set<ActivityType> activityTypes = new HashSet<>();
 
@@ -75,6 +79,5 @@ public class UserPreferences {
   @JoinColumn(name = "user_id", referencedColumnName = "id")
   private User user;
 
-  @Embedded
-  private Audit audit = new Audit();
+  @Embedded private Audit audit = new Audit();
 }

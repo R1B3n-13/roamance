@@ -8,6 +8,7 @@ import com.devs.roamance.model.user.preference.ClimatePreference;
 import com.devs.roamance.model.user.preference.CuisineType;
 import com.devs.roamance.model.user.preference.TravelStyle;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.Embedded;
 import java.util.Set;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -19,7 +20,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserPreferencesDto extends AuditDto {
+public class UserPreferencesDto {
   private UUID id;
 
   @JsonProperty("travel_style")
@@ -42,4 +43,6 @@ public class UserPreferencesDto extends AuditDto {
 
   @JsonProperty("climate_preference")
   private ClimatePreference climatePreference;
+
+  @Embedded private AuditDto audit = new AuditDto();
 }

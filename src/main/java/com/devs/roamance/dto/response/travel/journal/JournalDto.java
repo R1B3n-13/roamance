@@ -2,6 +2,7 @@ package com.devs.roamance.dto.response.travel.journal;
 
 import com.devs.roamance.dto.response.AuditDto;
 import com.devs.roamance.dto.response.travel.LocationResponseDto;
+import jakarta.persistence.Embedded;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -12,9 +13,11 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class JournalDto extends AuditDto {
+public class JournalDto {
   private UUID id;
   private String title;
   private LocationResponseDto destination;
   private String description;
+
+  @Embedded private AuditDto audit = new AuditDto();
 }

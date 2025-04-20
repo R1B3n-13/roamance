@@ -47,16 +47,15 @@ public class Itinerary {
   @Size(max = 10_000)
   private String description;
 
-  @NotNull
-  private LocalDate startDate;
-  @NotNull
-  private LocalDate endDate;
+  @NotNull private LocalDate startDate;
+  @NotNull private LocalDate endDate;
 
   @Size(max = 10)
   @ElementCollection(fetch = FetchType.LAZY)
   private List<@NotBlank @Size(max = 10_000) String> notes = new ArrayList<>();
 
-  @Formula("""
+  @Formula(
+      """
       (
         SELECT COALESCE(SUM(
           (SELECT COALESCE(SUM(a.cost), 0)
@@ -70,18 +69,22 @@ public class Itinerary {
   private BigDecimal totalCost = BigDecimal.ZERO;
 
   @JsonIgnore
-  @ManyToOne(fetch = FetchType.EAGER, cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH,
-      CascadeType.REFRESH })
+  @ManyToOne(
+      fetch = FetchType.EAGER,
+      cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH})
   @JoinColumn(name = "user_id", referencedColumnName = "id")
   private User user;
 
   @JsonIgnore
-  @OneToMany(mappedBy = "itinerary", fetch = FetchType.LAZY, cascade = { CascadeType.ALL }, orphanRemoval = true)
+  @OneToMany(
+      mappedBy = "itinerary",
+      fetch = FetchType.LAZY,
+      cascade = {CascadeType.ALL},
+      orphanRemoval = true)
   @OrderBy("date ASC")
   private List<DayPlan> dayPlans = new ArrayList<>();
 
-  @Embedded
-  private Audit audit = new Audit();
+  @Embedded private Audit audit = new Audit();
 
   @PrePersist
   @PreUpdate

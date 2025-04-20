@@ -1,5 +1,7 @@
 package com.devs.roamance.config;
 
+import com.devs.roamance.security.JwtUtils;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.Optional;
 import java.util.UUID;
 import org.slf4j.Logger;
@@ -10,8 +12,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
-import com.devs.roamance.security.JwtUtils;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -49,7 +49,8 @@ public class AuditorAwareImpl implements AuditorAware<UUID> {
       }
     }
 
-    ServletRequestAttributes attrs = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+    ServletRequestAttributes attrs =
+        (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
     if (attrs != null) {
       HttpServletRequest request = attrs.getRequest();
       String token = jwtUtils.getTokenFromHeader(request.getHeader("Authorization"));
