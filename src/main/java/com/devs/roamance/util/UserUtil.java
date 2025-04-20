@@ -1,6 +1,7 @@
 package com.devs.roamance.util;
 
 import com.devs.roamance.exception.AuthenticatedUserNotFoundException;
+import com.devs.roamance.model.user.Role;
 import com.devs.roamance.model.user.User;
 import com.devs.roamance.repository.UserRepository;
 import java.util.UUID;
@@ -19,7 +20,8 @@ public class UserUtil {
   }
 
   public UUID getAuthenticatedUserId() {
-    return getAuthenticatedUser().getId();
+    User user = getAuthenticatedUser();
+    return user != null ? user.getId() : null;
   }
 
   public User getAuthenticatedUser() {
@@ -30,5 +32,10 @@ public class UserUtil {
     return userRepository
         .findByEmail(email)
         .orElseThrow(() -> new AuthenticatedUserNotFoundException("No authenticated user found!"));
+  }
+
+  public boolean isAuthenticatedUserAdmin() {
+    User user = getAuthenticatedUser();
+    return user.getRoles().contains(Role.ADMIN);
   }
 }

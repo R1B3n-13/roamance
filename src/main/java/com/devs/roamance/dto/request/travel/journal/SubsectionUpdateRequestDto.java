@@ -12,9 +12,9 @@ import lombok.Setter;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type", visible = true)
 @JsonSubTypes({
-  @JsonSubTypes.Type(value = SightseeingSubsectionUpdateRequestDto.class, name = "Sightseeing"),
-  @JsonSubTypes.Type(value = ActivitySubsectionUpdateRequestDto.class, name = "Activity"),
-  @JsonSubTypes.Type(value = RouteSubsectionUpdateRequestDto.class, name = "Route")
+  @JsonSubTypes.Type(value = SightseeingSubsectionUpdateRequestDto.class, name = "SIGHTSEEING"),
+  @JsonSubTypes.Type(value = ActivitySubsectionUpdateRequestDto.class, name = "ACTIVITY"),
+  @JsonSubTypes.Type(value = RouteSubsectionUpdateRequestDto.class, name = "ROUTE")
 })
 @Getter
 @Setter
