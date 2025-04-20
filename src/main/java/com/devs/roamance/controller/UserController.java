@@ -31,7 +31,7 @@ public class UserController {
     this.userUtil = userUtil;
   }
 
-  @PostMapping("/register")
+  @PostMapping
   public ResponseEntity<BaseResponseDto> createUser(
       @Valid @RequestBody UserCreateRequestDto requestDto) {
 
@@ -72,7 +72,7 @@ public class UserController {
     return ResponseEntity.ok(responseDto);
   }
 
-  @GetMapping("/profile")
+  @GetMapping("/me")
   public ResponseEntity<UserResponseDto> getUserProfile() {
 
     UUID userId = userUtil.getAuthenticatedUser().getId();
@@ -96,7 +96,7 @@ public class UserController {
     return ResponseEntity.ok(responseDto);
   }
 
-  @PutMapping("/update")
+  @PutMapping
   public ResponseEntity<BaseResponseDto> updateUser(
       @Valid @RequestBody UserUpdateRequestDto requestDto) {
 
@@ -107,7 +107,7 @@ public class UserController {
     return ResponseEntity.ok(responseDto);
   }
 
-  @DeleteMapping("/delete")
+  @DeleteMapping
   public ResponseEntity<BaseResponseDto> deleteUser() {
 
     UUID userId = userUtil.getAuthenticatedUser().getId();

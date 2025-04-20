@@ -4,10 +4,10 @@ export const API_BASE_URL = ENV_VARS.API_URL;
 
 const USERS = `${API_BASE_URL}/users`;
 export const USER_ENDPOINTS = {
-  REGISTER: `${USERS}/register`,
-  UPDATE: `${USERS}/update`,
-  DELETE: `${USERS}/delete`,
-  PROFILE: `${USERS}/profile`,
+  REGISTER: USERS,
+  UPDATE: USERS,
+  DELETE: USERS,
+  PROFILE: `${USERS}/me`,
 } as const;
 
 

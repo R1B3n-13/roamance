@@ -3,11 +3,11 @@ package com.devs.roamance.util;
 import com.devs.roamance.exception.AuthenticatedUserNotFoundException;
 import com.devs.roamance.model.user.User;
 import com.devs.roamance.repository.UserRepository;
+import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
-import java.util.UUID;
 
 @Component
 public class UserUtil {
@@ -31,5 +31,4 @@ public class UserUtil {
         .findByEmail(email)
         .orElseThrow(() -> new AuthenticatedUserNotFoundException("No authenticated user found!"));
   }
-
 }

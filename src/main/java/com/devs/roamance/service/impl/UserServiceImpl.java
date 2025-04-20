@@ -52,12 +52,13 @@ public class UserServiceImpl implements UserService {
       User user = modelMapper.map(requestDto, User.class);
 
       user.setRoles(Set.of(Role.USER));
+      user.getInfo().setUser(user);
+      user.getPreferences().setUser(user);
 
       User savedUser = userRepository.save(user);
       userRepository.flush();
 
       UserDto dto = modelMapper.map(savedUser, UserDto.class);
-
       return new UserResponseDto(201, true, ResponseMessage.REGISTRATION_SUCCESS, dto);
 
     } catch (DataIntegrityViolationException e) {
