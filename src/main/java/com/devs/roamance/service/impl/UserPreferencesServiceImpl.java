@@ -1,18 +1,5 @@
 package com.devs.roamance.service.impl;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.UUID;
-
-import org.modelmapper.ModelMapper;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.devs.roamance.constant.ResponseMessage;
 import com.devs.roamance.dto.request.user.UserPreferencesRequestDto;
 import com.devs.roamance.dto.response.BaseResponseDto;
@@ -31,6 +18,17 @@ import com.devs.roamance.repository.UserPreferencesRepository;
 import com.devs.roamance.repository.UserRepository;
 import com.devs.roamance.service.UserPreferencesService;
 import com.devs.roamance.util.UserUtil;
+import java.util.HashSet;
+import java.util.List;
+import java.util.UUID;
+import org.modelmapper.ModelMapper;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class UserPreferencesServiceImpl implements UserPreferencesService {
@@ -40,8 +38,7 @@ public class UserPreferencesServiceImpl implements UserPreferencesService {
   private final ModelMapper modelMapper;
   private final UserUtil userUtil;
 
-  @Lazy
-  private UserPreferencesService self;
+  @Lazy private UserPreferencesService self;
 
   public UserPreferencesServiceImpl(
       UserPreferencesRepository userPreferencesRepository,
@@ -93,18 +90,20 @@ public class UserPreferencesServiceImpl implements UserPreferencesService {
     Page<UserPreferences> preferencesPage;
 
     if (isAdmin) {
-      Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
-          ? Sort.by(sortBy).ascending()
-          : Sort.by(sortBy).descending();
+      Sort sort =
+          sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
+              ? Sort.by(sortBy).ascending()
+              : Sort.by(sortBy).descending();
 
       Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
       preferencesPage = userPreferencesRepository.findAll(pageable);
       preferences = preferencesPage.getContent();
     } else {
-      preferences = userPreferencesRepository
-          .findByUserId(currentUser.getId())
-          .map(List::of)
-          .orElse(List.of());
+      preferences =
+          userPreferencesRepository
+              .findByUserId(currentUser.getId())
+              .map(List::of)
+              .orElse(List.of());
     }
 
     List<UserPreferencesDto> preferencesDto = preferences.stream().map(this::mapToDto).toList();
@@ -228,16 +227,18 @@ public class UserPreferencesServiceImpl implements UserPreferencesService {
     return userPreferencesRepository
         .findById(id)
         .orElseThrow(
-            () -> new ResourceNotFoundException(
-                String.format(ResponseMessage.USER_PREFERENCES_NOT_FOUND, id)));
+            () ->
+                new ResourceNotFoundException(
+                    String.format(ResponseMessage.USER_PREFERENCES_NOT_FOUND, id)));
   }
 
   private UserPreferences findUserPreferencesByUserIdOrThrow(UUID userId) {
     return userPreferencesRepository
         .findByUserId(userId)
         .orElseThrow(
-            () -> new ResourceNotFoundException(
-                String.format(ResponseMessage.USER_PREFERENCES_NOT_FOUND, userId)));
+            () ->
+                new ResourceNotFoundException(
+                    String.format(ResponseMessage.USER_PREFERENCES_NOT_FOUND, userId)));
   }
 
   private boolean isAdmin(User user) {

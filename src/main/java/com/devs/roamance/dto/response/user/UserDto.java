@@ -1,7 +1,7 @@
 package com.devs.roamance.dto.response.user;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import java.time.OffsetDateTime;
+import com.devs.roamance.dto.response.AuditTimeDto;
+import jakarta.persistence.Embedded;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -19,9 +19,5 @@ public class UserDto {
   private String name;
   private String email;
 
-  @JsonProperty("created_at")
-  private OffsetDateTime createdAt;
-
-  @JsonProperty("last_modified_at")
-  private OffsetDateTime lastModifiedAt;
+  @Embedded private AuditTimeDto audit = new AuditTimeDto();
 }

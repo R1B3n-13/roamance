@@ -1,6 +1,6 @@
 package com.devs.roamance.model.user;
 
-import com.devs.roamance.model.Audit;
+import com.devs.roamance.model.AuditTime;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.CascadeType;
@@ -55,5 +55,5 @@ public class UserInfo {
   @JoinColumn(name = "user_id", referencedColumnName = "id")
   private User user;
 
-  @Embedded private Audit audit = new Audit();
+  @Embedded private AuditTime audit = new AuditTime();
 }

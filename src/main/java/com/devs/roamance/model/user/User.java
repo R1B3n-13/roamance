@@ -1,5 +1,6 @@
 package com.devs.roamance.model.user;
 
+import com.devs.roamance.model.AuditTime;
 import com.devs.roamance.model.social.Chat;
 import com.devs.roamance.model.social.Comment;
 import com.devs.roamance.model.social.Message;
@@ -12,14 +13,34 @@ import com.devs.roamance.model.user.preference.UserPreferences;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotNull;
-import java.time.OffsetDateTime;
-import java.util.*;
 import java.util.ArrayList;
-import lombok.*;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
@@ -132,9 +153,5 @@ public class User {
       orphanRemoval = true)
   private List<Activity> activities = new ArrayList<>();
 
-  @CreatedDate
-  @Column(updatable = false)
-  private OffsetDateTime createdAt;
-
-  @LastModifiedDate private OffsetDateTime lastModifiedAt;
+  @Embedded private AuditTime audit = new AuditTime();
 }

@@ -1,6 +1,6 @@
 package com.devs.roamance.dto.response.user;
 
-import com.devs.roamance.dto.response.AuditDto;
+import com.devs.roamance.dto.response.AuditTimeDto;
 import com.devs.roamance.model.user.preference.AccommodationType;
 import com.devs.roamance.model.user.preference.ActivityType;
 import com.devs.roamance.model.user.preference.BudgetLevel;
@@ -44,5 +44,5 @@ public class UserPreferencesDto {
   @JsonProperty("climate_preference")
   private ClimatePreference climatePreference;
 
-  @Embedded private AuditDto audit = new AuditDto();
+  @Embedded private AuditTimeDto audit = new AuditTimeDto();
 }

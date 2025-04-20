@@ -1,6 +1,6 @@
 package com.devs.roamance.model.user.preference;
 
-import com.devs.roamance.model.Audit;
+import com.devs.roamance.model.AuditTime;
 import com.devs.roamance.model.user.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.CollectionTable;
@@ -79,5 +79,5 @@ public class UserPreferences {
   @JoinColumn(name = "user_id", referencedColumnName = "id")
   private User user;
 
-  @Embedded private Audit audit = new Audit();
+  @Embedded private AuditTime audit = new AuditTime();
 }

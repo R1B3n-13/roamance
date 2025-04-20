@@ -1,17 +1,5 @@
 package com.devs.roamance.service.impl;
 
-import java.util.List;
-import java.util.UUID;
-
-import org.modelmapper.ModelMapper;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.devs.roamance.constant.ResponseMessage;
 import com.devs.roamance.dto.request.user.UserInfoRequestDto;
 import com.devs.roamance.dto.response.BaseResponseDto;
@@ -26,6 +14,16 @@ import com.devs.roamance.model.user.UserInfo;
 import com.devs.roamance.repository.UserInfoRepository;
 import com.devs.roamance.service.UserInfoService;
 import com.devs.roamance.util.UserUtil;
+import java.util.List;
+import java.util.UUID;
+import org.modelmapper.ModelMapper;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class UserInfoServiceImpl implements UserInfoService {
@@ -34,13 +32,10 @@ public class UserInfoServiceImpl implements UserInfoService {
   private final UserUtil userUtil;
   private final ModelMapper modelMapper;
 
-  @Lazy
-  private UserInfoService self;
+  @Lazy private UserInfoService self;
 
   public UserInfoServiceImpl(
-      UserInfoRepository userInfoRepository,
-      UserUtil userUtil,
-      ModelMapper modelMapper) {
+      UserInfoRepository userInfoRepository, UserUtil userUtil, ModelMapper modelMapper) {
     this.userInfoRepository = userInfoRepository;
     this.userUtil = userUtil;
     this.modelMapper = modelMapper;
@@ -80,9 +75,10 @@ public class UserInfoServiceImpl implements UserInfoService {
     Page<UserInfo> userInfoPage;
 
     if (isAdmin) {
-      Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
-          ? Sort.by(sortBy).ascending()
-          : Sort.by(sortBy).descending();
+      Sort sort =
+          sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
+              ? Sort.by(sortBy).ascending()
+              : Sort.by(sortBy).descending();
 
       Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
       userInfoPage = userInfoRepository.findAll(pageable);
@@ -166,10 +162,13 @@ public class UserInfoServiceImpl implements UserInfoService {
   }
 
   private UserInfo findUserInfoById(UUID id) {
-    UserInfo userInfo = userInfoRepository
-        .findById(id)
-        .orElseThrow(() -> new ResourceNotFoundException(
-            String.format("No user's information found with id: %s", id)));
+    UserInfo userInfo =
+        userInfoRepository
+            .findById(id)
+            .orElseThrow(
+                () ->
+                    new ResourceNotFoundException(
+                        String.format("No user's information found with id: %s", id)));
 
     User currentUser = userUtil.getAuthenticatedUser();
     if (!userInfo.getUser().getId().equals(currentUser.getId())
@@ -184,7 +183,8 @@ public class UserInfoServiceImpl implements UserInfoService {
     return userInfoRepository
         .findByUserId(userId)
         .orElseThrow(
-            () -> new ResourceNotFoundException(
-                String.format("No user's information found for user with id: %s", userId)));
+            () ->
+                new ResourceNotFoundException(
+                    String.format("No user's information found for user with id: %s", userId)));
   }
 }

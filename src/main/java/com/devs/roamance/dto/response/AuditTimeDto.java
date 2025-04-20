@@ -1,7 +1,7 @@
 package com.devs.roamance.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.util.UUID;
+import java.time.OffsetDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,11 +11,11 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class AuditDto extends AuditTimeDto {
+public class AuditTimeDto {
 
-  @JsonProperty("created_by")
-  private UUID createdBy;
+  @JsonProperty("created_at")
+  private OffsetDateTime createdAt;
 
-  @JsonProperty("last_modified_by")
-  private UUID lastModifiedBy;
+  @JsonProperty("last_modified_at")
+  private OffsetDateTime lastModifiedAt;
 }
