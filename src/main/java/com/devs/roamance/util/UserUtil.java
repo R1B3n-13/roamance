@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import java.util.UUID;
 
 @Component
 public class UserUtil {
@@ -15,6 +16,10 @@ public class UserUtil {
 
   public UserUtil(@Autowired UserRepository userRepository) {
     this.userRepository = userRepository;
+  }
+
+  public UUID getAuthenticatedUserId() {
+    return getAuthenticatedUser().getId();
   }
 
   public User getAuthenticatedUser() {
@@ -26,4 +31,5 @@ public class UserUtil {
         .findByEmail(email)
         .orElseThrow(() -> new AuthenticatedUserNotFoundException("No authenticated user found!"));
   }
+
 }
