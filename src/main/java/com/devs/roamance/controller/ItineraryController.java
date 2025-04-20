@@ -38,7 +38,7 @@ public class ItineraryController {
   public ResponseEntity<ItineraryListResponseDto> getAllItineraries(
       @RequestParam(defaultValue = "0") int pageNumber,
       @RequestParam(defaultValue = "10") int pageSize,
-      @RequestParam(defaultValue = "createdAt") String sortBy,
+      @RequestParam(defaultValue = "audit.createdAt") String sortBy,
       @RequestParam(defaultValue = "desc") String sortDir) {
 
     int[] validatedParams = PaginationSortingUtil.validatePaginationParams(pageNumber, pageSize);
@@ -63,7 +63,7 @@ public class ItineraryController {
       @PathVariable @NotNull UUID userId,
       @RequestParam(defaultValue = "0") int pageNumber,
       @RequestParam(defaultValue = "10") int pageSize,
-      @RequestParam(defaultValue = "createdAt") String sortBy,
+      @RequestParam(defaultValue = "audit.createdAt") String sortBy,
       @RequestParam(defaultValue = "desc") String sortDir) {
 
     int[] validatedParams = PaginationSortingUtil.validatePaginationParams(pageNumber, pageSize);
