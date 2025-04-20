@@ -111,7 +111,7 @@ public class SubsectionServiceImpl implements SubsectionService {
             pageNumber, pageSize, Sort.by(PaginationSortingUtil.getSortDirection(sortDir), sortBy));
 
     Page<Subsection> subsectionPage =
-        subsectionRepository.findAllByJournal_Audit_CreatedBy(authenticatedUser.getId(), pageable);
+        subsectionRepository.findAllByJournalAuditCreatedBy(authenticatedUser.getId(), pageable);
 
     List<SubsectionBriefDto> subsections =
         subsectionPage.getContent().stream()
