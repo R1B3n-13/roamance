@@ -4,8 +4,7 @@ import com.devs.roamance.security.JwtUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Optional;
 import java.util.UUID;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -15,9 +14,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+@Slf4j
 @Component
 public class AuditorAwareImpl implements AuditorAware<UUID> {
-  private static final Logger logger = LoggerFactory.getLogger(AuditorAwareImpl.class);
   private final JwtUtils jwtUtils;
 
   public AuditorAwareImpl(JwtUtils jwtUtils) {
@@ -32,7 +31,7 @@ public class AuditorAwareImpl implements AuditorAware<UUID> {
     if (authentication == null
         || !authentication.isAuthenticated()
         || authentication.getPrincipal().equals("anonymousUser")) {
-      logger.debug("No authenticated user found, cannot provide UUID auditor");
+      log.debug("No authenticated user found, cannot provide UUID auditor");
       return Optional.empty();
     }
 
@@ -41,10 +40,10 @@ public class AuditorAwareImpl implements AuditorAware<UUID> {
       try {
         String userIdString = authentication.getDetails().toString();
         UUID userId = UUID.fromString(userIdString);
-        logger.debug("Retrieved user UUID: {} directly from authentication details", userId);
+        log.debug("Retrieved user UUID: {} directly from authentication details", userId);
         return Optional.of(userId);
       } catch (IllegalArgumentException e) {
-        logger.warn(
+        log.warn(
             "Could not parse UUID from authentication details: {}", authentication.getDetails());
       }
     }
@@ -58,15 +57,15 @@ public class AuditorAwareImpl implements AuditorAware<UUID> {
         try {
           String userIdString = jwtUtils.getUserIdFromToken(token);
           UUID userId = UUID.fromString(userIdString);
-          logger.debug("Retrieved user UUID: {} from JWT token", userId);
+          log.debug("Retrieved user UUID: {} from JWT token", userId);
           return Optional.of(userId);
         } catch (IllegalArgumentException e) {
-          logger.warn("Could not parse UUID from JWT token: {}", token);
+          log.warn("Could not parse UUID from JWT token: {}", token);
         }
       }
     }
 
-    logger.debug("User ID not found in authentication details or token");
+    log.debug("User ID not found in authentication details or token");
     return Optional.empty();
   }
 }

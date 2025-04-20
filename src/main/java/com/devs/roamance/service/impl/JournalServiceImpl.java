@@ -30,9 +30,8 @@ import com.devs.roamance.util.UserUtil;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -43,9 +42,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 public class JournalServiceImpl implements JournalService {
-  private static final Logger logger = LoggerFactory.getLogger(JournalServiceImpl.class);
 
   private final JournalRepository journalRepository;
   private final UserRepository userRepository;
@@ -67,14 +66,14 @@ public class JournalServiceImpl implements JournalService {
   @Transactional
   public JournalResponseDto create(JournalCreateRequestDto requestDto) {
     try {
-      logger.info(
+      log.info(
           "Creating journal with title: '{}' and {} subsections",
           requestDto.getTitle(),
           requestDto.getSubsections().size());
 
       Journal journal = modelMapper.map(requestDto, Journal.class);
 
-      logger.info("Creating journal with title: '{}'", journal);
+      log.info("Creating journal with title: '{}'", journal);
 
       if (!requestDto.getSubsections().isEmpty()) {
         for (SubsectionCreateRequestDto subsectionDto : requestDto.getSubsections()) {
@@ -94,7 +93,7 @@ public class JournalServiceImpl implements JournalService {
               };
           journal.addSubsection(subsection);
         }
-        logger.info(
+        log.info(
             "Established bidirectional relationship for {} subsections",
             journal.getSubsections().size());
       }
@@ -136,13 +135,13 @@ public class JournalServiceImpl implements JournalService {
     Page<Journal> journalPage;
 
     if (isAdmin) {
-      logger.info("User has ADMIN role, returning all journals with pagination");
+      log.info("User has ADMIN role, returning all journals with pagination");
       journalPage = journalRepository.findAll(pageable);
     } else {
       String email = authentication.getName();
       Optional<UUID> userId = userRepository.findByEmail(email).map(User::getId);
 
-      logger.info("User has USER role, returning only their journals, userId: {}", userId);
+      log.info("User has USER role, returning only their journals, userId: {}", userId);
 
       if (userId.isPresent()) {
         journalPage = journalRepository.findAllByAudit_CreatedBy(userId.get(), pageable);
@@ -172,10 +171,10 @@ public class JournalServiceImpl implements JournalService {
 
   @Override
   public JournalResponseDto get(UUID id) {
-    logger.info("Fetching journal with id: {} using JOIN FETCH for subsections", id);
+    log.info("Fetching journal with id: {} using JOIN FETCH for subsections", id);
     Journal journal = findJournalByAccess(id);
 
-    logger.info(
+    log.info(
         "Successfully fetched journal with title: '{}' and {} subsections",
         journal.getTitle(),
         journal.getSubsections().size());
@@ -187,14 +186,14 @@ public class JournalServiceImpl implements JournalService {
 
   @Override
   @Transactional
-  public JournalResponseDto update(JournalUpdateRequestDto requestDto, UUID id) {
+  public JournalResponseDto update(JournalUpdateRequestDto updateRequestDto, UUID id) {
     Journal journal = findJournalByAccess(id);
 
-    journal.setTitle(requestDto.getTitle());
-    journal.setDescription(requestDto.getDescription());
+    journal.setTitle(updateRequestDto.getTitle());
+    journal.setDescription(updateRequestDto.getDescription());
 
-    if (requestDto.getDestination() != null) {
-      journal.setDestination(modelMapper.map(requestDto.getDestination(), Location.class));
+    if (updateRequestDto.getDestination() != null) {
+      journal.setDestination(modelMapper.map(updateRequestDto.getDestination(), Location.class));
     }
 
     Journal savedJournal = journalRepository.save(journal);
@@ -227,7 +226,7 @@ public class JournalServiceImpl implements JournalService {
     User currentUser = userUtil.getAuthenticatedUser();
     boolean isAdmin = userUtil.isAuthenticatedUserAdmin();
     if (!isAdmin && !journal.getUser().getId().equals(currentUser.getId())) {
-      logger.warn(
+      log.warn(
           "User {} attempted to access journal {} without permission", currentUser.getEmail(), id);
       throw new UnauthorizedAccessException(ResponseMessage.JOURNAL_ACCESS_DENIED);
     }
