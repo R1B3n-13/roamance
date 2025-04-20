@@ -20,8 +20,6 @@ import com.devs.roamance.util.UserUtil;
 import java.util.List;
 import java.util.UUID;
 import org.modelmapper.ModelMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -31,7 +29,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class PostServiceImpl implements PostService {
-  private static final Logger logger = LoggerFactory.getLogger(PostServiceImpl.class);
 
   private final PostRepository postRepository;
   private final UserRepository userRepository;
@@ -108,14 +105,6 @@ public class PostServiceImpl implements PostService {
     Page<Post> posts = postRepository.findAllByIds(idsArray, pageable);
 
     List<PostDto> dtos = posts.stream().map(post -> modelMapper.map(post, PostDto.class)).toList();
-
-    if (!dtos.isEmpty())
-      logger.info(
-          "Response post object with audit: created at '{}', created by: '{}', last modified at '{}' last modified by: '{}'",
-          dtos.getFirst().getAudit().getCreatedAt(),
-          dtos.getFirst().getAudit().getCreatedBy(),
-          dtos.getFirst().getAudit().getLastModifiedAt(),
-          dtos.getFirst().getAudit().getLastModifiedBy());
 
     return new PostListResponseDto(200, true, ResponseMessage.POSTS_FETCH_SUCCESS, dtos);
   }

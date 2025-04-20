@@ -41,7 +41,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @EntityListeners(AuditingEntityListener.class)
 @Table(
     name = "journals",
-    uniqueConstraints = @UniqueConstraint(columnNames = {"title", "audit.created_by"}))
+    uniqueConstraints = @UniqueConstraint(columnNames = {"title", "created_by"}))
 public class Journal {
 
   @Id

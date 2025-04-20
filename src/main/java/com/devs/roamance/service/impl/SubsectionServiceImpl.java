@@ -88,7 +88,7 @@ public class SubsectionServiceImpl implements SubsectionService {
         savedSubsection.getId(),
         journal.getTitle());
 
-    SubsectionDetailDto detailDto = mapToSubsectionDetailDto(savedSubsection);
+    SubsectionDetailDto detailDto = modelMapper.map(savedSubsection, SubsectionDetailDto.class);
 
     return new SubsectionResponseDto(
         201, true, ResponseMessage.SUBSECTION_CREATE_SUCCESS, detailDto);
@@ -148,7 +148,7 @@ public class SubsectionServiceImpl implements SubsectionService {
 
     logger.info("Successfully fetched subsection with title: '{}'", subsection.getTitle());
 
-    SubsectionDetailDto detailDto = mapToSubsectionDetailDto(subsection);
+    SubsectionDetailDto detailDto = modelMapper.map(subsection, SubsectionDetailDto.class);
 
     return new SubsectionResponseDto(
         200, true, ResponseMessage.SUBSECTION_FETCH_SUCCESS, detailDto);
@@ -176,7 +176,7 @@ public class SubsectionServiceImpl implements SubsectionService {
     Subsection savedSubsection = subsectionRepository.save(subsection);
     logger.info("Successfully updated subsection with id: {}", id);
 
-    SubsectionDetailDto detailDto = mapToSubsectionDetailDto(savedSubsection);
+    SubsectionDetailDto detailDto = modelMapper.map(savedSubsection, SubsectionDetailDto.class);
 
     return new SubsectionResponseDto(
         200, true, ResponseMessage.SUBSECTION_UPDATE_SUCCESS, detailDto);
@@ -271,24 +271,5 @@ public class SubsectionServiceImpl implements SubsectionService {
         logger.error("Error mapping subsection details to RouteSubsectionUpdateRequestDto", e);
       }
     }
-  }
-
-  private SubsectionDetailDto mapToSubsectionDetailDto(Subsection subsection) {
-    SubsectionDetailDto detailDto = new SubsectionDetailDto();
-    detailDto.setId(subsection.getId());
-    detailDto.setTitle(subsection.getTitle());
-    detailDto.setNotes(subsection.getNotes());
-    detailDto.setChecklists(subsection.getChecklists());
-    detailDto.setJournalId(subsection.getJournal().getId());
-
-    if (subsection instanceof ActivitySubsection) {
-      detailDto.setType(SubsectionType.ACTIVITY);
-    } else if (subsection instanceof SightseeingSubsection) {
-      detailDto.setType(SubsectionType.SIGHTSEEING);
-    } else if (subsection instanceof RouteSubsection) {
-      detailDto.setType(SubsectionType.ROUTE);
-    }
-
-    return detailDto;
   }
 }
