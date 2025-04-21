@@ -36,6 +36,6 @@ public class UserUtil {
 
   public boolean isAuthenticatedUserAdmin() {
     User user = getAuthenticatedUser();
-    return user.getRoles().contains(Role.ADMIN);
+    return user != null && user.getRoles().contains(Role.ADMIN);
   }
 }
