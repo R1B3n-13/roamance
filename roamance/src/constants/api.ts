@@ -10,7 +10,6 @@ export const USER_ENDPOINTS = {
   PROFILE: `${USERS}/me`,
 } as const;
 
-
 const USER_AUTH = `${API_BASE_URL}/auth`;
 export const USER_AUTH_ENDPOINTS = {
   ROOT: USER_AUTH,
@@ -33,3 +32,13 @@ export const USER_PREFERENCES_ENDPOINTS = {
   UPDATE: `${USER_PREFERENCES}`,
   DELETE: `${USER_PREFERENCES}`,
 };
+
+const TRAVEL = `${API_BASE_URL}/travel`;
+const JOURNALS = `${TRAVEL}/journals`;
+export const JOURNAL_ENDPOINTS = {
+  ROOT: JOURNALS,
+  CREATE: `${JOURNALS}`,
+  GET_BY_ID: (id: string) => `${JOURNALS}/${id}`,
+  UPDATE: (id: string) => `${JOURNALS}/${id}`,
+  DELETE: (id: string) => `${JOURNALS}/${id}`,
+} as const;
