@@ -108,3 +108,5 @@ export const routes: Record<string, RouteItem> = {
     href: `/${paths.cookies}`,
   },
 };
+
+export const secureRoutes = [routes.profile.href];

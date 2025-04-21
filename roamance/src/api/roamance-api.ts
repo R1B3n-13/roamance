@@ -12,10 +12,14 @@ import axios, {
 } from 'axios';
 import { ApiError } from './errors';
 
-const PUBLIC_ENDPOINTS = [USER_AUTH_ENDPOINTS.LOGIN, USER_ENDPOINTS.REGISTER];
+const PUBLIC_ENDPOINTS = [
+  USER_AUTH_ENDPOINTS.LOGIN,
+  USER_ENDPOINTS.REGISTER,
+  USER_AUTH_ENDPOINTS.REFRESH_TOKEN,
+];
 class Api {
-  private instance: AxiosInstance;
-  private baseURL: string;
+  private readonly instance: AxiosInstance;
+  private readonly baseURL: string;
 
   constructor() {
     this.baseURL = ENV_VARS.API_URL;
@@ -82,8 +86,14 @@ class Api {
           error.response?.status === 401 &&
           originalRequest &&
           !originalRequest._retry &&
-          !(originalRequest.method?.toLowerCase() === 'post' &&
-            [USER_AUTH_ENDPOINTS.LOGIN, USER_ENDPOINTS.REGISTER, USER_AUTH_ENDPOINTS.REFRESH_TOKEN].includes(originalRequest.url || ''))
+          !(
+            originalRequest.method?.toLowerCase() === 'post' &&
+            [
+              USER_AUTH_ENDPOINTS.LOGIN,
+              USER_ENDPOINTS.REGISTER,
+              USER_AUTH_ENDPOINTS.REFRESH_TOKEN,
+            ].includes(originalRequest.url || '')
+          )
         ) {
           originalRequest._retry = true;
           try {
@@ -120,13 +130,10 @@ class Api {
     );
   }
 
-
-
   private getToken(): string | null {
     try {
       // Use authService method instead of manual cookie access
       const token = authService.getAccessToken();
-      console.log('Token retrieved:', token);
       if (!token) {
         console.warn('No token found in cookies');
         return null;
