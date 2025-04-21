@@ -87,14 +87,11 @@ jobs:
       - name: 📦 Install dependencies
         run: ${{ steps.detect-package-manager.outputs.manager }} ${{ steps.detect-package-manager.outputs.command }}
       - name: 🛠️ Build with Next.js
-        # Add next export command after build
-        run: |
-          ${{ steps.detect-package-manager.outputs.runner }} next build
-          ${{ steps.detect-package-manager.outputs.runner }} next export
+        run: ${{ steps.detect-package-manager.outputs.runner }} next build
       - name: 📤 Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ${{ env.WORKSPACE_PATH }}/out
+          path: ${{ env.WORKSPACE_PATH }}/.next
 
   deploy:
     environment:
