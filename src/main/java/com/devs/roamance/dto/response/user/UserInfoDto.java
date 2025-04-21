@@ -21,9 +21,6 @@ public class UserInfoDto {
   private String location;
   private LocalDate birthday;
 
-  @JsonProperty("profile_image")
-  private String profileImage;
-
   @JsonProperty("cover_image")
   private String coverImage;
 

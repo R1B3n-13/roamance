@@ -151,7 +151,6 @@ public class UserInfoServiceImpl implements UserInfoService {
     userInfo.setBio(requestDto.getBio());
     userInfo.setLocation(requestDto.getLocation());
     userInfo.setBirthday(requestDto.getBirthday());
-    userInfo.setProfileImage(requestDto.getProfileImage());
     userInfo.setCoverImage(requestDto.getCoverImage());
   }
 

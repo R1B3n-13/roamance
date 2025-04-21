@@ -12,6 +12,7 @@ import com.devs.roamance.model.travel.journal.Journal;
 import com.devs.roamance.model.user.preference.UserPreferences;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.CollectionTable;
@@ -65,6 +66,9 @@ public class User {
   @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
   @Enumerated(EnumType.STRING)
   private Set<Role> roles = new HashSet<>();
+
+  @JsonProperty("profile_image")
+  private String profileImage;
 
   @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
   private UserInfo info = new UserInfo();

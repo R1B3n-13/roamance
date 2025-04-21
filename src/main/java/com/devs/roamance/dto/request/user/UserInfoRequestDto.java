@@ -24,15 +24,9 @@ public class UserInfoRequestDto {
 
   private String location;
 
-  @JsonProperty("profile_image")
-  @Pattern(
-      regexp = "^$|^(https?:\\/\\/)?([\\w-]+\\.)+[\\w-]+(\\/[\\w- ./?%&=]*)?$",
-      message = "Profile image URL format is invalid")
-  private String profileImage;
-
   @JsonProperty("cover_image")
   @Pattern(
-      regexp = "^$|^(https?:\\/\\/)?([\\w-]+\\.)+[\\w-]+(\\/[\\w- ./?%&=]*)?$",
+      regexp = "^$|^(https?:\\/\\/)[^\\s]{0,2083}$",
       message = "Cover image URL format is invalid")
   private String coverImage;
 
