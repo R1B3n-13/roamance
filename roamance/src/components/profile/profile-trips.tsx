@@ -18,15 +18,15 @@ import {
   ArrowRight,
   Calendar,
   CalendarRange,
+  CheckCircle2,
   Clock,
+  Compass,
+  Flag,
+  LucideIcon,
+  MapPin,
   Plane,
   Plus,
-  MapPin,
-  Compass,
-  CheckCircle2,
-  Flag,
   Route,
-  LucideIcon,
 } from 'lucide-react';
 
 interface ProfileTripsProps {
@@ -36,7 +36,7 @@ interface ProfileTripsProps {
 }
 
 // Mock trip data
-const upcomingTrips = [
+const upcomingTrips: Trip[] = [
   {
     id: '1',
     destination: 'Bali, Indonesia',
@@ -55,7 +55,7 @@ const upcomingTrips = [
   },
 ];
 
-const pastTrips = [
+const pastTrips: Trip[] = [
   {
     id: '3',
     destination: 'Tokyo, Japan',
@@ -82,10 +82,10 @@ const pastTrips = [
   },
 ];
 
-export function ProfileTrips({ user, userInfo, loading }: ProfileTripsProps) {
+export function ProfileTrips({ loading }: ProfileTripsProps) {
   // Use trips from userInfo if available, otherwise fallback to mock data
-  const userUpcomingTrips = userInfo?.upcoming_trips || upcomingTrips;
-  const userPastTrips = userInfo?.past_trips || pastTrips;
+  const userUpcomingTrips = upcomingTrips;
+  const userPastTrips = pastTrips;
 
   // Format date to display in a more readable format
   const formatDate = (dateString: string) => {
@@ -166,9 +166,9 @@ export function ProfileTrips({ user, userInfo, loading }: ProfileTripsProps) {
       opacity: 1,
       transition: {
         staggerChildren: 0.1,
-        delayChildren: 0.1
-      }
-    }
+        delayChildren: 0.1,
+      },
+    },
   };
 
   const itemVariants = {
@@ -177,11 +177,11 @@ export function ProfileTrips({ user, userInfo, loading }: ProfileTripsProps) {
       opacity: 1,
       y: 0,
       transition: {
-        type: "spring",
+        type: 'spring',
         stiffness: 260,
-        damping: 20
-      }
-    }
+        damping: 20,
+      },
+    },
   };
 
   if (loading) {
@@ -341,20 +341,23 @@ export function ProfileTrips({ user, userInfo, loading }: ProfileTripsProps) {
               <StatsCard
                 icon={MapPin}
                 label="Countries"
-                value={userInfo?.stats?.countries_visited || userPastTrips.length}
+                value={userPastTrips.length}
                 color="ocean"
               />
               <StatsCard
                 icon={Plane}
                 label="Total Trips"
-                value={userInfo?.stats?.total_trips || (userPastTrips.length +
-                  userUpcomingTrips.filter((t) => t.status === 'confirmed').length)}
+                value={
+                  userPastTrips.length +
+                  userUpcomingTrips.filter((t) => t.status === 'confirmed')
+                    .length
+                }
                 color="sunset"
               />
               <StatsCard
                 icon={Calendar}
                 label="Days Traveled"
-                value={userInfo?.stats?.days_traveled || userPastTrips.reduce(
+                value={userPastTrips.reduce(
                   (acc, trip) =>
                     acc + tripDuration(trip.startDate, trip.endDate),
                   0
@@ -364,7 +367,7 @@ export function ProfileTrips({ user, userInfo, loading }: ProfileTripsProps) {
               <StatsCard
                 icon={Flag}
                 label="Bucket List"
-                value={userInfo?.stats?.bucket_list_count || 2}
+                value={2}
                 color="sand"
               />
             </div>
@@ -385,9 +388,21 @@ interface StatsCardProps {
 function StatsCard({ icon: Icon, label, value, color }: StatsCardProps) {
   const getColorClass = (colorName: string, type: 'bg' | 'text' | 'border') => {
     const colorMap: Record<string, Record<string, string>> = {
-      ocean: { bg: 'bg-ocean/10', text: 'text-ocean', border: 'border-ocean/30' },
-      sunset: { bg: 'bg-sunset/10', text: 'text-sunset', border: 'border-sunset/30' },
-      forest: { bg: 'bg-forest/10', text: 'text-forest', border: 'border-forest/30' },
+      ocean: {
+        bg: 'bg-ocean/10',
+        text: 'text-ocean',
+        border: 'border-ocean/30',
+      },
+      sunset: {
+        bg: 'bg-sunset/10',
+        text: 'text-sunset',
+        border: 'border-sunset/30',
+      },
+      forest: {
+        bg: 'bg-forest/10',
+        text: 'text-forest',
+        border: 'border-forest/30',
+      },
       sand: { bg: 'bg-sand/10', text: 'text-sand', border: 'border-sand/30' },
     };
 
@@ -399,22 +414,48 @@ function StatsCard({ icon: Icon, label, value, color }: StatsCardProps) {
       whileHover={{ y: -3, scale: 1.02 }}
       transition={{ duration: 0.2 }}
       className={cn(
-        "rounded-xl p-4 text-center border",
+        'rounded-xl p-4 text-center border',
         getColorClass(color, 'border'),
         getColorClass(color, 'bg'),
-        "bg-gradient-to-b from-background/80 to-background/50 backdrop-blur-sm shadow-sm"
-      )}>
+        'bg-gradient-to-b from-background/80 to-background/50 backdrop-blur-sm shadow-sm'
+      )}
+    >
       <div className="flex justify-center mb-2">
-        <div className={cn("p-2 rounded-full bg-white/20 shadow-sm", getColorClass(color, 'text'))}>
+        <div
+          className={cn(
+            'p-2 rounded-full bg-white/20 shadow-sm',
+            getColorClass(color, 'text')
+          )}
+        >
           <Icon className="h-5 w-5" />
         </div>
       </div>
       <p className="text-muted-foreground text-sm font-medium">{label}</p>
-      <p className={cn("text-3xl font-bold mt-1", getColorClass(color, 'text'))}>
+      <p
+        className={cn('text-3xl font-bold mt-1', getColorClass(color, 'text'))}
+      >
         {value}
       </p>
     </motion.div>
   );
+}
+
+interface Trip {
+  readonly id: string;
+  readonly destination: string;
+  readonly image: string;
+  readonly startDate: string;
+  readonly endDate: string;
+  readonly status: 'confirmed' | 'planning' | 'completed';
+}
+
+interface TripCardProps {
+  readonly trip: Trip;
+  readonly formatDate: (date: string) => string;
+  readonly daysUntil?: (date: string) => number;
+  readonly tripDuration: (start: string, end: string) => number;
+  readonly getStatusBadge: (status: string) => React.ReactNode;
+  readonly isUpcoming: boolean;
 }
 
 function TripCard({
@@ -424,14 +465,7 @@ function TripCard({
   tripDuration,
   getStatusBadge,
   isUpcoming,
-}: {
-  trip: any;
-  formatDate: (date: string) => string;
-  daysUntil?: (date: string) => number;
-  tripDuration: (start: string, end: string) => number;
-  getStatusBadge: (status: string) => React.ReactNode;
-  isUpcoming: boolean;
-}) {
+}: TripCardProps) {
   // Get gradient based on type
   const getGradient = () => {
     if (isUpcoming) {
@@ -446,7 +480,7 @@ function TripCard({
   return (
     <motion.div
       whileHover={{ y: -5 }}
-      transition={{ type: "spring", stiffness: 400, damping: 17 }}
+      transition={{ type: 'spring', stiffness: 400, damping: 17 }}
     >
       <Card className="overflow-hidden border-muted/40 bg-gradient-to-b from-background to-background/95 backdrop-blur-sm shadow-md transition-all duration-300 hover:shadow-xl py-0">
         <div className="relative h-44 w-full bg-muted">
@@ -477,17 +511,19 @@ function TripCard({
 
         <div className="p-5">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-lg">
-              {trip.destination}
-            </h3>
+            <h3 className="font-semibold text-lg">{trip.destination}</h3>
           </div>
 
           <div className="space-y-3 text-sm">
             <div className="flex items-center gap-2.5">
-              <div className={cn(
-                "p-1.5 rounded-md",
-                isUpcoming ? "bg-ocean/10 text-ocean" : "bg-sunset/10 text-sunset"
-              )}>
+              <div
+                className={cn(
+                  'p-1.5 rounded-md',
+                  isUpcoming
+                    ? 'bg-ocean/10 text-ocean'
+                    : 'bg-sunset/10 text-sunset'
+                )}
+              >
                 <Calendar className="h-4 w-4" />
               </div>
               <span>
@@ -496,13 +532,19 @@ function TripCard({
             </div>
 
             <div className="flex items-center gap-2.5">
-              <div className={cn(
-                "p-1.5 rounded-md",
-                isUpcoming ? "bg-ocean/10 text-ocean" : "bg-sunset/10 text-sunset"
-              )}>
+              <div
+                className={cn(
+                  'p-1.5 rounded-md',
+                  isUpcoming
+                    ? 'bg-ocean/10 text-ocean'
+                    : 'bg-sunset/10 text-sunset'
+                )}
+              >
                 <Clock className="h-4 w-4" />
               </div>
-              <span>Duration: {tripDuration(trip.startDate, trip.endDate)} days</span>
+              <span>
+                Duration: {tripDuration(trip.startDate, trip.endDate)} days
+              </span>
             </div>
 
             {isUpcoming && daysUntil && daysUntil(trip.startDate) > 0 && (
@@ -525,8 +567,10 @@ function TripCard({
                 variant="ghost"
                 size="sm"
                 className={cn(
-                  "flex items-center gap-2",
-                  isUpcoming ? "hover:text-ocean hover:bg-ocean/5" : "hover:text-sunset hover:bg-sunset/5"
+                  'flex items-center gap-2',
+                  isUpcoming
+                    ? 'hover:text-ocean hover:bg-ocean/5'
+                    : 'hover:text-sunset hover:bg-sunset/5'
                 )}
               >
                 <span>View Details</span>

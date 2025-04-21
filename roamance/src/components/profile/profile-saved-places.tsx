@@ -7,7 +7,17 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Bookmark, MapPin, Star, Search, Globe, Filter, X, Calendar, ExternalLink } from 'lucide-react';
+import {
+  Bookmark,
+  MapPin,
+  Star,
+  Search,
+  Globe,
+  Filter,
+  X,
+  Calendar,
+  ExternalLink,
+} from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
@@ -83,12 +93,12 @@ const mockSavedPlaces = [
   },
 ];
 
-export function ProfileSavedPlaces({ user, userInfo, loading }: ProfileSavedPlacesProps) {
+export function ProfileSavedPlaces({ loading }: ProfileSavedPlacesProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
 
   // Use saved places from userInfo if available, otherwise fallback to mock data
-  const savedPlaces = userInfo?.saved_places || mockSavedPlaces;
+  const savedPlaces = mockSavedPlaces;
 
   const filters = [
     { id: 'all', label: 'All Places', icon: Globe },
@@ -122,9 +132,9 @@ export function ProfileSavedPlaces({ user, userInfo, loading }: ProfileSavedPlac
       opacity: 1,
       transition: {
         staggerChildren: 0.1,
-        delayChildren: 0.1
-      }
-    }
+        delayChildren: 0.1,
+      },
+    },
   };
 
   const itemVariants = {
@@ -133,11 +143,11 @@ export function ProfileSavedPlaces({ user, userInfo, loading }: ProfileSavedPlac
       opacity: 1,
       y: 0,
       transition: {
-        type: "spring",
+        type: 'spring',
         stiffness: 260,
-        damping: 20
-      }
-    }
+        damping: 20,
+      },
+    },
   };
 
   if (loading) {
@@ -207,18 +217,26 @@ export function ProfileSavedPlaces({ user, userInfo, loading }: ProfileSavedPlac
                 {filters.map((filter) => {
                   // Determine color based on filter id
                   const getColorClass = () => {
-                    if (filter.id === 'beach') return 'bg-sunset text-white font-medium';
-                    if (filter.id === 'mountain') return 'bg-forest text-white font-medium';
-                    if (filter.id === 'nature') return 'bg-forest-dark text-white font-medium';
-                    if (filter.id === 'city') return 'bg-ocean-dark text-white font-medium';
+                    if (filter.id === 'beach')
+                      return 'bg-sunset text-white font-medium';
+                    if (filter.id === 'mountain')
+                      return 'bg-forest text-white font-medium';
+                    if (filter.id === 'nature')
+                      return 'bg-forest-dark text-white font-medium';
+                    if (filter.id === 'city')
+                      return 'bg-ocean-dark text-white font-medium';
                     return 'bg-sand-dark text-white font-medium';
                   };
 
                   const getBorderColor = () => {
-                    if (filter.id === 'beach') return 'border-sunset hover:bg-sunset/20 text-sunset hover:text-sunset-dark font-medium';
-                    if (filter.id === 'mountain') return 'border-forest hover:bg-forest/20 text-forest hover:text-forest-dark font-medium';
-                    if (filter.id === 'nature') return 'border-forest-dark hover:bg-forest-dark/20 text-forest-dark hover:text-forest-dark font-medium';
-                    if (filter.id === 'city') return 'border-ocean-dark hover:bg-ocean-dark/20 text-ocean-dark hover:text-ocean-dark font-medium';
+                    if (filter.id === 'beach')
+                      return 'border-sunset hover:bg-sunset/20 text-sunset hover:text-sunset-dark font-medium';
+                    if (filter.id === 'mountain')
+                      return 'border-forest hover:bg-forest/20 text-forest hover:text-forest-dark font-medium';
+                    if (filter.id === 'nature')
+                      return 'border-forest-dark hover:bg-forest-dark/20 text-forest-dark hover:text-forest-dark font-medium';
+                    if (filter.id === 'city')
+                      return 'border-ocean-dark hover:bg-ocean-dark/20 text-ocean-dark hover:text-ocean-dark font-medium';
                     return 'border-sand-dark hover:bg-sand-dark/20 text-sand-dark hover:text-sand-dark font-medium';
                   };
 
@@ -230,14 +248,20 @@ export function ProfileSavedPlaces({ user, userInfo, loading }: ProfileSavedPlac
                       className="z-10"
                     >
                       <Button
-                        variant={activeFilter === filter.id ? 'default' : 'outline'}
+                        variant={
+                          activeFilter === filter.id ? 'default' : 'outline'
+                        }
                         size="sm"
                         className={cn(
                           'rounded-full flex items-center gap-1.5 transition-all duration-300 shadow-sm',
-                          activeFilter === filter.id ? getColorClass() : getBorderColor()
+                          activeFilter === filter.id
+                            ? getColorClass()
+                            : getBorderColor()
                         )}
                         onClick={() =>
-                          setActiveFilter(activeFilter === filter.id ? null : filter.id)
+                          setActiveFilter(
+                            activeFilter === filter.id ? null : filter.id
+                          )
                         }
                       >
                         <filter.icon className="h-3.5 w-3.5" />
@@ -271,11 +295,7 @@ export function ProfileSavedPlaces({ user, userInfo, loading }: ProfileSavedPlac
       {filteredPlaces.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredPlaces.map((place, index) => (
-            <motion.div
-              key={place.id}
-              variants={itemVariants}
-              custom={index}
-            >
+            <motion.div key={place.id} variants={itemVariants} custom={index}>
               <SavedPlaceCard place={place} />
             </motion.div>
           ))}
@@ -345,13 +365,17 @@ function SavedPlaceCard({ place }: SavedPlaceCardProps) {
   // Format saved date
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
   };
 
   return (
     <motion.div
       whileHover={{ y: -5 }}
-      transition={{ type: "spring", stiffness: 400, damping: 17 }}
+      transition={{ type: 'spring', stiffness: 400, damping: 17 }}
     >
       <Card className="overflow-hidden group border-muted/40 bg-gradient-to-b from-background to-background/95 backdrop-blur-sm shadow-md transition-all duration-300 hover:shadow-xl py-0">
         {/* Place Image */}
@@ -360,7 +384,8 @@ function SavedPlaceCard({ place }: SavedPlaceCardProps) {
             className={cn(
               'absolute inset-0 flex items-center justify-center bg-gradient-to-tr',
               getGradient()
-            )}>
+            )}
+          >
             {/* Decorative pattern overlay */}
             <div className="absolute inset-0 bg-[url('/images/roamance-logo-no-text.png')] bg-repeat-space bg-contain opacity-10 mix-blend-overlay" />
 
@@ -396,9 +421,14 @@ function SavedPlaceCard({ place }: SavedPlaceCardProps) {
 
           {/* Saved date badge */}
           <div className="absolute bottom-3 left-3">
-            <Badge variant="outline" className="bg-black/50 text-white border-white/30 flex items-center gap-1.5 rounded-full backdrop-blur-sm shadow-sm">
+            <Badge
+              variant="outline"
+              className="bg-black/50 text-white border-white/30 flex items-center gap-1.5 rounded-full backdrop-blur-sm shadow-sm"
+            >
               <Calendar className="h-3 w-3" />
-              <span className="text-xs font-medium">Saved {formatDate(place.saved)}</span>
+              <span className="text-xs font-medium">
+                Saved {formatDate(place.saved)}
+              </span>
             </Badge>
           </div>
 
@@ -534,10 +564,7 @@ function EmptyState({
       </p>
 
       {(searchTerm || activeFilter) && (
-        <motion.div
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.98 }}
-        >
+        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }}>
           <Button
             onClick={onClear}
             variant="outline"
@@ -550,10 +577,7 @@ function EmptyState({
       )}
 
       {!searchTerm && !activeFilter && (
-        <motion.div
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.98 }}
-        >
+        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }}>
           <Button
             variant="default"
             className="flex items-center gap-2 bg-gradient-to-r from-ocean to-ocean-dark hover:opacity-90 transition-all duration-300 text-white shadow-md"
