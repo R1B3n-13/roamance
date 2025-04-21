@@ -20,8 +20,7 @@ public class UserUtil {
   }
 
   public UUID getAuthenticatedUserId() {
-    User user = getAuthenticatedUser();
-    return user != null ? user.getId() : null;
+    return getAuthenticatedUser().getId();
   }
 
   public User getAuthenticatedUser() {
