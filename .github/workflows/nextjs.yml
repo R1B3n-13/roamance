@@ -27,16 +27,15 @@ concurrency:
   group: "pages"
   cancel-in-progress: false
 
-# 📂 Default working directory
-defaults:
-  run:
-    working-directory: ${{ env.WORKSPACE_PATH }}
-
 # 📋 Jobs configuration
 jobs:
   # 🛠️ Build job
   build:
     runs-on: ubuntu-latest
+    # Define defaults for run steps within this job
+    defaults:
+      run:
+        working-directory: ${{ env.WORKSPACE_PATH }}
     env:
       # 🔒 Environment secrets
       NEXT_PUBLIC_API_URL: ${{ secrets.API_URL }}
