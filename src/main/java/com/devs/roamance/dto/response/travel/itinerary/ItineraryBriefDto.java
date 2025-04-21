@@ -15,7 +15,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ItineraryBriefDto extends AuditDto {
+public class ItineraryBriefDto {
 
   private UUID id;
   private String title;
@@ -31,4 +31,6 @@ public class ItineraryBriefDto extends AuditDto {
   private BigDecimal totalCost;
 
   private UserDto user;
+
+  private AuditDto audit = new AuditDto();
 }

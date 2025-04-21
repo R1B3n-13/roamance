@@ -16,7 +16,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ActivityDto extends AuditDto {
+public class ActivityDto {
 
   private UUID id;
   private LocationResponseDto location;
@@ -34,4 +34,6 @@ public class ActivityDto extends AuditDto {
 
   private String note;
   private BigDecimal cost;
+
+  private AuditDto audit = new AuditDto();
 }

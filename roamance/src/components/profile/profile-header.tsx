@@ -16,7 +16,7 @@ import { cn } from '@/lib/utils';
 import { User, UserInfo } from '@/types';
 import { getDateParts, getMonthName } from '@/utils/format';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Calendar, Camera, Home } from 'lucide-react';
+import { ArrowLeft, Calendar, Camera, Home, LogOut } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { toast } from 'sonner';
@@ -24,6 +24,7 @@ import { ThemeToggle } from '@/components/common/theme-toggle';
 import { FileUploader } from '@/components/common/file-uploader';
 import { userService } from '@/service/user-service';
 import { CloudinaryUploadResult } from '@/service/cloudinary-service';
+import { authService } from '@/service/auth-service';
 
 interface ProfileHeaderProps {
   user: User | null;
@@ -64,9 +65,8 @@ export function ProfileHeader({
     try {
       setIsUploading(true);
 
-      // Update user info with new profile image
-      await userService.updateUserInfo({
-        ...userInfo,
+      // Update basic user profile with new profile image
+      await userService.updateUserProfile({
         profile_image: result.url,
       });
 
@@ -166,6 +166,18 @@ export function ProfileHeader({
     console.error('Cover upload failed:', error);
     toast.error('Cover image upload failed: ' + error.message);
     setCoverUploadSuccessful(false);
+  };
+
+  // Add logout handler
+  const handleLogout = () => {
+    try {
+      authService.logout();
+      toast.success('Successfully logged out');
+      router.push(routes.signIn.href);
+    } catch (error) {
+      console.error('Logout failed:', error);
+      toast.error('Failed to log out');
+    }
   };
 
   return (
@@ -312,7 +324,7 @@ export function ProfileHeader({
               whileHover={{ scale: 1.05 }}
               transition={{ type: 'spring', stiffness: 400, damping: 10 }}
               // Adjusted size for responsiveness
-              className="h-7 w-7 sm:h-9 sm:w-9 rounded-full bg-white/30 hover:bg-white/40 backdrop-blur-md border border-white/30 transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center overflow-hidden"
+              className="h-7 w-7 sm:h-9 sm:w-9 rounded-full bg-white/30 hover:bg-white/50 backdrop-blur-md border border-white/30 transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center overflow-hidden"
             >
               <ThemeToggle className="h-full w-full text-white bg-transparent hover:bg-transparent border-none shadow-none" />
             </motion.div>
@@ -325,7 +337,7 @@ export function ProfileHeader({
                 variant="ghost"
                 size="icon"
                 // Adjusted size for responsiveness
-                className="h-7 w-7 sm:h-9 sm:w-9 rounded-full bg-white/30 hover:bg-white/40 backdrop-blur-md text-white border border-white/30 transition-all duration-300 shadow-md hover:shadow-lg"
+                className="h-7 w-7 sm:h-9 sm:w-9 rounded-full bg-white/30 hover:bg-white/50 backdrop-blur-md text-white border border-white/30 transition-all duration-300 shadow-md hover:shadow-lg"
                 onClick={() => router.back()}
                 aria-label="Go back"
               >
@@ -342,12 +354,28 @@ export function ProfileHeader({
                 variant="ghost"
                 size="icon"
                 // Adjusted size for responsiveness
-                className="h-7 w-7 sm:h-9 sm:w-9 rounded-full bg-white/30 hover:bg-white/40 backdrop-blur-md text-white border border-white/30 transition-all duration-300 shadow-md hover:shadow-lg"
+                className="h-7 w-7 sm:h-9 sm:w-9 rounded-full bg-white/30 hover:bg-white/50 backdrop-blur-md text-white border border-white/30 transition-all duration-300 shadow-md hover:shadow-lg"
                 onClick={() => router.push(routes.home.href)}
                 aria-label="Go to homepage"
               >
                 {/* Adjusted icon size */}
                 <Home className="h-3 w-3 sm:h-4 sm:w-4" />
+              </Button>
+            </motion.div>
+
+            {/* Add Logout Button */}
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 10 }}
+            >
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7 sm:h-9 sm:w-9 rounded-full bg-white/30 hover:bg-red-500/50 backdrop-blur-md text-white border border-white/30 transition-all duration-300 shadow-md hover:shadow-lg"
+                onClick={handleLogout}
+                aria-label="Log out"
+              >
+                <LogOut className="h-3 w-3 sm:h-4 sm:w-4" />
               </Button>
             </motion.div>
           </div>
@@ -372,7 +400,7 @@ export function ProfileHeader({
                 {/* Adjusted avatar size for responsiveness */}
                 <Avatar className="w-24 h-24 sm:w-28 sm:h-28 md:w-40 md:h-40 border-4 border-background shadow-xl ring-2 ring-muted/20 ring-offset-2 ring-offset-background transition-all duration-500">
                   <AvatarImage
-                    src={userInfo?.profile_image || undefined}
+                    src={user?.profile_image || undefined}
                     alt={user?.name || 'User'}
                     className="object-cover"
                   />
@@ -470,7 +498,7 @@ export function ProfileHeader({
                     <Calendar className="h-3 w-3 sm:h-3.5 sm:w-3.5 group-hover:animate-pulse" />
                     <span className="font-medium">
                       Joined{' '}
-                      {`${getMonthName(getDateParts(`${user?.created_at}`).month)} ${getDateParts(`${user?.created_at}`).year}` ||
+                      {`${getMonthName(getDateParts(user?.audit.created_at || '').month)} ${getDateParts(user?.audit.created_at || '').year}` ||
                         'April 20XX'}
                     </span>
                   </Badge>

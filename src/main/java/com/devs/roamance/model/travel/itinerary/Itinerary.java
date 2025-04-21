@@ -2,7 +2,7 @@ package com.devs.roamance.model.travel.itinerary;
 
 import com.devs.roamance.exception.DateOutOfRangeException;
 import com.devs.roamance.exception.InvalidDateTimeException;
-import com.devs.roamance.model.BaseEntity;
+import com.devs.roamance.model.Audit;
 import com.devs.roamance.model.travel.Location;
 import com.devs.roamance.model.user.User;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
@@ -20,6 +20,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.Formula;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @Table(name = "itineraries")
@@ -28,7 +29,8 @@ import org.hibernate.annotations.Formula;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
-public class Itinerary extends BaseEntity {
+@EntityListeners(AuditingEntityListener.class)
+public class Itinerary {
 
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
@@ -54,16 +56,16 @@ public class Itinerary extends BaseEntity {
 
   @Formula(
       """
-  (
-    SELECT COALESCE(SUM(
-      (SELECT COALESCE(SUM(a.cost), 0)
-       FROM activities a
-       WHERE a.day_plan_id = dp.id)
-    ), 0)
-    FROM day_plans dp
-    WHERE dp.itinerary_id = id
-  )
-  """)
+      (
+        SELECT COALESCE(SUM(
+          (SELECT COALESCE(SUM(a.cost), 0)
+           FROM activities a
+           WHERE a.day_plan_id = dp.id)
+        ), 0)
+        FROM day_plans dp
+        WHERE dp.itinerary_id = id
+      )
+      """)
   private BigDecimal totalCost = BigDecimal.ZERO;
 
   @JsonIgnore
@@ -81,6 +83,8 @@ public class Itinerary extends BaseEntity {
       orphanRemoval = true)
   @OrderBy("date ASC")
   private List<DayPlan> dayPlans = new ArrayList<>();
+
+  @Embedded private Audit audit = new Audit();
 
   @PrePersist
   @PreUpdate

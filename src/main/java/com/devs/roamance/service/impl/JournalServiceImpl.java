@@ -30,23 +30,21 @@ import com.devs.roamance.util.UserUtil;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 public class JournalServiceImpl implements JournalService {
-  private static final Logger logger = LoggerFactory.getLogger(JournalServiceImpl.class);
 
   private final JournalRepository journalRepository;
   private final UserRepository userRepository;
@@ -68,14 +66,14 @@ public class JournalServiceImpl implements JournalService {
   @Transactional
   public JournalResponseDto create(JournalCreateRequestDto requestDto) {
     try {
-      logger.info(
+      log.info(
           "Creating journal with title: '{}' and {} subsections",
           requestDto.getTitle(),
           requestDto.getSubsections().size());
 
       Journal journal = modelMapper.map(requestDto, Journal.class);
 
-      logger.info("Creating journal with title: '{}'", journal);
+      log.info("Creating journal with title: '{}'", journal);
 
       if (!requestDto.getSubsections().isEmpty()) {
         for (SubsectionCreateRequestDto subsectionDto : requestDto.getSubsections()) {
@@ -95,7 +93,7 @@ public class JournalServiceImpl implements JournalService {
               };
           journal.addSubsection(subsection);
         }
-        logger.info(
+        log.info(
             "Established bidirectional relationship for {} subsections",
             journal.getSubsections().size());
       }
@@ -128,8 +126,7 @@ public class JournalServiceImpl implements JournalService {
   public JournalListResponseDto getAll(
       int pageNumber, int pageSize, String sortBy, String sortDir) {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    boolean isAdmin =
-        authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"));
+    boolean isAdmin = userUtil.isAuthenticatedUserAdmin();
 
     Pageable pageable =
         PageRequest.of(
@@ -138,16 +135,16 @@ public class JournalServiceImpl implements JournalService {
     Page<Journal> journalPage;
 
     if (isAdmin) {
-      logger.info("User has ADMIN role, returning all journals with pagination");
+      log.info("User has ADMIN role, returning all journals with pagination");
       journalPage = journalRepository.findAll(pageable);
     } else {
       String email = authentication.getName();
       Optional<UUID> userId = userRepository.findByEmail(email).map(User::getId);
 
-      logger.info("User has USER role, returning only their journals, userId: {}", userId);
+      log.info("User has USER role, returning only their journals, userId: {}", userId);
 
       if (userId.isPresent()) {
-        journalPage = journalRepository.findAllByCreatedBy(userId.get(), pageable);
+        journalPage = journalRepository.findAllByAudit_CreatedBy(userId.get(), pageable);
       } else {
         return new JournalListResponseDto(
             200, true, ResponseMessage.JOURNALS_FETCH_SUCCESS, List.of());
@@ -174,27 +171,10 @@ public class JournalServiceImpl implements JournalService {
 
   @Override
   public JournalResponseDto get(UUID id) {
-    logger.info("Fetching journal with id: {} using JOIN FETCH for subsections", id);
-    Journal journal =
-        journalRepository
-            .findById(id)
-            .orElseThrow(
-                () ->
-                    new ResourceNotFoundException(
-                        String.format(ResponseMessage.JOURNAL_NOT_FOUND, id)));
+    log.info("Fetching journal with id: {} using JOIN FETCH for subsections", id);
+    Journal journal = findJournalByAccess(id);
 
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    User currentUser = userUtil.getAuthenticatedUser();
-    boolean isAdmin =
-        authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"));
-
-    if (!isAdmin && !journal.getUser().getId().equals(currentUser.getId())) {
-      logger.warn(
-          "User {} attempted to access journal {} without permission", currentUser.getEmail(), id);
-      throw new UnauthorizedAccessException(ResponseMessage.JOURNAL_ACCESS_DENIED);
-    }
-
-    logger.info(
+    log.info(
         "Successfully fetched journal with title: '{}' and {} subsections",
         journal.getTitle(),
         journal.getSubsections().size());
@@ -206,14 +186,14 @@ public class JournalServiceImpl implements JournalService {
 
   @Override
   @Transactional
-  public JournalResponseDto update(JournalUpdateRequestDto requestDto, UUID id) {
-    Journal journal = modelMapper.map(get(id).getData(), Journal.class);
+  public JournalResponseDto update(JournalUpdateRequestDto updateRequestDto, UUID id) {
+    Journal journal = findJournalByAccess(id);
 
-    journal.setTitle(requestDto.getTitle());
-    journal.setDescription(requestDto.getDescription());
+    journal.setTitle(updateRequestDto.getTitle());
+    journal.setDescription(updateRequestDto.getDescription());
 
-    if (requestDto.getDestination() != null) {
-      journal.setDestination(modelMapper.map(requestDto.getDestination(), Location.class));
+    if (updateRequestDto.getDestination() != null) {
+      journal.setDestination(modelMapper.map(updateRequestDto.getDestination(), Location.class));
     }
 
     Journal savedJournal = journalRepository.save(journal);
@@ -228,10 +208,28 @@ public class JournalServiceImpl implements JournalService {
   @Override
   @Transactional
   public BaseResponseDto delete(UUID id) {
-    Journal journal = modelMapper.map(get(id).getData(), Journal.class);
+    Journal journal = findJournalByAccess(id);
 
     journalRepository.delete(journal);
 
     return new BaseResponseDto(200, true, ResponseMessage.JOURNAL_DELETE_SUCCESS);
+  }
+
+  private Journal findJournalByAccess(UUID id) {
+    Journal journal =
+        journalRepository
+            .findById(id)
+            .orElseThrow(
+                () ->
+                    new ResourceNotFoundException(
+                        String.format(ResponseMessage.JOURNAL_NOT_FOUND, id)));
+    User currentUser = userUtil.getAuthenticatedUser();
+    boolean isAdmin = userUtil.isAuthenticatedUserAdmin();
+    if (!isAdmin && !journal.getUser().getId().equals(currentUser.getId())) {
+      log.warn(
+          "User {} attempted to access journal {} without permission", currentUser.getEmail(), id);
+      throw new UnauthorizedAccessException(ResponseMessage.JOURNAL_ACCESS_DENIED);
+    }
+    return journal;
   }
 }

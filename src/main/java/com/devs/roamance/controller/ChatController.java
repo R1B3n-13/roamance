@@ -41,7 +41,7 @@ public class ChatController {
   public ResponseEntity<ChatListResponseDto> getChatsForCurrentUser(
       @RequestParam(defaultValue = "0") Integer pageNumber,
       @RequestParam(defaultValue = "20") Integer pageSize,
-      @RequestParam(defaultValue = "lastModifiedAt") String sortBy,
+      @RequestParam(defaultValue = "audit.lastModifiedAt") String sortBy,
       @RequestParam(defaultValue = "desc") String sortDir) {
 
     int[] validatedParams = PaginationSortingUtil.validatePaginationParams(pageNumber, pageSize);

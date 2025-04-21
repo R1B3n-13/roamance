@@ -15,7 +15,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class MessageDto extends AuditDto {
+public class MessageDto {
 
   private UUID id;
   private String text;
@@ -27,4 +27,6 @@ public class MessageDto extends AuditDto {
   private List<String> videoPaths = new ArrayList<>();
 
   private UserDto user;
+
+  private AuditDto audit = new AuditDto();
 }

@@ -46,7 +46,8 @@ public class AuthTokenFilter extends OncePerRequestFilter {
     String contextPath = request.getContextPath();
 
     if (request.getRequestURI().startsWith(contextPath + "/auth")
-        || request.getRequestURI().equals(contextPath + "/users/register")) {
+        || ("POST".equalsIgnoreCase(request.getMethod())
+            && request.getRequestURI().equals(contextPath + "/users"))) {
 
       filterChain.doFilter(request, response);
 

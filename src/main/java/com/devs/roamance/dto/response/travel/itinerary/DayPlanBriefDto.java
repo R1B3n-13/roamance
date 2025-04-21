@@ -14,11 +14,13 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class DayPlanBriefDto extends AuditDto {
+public class DayPlanBriefDto {
 
   private UUID id;
   private LocalDate date;
 
   @JsonProperty("total_cost")
   private BigDecimal totalCost;
+
+  private AuditDto audit = new AuditDto();
 }

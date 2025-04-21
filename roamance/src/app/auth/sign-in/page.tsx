@@ -11,7 +11,7 @@ import { LoadingButton } from '@/components/common/loading-button';
 import { routes } from '@/constants';
 import { authService } from '@/service/auth-service';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Lock, Mail, RefreshCw, User } from 'lucide-react';
+import { Lock, Mail, User } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useRef, useState } from 'react';
@@ -50,15 +50,6 @@ export default function SignIn() {
     },
   });
 
-  const retryLogin = () => {
-    setIsLoading(false);
-    setError('');
-    // Focus on email field
-    if (emailRef.current) {
-      emailRef.current.focus();
-    }
-  };
-
   const onSubmit = async (data: SignInFormValues) => {
     setIsLoading(true);
     setError('');
@@ -69,13 +60,13 @@ export default function SignIn() {
       toast.success('Login successful', {
         description: (
           <p className="text-gray-600 dark:text-gray-400">
-            Redirecting you to your dashboard...
+            Redirecting you to your profile...
           </p>
         ),
         action: {
           label: (
             <div className="flex items-center gap-2">
-              <span>Dashboard</span>
+              <span>Profile</span>
             </div>
           ),
           onClick: () => router.push(routes.profile.href),
@@ -85,7 +76,6 @@ export default function SignIn() {
         duration: 4000,
       });
 
-      // Redirect to profile page
       router.push(routes.profile.href);
     } catch (err) {
       const errorMessage =
@@ -93,6 +83,7 @@ export default function SignIn() {
           ? err.message
           : 'Network error occurred. Please check your connection and try again.';
       setError(errorMessage);
+
       toast.error('Login error', {
         description: (
           <p className="text-gray-500 dark:text-gray-400">{errorMessage}</p>
@@ -100,15 +91,19 @@ export default function SignIn() {
         action: {
           label: (
             <div className="flex items-center gap-2">
-              <span>Try again</span>
-              <RefreshCw width="16" height="16" />
+              <span>Create account</span>
             </div>
           ),
-          onClick: retryLogin,
+          onClick: () => router.push(routes.signUp.href),
         },
         className:
           'bg-white dark:bg-slate-900 border border-red-100 dark:border-red-800 shadow-lg',
+        duration: 5000,
       });
+
+      setTimeout(() => {
+        router.push(routes.signUp.href);
+      }, 3000);
     } finally {
       setIsLoading(false);
     }

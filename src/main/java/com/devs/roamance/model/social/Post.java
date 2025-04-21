@@ -1,6 +1,6 @@
 package com.devs.roamance.model.social;
 
-import com.devs.roamance.model.BaseEntity;
+import com.devs.roamance.model.Audit;
 import com.devs.roamance.model.travel.Location;
 import com.devs.roamance.model.user.User;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
@@ -10,6 +10,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import java.util.*;
 import lombok.*;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @Table(name = "posts")
@@ -18,7 +19,8 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
-public class Post extends BaseEntity {
+@EntityListeners(AuditingEntityListener.class)
+public class Post {
 
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
@@ -73,5 +75,7 @@ public class Post extends BaseEntity {
       fetch = FetchType.LAZY,
       cascade = {CascadeType.ALL},
       orphanRemoval = true)
-  private List<Comment> comments;
+  private List<Comment> comments = new ArrayList<>();
+
+  @Embedded private Audit audit = new Audit();
 }

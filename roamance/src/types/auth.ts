@@ -5,6 +5,10 @@ export interface UserAuthForm {
   password: string;
 }
 
+export interface RefreshTokenRequest {
+  refresh_token: string;
+}
+
 export interface UserRegisterForm extends UserAuthForm {
   name: string;
   confirmPassword: string;

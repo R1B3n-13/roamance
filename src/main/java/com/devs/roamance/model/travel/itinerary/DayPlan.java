@@ -1,7 +1,7 @@
 package com.devs.roamance.model.travel.itinerary;
 
 import com.devs.roamance.exception.ScheduleCollisionException;
-import com.devs.roamance.model.BaseEntity;
+import com.devs.roamance.model.Audit;
 import com.devs.roamance.model.user.User;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -20,6 +20,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.Formula;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @Table(
@@ -30,7 +31,8 @@ import org.hibernate.annotations.Formula;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
-public class DayPlan extends BaseEntity {
+@EntityListeners(AuditingEntityListener.class)
+public class DayPlan {
 
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
@@ -71,11 +73,14 @@ public class DayPlan extends BaseEntity {
   @JoinColumn(name = "user_id", referencedColumnName = "id")
   private User user;
 
+  @Embedded private Audit audit = new Audit();
+
   public void validateNoTimeCollisions(Activity currentActivity) {
 
     if (currentActivity.getStartTime() == null || currentActivity.getEndTime() == null) return;
 
-    // need to fetch activities EAGERLY with DayPlan using entity graph to avoid n+1 problem
+    // need to fetch activities EAGERLY with DayPlan using entity graph to avoid n+1
+    // problem
     for (Activity otherActivity : activities) {
 
       if (currentActivity.getId().equals(otherActivity.getId())

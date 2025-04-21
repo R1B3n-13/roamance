@@ -8,17 +8,24 @@ import com.devs.roamance.dto.response.travel.journal.JournalResponseDto;
 import com.devs.roamance.service.JournalService;
 import com.devs.roamance.util.PaginationSortingUtil;
 import java.util.UUID;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
+@Slf4j
 @RestController
 @RequestMapping("/travel/journals")
 public class JournalController {
 
-  private static final Logger logger = LoggerFactory.getLogger(JournalController.class);
   private final JournalService journalService;
 
   public JournalController(JournalService journalService) {
@@ -32,7 +39,7 @@ public class JournalController {
       @RequestParam(defaultValue = "id") String sortBy,
       @RequestParam(defaultValue = "asc") String sortDir) {
 
-    logger.info("Getting journals based on user role with pagination");
+    log.info("Getting journals based on user role with pagination");
 
     int[] validatedParams = PaginationSortingUtil.validatePaginationParams(pageNumber, pageSize);
 
@@ -45,15 +52,15 @@ public class JournalController {
   @GetMapping("/{id}")
   public ResponseEntity<JournalResponseDto> getJournalById(@PathVariable UUID id) {
     JournalResponseDto journal = journalService.get(id);
-    logger.info(
+    log.info(
         "Retrieved journal with id: {} and title: {}",
         journal.getData().getId(),
         journal.getData().getTitle());
-    logger.info(
+    log.info(
         "Journal has {} subsections fetched via JOIN FETCH",
         journal.getData().getSubsections().size());
     if (!journal.getData().getSubsections().isEmpty()) {
-      logger.info(
+      log.info(
           "First subsection title: {}", journal.getData().getSubsections().getFirst().getTitle());
     }
 
@@ -63,7 +70,7 @@ public class JournalController {
   @PostMapping
   public ResponseEntity<JournalResponseDto> createJournal(
       @RequestBody JournalCreateRequestDto journal) {
-    logger.info("Creating journal with title: '{}'", journal.getTitle());
+    log.info("Creating journal with title: '{}'", journal.getTitle());
     JournalResponseDto createdJournal = journalService.create(journal);
 
     return ResponseEntity.status(HttpStatus.CREATED).body(createdJournal);

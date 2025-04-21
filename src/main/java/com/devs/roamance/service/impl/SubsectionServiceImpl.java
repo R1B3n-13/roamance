@@ -31,18 +31,17 @@ import com.devs.roamance.util.PaginationSortingUtil;
 import com.devs.roamance.util.UserUtil;
 import java.util.List;
 import java.util.UUID;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 public class SubsectionServiceImpl implements SubsectionService {
-  private static final Logger logger = LoggerFactory.getLogger(SubsectionServiceImpl.class);
 
   private final SubsectionRepository subsectionRepository;
   private final JournalRepository journalRepository;
@@ -62,7 +61,7 @@ public class SubsectionServiceImpl implements SubsectionService {
 
   @Override
   public SubsectionResponseDto create(SubsectionCreateRequestDto requestDto) {
-    logger.info(
+    log.info(
         "Creating subsection with title: '{}' for journal with ID: {}",
         requestDto.getTitle(),
         requestDto.getJournalId());
@@ -83,12 +82,12 @@ public class SubsectionServiceImpl implements SubsectionService {
 
     Subsection savedSubsection = subsectionRepository.save(subsection);
 
-    logger.info(
+    log.info(
         "Successfully created subsection with ID: {} linked to journal: {}",
         savedSubsection.getId(),
         journal.getTitle());
 
-    SubsectionDetailDto detailDto = mapToSubsectionDetailDto(savedSubsection);
+    SubsectionDetailDto detailDto = modelMapper.map(savedSubsection, SubsectionDetailDto.class);
 
     return new SubsectionResponseDto(
         201, true, ResponseMessage.SUBSECTION_CREATE_SUCCESS, detailDto);
@@ -97,7 +96,7 @@ public class SubsectionServiceImpl implements SubsectionService {
   @Override
   public SubsectionListResponseDto getAll(
       int pageNumber, int pageSize, String sortBy, String sortDir) {
-    logger.info(
+    log.info(
         "Fetching all subsections with pagination - page: {}, size: {}, sortBy: {}, sortDir: {}",
         pageNumber,
         pageSize,
@@ -111,7 +110,7 @@ public class SubsectionServiceImpl implements SubsectionService {
             pageNumber, pageSize, Sort.by(PaginationSortingUtil.getSortDirection(sortDir), sortBy));
 
     Page<Subsection> subsectionPage =
-        subsectionRepository.findAllByJournalCreatedBy(authenticatedUser.getId(), pageable);
+        subsectionRepository.findAllByJournalAuditCreatedBy(authenticatedUser.getId(), pageable);
 
     List<SubsectionBriefDto> subsections =
         subsectionPage.getContent().stream()
@@ -124,7 +123,7 @@ public class SubsectionServiceImpl implements SubsectionService {
                 })
             .toList();
 
-    logger.info(
+    log.info(
         "Successfully fetched {} subsections for user {}",
         subsections.size(),
         authenticatedUser.getId());
@@ -134,7 +133,7 @@ public class SubsectionServiceImpl implements SubsectionService {
 
   @Override
   public SubsectionResponseDto get(UUID id) {
-    logger.info("Fetching subsection with id: {}", id);
+    log.info("Fetching subsection with id: {}", id);
     Subsection subsection =
         subsectionRepository
             .findById(id)
@@ -146,17 +145,17 @@ public class SubsectionServiceImpl implements SubsectionService {
     Journal journal = subsection.getJournal();
     validateUserAccess(journal, "access", id);
 
-    logger.info("Successfully fetched subsection with title: '{}'", subsection.getTitle());
+    log.info("Successfully fetched subsection with title: '{}'", subsection.getTitle());
 
-    SubsectionDetailDto detailDto = mapToSubsectionDetailDto(subsection);
+    SubsectionDetailDto detailDto = modelMapper.map(subsection, SubsectionDetailDto.class);
 
     return new SubsectionResponseDto(
         200, true, ResponseMessage.SUBSECTION_FETCH_SUCCESS, detailDto);
   }
 
   @Override
-  public SubsectionResponseDto update(SubsectionUpdateRequestDto subsectionDetails, UUID id) {
-    logger.info("Updating subsection with id: {}", id);
+  public SubsectionResponseDto update(SubsectionUpdateRequestDto updateRequestDto, UUID id) {
+    log.info("Updating subsection with id: {}", id);
 
     Subsection subsection =
         subsectionRepository
@@ -169,14 +168,14 @@ public class SubsectionServiceImpl implements SubsectionService {
     Journal journal = subsection.getJournal();
     validateUserAccess(journal, "update", id);
 
-    subsection.setTitle(subsectionDetails.getTitle());
+    subsection.setTitle(updateRequestDto.getTitle());
 
-    updateSpecificFields(subsection, subsectionDetails);
+    updateSpecificFields(subsection, updateRequestDto);
 
     Subsection savedSubsection = subsectionRepository.save(subsection);
-    logger.info("Successfully updated subsection with id: {}", id);
+    log.info("Successfully updated subsection with id: {}", id);
 
-    SubsectionDetailDto detailDto = mapToSubsectionDetailDto(savedSubsection);
+    SubsectionDetailDto detailDto = modelMapper.map(savedSubsection, SubsectionDetailDto.class);
 
     return new SubsectionResponseDto(
         200, true, ResponseMessage.SUBSECTION_UPDATE_SUCCESS, detailDto);
@@ -184,7 +183,7 @@ public class SubsectionServiceImpl implements SubsectionService {
 
   @Override
   public BaseResponseDto delete(UUID id) {
-    logger.info("Deleting subsection with id: {}", id);
+    log.info("Deleting subsection with id: {}", id);
 
     Subsection subsection =
         subsectionRepository
@@ -198,20 +197,20 @@ public class SubsectionServiceImpl implements SubsectionService {
 
     validateUserAccess(journal, "delete", id);
 
-    logger.info("Detaching subsection from journal with ID: {}", journal.getId());
+    log.info("Detaching subsection from journal with ID: {}", journal.getId());
     journal.removeSubsection(subsection);
     subsection.setJournal(null);
 
     subsectionRepository.delete(subsection);
 
-    logger.info("Successfully deleted subsection with id: {}", id);
+    log.info("Successfully deleted subsection with id: {}", id);
     return new BaseResponseDto(200, true, ResponseMessage.SUBSECTION_DELETE_SUCCESS);
   }
 
   private void validateUserAccess(Journal journal, String operation, UUID resourceId) {
     User authenticatedUser = userUtil.getAuthenticatedUser();
-    if (!journal.getCreatedBy().equals(authenticatedUser.getId())) {
-      logger.error(
+    if (!journal.getAudit().getCreatedBy().equals(authenticatedUser.getId())) {
+      log.error(
           "User {} not authorized to {} resource {}",
           authenticatedUser.getId(),
           operation,
@@ -236,9 +235,9 @@ public class SubsectionServiceImpl implements SubsectionService {
   }
 
   private void updateSpecificFields(
-      Subsection subsection, SubsectionUpdateRequestDto subsectionDetails) {
+      Subsection subsection, SubsectionUpdateRequestDto updateRequestDto) {
     if (subsection instanceof ActivitySubsection activitySubsection
-        && subsectionDetails instanceof ActivitySubsectionUpdateRequestDto activityDetails) {
+        && updateRequestDto instanceof ActivitySubsectionUpdateRequestDto activityDetails) {
 
       activitySubsection.setActivityName(activityDetails.getActivityName());
       if (activityDetails.getLocation() != null) {
@@ -246,18 +245,18 @@ public class SubsectionServiceImpl implements SubsectionService {
             modelMapper.map(activityDetails.getLocation(), Location.class));
       }
     } else if (subsection instanceof SightseeingSubsection sightseeingSubsection
-        && subsectionDetails instanceof SightseeingSubsectionUpdateRequestDto sightseeingDetails) {
+        && updateRequestDto instanceof SightseeingSubsectionUpdateRequestDto sightseeingDetails) {
 
       if (sightseeingDetails.getLocation() != null) {
         sightseeingSubsection.setLocation(
             modelMapper.map(sightseeingDetails.getLocation(), Location.class));
       }
     } else if (subsection instanceof RouteSubsection routeSubsection
-        && subsectionDetails.getType() == SubsectionType.ROUTE) {
+        && updateRequestDto.getType() == SubsectionType.ROUTE) {
 
       try {
         RouteSubsectionUpdateRequestDto routeDetails =
-            modelMapper.map(subsectionDetails, RouteSubsectionUpdateRequestDto.class);
+            modelMapper.map(updateRequestDto, RouteSubsectionUpdateRequestDto.class);
         routeSubsection.setTotalTime(routeDetails.getTotalTime());
         routeSubsection.setTotalDistance(routeDetails.getTotalDistance());
         if (routeDetails.getLocations() != null && !routeDetails.getLocations().isEmpty()) {
@@ -268,27 +267,8 @@ public class SubsectionServiceImpl implements SubsectionService {
           routeSubsection.setLocations(locations);
         }
       } catch (Exception e) {
-        logger.error("Error mapping subsection details to RouteSubsectionUpdateRequestDto", e);
+        log.error("Error mapping subsection details to RouteSubsectionUpdateRequestDto", e);
       }
     }
-  }
-
-  private SubsectionDetailDto mapToSubsectionDetailDto(Subsection subsection) {
-    SubsectionDetailDto detailDto = new SubsectionDetailDto();
-    detailDto.setId(subsection.getId());
-    detailDto.setTitle(subsection.getTitle());
-    detailDto.setNotes(subsection.getNotes());
-    detailDto.setChecklists(subsection.getChecklists());
-    detailDto.setJournalId(subsection.getJournal().getId());
-
-    if (subsection instanceof ActivitySubsection) {
-      detailDto.setType(SubsectionType.ACTIVITY);
-    } else if (subsection instanceof SightseeingSubsection) {
-      detailDto.setType(SubsectionType.SIGHTSEEING);
-    } else if (subsection instanceof RouteSubsection) {
-      detailDto.setType(SubsectionType.ROUTE);
-    }
-
-    return detailDto;
   }
 }

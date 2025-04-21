@@ -13,7 +13,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CommentDto extends AuditDto {
+public class CommentDto {
 
   private UUID id;
   private String text;
@@ -25,4 +25,6 @@ public class CommentDto extends AuditDto {
   private String videoPath;
 
   private UserDto user;
+
+  private AuditDto audit = new AuditDto();
 }

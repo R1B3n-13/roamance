@@ -22,6 +22,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 import org.modelmapper.ModelMapper;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -37,6 +38,8 @@ public class UserPreferencesServiceImpl implements UserPreferencesService {
   private final ModelMapper modelMapper;
   private final UserUtil userUtil;
 
+  @Lazy private UserPreferencesService self;
+
   public UserPreferencesServiceImpl(
       UserPreferencesRepository userPreferencesRepository,
       UserRepository userRepository,
@@ -46,6 +49,7 @@ public class UserPreferencesServiceImpl implements UserPreferencesService {
     this.userRepository = userRepository;
     this.modelMapper = modelMapper;
     this.userUtil = userUtil;
+    this.self = this;
   }
 
   @Override
@@ -154,7 +158,7 @@ public class UserPreferencesServiceImpl implements UserPreferencesService {
   public UserPreferencesResponseDto updateByUserId(
       UserPreferencesRequestDto updateRequestDto, UUID userId) {
     UserPreferences preferences = findUserPreferencesByUserIdOrThrow(userId);
-    return update(updateRequestDto, preferences.getId());
+    return self.update(updateRequestDto, preferences.getId());
   }
 
   @Override
@@ -177,7 +181,7 @@ public class UserPreferencesServiceImpl implements UserPreferencesService {
   @Transactional
   public BaseResponseDto deleteByUserId(UUID userId) {
     UserPreferences preferences = findUserPreferencesByUserIdOrThrow(userId);
-    return delete(preferences.getId());
+    return self.delete(preferences.getId());
   }
 
   private void updateUserPreferencesProperties(

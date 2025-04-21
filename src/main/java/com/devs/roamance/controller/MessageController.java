@@ -36,7 +36,7 @@ public class MessageController {
       @PathVariable @NotNull UUID chatId,
       @RequestParam(defaultValue = "0") int pageNumber,
       @RequestParam(defaultValue = "50") int pageSize,
-      @RequestParam(defaultValue = "createdAt") String sortBy,
+      @RequestParam(defaultValue = "audit.createdAt") String sortBy,
       @RequestParam(defaultValue = "desc") String sortDir) {
 
     int[] validatedParams = PaginationSortingUtil.validatePaginationParams(pageNumber, pageSize);

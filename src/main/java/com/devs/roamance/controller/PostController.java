@@ -38,7 +38,7 @@ public class PostController {
   public ResponseEntity<PostListResponseDto> getAllPosts(
       @RequestParam(defaultValue = "0") int pageNumber,
       @RequestParam(defaultValue = "10") int pageSize,
-      @RequestParam(defaultValue = "createdAt") String sortBy,
+      @RequestParam(defaultValue = "audit.createdAt") String sortBy,
       @RequestParam(defaultValue = "desc") String sortDir) {
 
     int[] validatedParams = PaginationSortingUtil.validatePaginationParams(pageNumber, pageSize);
@@ -76,7 +76,7 @@ public class PostController {
       @PathVariable @NotNull UUID userId,
       @RequestParam(defaultValue = "0") int pageNumber,
       @RequestParam(defaultValue = "10") int pageSize,
-      @RequestParam(defaultValue = "createdAt") String sortBy,
+      @RequestParam(defaultValue = "audit.createdAt") String sortBy,
       @RequestParam(defaultValue = "desc") String sortDir) {
 
     int[] validatedParams = PaginationSortingUtil.validatePaginationParams(pageNumber, pageSize);

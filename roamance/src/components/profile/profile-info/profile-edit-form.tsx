@@ -40,7 +40,6 @@ export function ProfileEditForm({ user, userInfo, onCancel, onComplete }: Profil
     phone: userInfo?.phone || '',
     bio: userInfo?.bio || '',
     location: userInfo?.location || '',
-    website: userInfo?.website || '',
     birthday: userInfo?.birthday || '',
   });
 
@@ -61,7 +60,6 @@ export function ProfileEditForm({ user, userInfo, onCancel, onComplete }: Profil
         phone: userInfo.phone || '',
         bio: userInfo.bio || '',
         location: userInfo.location || '',
-        website: userInfo.website || '',
         birthday: userInfo.birthday || '',
       }));
     }
@@ -80,18 +78,23 @@ export function ProfileEditForm({ user, userInfo, onCancel, onComplete }: Profil
     try {
       setIsSaving(true);
 
-      // Extract user info data from form
+      // Extract profile and extended info data from form
+      const profileData: Partial<UserType> = {
+        name: formData.name,
+      };
       const userInfoData: Partial<UserInfo> = {
         phone: formData.phone,
         bio: formData.bio,
         location: formData.location,
-        website: formData.website,
         birthday: formData.birthday,
         user_id: user?.id,
       };
 
-      // Update user info using our service
-      await userService.updateUserInfo(userInfoData);
+      // Update basic profile and extended info in parallel
+      await Promise.all([
+        userService.updateUserProfile(profileData),
+        userService.updateUserInfo(userInfoData),
+      ]);
 
       toast.success('Your profile has been updated');
 
@@ -185,23 +188,6 @@ export function ProfileEditForm({ user, userInfo, onCancel, onComplete }: Profil
             onChange={handleChange}
             placeholder="New York, USA"
             className="border-muted/50 focus:border-forest focus:ring-1 focus:ring-forest/30 bg-background/80 backdrop-blur-sm transition-colors"
-          />
-        </motion.div>
-
-        <motion.div variants={itemVariants} className="space-y-2.5">
-          <Label
-            htmlFor="website"
-            className="text-sm font-medium text-muted-foreground"
-          >
-            Website
-          </Label>
-          <Input
-            id="website"
-            name="website"
-            value={formData.website}
-            onChange={handleChange}
-            placeholder="https://yourwebsite.com"
-            className="border-muted/50 focus:border-sand focus:ring-1 focus:ring-sand/30 bg-background/80 backdrop-blur-sm transition-colors"
           />
         </motion.div>
 

@@ -1,11 +1,12 @@
 package com.devs.roamance.model.user.preference;
 
-import com.devs.roamance.model.BaseEntity;
+import com.devs.roamance.model.AuditTime;
 import com.devs.roamance.model.user.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
@@ -27,13 +28,13 @@ import lombok.Setter;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
-@Table(name = "user_preferences")
 @EntityListeners(AuditingEntityListener.class)
+@Table(name = "user_preferences")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserPreferences extends BaseEntity {
+public class UserPreferences {
 
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
@@ -77,4 +78,6 @@ public class UserPreferences extends BaseEntity {
   @OneToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "user_id", referencedColumnName = "id")
   private User user;
+
+  @Embedded private AuditTime audit = new AuditTime();
 }

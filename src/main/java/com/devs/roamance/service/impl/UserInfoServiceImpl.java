@@ -12,13 +12,12 @@ import com.devs.roamance.exception.UserAlreadyExistException;
 import com.devs.roamance.model.user.User;
 import com.devs.roamance.model.user.UserInfo;
 import com.devs.roamance.repository.UserInfoRepository;
-import com.devs.roamance.repository.UserRepository;
 import com.devs.roamance.service.UserInfoService;
 import com.devs.roamance.util.UserUtil;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import org.modelmapper.ModelMapper;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -33,14 +32,14 @@ public class UserInfoServiceImpl implements UserInfoService {
   private final UserUtil userUtil;
   private final ModelMapper modelMapper;
 
+  @Lazy private UserInfoService self;
+
   public UserInfoServiceImpl(
-      UserInfoRepository userInfoRepository,
-      UserRepository userRepository,
-      UserUtil userUtil,
-      ModelMapper modelMapper) {
+      UserInfoRepository userInfoRepository, UserUtil userUtil, ModelMapper modelMapper) {
     this.userInfoRepository = userInfoRepository;
     this.userUtil = userUtil;
     this.modelMapper = modelMapper;
+    this.self = this;
   }
 
   @Override
@@ -70,7 +69,7 @@ public class UserInfoServiceImpl implements UserInfoService {
   public UserInfoListResponseDto getAll(
       int pageNumber, int pageSize, String sortBy, String sortDir) {
     User currentUser = userUtil.getAuthenticatedUser();
-    boolean isAdmin = isAdmin(currentUser);
+    boolean isAdmin = userUtil.isAuthenticatedUserAdmin();
 
     List<UserInfo> info;
     Page<UserInfo> userInfoPage;
@@ -88,7 +87,7 @@ public class UserInfoServiceImpl implements UserInfoService {
       info = userInfoRepository.findByUserId(currentUser.getId()).map(List::of).orElse(List.of());
     }
 
-    List<UserInfoDto> userInfoDtos = info.stream().map(this::mapToDto).collect(Collectors.toList());
+    List<UserInfoDto> userInfoDtos = info.stream().map(this::mapToDto).toList();
 
     return new UserInfoListResponseDto(
         200, true, ResponseMessage.USER_INFO_FETCH_SUCCESS, userInfoDtos);
@@ -98,29 +97,16 @@ public class UserInfoServiceImpl implements UserInfoService {
   public UserInfoResponseDto get(UUID id) {
     UserInfo userInfo = findUserInfoById(id);
 
-    User currentUser = userUtil.getAuthenticatedUser();
-    if (!userInfo.getUser().getId().equals(currentUser.getId()) && !isAdmin(currentUser)) {
-      throw new UnauthorizedAccessException(
-          "You don't have permission to access this user's information");
-    }
-
     UserInfoDto dto = mapToDto(userInfo);
     return new UserInfoResponseDto(200, true, ResponseMessage.USER_INFO_FETCH_SUCCESS, dto);
   }
 
   @Override
   public UserInfoResponseDto getByUserId(UUID id) {
-    User currentUser = userUtil.getAuthenticatedUser();
-    boolean isAdmin = isAdmin(currentUser);
-
-    if (!currentUser.getId().equals(id) && !isAdmin) {
-      throw new UnauthorizedAccessException(
-          "You don't have permission to access this user's information");
-    }
 
     UserInfo userInfo = findUserInfoByUserId(id);
-
     UserInfoDto dto = mapToDto(userInfo);
+
     return new UserInfoResponseDto(200, true, ResponseMessage.USER_INFO_FETCH_SUCCESS, dto);
   }
 
@@ -128,12 +114,6 @@ public class UserInfoServiceImpl implements UserInfoService {
   @Transactional
   public UserInfoResponseDto update(UserInfoRequestDto updateRequestDto, UUID id) {
     UserInfo userInfo = findUserInfoById(id);
-
-    User currentUser = userUtil.getAuthenticatedUser();
-    if (!userInfo.getUser().getId().equals(currentUser.getId()) && !isAdmin(currentUser)) {
-      throw new UnauthorizedAccessException(
-          "You don't have permission to update this user's information");
-    }
 
     updateUserInfoProperties(userInfo, updateRequestDto);
 
@@ -148,12 +128,6 @@ public class UserInfoServiceImpl implements UserInfoService {
   public BaseResponseDto delete(UUID id) {
     UserInfo userInfo = findUserInfoById(id);
 
-    User currentUser = userUtil.getAuthenticatedUser();
-    if (!userInfo.getUser().getId().equals(currentUser.getId()) && !isAdmin(currentUser)) {
-      throw new UnauthorizedAccessException(
-          "You don't have permission to delete this user's information");
-    }
-
     userInfoRepository.delete(userInfo);
     return new BaseResponseDto(200, true, ResponseMessage.USER_INFO_DELETE_SUCCESS);
   }
@@ -162,14 +136,14 @@ public class UserInfoServiceImpl implements UserInfoService {
   @Transactional
   public UserInfoResponseDto updateByUserId(UserInfoRequestDto updateRequestDto, UUID userId) {
     UserInfo userInfo = findUserInfoByUserId(userId);
-    return update(updateRequestDto, userInfo.getId());
+    return self.update(updateRequestDto, userInfo.getId());
   }
 
   @Override
   @Transactional
   public BaseResponseDto deleteByUserId(UUID userId) {
     UserInfo userInfo = findUserInfoByUserId(userId);
-    return delete(userInfo.getId());
+    return self.delete(userInfo.getId());
   }
 
   private void updateUserInfoProperties(UserInfo userInfo, UserInfoRequestDto requestDto) {
@@ -177,7 +151,6 @@ public class UserInfoServiceImpl implements UserInfoService {
     userInfo.setBio(requestDto.getBio());
     userInfo.setLocation(requestDto.getLocation());
     userInfo.setBirthday(requestDto.getBirthday());
-    userInfo.setProfileImage(requestDto.getProfileImage());
     userInfo.setCoverImage(requestDto.getCoverImage());
   }
 
@@ -188,12 +161,21 @@ public class UserInfoServiceImpl implements UserInfoService {
   }
 
   private UserInfo findUserInfoById(UUID id) {
-    return userInfoRepository
-        .findById(id)
-        .orElseThrow(
-            () ->
-                new ResourceNotFoundException(
-                    String.format("No user's information found with id: %s", id)));
+    UserInfo userInfo =
+        userInfoRepository
+            .findById(id)
+            .orElseThrow(
+                () ->
+                    new ResourceNotFoundException(
+                        String.format("No user's information found with id: %s", id)));
+
+    User currentUser = userUtil.getAuthenticatedUser();
+    if (!userInfo.getUser().getId().equals(currentUser.getId())
+        && !userUtil.isAuthenticatedUserAdmin()) {
+      throw new UnauthorizedAccessException(
+          "You don't have permission to access this user's information");
+    }
+    return userInfo;
   }
 
   private UserInfo findUserInfoByUserId(UUID userId) {
@@ -203,9 +185,5 @@ public class UserInfoServiceImpl implements UserInfoService {
             () ->
                 new ResourceNotFoundException(
                     String.format("No user's information found for user with id: %s", userId)));
-  }
-
-  private boolean isAdmin(User user) {
-    return user.getRoles().stream().anyMatch(r -> r.name().equals("ADMIN"));
   }
 }

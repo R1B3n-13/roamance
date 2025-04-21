@@ -12,9 +12,11 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class JournalDto extends AuditDto {
+public class JournalDto {
   private UUID id;
   private String title;
   private LocationResponseDto destination;
   private String description;
+
+  private AuditDto audit = new AuditDto();
 }

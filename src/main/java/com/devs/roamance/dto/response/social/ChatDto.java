@@ -15,11 +15,13 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChatDto extends AuditDto {
+public class ChatDto {
 
   private UUID id;
   private List<UserDto> users = new ArrayList<>();
 
   @JsonProperty("last_text")
   private String lastText;
+
+  private AuditDto audit = new AuditDto();
 }

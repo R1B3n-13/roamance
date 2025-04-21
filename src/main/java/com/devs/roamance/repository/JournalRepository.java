@@ -23,7 +23,5 @@ public interface JournalRepository extends JpaRepository<Journal, UUID> {
   List<Journal> findAll();
 
   @EntityGraph(attributePaths = {"subsections"})
-  List<Journal> findByCreatedBy(UUID createdBy);
-
-  Page<Journal> findAllByCreatedBy(UUID createdBy, Pageable pageable);
+  Page<Journal> findAllByAudit_CreatedBy(UUID createdBy, Pageable pageable);
 }

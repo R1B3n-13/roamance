@@ -1,6 +1,6 @@
 package com.devs.roamance.dto.response.user;
 
-import com.devs.roamance.dto.response.AuditDto;
+import com.devs.roamance.dto.response.AuditTimeDto;
 import com.devs.roamance.model.user.preference.AccommodationType;
 import com.devs.roamance.model.user.preference.ActivityType;
 import com.devs.roamance.model.user.preference.BudgetLevel;
@@ -19,7 +19,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserPreferencesDto extends AuditDto {
+public class UserPreferencesDto {
   private UUID id;
 
   @JsonProperty("travel_style")
@@ -42,4 +42,6 @@ public class UserPreferencesDto extends AuditDto {
 
   @JsonProperty("climate_preference")
   private ClimatePreference climatePreference;
+
+  private AuditTimeDto audit = new AuditTimeDto();
 }

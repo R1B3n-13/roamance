@@ -1,22 +1,25 @@
-import { USER_ENDPOINTS } from '@/constants/api';
+import { routes } from '@/constants';
+import { USER_AUTH_ENDPOINTS, USER_ENDPOINTS } from '@/constants/api';
+import { ENV_VARS } from '@/constants/keys';
+import { authService } from '@/service/auth-service';
+import { ApiResponse } from '@/types';
 import axios, {
   AxiosError,
   AxiosInstance,
   AxiosRequestConfig,
-  InternalAxiosRequestConfig,
   AxiosResponse,
+  InternalAxiosRequestConfig,
 } from 'axios';
 import { ApiError } from './errors';
-import { ApiResponse } from '@/types';
-import { routes } from '@/constants';
-import { ENV_VARS } from '@/constants/keys';
 
-// Public endpoints that don't require authentication
-const PUBLIC_ENDPOINTS = [USER_ENDPOINTS.LOGIN, USER_ENDPOINTS.REGISTER];
-
+const PUBLIC_ENDPOINTS = [
+  USER_AUTH_ENDPOINTS.LOGIN,
+  USER_ENDPOINTS.REGISTER,
+  USER_AUTH_ENDPOINTS.REFRESH_TOKEN,
+];
 class Api {
-  private instance: AxiosInstance;
-  private baseURL: string;
+  private readonly instance: AxiosInstance;
+  private readonly baseURL: string;
 
   constructor() {
     this.baseURL = ENV_VARS.API_URL;
@@ -36,8 +39,11 @@ class Api {
     // Request interceptor
     this.instance.interceptors.request.use(
       (config: InternalAxiosRequestConfig) => {
-        // Skip adding token for public endpoints
-        if (this.isPublicEndpoint(config.url || '')) {
+        // Skip token only for POST login and register endpoints
+        if (
+          config.method?.toLowerCase() === 'post' &&
+          PUBLIC_ENDPOINTS.includes(config.url || '')
+        ) {
           return config;
         }
 
@@ -75,23 +81,32 @@ class Api {
           _retry?: boolean;
         };
 
-        // Handle 401 Unauthorized errors (token expired)
+        // Attempt token refresh on 401 errors (excluding auth endpoints)
         if (
           error.response?.status === 401 &&
           originalRequest &&
           !originalRequest._retry &&
-          !this.isPublicEndpoint(originalRequest.url || '')
+          !(
+            originalRequest.method?.toLowerCase() === 'post' &&
+            [
+              USER_AUTH_ENDPOINTS.LOGIN,
+              USER_ENDPOINTS.REGISTER,
+              USER_AUTH_ENDPOINTS.REFRESH_TOKEN,
+            ].includes(originalRequest.url || '')
+          )
         ) {
           originalRequest._retry = true;
-
-          // Handle token expiration - clear cookies and redirect to login
-          if (typeof window !== 'undefined') {
-            console.log('Unauthorized access, clearing tokens and redirecting');
-            document.cookie =
-              'access_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-            document.cookie =
-              'refresh_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-            window.location.href = routes.signIn.href;
+          try {
+            const authResponse = await authService.refreshToken();
+            originalRequest.headers = originalRequest.headers || {};
+            originalRequest.headers.Authorization = `Bearer ${authResponse.access_token}`;
+            return this.instance.request(originalRequest);
+          } catch (refreshError) {
+            if (typeof window !== 'undefined') {
+              authService.logout();
+              window.location.href = routes.signIn.href;
+            }
+            return Promise.reject(refreshError);
           }
         }
 
@@ -115,31 +130,19 @@ class Api {
     );
   }
 
-  private isPublicEndpoint(url: string): boolean {
-    return PUBLIC_ENDPOINTS.some((endpoint) => url.includes(endpoint));
-  }
-
   private getToken(): string | null {
-    if (typeof window === 'undefined') return null;
-
     try {
-      // Get token from cookies instead of localStorage
-      const cookies = document.cookie.split(';');
-      const tokenCookie = cookies.find((cookie) =>
-        cookie.trim().startsWith('access_token=')
-      );
-
-      if (!tokenCookie) {
+      // Use authService method instead of manual cookie access
+      const token = authService.getAccessToken();
+      if (!token) {
         console.warn('No token found in cookies');
         return null;
       }
 
-      const token = tokenCookie.split('=')[1];
       console.log('Token retrieved from cookies');
-
       return token;
     } catch (error) {
-      console.error('Error accessing cookies:', error);
+      console.error('Error accessing token:', error);
       return null;
     }
   }

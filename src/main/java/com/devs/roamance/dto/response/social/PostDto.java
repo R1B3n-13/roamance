@@ -16,7 +16,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class PostDto extends AuditDto {
+public class PostDto {
 
   private UUID id;
   private String text;
@@ -36,4 +36,6 @@ public class PostDto extends AuditDto {
   private int commentsCount;
 
   private UserDto user;
+
+  private AuditDto audit = new AuditDto();
 }

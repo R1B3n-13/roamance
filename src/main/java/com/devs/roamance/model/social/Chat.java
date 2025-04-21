@@ -1,6 +1,6 @@
 package com.devs.roamance.model.social;
 
-import com.devs.roamance.model.BaseEntity;
+import com.devs.roamance.model.Audit;
 import com.devs.roamance.model.user.User;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -14,6 +14,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @Table(name = "chats")
@@ -22,7 +23,8 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
-public class Chat extends BaseEntity {
+@EntityListeners(AuditingEntityListener.class)
+public class Chat {
 
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
@@ -49,4 +51,6 @@ public class Chat extends BaseEntity {
 
   @Column(length = 4000)
   private String lastText;
+
+  @Embedded private Audit audit = new Audit();
 }

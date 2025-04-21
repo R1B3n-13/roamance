@@ -1,31 +1,37 @@
-import { Audit } from './audit';
+import { AuditTime } from './audit';
 import { BaseResponse } from './response';
 
-export interface User extends Audit {
+export interface User {
   id: string;
   email: string;
   name: string;
+  profile_image: string | null;
+  audit: AuditTime;
 }
 
 export type UserResponse = BaseResponse<User>;
 
-export interface UserInfo extends Audit {
+/* -------------------------------- User Info ------------------------------- */
+
+export interface UserInfo {
   id: string;
   phone: string | null;
   bio: string | null;
   location: string | null;
   birthday: string | null;
-  profile_image: string | null;
   cover_image: string | null;
   user_id: string;
+  audit: AuditTime;
 }
 
 export type UserInfoResponse = BaseResponse<UserInfo>;
 
+/* ---------------------------- User Preferences ---------------------------- */
+
 export enum TravelStyle {
   RELAXED = 'RELAXED',
   BALANCED = 'BALANCED',
-  ADVENTUROUS = 'ADVENTUROUS'
+  ADVENTUROUS = 'ADVENTUROUS',
 }
 
 export enum AccommodationType {
@@ -33,7 +39,7 @@ export enum AccommodationType {
   RESORTS = 'RESORTS',
   APARTMENTS = 'APARTMENTS',
   HOSTELS = 'HOSTELS',
-  CAMPING = 'CAMPING'
+  CAMPING = 'CAMPING',
 }
 
 export enum ActivityType {
@@ -41,7 +47,7 @@ export enum ActivityType {
   NATURE_AND_OUTDOORS = 'NATURE_AND_OUTDOORS',
   CULTURAL_EXPERIENCE = 'CULTURAL_EXPERIENCE',
   FOOD_AND_DINING = 'FOOD_AND_DINING',
-  ENTERTAINMENT = 'ENTERTAINMENT'
+  ENTERTAINMENT = 'ENTERTAINMENT',
 }
 
 export enum CuisineType {
@@ -49,14 +55,14 @@ export enum CuisineType {
   INTERNATIONAL = 'INTERNATIONAL',
   FINE_DINING = 'FINE_DINING',
   STREET_FOOD = 'STREET_FOOD',
-  VEGAN = 'VEGAN'
+  VEGAN = 'VEGAN',
 }
 
 export enum ClimatePreference {
   WARM_AND_SUNNY = 'WARM_AND_SUNNY',
   COLD_AND_SNOWY = 'COLD_AND_SNOWY',
   MODERATE = 'MODERATE',
-  ANY_CLIMATE = 'ANY_CLIMATE'
+  ANY_CLIMATE = 'ANY_CLIMATE',
 }
 
 export enum BudgetLevel {
@@ -64,12 +70,8 @@ export enum BudgetLevel {
   ECONOMIC = 'ECONOMIC',
   MODERATE = 'MODERATE',
   PREMIUM = 'PREMIUM',
-  LUXURY = 'LUXURY'
+  LUXURY = 'LUXURY',
 }
-
-
-/* ---------------------------- User Preferences ---------------------------- */
-
 
 export interface UserPreferences {
   travel_style: TravelStyle;
@@ -80,9 +82,10 @@ export interface UserPreferences {
   budget_level: BudgetLevel;
 }
 
-export interface UserPreferencesWithAudit extends UserPreferences, Audit {
+export interface UserPreferencesWithAudit extends UserPreferences {
   id: string;
   user_id: string;
+  audit: AuditTime;
 }
 
 export type UserPreferencesResponse = BaseResponse<UserPreferencesWithAudit>;

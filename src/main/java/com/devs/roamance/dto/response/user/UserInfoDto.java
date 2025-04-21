@@ -1,8 +1,8 @@
 package com.devs.roamance.dto.response.user;
 
+import com.devs.roamance.dto.response.AuditTimeDto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -20,18 +20,11 @@ public class UserInfoDto {
   private String location;
   private LocalDate birthday;
 
-  @JsonProperty("profile_image")
-  private String profileImage;
-
   @JsonProperty("cover_image")
   private String coverImage;
 
   @JsonProperty("user_id")
   private UUID userId;
 
-  @JsonProperty("created_at")
-  private OffsetDateTime createdAt;
-
-  @JsonProperty("last_modified_at")
-  private OffsetDateTime lastModifiedAt;
+  private AuditTimeDto audit = new AuditTimeDto();
 }
