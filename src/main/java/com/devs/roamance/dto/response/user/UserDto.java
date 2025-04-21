@@ -2,7 +2,6 @@ package com.devs.roamance.dto.response.user;
 
 import com.devs.roamance.dto.response.AuditTimeDto;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.persistence.Embedded;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -22,5 +21,5 @@ public class UserDto {
   @JsonProperty("profile_image")
   private String profileImage;
 
-  @Embedded private AuditTimeDto audit = new AuditTimeDto();
+  private AuditTimeDto audit = new AuditTimeDto();
 }

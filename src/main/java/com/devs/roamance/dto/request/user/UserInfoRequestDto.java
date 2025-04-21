@@ -26,7 +26,7 @@ public class UserInfoRequestDto {
 
   @JsonProperty("cover_image")
   @Pattern(
-      regexp = "^$|^(https?:\\/\\/)[^\\s]{0,2083}$",
+      regexp = "^$|(?i)^(https?:\\/\\/)[^\\s]{0,2083}$",
       message = "Cover image URL format is invalid")
   private String coverImage;
 

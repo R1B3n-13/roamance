@@ -4,7 +4,6 @@ import com.devs.roamance.dto.response.AuditDto;
 import com.devs.roamance.model.travel.journal.SubsectionType;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.persistence.Embedded;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -24,5 +23,5 @@ public class SubsectionBriefDto {
   @JsonProperty("journal_id")
   private UUID journalId;
 
-  @Embedded private AuditDto audit = new AuditDto();
+  private AuditDto audit = new AuditDto();
 }

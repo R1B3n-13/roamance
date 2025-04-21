@@ -3,7 +3,6 @@ package com.devs.roamance.dto.response.social;
 import com.devs.roamance.dto.response.AuditDto;
 import com.devs.roamance.dto.response.user.UserDto;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.persistence.Embedded;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -29,5 +28,5 @@ public class MessageDto {
 
   private UserDto user;
 
-  @Embedded private AuditDto audit = new AuditDto();
+  private AuditDto audit = new AuditDto();
 }

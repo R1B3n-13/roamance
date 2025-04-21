@@ -35,7 +35,7 @@ public class UserCreateRequestDto {
 
   @JsonProperty("profile_image")
   @Pattern(
-      regexp = "^$|^(https?:\\/\\/)[^\\s]{0,2083}$",
+      regexp = "^$|(?i)^(https?:\\/\\/)[^\\s]{0,2083}$",
       message = "Profile image URL format is invalid")
   private String profileImage;
 }

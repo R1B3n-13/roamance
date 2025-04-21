@@ -2,7 +2,6 @@ package com.devs.roamance.dto.response.user;
 
 import com.devs.roamance.dto.response.AuditTimeDto;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.persistence.Embedded;
 import java.time.LocalDate;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -27,5 +26,5 @@ public class UserInfoDto {
   @JsonProperty("user_id")
   private UUID userId;
 
-  @Embedded private AuditTimeDto audit = new AuditTimeDto();
+  private AuditTimeDto audit = new AuditTimeDto();
 }

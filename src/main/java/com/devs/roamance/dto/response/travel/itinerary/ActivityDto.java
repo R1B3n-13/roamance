@@ -4,7 +4,6 @@ import com.devs.roamance.dto.response.AuditDto;
 import com.devs.roamance.dto.response.travel.LocationResponseDto;
 import com.devs.roamance.model.travel.itinerary.ActivityType;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.persistence.Embedded;
 import java.math.BigDecimal;
 import java.time.LocalTime;
 import java.util.UUID;
@@ -36,5 +35,5 @@ public class ActivityDto {
   private String note;
   private BigDecimal cost;
 
-  @Embedded private AuditDto audit = new AuditDto();
+  private AuditDto audit = new AuditDto();
 }

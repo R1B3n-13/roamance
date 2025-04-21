@@ -2,7 +2,6 @@ package com.devs.roamance.dto.response.travel.itinerary;
 
 import com.devs.roamance.dto.response.AuditDto;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.persistence.Embedded;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.UUID;
@@ -23,5 +22,5 @@ public class DayPlanBriefDto {
   @JsonProperty("total_cost")
   private BigDecimal totalCost;
 
-  @Embedded private AuditDto audit = new AuditDto();
+  private AuditDto audit = new AuditDto();
 }
