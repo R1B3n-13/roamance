@@ -6,8 +6,7 @@ name: 🌐 Deploy Next.js site to Pages
 on:
   # Runs on pushes targeting the default branch
   push:
-    branches:
-      ["main", "develop", "feature/develop-TASK_78-configure_github_pages"]
+    branches: ["main"]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -18,8 +17,8 @@ env:
 
 # 🔐 Permissions configuration
 permissions:
-  contents: read  # 📄 Read repository contents
-  pages: write    # 📝 Write to GitHub Pages
+  contents: read # 📄 Read repository contents
+  pages: write # 📝 Write to GitHub Pages
   id-token: write # 🔑 Write ID token
 
 # ⚙️ Concurrency settings
