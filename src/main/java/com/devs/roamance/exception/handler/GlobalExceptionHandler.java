@@ -274,7 +274,105 @@ public class GlobalExceptionHandler {
     log.error("IllegalArgumentException: {}", ex.getMessage(), ex);
 
     return new ResponseEntity<>(
-        new BaseResponseDto(400, false, ex.getMessage()), HttpStatus.BAD_REQUEST);
+        new BaseResponseDto(
+            400,
+            false,
+            (ResponseMessage.INVALID_TOKEN_TYPE.equals(ex.getMessage())
+                    || ResponseMessage.JWT_CLAIMS_EMPTY.equals(ex.getMessage()))
+                ? ex.getMessage()
+                : "Illegal argument!"),
+        HttpStatus.BAD_REQUEST);
+  }
+
+  @ExceptionHandler(MethodArgumentNotValidException.class)
+  public ResponseEntity<ValidationErrorResponseDto> handleMethodArgumentNotValidException(
+      MethodArgumentNotValidException ex) {
+
+    List<ValidationErrorDto> errors =
+        ex.getBindingResult().getFieldErrors().stream()
+            .map(error -> new ValidationErrorDto(error.getField(), error.getDefaultMessage()))
+            .toList();
+
+    log.error("MethodArgumentNotValidException: {}", ex.getMessage(), ex);
+
+    return new ResponseEntity<>(
+        new ValidationErrorResponseDto(400, false, ResponseMessage.VALIDATION_FAILED, errors),
+        HttpStatus.BAD_REQUEST);
+  }
+
+  @ExceptionHandler(HandlerMethodValidationException.class)
+  public ResponseEntity<ValidationErrorResponseDto> handleHandlerMethodValidationException(
+      HandlerMethodValidationException ex) {
+
+    List<ValidationErrorDto> errors =
+        ex.getAllErrors().stream()
+            .map(
+                error -> {
+                  String fieldName = null;
+                  String[] codes = error.getCodes();
+
+                  if (codes != null && codes.length > 0) {
+
+                    String code = codes[0];
+                    String[] parts = code.split("\\.");
+
+                    if (parts.length > 0) {
+                      fieldName = parts[parts.length - 1];
+                    }
+                  }
+
+                  if (fieldName == null || fieldName.isEmpty()) {
+                    fieldName = "not available";
+                  }
+
+                  return new ValidationErrorDto(fieldName, error.getDefaultMessage());
+                })
+            .toList();
+
+    log.error("HandlerMethodValidationException: {}", ex.getMessage(), ex);
+
+    return new ResponseEntity<>(
+        new ValidationErrorResponseDto(400, false, ResponseMessage.VALIDATION_FAILED, errors),
+        HttpStatus.BAD_REQUEST);
+  }
+
+  @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+  public ResponseEntity<ValidationErrorResponseDto> handleMethodArgumentTypeMismatchException(
+      MethodArgumentTypeMismatchException ex) {
+
+    String paramName = ex.getName();
+    String requiredType =
+        ex.getRequiredType() != null ? ex.getRequiredType().getSimpleName() : "unknown";
+
+    String errorMessage =
+        String.format("Parameter '%s' should be of type '%s'", paramName, requiredType);
+
+    List<ValidationErrorDto> errors = List.of(new ValidationErrorDto(paramName, errorMessage));
+
+    log.error("MethodArgumentTypeMismatchException: {}", ex.getMessage(), ex);
+
+    return new ResponseEntity<>(
+        new ValidationErrorResponseDto(400, false, ResponseMessage.VALIDATION_FAILED, errors),
+        HttpStatus.BAD_REQUEST);
+  }
+
+  @ExceptionHandler(ConstraintViolationException.class)
+  public ResponseEntity<ValidationErrorResponseDto> handleConstraintViolationException(
+      ConstraintViolationException ex) {
+
+    List<ValidationErrorDto> errors =
+        ex.getConstraintViolations().stream()
+            .map(
+                violation ->
+                    new ValidationErrorDto(
+                        violation.getPropertyPath().toString(), violation.getMessage()))
+            .toList();
+
+    log.error("ConstraintViolationException: {}", ex.getMessage(), ex);
+
+    return new ResponseEntity<>(
+        new ValidationErrorResponseDto(400, false, ResponseMessage.VALIDATION_FAILED, errors),
+        HttpStatus.BAD_REQUEST);
   }
 
   // ==================== Fallback Exception Handler ====================
