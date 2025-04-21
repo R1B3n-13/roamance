@@ -64,9 +64,8 @@ export function ProfileHeader({
     try {
       setIsUploading(true);
 
-      // Update user info with new profile image
-      await userService.updateUserInfo({
-        ...userInfo,
+      // Update basic user profile with new profile image
+      await userService.updateUserProfile({
         profile_image: result.url,
       });
 
@@ -372,7 +371,7 @@ export function ProfileHeader({
                 {/* Adjusted avatar size for responsiveness */}
                 <Avatar className="w-24 h-24 sm:w-28 sm:h-28 md:w-40 md:h-40 border-4 border-background shadow-xl ring-2 ring-muted/20 ring-offset-2 ring-offset-background transition-all duration-500">
                   <AvatarImage
-                    src={userInfo?.profile_image || undefined}
+                    src={user?.profile_image || undefined}
                     alt={user?.name || 'User'}
                     className="object-cover"
                   />
@@ -470,7 +469,7 @@ export function ProfileHeader({
                     <Calendar className="h-3 w-3 sm:h-3.5 sm:w-3.5 group-hover:animate-pulse" />
                     <span className="font-medium">
                       Joined{' '}
-                      {`${getMonthName(getDateParts(`${user?.created_at}`).month)} ${getDateParts(`${user?.created_at}`).year}` ||
+                      {`${getMonthName(getDateParts(user?.audit.created_at || '').month)} ${getDateParts(user?.audit.created_at || '').year}` ||
                         'April 20XX'}
                     </span>
                   </Badge>

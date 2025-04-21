@@ -26,6 +26,24 @@ export class UserService {
   }
 
   /**
+   * Updates basic user profile (name, profile_image, etc.)
+   */
+  async updateUserProfile(data: Partial<User>): Promise<User> {
+    try {
+      const response = await this.apiService.put<UserResponse, Partial<User>>(
+        USER_ENDPOINTS.UPDATE,
+        data
+      );
+      return response.data.data;
+    } catch (error) {
+      if (error instanceof ApiError) {
+        throw new Error(`Failed to update user profile: ${error.message}`);
+      }
+      throw error;
+    }
+  }
+
+  /**
    * Fetches the extended user information
    */
   async getUserInfo(): Promise<UserInfo> {
