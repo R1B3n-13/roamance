@@ -1,12 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { PlusCircle, BookOpen, Search, Loader2 } from 'lucide-react';
-import { JournalBrief, JournalCreateRequest, JournalDetail } from '@/types/journal';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
 import { journalService } from '@/service/journal-service';
-import { JournalCard } from './journal-card';
-import { JournalForm } from './journal-form';
-import { JournalDetailView } from './journal-detail-view';
+import { JournalBrief, JournalCreateRequest, JournalDetail } from '@/types/journal';
+import { AnimatePresence, motion } from 'framer-motion';
+import { AlertCircle, BookOpen, Loader2, PlusCircle, Search, X } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 import { ConfirmDialog } from '../../common/confirm-dialog';
-import { motion } from 'framer-motion';
+import { JournalCard } from './journal-card';
+import { JournalDetailView } from './journal-detail-view';
+import { JournalForm } from './journal-form';
 
 export const JournalManagement: React.FC = () => {
   const [journals, setJournals] = useState<JournalBrief[]>([]);
@@ -21,6 +24,30 @@ export const JournalManagement: React.FC = () => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [error, setError] = useState<string | null>(null);
+
+  // Animation variants
+  const staggerContainer = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const fadeInUp = {
+    hidden: { opacity: 0, y: 20 },
+    show: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        type: "spring",
+        damping: 25,
+        stiffness: 200
+      }
+    }
+  };
 
   // Load journals on component mount
   useEffect(() => {
@@ -144,124 +171,144 @@ export const JournalManagement: React.FC = () => {
       );
 
   return (
-    <div className="space-y-6">
-      {/* Header section */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-            My Travel Journals
-          </h2>
-          <p className="text-gray-500 dark:text-gray-400 mt-1">
-            Create and manage your travel experiences
-          </p>
+    <div className="space-y-8">
+      {/* Header section with subtle background glow */}
+      <div className="relative rounded-2xl p-6 bg-gradient-to-r from-background/80 via-background/60 to-background/80 backdrop-blur-sm border border-muted/30 shadow-sm">
+        <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 via-indigo-500/5 to-blue-500/5 rounded-2xl -z-10"></div>
+        <div className="absolute -left-10 -top-10 w-40 h-40 bg-purple-500/10 rounded-full blur-3xl -z-10"></div>
+        <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-indigo-500/10 rounded-full blur-3xl -z-10"></div>
+
+        {/* Gradient line consistent with other tabs */}
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 via-indigo-500 to-blue-500 opacity-80" />
+
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-5">
+          <div>
+            <h2 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
+              My Travel Journals
+            </h2>
+            <p className="text-muted-foreground mt-1.5">
+              Document and revisit your memorable travel experiences
+            </p>
+          </div>
+
+          <Button
+            onClick={handleCreateJournal}
+            className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-md hover:shadow-lg transition-all duration-300 border-none"
+            size="sm"
+          >
+            <PlusCircle className="w-4 h-4 mr-2" />
+            New Journal
+          </Button>
         </div>
 
-        <button
-          onClick={handleCreateJournal}
-          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none"
-        >
-          <PlusCircle className="w-4 h-4 mr-2" />
-          New Journal
-        </button>
-      </div>
-
-      {/* Search section */}
-      <div className="relative">
-        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <Search className="h-5 w-5 text-gray-400" />
+        {/* Search section */}
+        <div className="relative mt-6 max-w-xl">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <Search className="h-4 w-4 text-muted-foreground" />
+          </div>
+          <Input
+            type="text"
+            placeholder="Search your journals..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10 bg-background/60 backdrop-blur-sm border-muted/40 focus:border-indigo-500/50 focus:ring-indigo-500/20 transition-all duration-300"
+          />
         </div>
-        <input
-          type="text"
-          placeholder="Search journals..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-        />
       </div>
 
       {/* Error message */}
-      {error && (
-        <div className="rounded-md bg-red-50 dark:bg-red-900/30 p-4">
-          <div className="flex">
-            <div className="flex-shrink-0">
-              <svg className="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-              </svg>
-            </div>
-            <div className="ml-3">
-              <p className="text-sm font-medium text-red-800 dark:text-red-200">
-                {error}
-              </p>
-            </div>
-            <div className="ml-auto pl-3">
-              <div className="-mx-1.5 -my-1.5">
-                <button
-                  onClick={() => setError(null)}
-                  className="inline-flex rounded-md p-1.5 text-red-500 hover:bg-red-100 dark:hover:bg-red-800/50"
-                >
-                  <span className="sr-only">Dismiss</span>
-                  <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                  </svg>
-                </button>
+      <AnimatePresence>
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="rounded-lg bg-destructive/10 border border-destructive/20 p-4"
+          >
+            <div className="flex items-start">
+              <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
+              <div className="ml-3 flex-1">
+                <p className="text-sm font-medium text-destructive">
+                  {error}
+                </p>
               </div>
+              <button
+                onClick={() => setError(null)}
+                className="ml-auto flex-shrink-0 p-1.5 text-muted-foreground hover:text-foreground"
+              >
+                <span className="sr-only">Dismiss</span>
+                <X className="h-4 w-4" />
+              </button>
             </div>
-          </div>
-        </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      {/* Journals grid */}
+      {/* Journals grid with staggered animations */}
       {isLoading ? (
-        <div className="flex justify-center items-center py-12">
-          <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
-          <span className="ml-2 text-gray-600 dark:text-gray-400">Loading journals...</span>
+        <div className="flex flex-col justify-center items-center py-20">
+          <div className="relative">
+            <div className="h-16 w-16 rounded-full border-4 border-muted/20 border-t-indigo-600 animate-spin"></div>
+            <div className="absolute inset-0 rounded-full border-4 border-indigo-600/10"></div>
+          </div>
+          <span className="mt-4 text-muted-foreground font-medium">Loading your journals...</span>
         </div>
       ) : filteredJournals.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <motion.div
+          variants={staggerContainer}
+          initial="hidden"
+          animate="show"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+        >
           {filteredJournals.map((journal) => (
-            <JournalCard
-              key={journal.id}
-              journal={journal}
-              onEdit={handleEditJournal}
-              onDelete={handleDeleteJournal}
-              onView={handleViewJournal}
-            />
+            <motion.div key={journal.id} variants={fadeInUp}>
+              <JournalCard
+                journal={journal}
+                onEdit={handleEditJournal}
+                onDelete={handleDeleteJournal}
+                onView={handleViewJournal}
+              />
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       ) : (
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-12 text-center"
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ type: "spring", stiffness: 200, damping: 25 }}
+          className="rounded-2xl bg-gradient-to-br from-background/90 to-background/70 backdrop-blur-sm border border-muted/30 p-12 text-center"
         >
+          <div className="relative w-20 h-20 bg-gradient-to-br from-indigo-500/10 to-purple-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
+            <BookOpen className="w-10 h-10 text-indigo-500/70" />
+          </div>
+
           {searchQuery.trim() !== '' ? (
             <>
-              <BookOpen className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white">No matching journals</h3>
-              <p className="mt-2 text-gray-500 dark:text-gray-400">
-                We couldn't find any journals matching your search. Try a different search term.
+              <h3 className="text-xl font-medium text-foreground mb-2">No matching journals</h3>
+              <p className="text-muted-foreground max-w-md mx-auto">
+                We couldn't find any journals matching your search criteria. Try a different search term or clear your search.
               </p>
-              <button
+              <Button
                 onClick={() => setSearchQuery('')}
-                className="mt-4 text-indigo-600 hover:text-indigo-500 font-medium"
+                variant="outline"
+                className="mt-6 border-indigo-500/30 text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-950/30"
               >
                 Clear search
-              </button>
+              </Button>
             </>
           ) : (
             <>
-              <BookOpen className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white">No journals yet</h3>
-              <p className="mt-2 text-gray-500 dark:text-gray-400">
-                Get started by creating your first travel journal.
+              <h3 className="text-xl font-medium text-foreground mb-2">Your journal collection is empty</h3>
+              <p className="text-muted-foreground max-w-md mx-auto">
+                Start documenting your travel experiences by creating your first journal.
               </p>
-              <button
+              <Button
                 onClick={handleCreateJournal}
-                className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none"
+                className="mt-6 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-md hover:shadow-lg transition-all duration-300 border-none"
               >
                 <PlusCircle className="w-4 h-4 mr-2" />
-                Create Journal
-              </button>
+                Create your first journal
+              </Button>
             </>
           )}
         </motion.div>
