@@ -22,7 +22,7 @@ public enum AccommodationType {
     return value;
   }
 
-  public static AccommodationType fromValue(String value) {
+  public static AccommodationType fromString(String value) {
     if (value == null) {
       return HOTELS;
     }

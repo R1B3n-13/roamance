@@ -22,7 +22,7 @@ public enum CuisineType {
     return value;
   }
 
-  public static CuisineType fromValue(String value) {
+  public static CuisineType fromString(String value) {
     if (value == null) {
       return LOCAL_CUISINE;
     }

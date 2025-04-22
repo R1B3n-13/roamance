@@ -2,6 +2,8 @@ package com.devs.roamance.dto.response.travel.journal;
 
 import com.devs.roamance.dto.response.AuditDto;
 import com.devs.roamance.dto.response.travel.LocationResponseDto;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -17,6 +19,12 @@ public class JournalDto {
   private String title;
   private LocationResponseDto destination;
   private String description;
+
+  private Boolean isPublic;
+  private OffsetDateTime date = OffsetDateTime.now();
+
+  @JsonProperty("cover_image")
+  private String coverImage;
 
   private AuditDto audit = new AuditDto();
 }

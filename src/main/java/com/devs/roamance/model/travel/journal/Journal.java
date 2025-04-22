@@ -1,7 +1,7 @@
 package com.devs.roamance.model.travel.journal;
 
-import com.devs.roamance.model.Audit;
-import com.devs.roamance.model.travel.Location;
+import com.devs.roamance.model.audit.Audit;
+import com.devs.roamance.model.common.Location;
 import com.devs.roamance.model.user.User;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -20,6 +20,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -53,6 +54,11 @@ public class Journal {
   @NonNull @Embedded private Location destination;
 
   @Nullable private String description;
+
+  private Boolean isPublic;
+  private OffsetDateTime date;
+
+  @Nullable private String coverImage;
 
   @OneToMany(
       mappedBy = "journal",

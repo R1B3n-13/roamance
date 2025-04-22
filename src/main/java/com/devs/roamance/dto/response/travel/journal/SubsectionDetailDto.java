@@ -1,6 +1,7 @@
 package com.devs.roamance.dto.response.travel.journal;
 
 import com.devs.roamance.dto.response.travel.LocationResponseDto;
+import com.devs.roamance.model.common.ActivityType;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
@@ -20,13 +21,13 @@ public class SubsectionDetailDto extends SubsectionBriefDto {
   private List<String> checklists = new ArrayList<>();
 
   // For Activity Subsection
-  private LocationResponseDto waypoints;
+  private LocationResponseDto location;
 
-  @JsonProperty("activity_name")
-  private String activityName;
+  @JsonProperty("activity_type")
+  private ActivityType activityType;
 
   // For Route Subsection
-  private List<LocationResponseDto> locations = new ArrayList<>();
+  private List<LocationResponseDto> waypoints = new ArrayList<>();
 
   @JsonProperty("total_time")
   private Integer totalTime;

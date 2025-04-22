@@ -1,10 +1,13 @@
 package com.devs.roamance.dto.request.travel.journal;
 
 import com.devs.roamance.dto.request.travel.LocationCreateRequestDto;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -27,6 +30,15 @@ public class JournalCreateRequestDto {
 
   @Size(max = 1000, message = "Description must be less than 1000 characters")
   private String description;
+
+  private Boolean isPublic = false;
+  private OffsetDateTime date = OffsetDateTime.now();
+
+  @JsonProperty("cover_image")
+  @Pattern(
+      regexp = "^$|(?i)^(https?:\\/\\/)[^\\s]{0,2083}$",
+      message = "Cover image URL format is invalid")
+  private String coverImage;
 
   @Valid
   @Size(max = 20, message = "Maximum 20 subsections allowed")

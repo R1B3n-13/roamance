@@ -1,6 +1,6 @@
 package com.devs.roamance.model.user;
 
-import com.devs.roamance.model.AuditTime;
+import com.devs.roamance.model.audit.AuditTime;
 import com.devs.roamance.model.social.Chat;
 import com.devs.roamance.model.social.Comment;
 import com.devs.roamance.model.social.Message;

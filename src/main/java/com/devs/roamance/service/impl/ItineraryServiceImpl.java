@@ -10,7 +10,7 @@ import com.devs.roamance.dto.response.travel.itinerary.ItineraryListResponseDto;
 import com.devs.roamance.dto.response.travel.itinerary.ItineraryResponseDto;
 import com.devs.roamance.exception.ResourceNotFoundException;
 import com.devs.roamance.exception.UnauthorizedActionException;
-import com.devs.roamance.model.travel.Location;
+import com.devs.roamance.model.common.Location;
 import com.devs.roamance.model.travel.itinerary.Itinerary;
 import com.devs.roamance.model.user.User;
 import com.devs.roamance.repository.ItineraryRepository;
