@@ -31,13 +31,19 @@ public class JournalCreateRequestDto {
   @Size(max = 1000, message = "Description must be less than 1000 characters")
   private String description;
 
-  private Boolean isPublic = false;
+  @JsonProperty("is_favorite")
+  private Boolean isFavorite = false;
+
+  @JsonProperty("is_archived")
+  private Boolean isArchived = false;
+
+  @JsonProperty("is_shared")
+  private Boolean isShared = false;
+
   private OffsetDateTime date = OffsetDateTime.now();
 
   @JsonProperty("cover_image")
-  @Pattern(
-      regexp = "^$|(?i)^(https?:\\/\\/)[^\\s]{0,2083}$",
-      message = "Cover image URL format is invalid")
+  @Pattern(regexp = "^$|(?i)^(https?:\\/\\/)[^\\s]{0,2083}$", message = "Cover image URL format is invalid")
   private String coverImage;
 
   @Valid

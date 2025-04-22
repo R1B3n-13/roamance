@@ -20,7 +20,15 @@ public class JournalDto {
   private LocationResponseDto destination;
   private String description;
 
-  private Boolean isPublic;
+  @JsonProperty("is_favorite")
+  private Boolean isFavorite;
+
+  @JsonProperty("is_archived")
+  private Boolean isArchived;
+
+  @JsonProperty("is_shared")
+  private Boolean isShared;
+
   private OffsetDateTime date = OffsetDateTime.now();
 
   @JsonProperty("cover_image")

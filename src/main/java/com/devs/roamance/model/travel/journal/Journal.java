@@ -55,7 +55,9 @@ public class Journal {
 
   @Nullable private String description;
 
-  private Boolean isPublic;
+  private Boolean isFavorite ;
+  private Boolean isArchived ;
+  private Boolean isShared;
   private OffsetDateTime date;
 
   @Nullable private String coverImage;
