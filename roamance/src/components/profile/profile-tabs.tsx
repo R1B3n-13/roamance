@@ -2,7 +2,7 @@
 
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
-import { User, Settings, Compass, Bookmark } from 'lucide-react';
+import { User, Settings, Compass, Bookmark, BookOpen } from 'lucide-react';
 
 interface ProfileTabsProps {
   activeTab: string;
@@ -30,6 +30,12 @@ export function ProfileTabs({ activeTab, setActiveTab }: ProfileTabsProps) {
       color: 'forest',
     },
     {
+      id: 'journals',
+      label: 'My Journals',
+      icon: BookOpen,
+      color: 'purple',
+    },
+    {
       id: 'saved',
       label: 'Saved Places',
       icon: Bookmark,
@@ -44,6 +50,7 @@ export function ProfileTabs({ activeTab, setActiveTab }: ProfileTabsProps) {
       sunset: { text: 'text-sunset', bg: 'bg-sunset', border: 'border-sunset' },
       forest: { text: 'text-forest', bg: 'bg-forest', border: 'border-forest' },
       sand: { text: 'text-sand', bg: 'bg-sand', border: 'border-sand' },
+      purple: { text: 'text-purple-500', bg: 'bg-purple-500', border: 'border-purple-500' },
     };
 
     return colorMap[tabColor]?.[type] || '';

@@ -9,6 +9,7 @@ import { ProfilePreferences } from './preferences';
 import { ProfileSavedPlaces } from './profile-saved-places';
 import { ProfileTabs } from './profile-tabs';
 import { ProfileTrips } from './profile-trips';
+import { JournalManagement } from './journal/journal-management';
 import { User, UserInfo } from '@/types';
 import { userService } from '@/service/user-service';
 
@@ -60,6 +61,8 @@ export function ProfilePage() {
         return (
           <ProfileTrips user={user} userInfo={userInfo} loading={loading} />
         );
+      case 'journals':
+        return <JournalManagement />;
       case 'saved':
         return (
           <ProfileSavedPlaces
@@ -181,6 +184,9 @@ export function ProfilePage() {
             )}
             {activeTab === 'trips' && (
               <div className="absolute inset-0 bg-gradient-to-tr from-forest/5 to-transparent rounded-xl -z-10" />
+            )}
+            {activeTab === 'journals' && (
+              <div className="absolute inset-0 bg-gradient-to-tr from-purple-500/5 to-transparent rounded-xl -z-10" />
             )}
             {activeTab === 'saved' && (
               <div className="absolute inset-0 bg-gradient-to-tr from-sand/5 to-transparent rounded-xl -z-10" />

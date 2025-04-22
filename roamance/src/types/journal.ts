@@ -1,4 +1,5 @@
 import { Audit } from './audit';
+import { Location } from './location';
 import { BaseResponse } from './response';
 import { Subsection } from './subsection';
 import { User } from './user';
