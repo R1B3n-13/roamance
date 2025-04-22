@@ -20,7 +20,13 @@ export const paths = {
   terms: 'terms',
   privacy: 'privacy',
   cookies: 'cookies',
-};
+
+  info: 'info',
+  preferences: 'preferences',
+  trips: 'trips',
+  journals: 'journals',
+  places: 'places',
+} as const;
 
 export const pathTitles = {
   home: 'Home',
@@ -41,7 +47,13 @@ export const pathTitles = {
   terms: 'Terms of Service',
   privacy: 'Privacy Policy',
   cookies: 'Cookies Policy',
-};
+
+  info: 'Information',
+  preferences: 'Preferences',
+  trips: 'My Trips',
+  journals: 'Journals',
+  places: 'Places',
+} as const;
 
 export const routes: Record<string, RouteItem> = {
   home: {
@@ -107,6 +119,29 @@ export const routes: Record<string, RouteItem> = {
     title: pathTitles.cookies,
     href: `/${paths.cookies}`,
   },
-};
 
-export const secureRoutes = [routes.profile.href];
+  /* --------------------------------- Profile -------------------------------- */
+
+  info: {
+    title: pathTitles.info,
+    href: `/${paths.profile}/${paths.info}`,
+  },
+  preferences: {
+    title: pathTitles.preferences,
+    href: `/${paths.profile}/${paths.preferences}`,
+  },
+  trips: {
+    title: pathTitles.trips,
+    href: `/${paths.profile}/${paths.trips}`,
+  },
+  journals: {
+    title: pathTitles.journals,
+    href: `/${paths.profile}/${paths.journals}`,
+  },
+  places: {
+    title: pathTitles.places,
+    href: `/${paths.profile}/${paths.places}`,
+  },
+} as const;
+
+export const secureRoutes = [routes.profile.href] as const;

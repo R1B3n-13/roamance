@@ -3,43 +3,53 @@
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 import { User, Settings, Compass, Bookmark, BookOpen } from 'lucide-react';
+import { useRouter, usePathname } from 'next/navigation';
+import { routes } from '@/constants/routes';
 
 interface ProfileTabsProps {
   activeTab: string;
-  setActiveTab: (tab: string) => void;
+  setActiveTab?: (tab: string) => void;
 }
 
-export function ProfileTabs({ activeTab, setActiveTab }: ProfileTabsProps) {
+export function ProfileTabs({ activeTab }: ProfileTabsProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+
   const tabs = [
     {
       id: 'info',
       label: 'Information',
       icon: User,
       color: 'ocean',
+      route: routes.info.href,
     },
     {
       id: 'preferences',
       label: 'Preferences',
       icon: Settings,
       color: 'sunset',
+      route: routes.preferences.href,
     },
     {
       id: 'trips',
       label: 'My Trips',
       icon: Compass,
       color: 'forest',
+      route: routes.trips.href,
     },
     {
       id: 'journals',
       label: 'My Journals',
       icon: BookOpen,
       color: 'purple',
+      route: routes.journals.href,
     },
     {
       id: 'saved',
       label: 'Saved Places',
       icon: Bookmark,
       color: 'sand',
+      route: routes.places.href,
     },
   ];
 
@@ -63,7 +73,7 @@ export function ProfileTabs({ activeTab, setActiveTab }: ProfileTabsProps) {
           {tabs.map((tab) => (
             <motion.button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => router.push(tab.route)}
               whileHover={{
                 y: -2,
                 transition: { duration: 0.2 },
@@ -72,7 +82,7 @@ export function ProfileTabs({ activeTab, setActiveTab }: ProfileTabsProps) {
                 'relative flex items-center gap-1 sm:gap-4 px-3 py-2.5 sm:px-4 sm:py-3 md:px-5 md:py-3.5', // Adjusted padding
                 'rounded-t-lg text-xs sm:text-sm font-medium transition-all duration-300', // Adjusted font size
                 'border-b-2 border-transparent cursor-pointer flex-shrink-0', // Added flex-shrink-0
-                activeTab === tab.id
+                activeTab === tab.id || pathname === tab.route
                   ? `${getColorClass(tab.color, 'text')} border-b-2 ${getColorClass(tab.color, 'border')}`
                   : 'text-muted-foreground hover:text-foreground hover:bg-muted/30'
               )}
@@ -80,7 +90,7 @@ export function ProfileTabs({ activeTab, setActiveTab }: ProfileTabsProps) {
               <div
                 className={cn(
                   'flex items-center justify-center p-1 sm:p-1.5 rounded-full', // Adjusted padding
-                  activeTab === tab.id
+                  activeTab === tab.id || pathname === tab.route
                     ? `${getColorClass(tab.color, 'bg')}/10`
                     : 'bg-muted/20'
                 )}
@@ -88,7 +98,7 @@ export function ProfileTabs({ activeTab, setActiveTab }: ProfileTabsProps) {
                 <tab.icon
                   className={cn(
                     'h-5 w-5', // Adjusted icon size
-                    activeTab === tab.id
+                    activeTab === tab.id || pathname === tab.route
                       ? getColorClass(tab.color, 'text')
                       : 'text-muted-foreground'
                   )}
@@ -99,7 +109,7 @@ export function ProfileTabs({ activeTab, setActiveTab }: ProfileTabsProps) {
                 {tab.label}
               </span>
 
-              {activeTab === tab.id && (
+              {(activeTab === tab.id || pathname === tab.route) && (
                 <motion.div
                   layoutId="activeTabIndicator"
                   className={cn(

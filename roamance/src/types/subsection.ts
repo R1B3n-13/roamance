@@ -41,16 +41,19 @@ export interface SubsectionCreateRequest {
 
 export interface SightseeingSubsectionCreateRequest
   extends SubsectionCreateRequest {
+  type: SubsectionType.SIGHTSEEING;
   location: Location;
 }
 
 export interface ActivitySubsectionCreateRequest
   extends SubsectionCreateRequest {
+  type: SubsectionType.ACTIVITY;
   location: Location;
   activity_name: string;
 }
 
 export interface RouteSubsectionCreateRequest extends SubsectionCreateRequest {
+  type: SubsectionType.ROUTE;
   locations: Location[];
   total_time: number;
   total_distance: number;
