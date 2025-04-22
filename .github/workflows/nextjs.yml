@@ -7,7 +7,7 @@ name: Deploy Next.js site in Subdirectory to Pages
 on:
   # Runs on pushes targeting the default branch
   push:
-    branches: ["main"]
+    branches: ["main", "hotfix/main-TASK_81-fix_nextjs_static_file_issue"]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -60,7 +60,6 @@ jobs:
           cache: ${{ steps.detect-package-manager.outputs.manager }}
           # Specify the path to the lock file within the subdirectory for caching
           cache-dependency-path: roamance/${{ steps.detect-package-manager.outputs.manager == 'yarn' && 'yarn.lock' || 'package-lock.json' }}
-
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
