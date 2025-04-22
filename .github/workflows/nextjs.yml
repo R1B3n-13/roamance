@@ -65,9 +65,8 @@ jobs:
         uses: actions/configure-pages@v5
         with:
           # Specify the working directory for the Next.js project
+          # We removed static_site_generator: next because we configure output: 'export' in next.config.js
           working-directory: roamance
-          # Automatically inject basePath etc. based on Next.js static export
-          static_site_generator: next
 
       - name: Restore cache
         uses: actions/cache@v4
@@ -89,17 +88,13 @@ jobs:
 
       - name: Build with Next.js
         # Run the build command within the /roamance directory
+        # This will now produce the 'out' directory because output: 'export' is in next.config.js
         run: ${{ steps.detect-package-manager.outputs.runner }} next build
         working-directory: roamance
-        # By default, run steps fail the job if the command exits with a non-zero status.
-        # This is good and we want this behavior, so no explicit 'continue-on-error: true' here.
 
-      # --- Added Diagnostic Step ---
+      # You can keep or remove this diagnostic step now that the build is expected to work
       - name: List contents of roamance directory after build
         run: ls -la roamance/
-      - name: List contents of root directory after build
-        run: ls -la
-      # -----------------------------
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
