@@ -1,10 +1,12 @@
 package com.devs.roamance.dto.response.travel.journal;
 
+import java.util.UUID;
+
 import com.devs.roamance.dto.response.AuditDto;
 import com.devs.roamance.model.travel.journal.SubsectionType;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.util.UUID;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
