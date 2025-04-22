@@ -97,6 +97,8 @@ jobs:
       # --- Added Diagnostic Step ---
       - name: List contents of roamance directory after build
         run: ls -la roamance/
+      - name: List contents of root directory after build
+        run: ls -la
       # -----------------------------
 
       - name: Upload artifact
