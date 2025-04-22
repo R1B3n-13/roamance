@@ -16,7 +16,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RouteSubsection extends Subsection {
-  @ElementCollection @NonNull private List<Location> locations = new ArrayList<>();
+  @ElementCollection @NonNull private List<Location> waypoints = new ArrayList<>();
 
   @Nullable private Integer totalTime;
 

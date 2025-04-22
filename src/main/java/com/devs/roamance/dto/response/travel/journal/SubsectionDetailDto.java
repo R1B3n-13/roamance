@@ -20,7 +20,7 @@ public class SubsectionDetailDto extends SubsectionBriefDto {
   private List<String> checklists = new ArrayList<>();
 
   // For Activity Subsection
-  private LocationResponseDto location;
+  private LocationResponseDto waypoints;
 
   @JsonProperty("activity_name")
   private String activityName;

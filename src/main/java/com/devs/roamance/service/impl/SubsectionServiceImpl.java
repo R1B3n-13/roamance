@@ -264,7 +264,7 @@ public class SubsectionServiceImpl implements SubsectionService {
               routeDetails.getLocations().stream()
                   .map(loc -> modelMapper.map(loc, Location.class))
                   .toList();
-          routeSubsection.setLocations(locations);
+          routeSubsection.setWaypoints(locations);
         }
       } catch (Exception e) {
         log.error("Error mapping subsection details to RouteSubsectionUpdateRequestDto", e);

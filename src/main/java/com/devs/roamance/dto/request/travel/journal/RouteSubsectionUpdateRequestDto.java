@@ -17,7 +17,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RouteSubsectionUpdateRequestDto extends LocationUpdateRequestDto {
-  @Valid private List<LocationUpdateRequestDto> locations = new ArrayList<>();
+  @Valid private List<LocationUpdateRequestDto> waypoints = new ArrayList<>();
 
   @JsonProperty("total_time")
   @Min(value = 1, message = "Total time must be at least 1 minute")

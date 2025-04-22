@@ -18,7 +18,7 @@ import lombok.Setter;
 public class RouteSubsectionCreateRequestDto extends SubsectionCreateRequestDto {
   @NotEmpty(message = "At least one route location is required")
   @Valid
-  private List<LocationCreateRequestDto> locations = new ArrayList<>();
+  private List<LocationCreateRequestDto> waypoints = new ArrayList<>();
 
   @JsonProperty("total_time")
   @NotNull(message = "Total time is required")
