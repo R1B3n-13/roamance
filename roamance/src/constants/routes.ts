@@ -1,4 +1,4 @@
-import { RouteItem } from '@/types';
+import { DynamicRouteItem, RouteItem } from '@/types';
 
 export const paths = {
   home: '',
@@ -55,7 +55,29 @@ export const pathTitles = {
   places: 'Places',
 } as const;
 
-export const routes: Record<string, RouteItem> = {
+export const routes: {
+  home: RouteItem;
+  map: RouteItem;
+  destinations: RouteItem;
+  activities: RouteItem;
+  plans: RouteItem;
+  profile: RouteItem;
+  signIn: RouteItem;
+  signUp: RouteItem;
+  about: RouteItem;
+  careers: RouteItem;
+  blog: RouteItem;
+  contact: RouteItem;
+  terms: RouteItem;
+  privacy: RouteItem;
+  cookies: RouteItem;
+  info: RouteItem;
+  preferences: RouteItem;
+  trips: RouteItem;
+  journals: RouteItem;
+  journalDetail: DynamicRouteItem;
+  places: RouteItem;
+} = {
   home: {
     title: pathTitles.home,
     href: `/${paths.home}`,
@@ -138,6 +160,10 @@ export const routes: Record<string, RouteItem> = {
     title: pathTitles.journals,
     href: `/${paths.profile}/${paths.journals}`,
   },
+  journalDetail: (id) => ({
+    title: pathTitles.journals,
+    href: `/${paths.profile}/${paths.journals}/${id}`,
+  }),
   places: {
     title: pathTitles.places,
     href: `/${paths.profile}/${paths.places}`,

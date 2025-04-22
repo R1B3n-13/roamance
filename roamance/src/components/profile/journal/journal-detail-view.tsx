@@ -4,6 +4,24 @@ import { JournalDetail } from '@/types/journal';
 import { SubsectionType } from '@/types/subsection';
 import { formatDate } from '@/utils/format';
 import { motion, AnimatePresence } from 'framer-motion';
+import dynamic from 'next/dynamic';
+import { cn } from '@/lib/utils';
+
+// Dynamically import Leaflet components to avoid SSR issues
+const MapContainer = dynamic(
+  () => import('react-leaflet').then((mod) => mod.MapContainer),
+  { ssr: false }
+);
+
+const TileLayer = dynamic(
+  () => import('react-leaflet').then((mod) => mod.TileLayer),
+  { ssr: false }
+);
+
+const DestinationMarker = dynamic(
+  () => import('@/components/maps/markers').then((mod) => mod.DestinationMarker),
+  { ssr: false }
+);
 
 interface JournalDetailViewProps {
   journal: JournalDetail;
@@ -20,6 +38,26 @@ export const JournalDetailView: React.FC<JournalDetailViewProps> = ({
     journal.subsections.length > 0 ? journal.subsections[0].id : null
   );
   const [showMap, setShowMap] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  // Check if dark mode is enabled
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setIsDarkMode(document.documentElement.classList.contains('dark'));
+
+      // Listen for theme changes
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.attributeName === 'class') {
+            setIsDarkMode(document.documentElement.classList.contains('dark'));
+          }
+        });
+      });
+
+      observer.observe(document.documentElement, { attributes: true });
+      return () => observer.disconnect();
+    }
+  }, []);
 
   if (!isOpen) return null;
 
@@ -216,14 +254,36 @@ export const JournalDetailView: React.FC<JournalDetailViewProps> = ({
                       className="overflow-hidden"
                     >
                       <div className="mt-3 h-64 bg-gray-100 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 overflow-hidden">
-                        <iframe
-                          title="Journal Location"
-                          width="100%"
-                          height="100%"
-                          frameBorder="0"
-                          src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyBIwzALxUPNbatRBj3Xi1Uhp0fFzwWNBkE&q=${journal.destination.latitude},${journal.destination.longitude}&zoom=12`}
-                          allowFullScreen
-                        />
+                        {typeof window !== 'undefined' && (
+                          <div className="h-full w-full relative">
+                            <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+                            <MapContainer
+                              center={[journal.destination.latitude, journal.destination.longitude]}
+                              zoom={12}
+                              style={{ height: "100%", width: "100%" }}
+                              zoomControl={true}
+                              className={cn({ 'dark-map': isDarkMode })}
+                            >
+                              <TileLayer
+                                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                                url={isDarkMode
+                                  ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                                  : "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                }
+                              />
+
+                              <DestinationMarker
+                                position={{
+                                  lat: journal.destination.latitude,
+                                  lng: journal.destination.longitude
+                                }}
+                                locationName={journal.title}
+                                isDarkMode={isDarkMode}
+                              />
+                            </MapContainer>
+                          </div>
+                        )}
                       </div>
                     </motion.div>
                   )}
