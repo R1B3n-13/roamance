@@ -265,6 +265,18 @@ public class GlobalExceptionHandler {
         new BaseResponseDto(400, false, ex.getMessage()), HttpStatus.BAD_REQUEST);
   }
 
+  // ==================== AI Related Exceptions ====================
+
+  @ExceptionHandler(AiGenerationFailedException.class)
+  public ResponseEntity<BaseResponseDto> handleAiGenerationFailedException(
+      AiGenerationFailedException ex) {
+
+    log.error("AiGenerationFailedException: {}", ex.getMessage(), ex);
+
+    return new ResponseEntity<>(
+        new BaseResponseDto(500, false, ex.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+  }
+
   // ==================== General Exceptions ====================
 
   @ExceptionHandler(IllegalArgumentException.class)

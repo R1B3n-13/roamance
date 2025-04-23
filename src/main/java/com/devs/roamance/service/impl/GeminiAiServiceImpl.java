@@ -5,8 +5,13 @@ import static dev.langchain4j.model.googleai.GeminiHarmBlockThreshold.BLOCK_MEDI
 import static dev.langchain4j.model.googleai.GeminiHarmCategory.*;
 
 import com.devs.roamance.constant.AiSystemInstruction;
+import com.devs.roamance.constant.ResponseMessage;
 import com.devs.roamance.dto.request.ai.MultiModalAiRequestDto;
+import com.devs.roamance.dto.request.ai.UniModalAiRequestDto;
+import com.devs.roamance.dto.response.ai.AiDto;
+import com.devs.roamance.dto.response.ai.AiResponseDto;
 import com.devs.roamance.dto.response.ai.TidbitsAndSafetyResponseDto;
+import com.devs.roamance.exception.AiGenerationFailedException;
 import com.devs.roamance.service.GeminiAiService;
 import com.devs.roamance.util.GeminiAiUtil;
 import com.devs.roamance.util.RestUtil;
@@ -84,7 +89,8 @@ public class GeminiAiServiceImpl implements GeminiAiService {
           new TidbitsAndSafetyResponseDto(null, FinishReason.OTHER));
     }
 
-    ChatResponse chatResponse = generateResponse(model, mediaBytes, requestDto.getText());
+    ChatResponse chatResponse =
+        generateResponse(model, AiSystemInstruction.FOR_TIDBITS, mediaBytes, requestDto.getText());
 
     if (chatResponse == null) {
 
@@ -97,8 +103,41 @@ public class GeminiAiServiceImpl implements GeminiAiService {
             chatResponse.aiMessage().text(), chatResponse.finishReason()));
   }
 
+  @Override
+  @Async
+  public CompletableFuture<AiResponseDto> getProofreading(UniModalAiRequestDto requestDto) {
+
+    ChatLanguageModel model;
+
+    try {
+      model =
+          geminiAiUtil.geminiModelBuilder(
+              apiKey, "gemini-2.0-flash", builder -> builder.temperature(0.5));
+    } catch (Exception e) {
+      log.error("Gemini model build failed: {}", e.getMessage(), e);
+      return CompletableFuture.completedFuture(new AiResponseDto(null));
+    }
+
+    ChatResponse chatResponse =
+        generateResponse(model, AiSystemInstruction.FOR_PROOFREADING, null, requestDto.getText());
+
+    if (chatResponse == null) {
+      throw new AiGenerationFailedException(ResponseMessage.PROOFREAD_GENERATION_FAILED);
+    }
+
+    return CompletableFuture.completedFuture(
+        new AiResponseDto(
+            201,
+            true,
+            ResponseMessage.PROOFREAD_GENERATION_SUCCESS,
+            new AiDto(chatResponse.aiMessage().text())));
+  }
+
   private ChatResponse generateResponse(
-      ChatLanguageModel model, Map<String, RestUtil.Media> mediaBytes, String text) {
+      ChatLanguageModel model,
+      String systemInstruction,
+      Map<String, RestUtil.Media> mediaBytes,
+      String text) {
 
     if ((text == null || text.isEmpty()) && (mediaBytes == null || mediaBytes.isEmpty())) {
 
@@ -106,20 +145,10 @@ public class GeminiAiServiceImpl implements GeminiAiService {
     }
 
     try {
-      SystemMessage systemMessage = new SystemMessage(AiSystemInstruction.FOR_TIDBITS);
+      SystemMessage systemMessage = new SystemMessage(systemInstruction);
 
       UserMessage.Builder userMessageBuilder = UserMessage.builder();
-
-      if (text != null && !text.isEmpty()) {
-        userMessageBuilder.addContent(TextContent.from(text));
-      }
-
-      for (Map.Entry<String, RestUtil.Media> entry : mediaBytes.entrySet()) {
-        String base64Image = Base64.getEncoder().encodeToString(entry.getValue().content());
-        ImageContent imageContent = ImageContent.from(base64Image, entry.getValue().mimeType());
-        userMessageBuilder.addContent(imageContent);
-      }
-
+      addContentToUserMessage(userMessageBuilder, mediaBytes, text);
       UserMessage userMessage = userMessageBuilder.build();
 
       return model.chat(systemMessage, userMessage);
@@ -137,6 +166,24 @@ public class GeminiAiServiceImpl implements GeminiAiService {
     } catch (Exception e) {
       log.error("AI response generation failed: {}", e.getMessage(), e);
       return null;
+    }
+  }
+
+  private void addContentToUserMessage(
+      UserMessage.Builder userMessageBuilder, Map<String, RestUtil.Media> mediaBytes, String text) {
+
+    if (text != null && !text.isEmpty()) {
+      userMessageBuilder.addContent(TextContent.from(text));
+    }
+
+    if (mediaBytes == null || mediaBytes.isEmpty()) {
+      return;
+    }
+
+    for (Map.Entry<String, RestUtil.Media> entry : mediaBytes.entrySet()) {
+      String base64Image = Base64.getEncoder().encodeToString(entry.getValue().content());
+      ImageContent imageContent = ImageContent.from(base64Image, entry.getValue().mimeType());
+      userMessageBuilder.addContent(imageContent);
     }
   }
 }
