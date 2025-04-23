@@ -267,8 +267,8 @@ export const JournalManagement: React.FC = () => {
         <div className="absolute -left-10 -top-10 w-40 h-40 bg-purple-500/10 rounded-full blur-3xl -z-10"></div>
         <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-indigo-500/10 rounded-full blur-3xl -z-10"></div>
 
-        {/* Gradient line consistent with other tabs */}
-        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 via-indigo-500 to-blue-500 opacity-80" />
+        {/* Gradient line using all colors from globals.css, starting with violet */}
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-violet via-forest to-ocean opacity-80" />
 
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-5">
           <div>

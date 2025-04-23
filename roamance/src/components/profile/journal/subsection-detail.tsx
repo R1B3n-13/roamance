@@ -70,17 +70,19 @@ export const SubsectionDetail: React.FC<SubsectionDetailProps> = ({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05 + 0.1 }}
       className={cn(
-        'rounded-xl overflow-hidden border shadow-sm transition-all duration-300',
+        'rounded-2xl bg-white dark:bg-gray-800 border border-muted/20 shadow-lg transition-colors duration-300',
         isActive
-          ? cn('border-muted/70 shadow-md', colors.border)
-          : 'border-muted/30 hover:border-muted/50'
+          ? cn(colors.border, 'shadow-xl')
+          : 'hover:border-muted/30'
       )}
     >
       <button
         onClick={toggleSubsection}
         className={cn(
-          'flex items-center justify-between w-full p-4 text-left bg-background hover:bg-muted/20 transition-colors duration-200',
-          isActive && cn('bg-muted/10', colors.bg)
+          'flex items-center justify-between w-full p-6 text-left rounded-t-2xl transition-colors duration-200',
+          isActive
+            ? cn('bg-muted/10', colors.bg)
+            : 'bg-white dark:bg-gray-800 hover:bg-muted/10'
         )}
       >
         <div className="flex items-center">
@@ -132,9 +134,9 @@ export const SubsectionDetail: React.FC<SubsectionDetailProps> = ({
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3 }}
-            className="overflow-hidden border-t border-muted/30"
+            className="overflow-hidden border-t border-muted/20"
           >
-            <div className={cn('p-5', colors.bg)}>
+            <div className={cn('p-6 space-y-6', colors.bg)}>
               {/* Type-specific content */}
               {subsection.type === SubsectionType.SIGHTSEEING && (
                 <div className="mb-5">

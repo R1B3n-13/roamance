@@ -1,18 +1,23 @@
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { JournalBrief } from '@/types/journal';
 import { formatRelativeTime } from '@/utils';
-import { AnimatePresence, motion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
   Archive,
+  ArchiveRestore,
   BookOpen,
+  Calendar,
   Clock,
   Edit,
+  Lock,
   MapPin,
-  MoreVertical,
+  Share2,
   Star,
-  Trash2,
 } from 'lucide-react';
-import React, { useEffect, useRef, useState } from 'react';
+import React from 'react';
 import { getJournalColorScheme } from './colorscheme';
 
 interface JournalCardProps {
@@ -27,219 +32,244 @@ interface JournalCardProps {
 export const JournalCard: React.FC<JournalCardProps> = ({
   journal,
   onEdit,
-  onDelete,
   onView,
   onToggleFavorite,
   onToggleArchive,
 }) => {
-  const [showOptions, setShowOptions] = useState(false);
-  const optionsRef = useRef<HTMLDivElement>(null);
-
-  // Close options menu when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        optionsRef.current &&
-        !optionsRef.current.contains(event.target as Node)
-      ) {
-        setShowOptions(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
-
-  const handleCardClick = (e: React.MouseEvent) => {
-    // Don't trigger card click when clicking on the options menu
-    if (!(e.target as Element).closest('.journal-options')) {
-      onView(journal);
-    }
-  };
-
   // Get consistent color scheme based on journal title
   const colorScheme = getJournalColorScheme(journal.title);
 
+  // Get gradient based on colorScheme
+  const getGradient = () => {
+    if (journal.is_favorite) return 'from-sunset/80 to-sunset-dark/80';
+
+    switch (colorScheme.type) {
+      case 'ocean':
+        return 'from-ocean/80 to-ocean-dark/80';
+      case 'sunset':
+        return 'from-sunset/80 to-sand/80';
+      case 'forest':
+        return 'from-forest/80 to-forest-dark/80';
+      case 'violet':
+        return 'from-violet/80 to-violet-dark/80';
+      case 'lavender':
+        return 'from-lavender/80 to-lavender-dark/80';
+      default:
+        return 'from-ocean/80 to-ocean-dark/80';
+    }
+  };
+
+  // Get badge style based on colorScheme
+  const getBadgeStyle = () => {
+    if (journal.is_favorite) return 'bg-sunset text-white border border-sunset/20 shadow-sm';
+
+    switch (colorScheme.type) {
+      case 'ocean':
+        return 'bg-ocean text-white border border-ocean/20 shadow-sm';
+      case 'sunset':
+        return 'bg-sunset text-white border border-sunset/20 shadow-sm';
+      case 'forest':
+        return 'bg-forest text-white border border-forest/20 shadow-sm';
+      case 'violet':
+        return 'bg-violet text-white border border-violet/20 shadow-sm';
+      case 'lavender':
+        return 'bg-lavender text-white border border-lavender/20 shadow-sm';
+      default:
+        return 'bg-ocean text-white border border-ocean/20 shadow-sm';
+    }
+  };
+
+  // Format created date
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
+  };
+
   return (
     <motion.div
-      whileHover={{
-        y: -5,
-        boxShadow:
-          '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
-      }}
-      transition={{ duration: 0.3 }}
-      className="group relative h-full flex flex-col rounded-xl overflow-hidden bg-background/80 backdrop-blur-sm border border-muted/30 shadow-sm hover:shadow-lg hover:border-muted/50 transition-all duration-300"
+      whileHover={{ y: -5 }}
+      transition={{ type: 'spring', stiffness: 400, damping: 17 }}
     >
-      {/* Card header with gradient */}
-      <div
-        className={cn('h-24 relative bg-gradient-to-r', colorScheme.gradient)}
-      >
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/50"></div>
-
-        {/* Options button */}
-        <div
-          className="absolute top-3 right-3 z-20 journal-options"
-          ref={optionsRef}
-        >
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setShowOptions(!showOptions);
-            }}
-            className="p-1.5 rounded-full bg-white/20 text-white backdrop-blur-sm hover:bg-white/30 transition-colors"
-            aria-label="Journal options"
-          >
-            <MoreVertical className="w-4 h-4" />
-          </button>
-
-          <AnimatePresence>
-            {showOptions && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: 5 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: 5 }}
-                transition={{ duration: 0.15 }}
-                className="absolute right-0 mt-2 w-48 bg-background/95 backdrop-blur-sm rounded-lg shadow-lg z-30 border border-muted/40 overflow-hidden"
-              >
-                <div className="py-1">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onView(journal);
-                      setShowOptions(false);
-                    }}
-                    className="flex items-center w-full px-4 py-2.5 text-sm text-foreground hover:bg-muted/50 transition-colors"
-                  >
-                    <BookOpen className="w-4 h-4 mr-2 text-violet" />
-                    View Details
-                  </button>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onEdit(journal);
-                      setShowOptions(false);
-                    }}
-                    className="flex items-center w-full px-4 py-2.5 text-sm text-foreground hover:bg-muted/50 transition-colors"
-                  >
-                    <Edit className="w-4 h-4 mr-2 text-sunset" />
-                    Edit Journal
-                  </button>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onDelete(journal);
-                      setShowOptions(false);
-                    }}
-                    className="flex items-center w-full px-4 py-2.5 text-sm text-destructive hover:bg-destructive/10 transition-colors"
-                  >
-                    <Trash2 className="w-4 h-4 mr-2" />
-                    Delete Journal
-                  </button>
-                </div>
-              </motion.div>
+      <Card className="overflow-hidden group border-muted/40 bg-gradient-to-b from-background to-background/95 backdrop-blur-sm shadow-md transition-all duration-300 hover:shadow-xl py-0">
+        {/* Journal Header Image */}
+        <div className="h-48 relative overflow-hidden">
+          <div
+            className={cn(
+              'absolute inset-0 flex items-center justify-center bg-gradient-to-tr',
+              getGradient()
             )}
-          </AnimatePresence>
-        </div>
+          >
+            {/* Decorative pattern overlay */}
+            <div className="absolute inset-0 bg-[url('/images/roamance-logo-no-text.png')] bg-repeat-space bg-contain opacity-10 mix-blend-overlay" />
 
-        {/* Journal title overlay */}
-        <div className="absolute bottom-0 left-0 right-0 p-3 z-10 flex items-end">
-          <h3 className="text-lg font-semibold text-white truncate drop-shadow-sm">
-            {journal.title}
-          </h3>
-        </div>
-      </div>
+            <div className="relative z-10 text-center px-4">
+              <p className="text-white text-xl font-bold drop-shadow-md">
+                {journal.title}
+              </p>
+            </div>
+          </div>
 
-      {/* Card content */}
-      <div
-        onClick={handleCardClick}
-        className="flex-1 p-4 flex flex-col cursor-pointer"
-      >
-        {/* Favorite and Archive action buttons */}
-        <div className="flex justify-end gap-2 mb-2">
-          <button
+          {/* Badges section */}
+          <div className="absolute top-3 left-3">
+            <Badge
+              className={cn(
+                'capitalize rounded-full shadow-md px-2.5',
+                getBadgeStyle()
+              )}
+            >
+              {journal.total_subsections}{' '}
+              {journal.total_subsections === 1 ? 'section' : 'sections'}
+            </Badge>
+          </div>
+
+          {/* Shared badge */}
+          <div className="absolute top-3 right-3">
+            <Badge
+              className={cn(
+                'flex items-center gap-1 font-medium rounded-full shadow-md',
+                journal.is_shared
+                  ? 'bg-ocean text-white border border-ocean-light/30'
+                  : 'bg-mountain text-white border border-mountain-light/30'
+              )}
+            >
+              {journal.is_shared ? (
+                <Share2 className="h-3 w-3" />
+              ) : (
+                <Lock className="h-3 w-3" />
+              )}
+              {journal.is_shared ? 'Shared' : 'Private'}
+            </Badge>
+          </div>
+
+          {/* Created date badge */}
+          <div className="absolute bottom-3 left-3">
+            <Badge
+              variant="outline"
+              className="bg-black/50 text-white border-white/30 flex items-center gap-1.5 rounded-full backdrop-blur-sm shadow-sm"
+            >
+              <Calendar className="h-3 w-3" />
+              <span className="text-xs font-medium">
+                Created {formatDate(journal.audit.created_at)}
+              </span>
+            </Badge>
+          </div>
+
+          {/* Favorite/Bookmark button */}
+          <Button
+            size="icon"
+            variant="ghost"
             onClick={(e) => {
               e.stopPropagation();
               onToggleFavorite(journal);
             }}
-            className={`p-1.5 rounded-full ${journal.is_favorite ? 'bg-yellow-100 text-yellow-500 dark:bg-yellow-900/30 dark:text-yellow-400' : 'bg-muted/20 text-muted-foreground hover:bg-muted/30'} transition-colors`}
-            aria-label={journal.is_favorite ? "Remove from favorites" : "Add to favorites"}
+            className={cn(
+              'absolute bottom-3 right-3 h-9 w-9 rounded-full backdrop-blur-md border transition-all duration-300 shadow-sm hover:shadow-md',
+              journal.is_favorite
+                ? 'bg-sunset/85 hover:bg-sunset text-white border-sunset-light/30'
+                : 'bg-white/15 hover:bg-white/30 text-white border-white/20'
+            )}
           >
-            <Star className="w-4 h-4" />
-          </button>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onToggleArchive(journal);
-            }}
-            className={`p-1.5 rounded-full ${journal.is_archived ? 'bg-blue-100 text-blue-500 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-muted/20 text-muted-foreground hover:bg-muted/30'} transition-colors`}
-            aria-label={journal.is_archived ? "Unarchive journal" : "Archive journal"}
-          >
-            <Archive className="w-4 h-4" />
-          </button>
+            <Star
+              className={cn('h-4 w-4', journal.is_favorite ? 'fill-white' : '')}
+            />
+          </Button>
         </div>
 
-        <p className="text-sm text-muted-foreground line-clamp-3 flex-1">
-          {journal.description}
-        </p>
-
-        <div className="mt-4 pt-3 border-t border-muted/20 flex flex-col gap-2">
-          {journal.destination && (
-            <div className="flex items-center text-xs text-muted-foreground">
-              <div
-                className={cn(
-                  'w-6 h-6 rounded-full flex items-center justify-center mr-2 flex-shrink-0',
-                  colorScheme.bg,
-                  colorScheme.bgDark
-                )}
-              >
-                <MapPin
-                  className={cn(
-                    'w-3 h-3',
-                    colorScheme.icon,
-                    colorScheme.iconDark
-                  )}
-                />
-              </div>
-              <span className="truncate">
-                {journal.destination
-                  ? `${journal.destination.latitude.toFixed(2)}, ${journal.destination.longitude.toFixed(2)}`
-                  : 'No location'}
-              </span>
+        {/* Journal Content */}
+        <div className="p-5">
+          <div className="flex items-start justify-between">
+            <div>
+              <h3 className={cn(
+                "font-semibold mb-1.5 transition-colors",
+                journal.is_favorite
+                  ? "group-hover:text-sunset"
+                  : "group-hover:text-ocean"
+              )}>
+                {journal.title}
+              </h3>
+              {journal.destination && (
+                <div className="flex items-center text-muted-foreground text-sm gap-1.5">
+                  <MapPin className="h-3.5 w-3.5" />
+                  <span>
+                    {journal.destination
+                      ? `${journal.destination.latitude.toFixed(2)}, ${journal.destination.longitude.toFixed(2)}`
+                      : 'No location'}
+                  </span>
+                </div>
+              )}
             </div>
-          )}
+          </div>
 
-          <div className="flex items-center justify-between">
-            <div className="flex items-center text-xs text-muted-foreground">
-              <div
-                className={cn(
-                  'w-6 h-6 rounded-full flex items-center justify-center mr-2 flex-shrink-0',
-                  'bg-sunset-light/20 dark:bg-sunset-dark/20'
-                )}
-              >
-                <Clock className="w-3 h-3 text-sunset dark:text-sunset-light" />
-              </div>
+          <p className="text-muted-foreground text-sm mt-3 line-clamp-2 leading-relaxed">
+            {journal.description}
+          </p>
+
+          {/* Time indicator */}
+          <div className="flex items-center text-xs text-muted-foreground mt-4">
+            <div className="flex items-center gap-1.5">
+              <Clock className="h-3.5 w-3.5 text-muted-foreground" />
               <span>
                 {formatRelativeTime(new Date(journal.audit.created_at))}
               </span>
             </div>
+          </div>
 
-            <div className="ml-auto">
-              <span
-                className={cn(
-                  'inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium',
-                  colorScheme.badge,
-                  colorScheme.badgeDark
-                )}
-              >
-                {journal.total_subsections}{' '}
-                {journal.total_subsections === 1 ? 'section' : 'sections'}
-              </span>
-            </div>
+          {/* Action buttons */}
+          <div className="mt-4 pt-4 border-t border-muted/20 flex justify-between">
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={(e) => {
+                e.stopPropagation();
+                onView(journal);
+              }}
+              className="text-xs text-muted-foreground hover:text-forest hover:bg-forest/5 transition-colors duration-300 flex items-center gap-1.5"
+            >
+              <BookOpen className="h-3.5 w-3.5" />
+              <span>View</span>
+            </Button>
+
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleArchive(journal);
+              }}
+              className={cn(
+                'text-xs text-muted-foreground transition-colors duration-300 flex items-center gap-1.5',
+                journal.is_archived
+                  ? 'hover:text-violet hover:bg-violet/5'
+                  : 'hover:text-lavender hover:bg-lavender/5'
+              )}
+            >
+              {journal.is_archived ? (
+                <ArchiveRestore className="h-3.5 w-3.5" />
+              ) : (
+                <Archive className="h-3.5 w-3.5" />
+              )}
+              <span>{journal.is_archived ? 'Unarchive' : 'Archive'}</span>
+            </Button>
+
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit(journal);
+              }}
+              className="text-xs text-muted-foreground hover:text-sunset hover:bg-sunset/5 transition-colors duration-300 flex items-center gap-1.5"
+            >
+              <Edit className="h-3.5 w-3.5" />
+              <span>Edit</span>
+            </Button>
           </div>
         </div>
-      </div>
+      </Card>
     </motion.div>
   );
 };

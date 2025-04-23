@@ -1,3 +1,4 @@
+import { LocationPickerMap } from '@/components/maps/LocationPickerMap';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
@@ -11,8 +12,6 @@ import {
   Eye,
   ListChecks,
   Loader2,
-  MapPin,
-  Navigation,
   Plus,
   Route,
   StickyNote,
@@ -88,35 +87,6 @@ export const SubsectionForm: React.FC<SubsectionFormProps> = ({
         [name]: value,
       }));
     }
-  };
-
-  const handleSubsectionLocationChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const { name, value } = e.target;
-    const numValue = parseFloat(value);
-
-    setSubsection((prev) => {
-      // Ensure we only update location for types that have it
-      if (
-        prev.type === SubsectionType.SIGHTSEEING ||
-        prev.type === SubsectionType.ACTIVITY
-      ) {
-        return {
-          ...prev,
-          location: {
-            ...prev.location,
-            [name === 'subsectionLatitude' ? 'latitude' : 'longitude']: isNaN(
-              numValue
-            )
-              ? 0
-              : numValue,
-          },
-        };
-      }
-      // Return previous state if the type doesn't have a location property
-      return prev;
-    });
   };
 
   const handleRouteLocationChange = (
@@ -244,7 +214,7 @@ export const SubsectionForm: React.FC<SubsectionFormProps> = ({
   };
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6 p-6 bg-white dark:bg-gray-800 rounded-2xl shadow-lg">
       {subsectionError && (
         <motion.div
           initial={{ opacity: 0, y: -10 }}
@@ -412,49 +382,25 @@ export const SubsectionForm: React.FC<SubsectionFormProps> = ({
             getTypeColors().border
           )}
         >
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label
-                htmlFor="subsectionLatitude"
-                className="text-sm font-medium text-foreground/80 mb-1.5 block"
-              >
-                Latitude
-              </label>
-              <div className="relative">
-                <MapPin className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  type="number"
-                  step="0.000001"
-                  id="subsectionLatitude"
-                  name="subsectionLatitude"
-                  value={subsection.location?.latitude || 0}
-                  onChange={handleSubsectionLocationChange}
-                  placeholder="0.00"
-                  className="pl-10"
-                />
-              </div>
-            </div>
-            <div>
-              <label
-                htmlFor="subsectionLongitude"
-                className="text-sm font-medium text-foreground/80 mb-1.5 block"
-              >
-                Longitude
-              </label>
-              <div className="relative">
-                <Navigation className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  type="number"
-                  step="0.000001"
-                  id="subsectionLongitude"
-                  name="subsectionLongitude"
-                  value={subsection.location?.longitude || 0}
-                  onChange={handleSubsectionLocationChange}
-                  placeholder="0.00"
-                  className="pl-10"
-                />
-              </div>
-            </div>
+          <div>
+            <label className="text-sm font-medium text-foreground/80 mb-1.5 block">
+              Location
+            </label>
+            <LocationPickerMap
+              initialLocation={
+                subsection.location || { latitude: 0, longitude: 0 }
+              }
+              onLocationChangeAction={(lat, lng) => {
+                setSubsection((prev) => ({
+                  ...prev,
+                  location: {
+                    latitude: lat,
+                    longitude: lng,
+                  },
+                }));
+              }}
+              height="250px"
+            />
           </div>
 
           {subsection.type === SubsectionType.ACTIVITY && (
@@ -667,12 +613,12 @@ export const SubsectionForm: React.FC<SubsectionFormProps> = ({
         </div>
       </div>
 
-      <div className="flex justify-end space-x-3 pt-4">
+      <div className="flex justify-end space-x-4 pt-6">
         <Button
           type="button"
           onClick={onCancel}
           variant="outline"
-          className="px-4"
+          className="px-6 py-2 rounded-full"
         >
           Cancel
         </Button>
@@ -680,7 +626,7 @@ export const SubsectionForm: React.FC<SubsectionFormProps> = ({
           type="button"
           onClick={handleSubmit}
           disabled={isSubmitting}
-          className="px-4 bg-gradient-to-r from-violet to-lavender hover:from-violet hover:to-lavender/90 text-white"
+          className="px-6 py-2 rounded-full bg-gradient-to-r from-violet to-lavender hover:from-violet hover:to-lavender/90 text-white"
         >
           {isSubmitting ? (
             <>
