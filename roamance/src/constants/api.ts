@@ -42,3 +42,12 @@ export const JOURNAL_ENDPOINTS = {
   UPDATE: (id: string) => `${JOURNALS}/${id}`,
   DELETE: (id: string) => `${JOURNALS}/${id}`,
 } as const;
+
+const SUBSECTIONS = `${TRAVEL}/journals`;
+export const SUBSECTION_ENDPOINTS = {
+  ROOT: SUBSECTIONS,
+  CREATE: `${SUBSECTIONS}`,
+  GET_BY_ID: (id: string) => `${SUBSECTIONS}/${id}`,
+  UPDATE: (id: string) => `${SUBSECTIONS}/${id}`,
+  DELETE: (id: string) => `${SUBSECTIONS}/${id}`,
+} as const;

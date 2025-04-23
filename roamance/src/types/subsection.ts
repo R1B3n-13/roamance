@@ -1,6 +1,7 @@
 import { Audit } from './audit';
 import { Journal } from './journal';
 import { BaseResponse } from './response';
+import { Location } from './location';
 
 export enum SubsectionType {
   SIGHTSEEING = 'SIGHTSEEING',
@@ -8,60 +9,65 @@ export enum SubsectionType {
   ROUTE = 'ROUTE',
 }
 
-export interface Subsection extends SubsectionCreateRequest {
+export interface Subsection extends SubsectionRequestDto {
   id: string;
   journal: Journal;
   audit: Audit;
 }
 
 export interface SightseeingSubsection extends Subsection {
+  type: SubsectionType.SIGHTSEEING;
   location: Location;
 }
 
 export interface ActivitySubsection extends Subsection {
+  type: SubsectionType.ACTIVITY;
   location: Location;
   activity_name: string;
 }
 
 export interface RouteSubsection extends Subsection {
-  locations: Location[];
+  type: SubsectionType.ROUTE;
+  waypoints: Location[];
   total_time: number;
   total_distance: number;
 }
 
 /* --------------------------------- Create --------------------------------- */
 
-export interface SubsectionCreateRequest {
+export interface SubsectionRequestDto {
   title: string;
-  type: SubsectionType;
   journal_id: string;
   notes: string[];
   checklists: string[];
 }
 
-export interface SightseeingSubsectionCreateRequest
-  extends SubsectionCreateRequest {
+export interface SightseeingSubsectionRequest extends SubsectionRequestDto {
   type: SubsectionType.SIGHTSEEING;
   location: Location;
 }
 
-export interface ActivitySubsectionCreateRequest
-  extends SubsectionCreateRequest {
+export interface ActivitySubsectionRequest extends SubsectionRequestDto {
   type: SubsectionType.ACTIVITY;
   location: Location;
-  activity_name: string;
+  activity_type: string;
 }
 
-export interface RouteSubsectionCreateRequest extends SubsectionCreateRequest {
+export interface RouteSubsectionRequest extends SubsectionRequestDto {
   type: SubsectionType.ROUTE;
-  locations: Location[];
+  waypoints: Location[];
   total_time: number;
   total_distance: number;
 }
 
+export type SubsectionRequest =
+  | ActivitySubsectionRequest
+  | SightseeingSubsectionRequest
+  | RouteSubsectionRequest;
+
 /* -------------------------------- Response -------------------------------- */
 
-export interface SubsectionBrief {
+export interface SubsectionBriefDto {
   id: string;
   title: string;
   type: SubsectionType;
@@ -69,11 +75,31 @@ export interface SubsectionBrief {
   audit: Audit;
 }
 
-export interface SubsectionDetail {
+export type SubsectionDetailDto = Omit<SubsectionBriefDto, 'type'> & {
   notes: string[];
   checklists: string[];
+};
+
+export interface SightseeingSubsectionDto extends SubsectionDetailDto {
+  type: SubsectionType.SIGHTSEEING;
+  location: Location;
 }
 
-export type SubsectionBriefResponse = BaseResponse<SubsectionBrief>;
-export type SubsectionListResponse = BaseResponse<SubsectionBrief[]>;
-export type SubsectionDetailResponse = BaseResponse<SubsectionDetail>;
+export interface ActivitySubsectionDto extends SubsectionDetailDto {
+  type: SubsectionType.ACTIVITY;
+  location: Location;
+  activity_type: string;
+}
+
+export interface RouteSubsectionDto extends SubsectionDetailDto {
+  type: SubsectionType.ROUTE;
+  waypoints: Location[];
+  total_time: number;
+  total_distance: number;
+}
+
+export type SubsectionBriefResponse = BaseResponse<SubsectionBriefDto>;
+export type SubsectionListResponse = BaseResponse<SubsectionBriefDto[]>;
+export type SubsectionDetailResponse = BaseResponse<
+  SightseeingSubsectionDto | RouteSubsectionDto | ActivitySubsectionDto
+>;

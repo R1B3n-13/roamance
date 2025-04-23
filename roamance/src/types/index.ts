@@ -1,4 +1,6 @@
+export * from './activity';
 export * from './api';
+export * from './audit';
 export * from './auth';
 export * from './journal';
 export * from './location';

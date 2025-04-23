@@ -1,10 +1,13 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { cn } from '@/lib/utils';
 import { journalService } from '@/service/journal-service';
-import { JournalBrief, JournalCreateRequest, JournalDetail } from '@/types/journal';
+import {
+  JournalBrief,
+  JournalCreateRequest,
+  JournalDetail,
+} from '@/types/journal';
 import { AnimatePresence, motion } from 'framer-motion';
-import { AlertCircle, BookOpen, Loader2, PlusCircle, Search, X } from 'lucide-react';
+import { AlertCircle, BookOpen, PlusCircle, Search, X } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { ConfirmDialog } from '../../common/confirm-dialog';
 import { JournalCard } from './journal-card';
@@ -13,13 +16,20 @@ import { JournalForm } from './journal-form';
 
 export const JournalManagement: React.FC = () => {
   const [journals, setJournals] = useState<JournalBrief[]>([]);
-  const [selectedJournal, setSelectedJournal] = useState<JournalDetail | null>(null);
-  const [journalToDelete, setJournalToDelete] = useState<JournalBrief | null>(null);
-  const [journalToEdit, setJournalToEdit] = useState<JournalDetail | null>(null);
+  const [selectedJournal, setSelectedJournal] = useState<JournalDetail | null>(
+    null
+  );
+  const [journalToDelete, setJournalToDelete] = useState<JournalBrief | null>(
+    null
+  );
+  const [journalToEdit, setJournalToEdit] = useState<JournalDetail | null>(
+    null
+  );
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isDetailViewOpen, setIsDetailViewOpen] = useState(false);
   const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isDetailLoading, setIsDetailLoading] = useState(false); // New state for journal detail loading
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -31,9 +41,9 @@ export const JournalManagement: React.FC = () => {
     show: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.1
-      }
-    }
+        staggerChildren: 0.1,
+      },
+    },
   };
 
   const fadeInUp = {
@@ -42,11 +52,11 @@ export const JournalManagement: React.FC = () => {
       opacity: 1,
       y: 0,
       transition: {
-        type: "spring",
+        type: 'spring',
         damping: 25,
-        stiffness: 200
-      }
-    }
+        stiffness: 200,
+      },
+    },
   };
 
   // Load journals on component mount
@@ -61,9 +71,10 @@ export const JournalManagement: React.FC = () => {
     try {
       const journalList = await journalService.getAllJournals();
       setJournals(journalList);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error fetching journals:', err);
-      setError(err.message || 'Failed to load journals. Please try again.');
+      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
+      setError(errorMessage || 'Failed to load journals. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -80,9 +91,12 @@ export const JournalManagement: React.FC = () => {
       const journalDetail = await journalService.getJournalById(journal.id);
       setJournalToEdit(journalDetail);
       setIsFormOpen(true);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error fetching journal details:', err);
-      setError(err.message || 'Failed to load journal details. Please try again.');
+      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
+      setError(
+        errorMessage || 'Failed to load journal details. Please try again.'
+      );
     } finally {
       setIsLoading(false);
     }
@@ -90,15 +104,20 @@ export const JournalManagement: React.FC = () => {
 
   const handleViewJournal = async (journal: JournalBrief) => {
     try {
-      setIsLoading(true);
+      setIsDetailLoading(true); // Use separate loading state for detail view
+      // Open the detail view immediately with loading state
+      setIsDetailViewOpen(true);
+
       const journalDetail = await journalService.getJournalById(journal.id);
       setSelectedJournal(journalDetail);
-      setIsDetailViewOpen(true);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error fetching journal details:', err);
-      setError(err.message || 'Failed to load journal details. Please try again.');
+      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
+      setError(
+        errorMessage || 'Failed to load journal details. Please try again.'
+      );
     } finally {
-      setIsLoading(false);
+      setIsDetailLoading(false);
     }
   };
 
@@ -116,14 +135,15 @@ export const JournalManagement: React.FC = () => {
       await journalService.deleteJournal(journalToDelete.id);
 
       // Update the local state
-      setJournals(journals.filter(j => j.id !== journalToDelete.id));
+      setJournals(journals.filter((j) => j.id !== journalToDelete.id));
 
       // Close the dialog
       setIsConfirmDeleteOpen(false);
       setJournalToDelete(null);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error deleting journal:', err);
-      setError(err.message || 'Failed to delete journal. Please try again.');
+      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
+      setError(errorMessage || 'Failed to delete journal. Please try again.');
     } finally {
       setIsDeleting(false);
     }
@@ -137,38 +157,48 @@ export const JournalManagement: React.FC = () => {
 
       if (journalToEdit) {
         // Update existing journal
-        updatedJournal = await journalService.updateJournal(journalToEdit.id, journalData);
+        updatedJournal = await journalService.updateJournal(
+          journalToEdit.id,
+          journalData
+        );
 
         // Update journals list
-        setJournals(prevJournals =>
-          prevJournals.map(j => j.id === updatedJournal.id ? updatedJournal : j)
+        setJournals((prevJournals) =>
+          prevJournals.map((j) =>
+            j.id === updatedJournal.id ? updatedJournal : j
+          )
         );
       } else {
         // Create new journal
         const newJournal = await journalService.createJournal(journalData);
 
         // Add to journals list
-        setJournals(prevJournals => [...prevJournals, newJournal]);
+        setJournals((prevJournals) => [...prevJournals, newJournal]);
       }
-
       // Close the form
       setIsFormOpen(false);
       setJournalToEdit(null);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error saving journal:', err);
-      setError(err.message || 'Failed to save journal. Please try again.');
+      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
+      setError(errorMessage || 'Failed to save journal. Please try again.');
     } finally {
+      setIsSubmitting(false);
       setIsSubmitting(false);
     }
   };
 
   // Filter journals based on search query
-  const filteredJournals = searchQuery.trim() === ''
-    ? journals
-    : journals.filter(journal =>
-        journal.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        journal.description.toLowerCase().includes(searchQuery.toLowerCase())
-      );
+  const filteredJournals =
+    searchQuery.trim() === ''
+      ? journals
+      : journals.filter(
+          (journal) =>
+            journal.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            journal.description
+              .toLowerCase()
+              .includes(searchQuery.toLowerCase())
+        );
 
   return (
     <div className="space-y-8">
@@ -228,9 +258,7 @@ export const JournalManagement: React.FC = () => {
             <div className="flex items-start">
               <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
               <div className="ml-3 flex-1">
-                <p className="text-sm font-medium text-destructive">
-                  {error}
-                </p>
+                <p className="text-sm font-medium text-destructive">{error}</p>
               </div>
               <button
                 onClick={() => setError(null)}
@@ -251,7 +279,9 @@ export const JournalManagement: React.FC = () => {
             <div className="h-16 w-16 rounded-full border-4 border-muted/20 border-t-indigo-600 animate-spin"></div>
             <div className="absolute inset-0 rounded-full border-4 border-indigo-600/10"></div>
           </div>
-          <span className="mt-4 text-muted-foreground font-medium">Loading your journals...</span>
+          <span className="mt-4 text-muted-foreground font-medium">
+            Loading your journals...
+          </span>
         </div>
       ) : filteredJournals.length > 0 ? (
         <motion.div
@@ -275,7 +305,7 @@ export const JournalManagement: React.FC = () => {
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ type: "spring", stiffness: 200, damping: 25 }}
+          transition={{ type: 'spring', stiffness: 200, damping: 25 }}
           className="rounded-2xl bg-gradient-to-br from-background/90 to-background/70 backdrop-blur-sm border border-muted/30 p-12 text-center"
         >
           <div className="relative w-20 h-20 bg-gradient-to-br from-indigo-500/10 to-purple-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -284,9 +314,12 @@ export const JournalManagement: React.FC = () => {
 
           {searchQuery.trim() !== '' ? (
             <>
-              <h3 className="text-xl font-medium text-foreground mb-2">No matching journals</h3>
+              <h3 className="text-xl font-medium text-foreground mb-2">
+                No matching journals
+              </h3>
               <p className="text-muted-foreground max-w-md mx-auto">
-                We couldn't find any journals matching your search criteria. Try a different search term or clear your search.
+                We couldn&apos;t find any journals matching your search criteria. Try
+                a different search term or clear your search.
               </p>
               <Button
                 onClick={() => setSearchQuery('')}
@@ -298,9 +331,12 @@ export const JournalManagement: React.FC = () => {
             </>
           ) : (
             <>
-              <h3 className="text-xl font-medium text-foreground mb-2">Your journal collection is empty</h3>
+              <h3 className="text-xl font-medium text-foreground mb-2">
+                Your journal collection is empty
+              </h3>
               <p className="text-muted-foreground max-w-md mx-auto">
-                Start documenting your travel experiences by creating your first journal.
+                Start documenting your travel experiences by creating your first
+                journal.
               </p>
               <Button
                 onClick={handleCreateJournal}
@@ -324,11 +360,12 @@ export const JournalManagement: React.FC = () => {
       />
 
       {/* Journal Detail View */}
-      {selectedJournal && (
+      {(isDetailLoading || selectedJournal) && (
         <JournalDetailView
           journal={selectedJournal}
           isOpen={isDetailViewOpen}
           onClose={() => setIsDetailViewOpen(false)}
+          isLoading={isDetailLoading}
         />
       )}
 

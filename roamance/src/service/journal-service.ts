@@ -1,15 +1,14 @@
+import api from '@/api/roamance-api';
+import { JOURNAL_ENDPOINTS } from '@/constants/api';
 import {
-  Journal,
   JournalBrief,
   JournalBriefResponse,
   JournalCreateRequest,
   JournalDetail,
   JournalDetailResponse,
-  JournalListResponse,
+  JournalListResponse
 } from '@/types/journal';
-import { SubsectionCreateRequest } from '@/types/subsection';
-import { JOURNAL_ENDPOINTS } from '@/constants/api';
-import api from '@/api/roamance-api';
+import { SubsectionRequest } from '@/types/subsection';
 import { AxiosResponse } from 'axios';
 
 class JournalService {
@@ -95,7 +94,7 @@ class JournalService {
    */
   async addSubsection(
     journalId: string,
-    subsectionData: SubsectionCreateRequest
+    subsectionData: SubsectionRequest
   ): Promise<JournalDetail> {
     try {
       // First get the current journal

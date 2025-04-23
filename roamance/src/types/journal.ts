@@ -1,7 +1,13 @@
 import { Audit } from './audit';
 import { Location } from './location';
 import { BaseResponse } from './response';
-import { Subsection } from './subsection';
+import {
+  SubsectionRequest,
+  SightseeingSubsectionDto,
+  ActivitySubsectionDto,
+  RouteSubsectionDto,
+  Subsection,
+} from './subsection';
 import { User } from './user';
 
 export interface Journal {
@@ -20,7 +26,7 @@ export interface JournalCreateRequest {
   title: string;
   destination: Location;
   description: string;
-  subsections: Subsection[];
+  subsections: SubsectionRequest[];
 }
 
 /* -------------------------------- Response -------------------------------- */
@@ -30,6 +36,11 @@ export interface JournalDto {
   title: string;
   destination: Location;
   description: string;
+  is_favorite: boolean;
+  is_archived: boolean;
+  is_shared: boolean;
+  date: string;
+  cover_image: string;
   audit: Audit;
 }
 
@@ -38,7 +49,11 @@ export interface JournalBrief extends JournalDto {
 }
 
 export interface JournalDetail extends JournalDto {
-  subsections: Subsection[];
+  subsections: (
+    | SightseeingSubsectionDto
+    | ActivitySubsectionDto
+    | RouteSubsectionDto
+  )[];
 }
 
 export type JournalBriefResponse = BaseResponse<JournalBrief>;
