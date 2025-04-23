@@ -57,6 +57,14 @@
   --color-mountain-light: var(--mountain-light);
   --color-mountain: var(--mountain);
   --color-mountain-dark: var(--mountain-dark);
+
+  /* Violet theme colors */
+  --color-violet-light: var(--violet-light);
+  --color-violet: var(--violet);
+  --color-violet-dark: var(--violet-dark);
+  --color-lavender-light: var(--lavender-light);
+  --color-lavender: var(--lavender);
+  --color-lavender-dark: var(--lavender-dark);
 }
 
 :root {
@@ -100,6 +108,16 @@
   --mountain-light: #a6acaf;
   --mountain: #707b7c;
   --mountain-dark: #424949;
+
+  /* Violet theme colors */
+  --violet-light: #c39bd3;
+  --violet: #8e44ad;
+  --violet-dark: #6c3483;
+
+  /* Lavender accent colors */
+  --lavender-light: #d6c2e9;
+  --lavender: #9b59b6;
+  --lavender-dark: #76448a;
 
   /* Adventure Red as destructive */
   --destructive: oklch(0.6 0.25 25);
@@ -148,6 +166,16 @@
   /* Dark Tropical Green as accent */
   --accent: oklch(0.25 0.05 150);
   --accent-foreground: oklch(0.95 0 0);
+
+  /* Violet theme colors - dark mode */
+  --violet-light: oklch(0.65 0.25 300);
+  --violet: oklch(0.55 0.28 300);
+  --violet-dark: oklch(0.45 0.22 300);
+
+  /* Lavender accent colors - dark mode */
+  --lavender-light: oklch(0.7 0.18 290);
+  --lavender: oklch(0.6 0.22 290);
+  --lavender-dark: oklch(0.5 0.18 290);
 
   /* Vibrant Adventure Red as destructive */
   --destructive: oklch(0.7 0.28 25);

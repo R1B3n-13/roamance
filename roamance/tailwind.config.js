@@ -82,6 +82,17 @@ module.exports = {
           DEFAULT: 'var(--mountain)',
           dark: 'var(--mountain-dark)',
         },
+        // New violet color scheme
+        violet: {
+          light: 'var(--violet-light)',
+          DEFAULT: 'var(--violet)',
+          dark: 'var(--violet-dark)',
+        },
+        lavender: {
+          light: 'var(--lavender-light)',
+          DEFAULT: 'var(--lavender)',
+          dark: 'var(--lavender-dark)',
+        },
       },
       borderRadius: {
         lg: 'var(--radius)',
@@ -132,6 +143,7 @@ module.exports = {
         'world-map': "url('/world-map-pattern.png')",
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
         'gradient-travel': 'linear-gradient(45deg, #2980B9, #E67E22)',
+        'gradient-violet': 'linear-gradient(45deg, #8e44ad, #9b59b6)',
       },
     },
   },

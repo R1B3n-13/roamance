@@ -98,6 +98,11 @@ export interface RouteSubsectionDto extends SubsectionDetailDto {
   total_distance: number;
 }
 
+export type SubsectionDetailResponseDto =
+  | SightseeingSubsectionDto
+  | RouteSubsectionDto
+  | ActivitySubsectionDto;
+
 export type SubsectionBriefResponse = BaseResponse<SubsectionBriefDto>;
 export type SubsectionListResponse = BaseResponse<SubsectionBriefDto[]>;
 export type SubsectionDetailResponse = BaseResponse<
