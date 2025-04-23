@@ -1,6 +1,8 @@
 package com.devs.roamance.dto.request.travel.journal;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.devs.roamance.dto.request.travel.LocationUpdateRequestDto;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -41,4 +43,8 @@ public class JournalUpdateRequestDto {
   @JsonProperty("cover_image")
   @Pattern(regexp = "^$|(?i)^(https?:\\/\\/)[^\\s]{0,2083}$", message = "Cover image URL format is invalid")
   private String coverImage;
+
+  @Valid
+  @Size(max = 20, message = "Maximum 20 subsections allowed")
+  private List<SubsectionUpdateRequestDto> subsections = new ArrayList<>();
 }

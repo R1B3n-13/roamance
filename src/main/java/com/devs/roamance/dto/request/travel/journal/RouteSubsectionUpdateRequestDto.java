@@ -16,7 +16,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class RouteSubsectionUpdateRequestDto extends LocationUpdateRequestDto {
+public class RouteSubsectionUpdateRequestDto extends SubsectionUpdateRequestDto {
   @Valid private List<LocationUpdateRequestDto> waypoints = new ArrayList<>();
 
   @JsonProperty("total_time")
