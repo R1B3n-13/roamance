@@ -34,17 +34,15 @@ export const JournalForm: React.FC<JournalFormProps> = ({
     description: '',
     destination: { latitude: 0, longitude: 0 },
     subsections: [],
+    is_favorite: false,
+    is_archived: false,
+    is_shared: false,
+    date: new Date().toISOString().split('T')[0],
+    cover_image: '',
   });
 
   const [subsectionFormVisible, setSubsectionFormVisible] = useState(false);
   const [isSubmittingSubsection, setIsSubmittingSubsection] = useState(false);
-
-  const [destinationName, setDestinationName] = useState('');
-  const [coverImage, setCoverImage] = useState('');
-  const [travelDates, setTravelDates] = useState({
-    startDate: '',
-    endDate: '',
-  });
 
   useEffect(() => {
     if (journal) {
@@ -56,21 +54,12 @@ export const JournalForm: React.FC<JournalFormProps> = ({
           ...sub,
           journal_id: journal.id,
         })),
+        is_favorite: journal.is_favorite,
+        is_archived: journal.is_archived,
+        is_shared: journal.is_shared,
+        date: journal.date || new Date().toISOString().split('T')[0],
+        cover_image: journal.cover_image || '',
       });
-
-      // Extract metadata from description
-      const descriptionLines = journal.description.split('\n');
-      for (const line of descriptionLines) {
-        if (line.startsWith('Destination:')) {
-          setDestinationName(line.replace('Destination:', '').trim());
-        } else if (line.startsWith('Travel Dates:')) {
-          const datesStr = line.replace('Travel Dates:', '').trim();
-          const [startDate = '', endDate = ''] = datesStr.split(' to ');
-          setTravelDates({ startDate, endDate });
-        } else if (line.startsWith('Cover Image:')) {
-          setCoverImage(line.replace('Cover Image:', '').trim());
-        }
-      }
     } else {
       // Reset form when creating a new journal
       setFormData({
@@ -78,21 +67,34 @@ export const JournalForm: React.FC<JournalFormProps> = ({
         description: '',
         destination: { latitude: 0, longitude: 0 },
         subsections: [],
+        is_favorite: false,
+        is_archived: false,
+        is_shared: false,
+        date: new Date().toISOString().split('T')[0],
+        cover_image: '',
       });
-      setDestinationName('');
-      setCoverImage('');
-      setTravelDates({ startDate: '', endDate: '' });
     }
   }, [journal]);
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+
+    // Special handling for checkbox fields
+    if (name === 'is_favorite' || name === 'is_archived' || name === 'is_shared') {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: e.target.type === 'checkbox' ? (e.target as HTMLInputElement).checked : value === 'true',
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
   };
 
   const handleLocationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -107,14 +109,6 @@ export const JournalForm: React.FC<JournalFormProps> = ({
           ? 0
           : numValue,
       },
-    }));
-  };
-
-  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setTravelDates((prev) => ({
-      ...prev,
-      [name]: value,
     }));
   };
 
@@ -150,12 +144,7 @@ export const JournalForm: React.FC<JournalFormProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const enhancedFormData = {
-      ...formData,
-      // We can add the additional metadata to description until backend supports it
-      description: `${formData.description}\n\nDestination: ${destinationName}\nTravel Dates: ${travelDates.startDate} to ${travelDates.endDate}\nCover Image: ${coverImage}`,
-    };
-    await onSubmit(enhancedFormData);
+    await onSubmit(formData);
   };
 
   if (!isOpen) return null;
@@ -169,21 +158,15 @@ export const JournalForm: React.FC<JournalFormProps> = ({
               {journal ? 'Edit Journal' : 'Create New Journal'}
             </span>
           </DialogTitle>
-          <DialogXButton onClose={onClose} />
+          <DialogXButton onClick={onClose} />
         </div>
 
         <form onSubmit={handleSubmit} className="p-6">
           {/* Journal Metadata Form */}
           <JournalMetadataForm
             formData={formData}
-            destinationName={destinationName}
-            coverImage={coverImage}
-            travelDates={travelDates}
             onChange={handleChange}
             onLocationChange={handleLocationChange}
-            onDateChange={handleDateChange}
-            onDestinationNameChange={(e) => setDestinationName(e.target.value)}
-            onCoverImageChange={(e) => setCoverImage(e.target.value)}
           />
 
           {/* Subsections */}

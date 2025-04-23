@@ -43,7 +43,7 @@ export const JOURNAL_ENDPOINTS = {
   DELETE: (id: string) => `${JOURNALS}/${id}`,
 } as const;
 
-const SUBSECTIONS = `${TRAVEL}/journals`;
+const SUBSECTIONS = `${TRAVEL}/subsections`;
 export const SUBSECTION_ENDPOINTS = {
   ROOT: SUBSECTIONS,
   CREATE: `${SUBSECTIONS}`,

@@ -3,11 +3,13 @@ import { JournalBrief } from '@/types/journal';
 import { formatRelativeTime } from '@/utils';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
+  Archive,
   BookOpen,
   Clock,
   Edit,
   MapPin,
   MoreVertical,
+  Star,
   Trash2,
 } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
@@ -18,6 +20,8 @@ interface JournalCardProps {
   onEdit: (journal: JournalBrief) => void;
   onDelete: (journal: JournalBrief) => void;
   onView: (journal: JournalBrief) => void;
+  onToggleFavorite: (journal: JournalBrief) => void;
+  onToggleArchive: (journal: JournalBrief) => void;
 }
 
 export const JournalCard: React.FC<JournalCardProps> = ({
@@ -25,6 +29,8 @@ export const JournalCard: React.FC<JournalCardProps> = ({
   onEdit,
   onDelete,
   onView,
+  onToggleFavorite,
+  onToggleArchive,
 }) => {
   const [showOptions, setShowOptions] = useState(false);
   const optionsRef = useRef<HTMLDivElement>(null);
@@ -150,6 +156,30 @@ export const JournalCard: React.FC<JournalCardProps> = ({
         onClick={handleCardClick}
         className="flex-1 p-4 flex flex-col cursor-pointer"
       >
+        {/* Favorite and Archive action buttons */}
+        <div className="flex justify-end gap-2 mb-2">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleFavorite(journal);
+            }}
+            className={`p-1.5 rounded-full ${journal.is_favorite ? 'bg-yellow-100 text-yellow-500 dark:bg-yellow-900/30 dark:text-yellow-400' : 'bg-muted/20 text-muted-foreground hover:bg-muted/30'} transition-colors`}
+            aria-label={journal.is_favorite ? "Remove from favorites" : "Add to favorites"}
+          >
+            <Star className="w-4 h-4" />
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleArchive(journal);
+            }}
+            className={`p-1.5 rounded-full ${journal.is_archived ? 'bg-blue-100 text-blue-500 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-muted/20 text-muted-foreground hover:bg-muted/30'} transition-colors`}
+            aria-label={journal.is_archived ? "Unarchive journal" : "Archive journal"}
+          >
+            <Archive className="w-4 h-4" />
+          </button>
+        </div>
+
         <p className="text-sm text-muted-foreground line-clamp-3 flex-1">
           {journal.description}
         </p>

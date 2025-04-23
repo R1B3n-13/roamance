@@ -10,29 +10,7 @@ import {
 } from './subsection';
 import { User } from './user';
 
-export interface Journal {
-  id: string;
-  title: string;
-  destination: Location;
-  description: string;
-  subsections: Subsection[];
-  user: User;
-  audit: Audit;
-}
-
-/* --------------------------------- Create --------------------------------- */
-
-export interface JournalCreateRequest {
-  title: string;
-  destination: Location;
-  description: string;
-  subsections: SubsectionRequest[];
-}
-
-/* -------------------------------- Response -------------------------------- */
-
-export interface JournalDto {
-  id: string;
+export interface BaseJournal {
   title: string;
   destination: Location;
   description: string;
@@ -41,6 +19,25 @@ export interface JournalDto {
   is_shared: boolean;
   date: string;
   cover_image: string;
+}
+
+export interface Journal extends BaseJournal {
+  id: string;
+  subsections: Subsection[];
+  user: User;
+  audit: Audit;
+}
+
+/* --------------------------------- Create --------------------------------- */
+
+export interface JournalCreateRequest extends BaseJournal {
+  subsections: SubsectionRequest[];
+}
+
+/* -------------------------------- Response -------------------------------- */
+
+export interface JournalDto extends BaseJournal {
+  id: string;
   audit: Audit;
 }
 

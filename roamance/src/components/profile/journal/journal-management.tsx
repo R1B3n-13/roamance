@@ -1,4 +1,13 @@
 import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { journalService } from '@/service/journal-service';
 import {
@@ -7,7 +16,7 @@ import {
   JournalDetail,
 } from '@/types/journal';
 import { AnimatePresence, motion } from 'framer-motion';
-import { AlertCircle, BookOpen, PlusCircle, Search, X } from 'lucide-react';
+import { AlertCircle, Archive, BookOpen, Filter, PlusCircle, Search, Share2, Star, X } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { ConfirmDialog } from '../../common/confirm-dialog';
 import { JournalCard } from './journal-card';
@@ -33,6 +42,11 @@ export const JournalManagement: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [filters, setFilters] = useState({
+    favorites: false,
+    archived: false,
+    shared: false,
+  });
   const [error, setError] = useState<string | null>(null);
 
   // Animation variants
@@ -188,17 +202,62 @@ export const JournalManagement: React.FC = () => {
     }
   };
 
-  // Filter journals based on search query
-  const filteredJournals =
-    searchQuery.trim() === ''
-      ? journals
-      : journals.filter(
-          (journal) =>
-            journal.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            journal.description
-              .toLowerCase()
-              .includes(searchQuery.toLowerCase())
-        );
+  const handleToggleFavorite = async (journal: JournalBrief) => {
+    try {
+      const updatedJournal = await journalService.updateJournal(journal.id, {
+        ...journal,
+        is_favorite: !journal.is_favorite,
+      });
+
+      // Update journals list
+      setJournals((prevJournals) =>
+        prevJournals.map((j) =>
+          j.id === updatedJournal.id ? updatedJournal : j
+        )
+      );
+    } catch (err: unknown) {
+      console.error('Error updating favorite status:', err);
+      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
+      setError(errorMessage || 'Failed to update journal. Please try again.');
+    }
+  };
+
+  const handleToggleArchive = async (journal: JournalBrief) => {
+    try {
+      const updatedJournal = await journalService.updateJournal(journal.id, {
+        ...journal,
+        is_archived: !journal.is_archived,
+      });
+
+      // Update journals list
+      setJournals((prevJournals) =>
+        prevJournals.map((j) =>
+          j.id === updatedJournal.id ? updatedJournal : j
+        )
+      );
+    } catch (err: unknown) {
+      console.error('Error updating archive status:', err);
+      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
+      setError(errorMessage || 'Failed to update journal. Please try again.');
+    }
+  };
+
+  // Filter journals based on search query and filter options
+  const filteredJournals = journals
+    .filter((journal) => {
+      // Apply filter options
+      if (filters.favorites && !journal.is_favorite) return false;
+      if (filters.archived && !journal.is_archived) return false;
+      if (filters.shared && !journal.is_shared) return false;
+
+      // Apply search query
+      if (searchQuery.trim() === '') return true;
+
+      return (
+        journal.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        journal.description.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    });
 
   return (
     <div className="space-y-8">
@@ -231,18 +290,90 @@ export const JournalManagement: React.FC = () => {
           </Button>
         </div>
 
-        {/* Search section */}
-        <div className="relative mt-6 max-w-xl">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Search className="h-4 w-4 text-muted-foreground" />
+        {/* Search section with filter button */}
+        <div className="relative mt-6 flex items-center max-w-xl">
+          <div className="flex-1 relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Search className="h-4 w-4 text-muted-foreground" />
+            </div>
+            <Input
+              type="text"
+              placeholder="Search your journals..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 bg-background/60 backdrop-blur-sm border-muted/40 focus:border-indigo-500/50 focus:ring-indigo-500/20 transition-all duration-300 pr-4"
+            />
           </div>
-          <Input
-            type="text"
-            placeholder="Search your journals..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 bg-background/60 backdrop-blur-sm border-muted/40 focus:border-indigo-500/50 focus:ring-indigo-500/20 transition-all duration-300"
-          />
+
+          {/* Filter dropdown using Shadcn's DropdownMenu */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                className={`ml-2 h-10 w-10 border-muted/40 ${
+                  (filters.favorites || filters.archived || filters.shared)
+                    ? 'text-indigo-600 border-indigo-300 dark:border-indigo-700'
+                    : ''
+                }`}
+                aria-label="Filter journals"
+              >
+                <Filter className="h-4 w-4" />
+                {(filters.favorites || filters.archived || filters.shared) && (
+                  <span className="absolute top-0 right-0 h-2.5 w-2.5 rounded-full bg-indigo-600"></span>
+                )}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-64">
+              <DropdownMenuLabel>Filter Journals</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuCheckboxItem
+                checked={filters.favorites}
+                onCheckedChange={(checked) =>
+                  setFilters({...filters, favorites: checked})
+                }
+              >
+                <div className="flex items-center">
+                  <Star className="h-4 w-4 text-yellow-500 mr-2" />
+                  <span>Favorites</span>
+                </div>
+              </DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem
+                checked={filters.archived}
+                onCheckedChange={(checked) =>
+                  setFilters({...filters, archived: checked})
+                }
+              >
+                <div className="flex items-center">
+                  <Archive className="h-4 w-4 text-blue-500 mr-2" />
+                  <span>Archived</span>
+                </div>
+              </DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem
+                checked={filters.shared}
+                onCheckedChange={(checked) =>
+                  setFilters({...filters, shared: checked})
+                }
+              >
+                <div className="flex items-center">
+                  <Share2 className="h-4 w-4 text-green-500 mr-2" />
+                  <span>Shared</span>
+                </div>
+              </DropdownMenuCheckboxItem>
+              {(filters.favorites || filters.archived || filters.shared) && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={() => setFilters({favorites: false, archived: false, shared: false})}
+                    className="text-muted-foreground hover:text-foreground"
+                  >
+                    <X className="h-4 w-4 mr-2" />
+                    <span>Clear all filters</span>
+                  </DropdownMenuItem>
+                </>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
@@ -297,6 +428,8 @@ export const JournalManagement: React.FC = () => {
                 onEdit={handleEditJournal}
                 onDelete={handleDeleteJournal}
                 onView={handleViewJournal}
+                onToggleFavorite={handleToggleFavorite}
+                onToggleArchive={handleToggleArchive}
               />
             </motion.div>
           ))}

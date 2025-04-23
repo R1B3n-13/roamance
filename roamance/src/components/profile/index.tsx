@@ -63,7 +63,7 @@ export function ProfilePage() {
   // Render tab content based on active tab
   const renderTabContent = () => {
     switch (activeTab) {
-      case 'info':
+      case paths.info:
         return (
           <ProfileInfo
             user={user}
@@ -72,7 +72,7 @@ export function ProfilePage() {
             onProfileUpdate={fetchUserProfile}
           />
         );
-      case 'preferences':
+      case paths.preferences:
         return (
           <ProfilePreferences
             user={user}
@@ -80,13 +80,13 @@ export function ProfilePage() {
             loading={loading}
           />
         );
-      case 'trips':
+      case paths.trips:
         return (
           <ProfileTrips user={user} userInfo={userInfo} loading={loading} />
         );
-      case 'journals':
+      case paths.journals:
         return <JournalManagement />;
-      case 'saved':
+      case paths.places:
         return (
           <ProfileSavedPlaces
             user={user}
