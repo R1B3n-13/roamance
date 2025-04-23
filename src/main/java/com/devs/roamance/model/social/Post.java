@@ -39,6 +39,11 @@ public class Post {
 
   @Embedded private Location location;
 
+  private Boolean isSafe = true;
+
+  @Column(length = 10_000)
+  private String tidbits;
+
   private int likesCount = 0;
   private int commentsCount = 0;
 
