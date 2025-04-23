@@ -1,5 +1,7 @@
 package com.devs.roamance.dto.request.ai;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,5 +15,7 @@ import lombok.Setter;
 public class MultiModalAiRequestDto {
 
   private String text;
-  private List<String> mediaUrls;
+
+  @JsonProperty("media_urls")
+  private List<String> mediaUrls = new ArrayList<>();
 }

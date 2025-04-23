@@ -1,5 +1,6 @@
 package com.devs.roamance.service.impl;
 
+import static dev.langchain4j.model.googleai.GeminiHarmBlockThreshold.BLOCK_LOW_AND_ABOVE;
 import static dev.langchain4j.model.googleai.GeminiHarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE;
 import static dev.langchain4j.model.googleai.GeminiHarmCategory.*;
 
@@ -52,9 +53,12 @@ public class GeminiAiServiceImpl implements GeminiAiService {
               .downloadMultipleMediaWithMime(requestDto.getMediaUrls())
               .get(10, TimeUnit.SECONDS);
 
+    } catch (InterruptedException e) {
+      log.error("Media download interrupted: {}", e.getMessage(), e);
+      Thread.currentThread().interrupt();
+
     } catch (Exception e) {
       log.error("Media download failed: {}", e.getMessage(), e);
-      Thread.currentThread().interrupt();
     }
 
     ChatLanguageModel model;
@@ -65,13 +69,15 @@ public class GeminiAiServiceImpl implements GeminiAiService {
               apiKey,
               "gemini-2.0-flash",
               builder ->
-                  builder.safetySettings(
-                      Map.of(
-                          HARM_CATEGORY_HARASSMENT, BLOCK_MEDIUM_AND_ABOVE,
-                          HARM_CATEGORY_DANGEROUS_CONTENT, BLOCK_MEDIUM_AND_ABOVE,
-                          HARM_CATEGORY_SEXUALLY_EXPLICIT, BLOCK_MEDIUM_AND_ABOVE,
-                          HARM_CATEGORY_HATE_SPEECH, BLOCK_MEDIUM_AND_ABOVE,
-                          HARM_CATEGORY_CIVIC_INTEGRITY, BLOCK_MEDIUM_AND_ABOVE)));
+                  builder
+                      .safetySettings(
+                          Map.of(
+                              HARM_CATEGORY_HARASSMENT, BLOCK_LOW_AND_ABOVE,
+                              HARM_CATEGORY_DANGEROUS_CONTENT, BLOCK_MEDIUM_AND_ABOVE,
+                              HARM_CATEGORY_SEXUALLY_EXPLICIT, BLOCK_LOW_AND_ABOVE,
+                              HARM_CATEGORY_HATE_SPEECH, BLOCK_LOW_AND_ABOVE,
+                              HARM_CATEGORY_CIVIC_INTEGRITY, BLOCK_MEDIUM_AND_ABOVE))
+                      .temperature(0.3));
     } catch (Exception e) {
       log.error("Gemini model build failed: {}", e.getMessage(), e);
       return CompletableFuture.completedFuture(

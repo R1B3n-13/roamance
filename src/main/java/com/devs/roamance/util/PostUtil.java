@@ -30,9 +30,8 @@ public class PostUtil {
   public void backgroundAiAnalysis(UUID postId, PostRequestDto createRequestDto) {
     try {
       MultiModalAiRequestDto aiRequestDto = new MultiModalAiRequestDto();
-      aiRequestDto.setText(createRequestDto.getText());
-      aiRequestDto.setMediaUrls(createRequestDto.getImagePaths());
-      aiRequestDto.getMediaUrls().addAll(createRequestDto.getVideoPaths());
+
+      setFields(aiRequestDto, createRequestDto);
 
       TidbitsAndSafetyResponseDto responseDto =
           geminiAiService.getTidbitsAndSafety(aiRequestDto).join();
@@ -45,16 +44,34 @@ public class PostUtil {
                       new ResourceNotFoundException(
                           String.format(ResponseMessage.POST_NOT_FOUND, postId)));
 
-      if (responseDto.getFinishReason() == FinishReason.CONTENT_FILTER) {
-        post.setIsSafe(false);
-      } else if (responseDto.getText() != null && !responseDto.getText().isEmpty()) {
-        post.setTidbits(responseDto.getText());
-      }
+      updatePostWithAnalysis(responseDto, post);
 
       postRepository.save(post);
 
     } catch (Exception e) {
-      log.error("Error in background AI analysis for the post {}: ", e.getMessage(), e);
+      log.error("Error in background AI analysis for post {}: {}", postId, e.getMessage(), e);
+    }
+  }
+
+  private void setFields(MultiModalAiRequestDto aiRequestDto, PostRequestDto createRequestDto) {
+
+    if (createRequestDto.getText() != null && !createRequestDto.getText().isEmpty()) {
+      aiRequestDto.setText(createRequestDto.getText());
+    }
+    if (createRequestDto.getImagePaths() != null && !createRequestDto.getImagePaths().isEmpty()) {
+      aiRequestDto.setMediaUrls(createRequestDto.getImagePaths());
+    }
+    if (createRequestDto.getVideoPaths() != null && !createRequestDto.getVideoPaths().isEmpty()) {
+      aiRequestDto.getMediaUrls().addAll(createRequestDto.getVideoPaths());
+    }
+  }
+
+  private void updatePostWithAnalysis(TidbitsAndSafetyResponseDto responseDto, Post post) {
+
+    if (responseDto.getFinishReason() == FinishReason.CONTENT_FILTER) {
+      post.setIsSafe(false);
+    } else if (responseDto.getText() != null && !responseDto.getText().isEmpty()) {
+      post.setTidbits(responseDto.getText());
     }
   }
 }

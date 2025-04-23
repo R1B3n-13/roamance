@@ -37,7 +37,7 @@ public class Post extends BaseEntity {
 
   @Embedded private Location location;
 
-  private Boolean isSafe;
+  private Boolean isSafe = true;
 
   @Column(length = 10_000)
   private String tidbits;

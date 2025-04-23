@@ -3,11 +3,12 @@ package com.devs.roamance.util;
 import com.devs.roamance.config.GeminiModelConfig;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.googleai.GoogleAiGeminiChatModel;
+import java.util.Objects;
 import java.util.function.Consumer;
 import org.springframework.stereotype.Component;
 
 @Component
-public class GeminiAiUtil {
+public final class GeminiAiUtil {
 
   /**
    * Creates a GoogleAiGeminiChatModel with required parameters and additional configuration
@@ -19,6 +20,10 @@ public class GeminiAiUtil {
    */
   public ChatLanguageModel geminiModelBuilder(
       String apiKey, String modelName, GeminiModelConfig config) {
+
+    Objects.requireNonNull(apiKey, "apiKey must not be null");
+    Objects.requireNonNull(modelName, "modelName must not be null");
+    Objects.requireNonNull(config, "config must not be null");
 
     return GoogleAiGeminiChatModel.builder()
         .apiKey(apiKey)
