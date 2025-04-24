@@ -59,7 +59,7 @@ public abstract class Subsection {
 
   @ElementCollection private List<String> notes = new ArrayList<>();
 
-  @ElementCollection private List<String> checklists = new ArrayList<>();
+  @ElementCollection private List<ChecklistItem> checklists = new ArrayList<>();
 
   @JsonIgnore
   @ManyToOne(

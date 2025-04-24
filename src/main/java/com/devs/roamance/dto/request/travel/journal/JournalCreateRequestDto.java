@@ -43,7 +43,9 @@ public class JournalCreateRequestDto {
   private OffsetDateTime date = OffsetDateTime.now();
 
   @JsonProperty("cover_image")
-  @Pattern(regexp = "^$|(?i)^(https?:\\/\\/)[^\\s]{0,2083}$", message = "Cover image URL format is invalid")
+  @Pattern(
+      regexp = "^$|(?i)^(https?:\\/\\/)[^\\s]{0,2083}$",
+      message = "Cover image URL format is invalid")
   private String coverImage;
 
   @Valid

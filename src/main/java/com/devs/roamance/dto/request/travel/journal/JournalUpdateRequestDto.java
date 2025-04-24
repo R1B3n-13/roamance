@@ -1,15 +1,13 @@
 package com.devs.roamance.dto.request.travel.journal;
 
-import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.List;
-
 import com.devs.roamance.dto.request.travel.LocationUpdateRequestDto;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,8 +21,7 @@ public class JournalUpdateRequestDto {
   @Size(min = 1, max = 100, message = "Title must be between 1-100 characters")
   private String title;
 
-  @Valid
-  private LocationUpdateRequestDto destination;
+  @Valid private LocationUpdateRequestDto destination;
 
   @Size(max = 1000, message = "Description must be less than 1000 characters")
   private String description;
@@ -41,7 +38,9 @@ public class JournalUpdateRequestDto {
   private OffsetDateTime date = OffsetDateTime.now();
 
   @JsonProperty("cover_image")
-  @Pattern(regexp = "^$|(?i)^(https?:\\/\\/)[^\\s]{0,2083}$", message = "Cover image URL format is invalid")
+  @Pattern(
+      regexp = "^$|(?i)^(https?:\\/\\/)[^\\s]{0,2083}$",
+      message = "Cover image URL format is invalid")
   private String coverImage;
 
   @Valid

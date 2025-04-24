@@ -1,10 +1,14 @@
 package com.devs.roamance.dto.request.travel.journal;
 
+import com.devs.roamance.model.travel.journal.ChecklistItem;
 import com.devs.roamance.model.travel.journal.SubsectionType;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
@@ -20,15 +24,14 @@ import lombok.Setter;
 @Setter
 public abstract class SubsectionUpdateRequestDto {
 
-  @Size(min = 1, max = 100, message = "Title must be between 1-100 characters")
+  @NotBlank(message = "Title must not be blank")
   private String title;
 
+  @Enumerated(EnumType.STRING)
+  @NotNull(message = "Type must not be null")
   private SubsectionType type;
 
-  @Size(max = 10, message = "Maximum 10 notes allowed")
   private List<@NotBlank(message = "Note cannot be empty") String> notes = new ArrayList<>();
 
-  @Size(max = 10, message = "Maximum 10 checklist items allowed")
-  private List<@NotBlank(message = "Checklist item cannot be empty") String> checklists =
-      new ArrayList<>();
+  private List<@Valid ChecklistItem> checklists = new ArrayList<>();
 }

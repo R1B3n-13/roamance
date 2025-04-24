@@ -81,19 +81,20 @@ public class JournalServiceImpl implements JournalService {
 
       if (!requestDto.getSubsections().isEmpty()) {
         for (SubsectionCreateRequestDto subsectionDto : requestDto.getSubsections()) {
-          Subsection subsection = switch (subsectionDto) {
-            case ActivitySubsectionCreateRequestDto activitySubsectionCreateRequestDto ->
-              modelMapper.map(subsectionDto, ActivitySubsection.class);
-            case SightseeingSubsectionCreateRequestDto sightseeingSubsectionCreateRequestDto ->
-              modelMapper.map(subsectionDto, SightseeingSubsection.class);
-            case RouteSubsectionCreateRequestDto routeSubsectionCreateRequestDto ->
-              modelMapper.map(subsectionDto, RouteSubsection.class);
-            case null, default -> {
-              assert subsectionDto != null;
-              throw new IllegalArgumentException(
-                  "Unknown subsection type: " + subsectionDto.getClass().getName());
-            }
-          };
+          Subsection subsection =
+              switch (subsectionDto) {
+                case ActivitySubsectionCreateRequestDto activitySubsectionCreateRequestDto ->
+                    modelMapper.map(subsectionDto, ActivitySubsection.class);
+                case SightseeingSubsectionCreateRequestDto sightseeingSubsectionCreateRequestDto ->
+                    modelMapper.map(subsectionDto, SightseeingSubsection.class);
+                case RouteSubsectionCreateRequestDto routeSubsectionCreateRequestDto ->
+                    modelMapper.map(subsectionDto, RouteSubsection.class);
+                case null, default -> {
+                  assert subsectionDto != null;
+                  throw new IllegalArgumentException(
+                      "Unknown subsection type: " + subsectionDto.getClass().getName());
+                }
+              };
           journal.addSubsection(subsection);
         }
         log.info(
@@ -106,11 +107,13 @@ public class JournalServiceImpl implements JournalService {
       Journal savedJournal = journalRepository.save(journal);
       journalRepository.flush();
 
-      Journal dto = journalRepository
-          .findById(savedJournal.getId())
-          .orElseThrow(
-              () -> new ResourceNotFoundException(
-                  String.format(ResponseMessage.JOURNAL_NOT_FOUND, savedJournal.getId())));
+      Journal dto =
+          journalRepository
+              .findById(savedJournal.getId())
+              .orElseThrow(
+                  () ->
+                      new ResourceNotFoundException(
+                          String.format(ResponseMessage.JOURNAL_NOT_FOUND, savedJournal.getId())));
 
       JournalDetailDto journalDetailDto = modelMapper.map(dto, JournalDetailDto.class);
 
@@ -129,8 +132,9 @@ public class JournalServiceImpl implements JournalService {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     boolean isAdmin = userUtil.isAuthenticatedUserAdmin();
 
-    Pageable pageable = PageRequest.of(
-        pageNumber, pageSize, Sort.by(PaginationSortingUtil.getSortDirection(sortDir), sortBy));
+    Pageable pageable =
+        PageRequest.of(
+            pageNumber, pageSize, Sort.by(PaginationSortingUtil.getSortDirection(sortDir), sortBy));
 
     Page<Journal> journalPage;
 
@@ -151,16 +155,19 @@ public class JournalServiceImpl implements JournalService {
       }
     }
 
-    List<JournalBriefDto> journalDtos = journalPage.getContent().stream()
-        .map(
-            journal -> {
-              Journal journalWithSubsections = journalRepository.findById(journal.getId()).orElse(journal);
+    List<JournalBriefDto> journalDtos =
+        journalPage.getContent().stream()
+            .map(
+                journal -> {
+                  Journal journalWithSubsections =
+                      journalRepository.findById(journal.getId()).orElse(journal);
 
-              JournalBriefDto dto = modelMapper.map(journalWithSubsections, JournalBriefDto.class);
-              dto.setTotalSubsections(journalWithSubsections.getSubsections().size());
-              return dto;
-            })
-        .toList();
+                  JournalBriefDto dto =
+                      modelMapper.map(journalWithSubsections, JournalBriefDto.class);
+                  dto.setTotalSubsections(journalWithSubsections.getSubsections().size());
+                  return dto;
+                })
+            .toList();
 
     return new JournalListResponseDto(
         200, true, ResponseMessage.JOURNALS_FETCH_SUCCESS, journalDtos);
@@ -241,11 +248,13 @@ public class JournalServiceImpl implements JournalService {
   }
 
   private Journal findJournalByAccess(UUID id) {
-    Journal journal = journalRepository
-        .findById(id)
-        .orElseThrow(
-            () -> new ResourceNotFoundException(
-                String.format(ResponseMessage.JOURNAL_NOT_FOUND, id)));
+    Journal journal =
+        journalRepository
+            .findById(id)
+            .orElseThrow(
+                () ->
+                    new ResourceNotFoundException(
+                        String.format(ResponseMessage.JOURNAL_NOT_FOUND, id)));
     User currentUser = userUtil.getAuthenticatedUser();
     boolean isAdmin = userUtil.isAuthenticatedUserAdmin();
     if (!isAdmin && !journal.getUser().getId().equals(currentUser.getId())) {

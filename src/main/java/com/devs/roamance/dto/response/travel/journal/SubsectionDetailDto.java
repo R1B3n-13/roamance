@@ -2,6 +2,7 @@ package com.devs.roamance.dto.response.travel.journal;
 
 import com.devs.roamance.dto.response.travel.LocationResponseDto;
 import com.devs.roamance.model.common.ActivityType;
+import com.devs.roamance.model.travel.journal.ChecklistItem;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
@@ -18,7 +19,7 @@ import lombok.Setter;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SubsectionDetailDto extends SubsectionBriefDto {
   private List<String> notes = new ArrayList<>();
-  private List<String> checklists = new ArrayList<>();
+  private List<ChecklistItem> checklists = new ArrayList<>();
 
   // For Activity Subsection
   private LocationResponseDto location;
