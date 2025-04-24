@@ -86,7 +86,7 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
     cover_image: journal.cover_image || '',
   });
 
-  // Function to fetch subsection details - define with useCallback before using in useEffect
+  // Function to fetch subsection details
   const fetchSubsectionDetails = useCallback(
     async (subsectionId: string) => {
       if (subsectionDetails[subsectionId]) {
@@ -115,7 +115,8 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
           `Failed to fetch subsection details for ID ${subsectionId}:`,
           error
         );
-        toast.error('Failed to load section details');
+        // Don't show error toast for background loading
+        // Only show errors when explicitly trying to view a subsection
       } finally {
         setIsLoading((prev) => ({
           ...prev,
@@ -126,7 +127,17 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
     [subsectionDetails]
   );
 
-  // Auto-select the first subsection if one exists
+  // Immediately start background loading of all subsections
+  useEffect(() => {
+    if (journal.subsections && journal.subsections.length > 0) {
+      // Load all subsections in the background as soon as the journal loads
+      journal.subsections.forEach(subsection => {
+        fetchSubsectionDetails(subsection.id);
+      });
+    }
+  }, [journal.subsections, fetchSubsectionDetails]);
+
+  // Auto-select the first subsection if one exists - but don't wait for the fetch to complete
   useEffect(() => {
     if (
       journal.subsections &&
@@ -136,9 +147,10 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
       const firstSubsectionId = journal.subsections[0].id;
       setSelectedSubsectionId(firstSubsectionId);
       setSelectedSubsectionIndex(0);
-      fetchSubsectionDetails(firstSubsectionId);
+      // Note: We don't need to call fetchSubsectionDetails here
+      // since we're already loading all subsections in the background
     }
-  }, [journal.subsections, selectedSubsectionId, fetchSubsectionDetails]);
+  }, [journal.subsections, selectedSubsectionId]);
 
   // Automatically keep the sidebar visible on desktop and hidden on mobile
   useEffect(() => {
@@ -614,8 +626,7 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
             ) : editMode ? (
               <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
                 Edit Section:{' '}
-                {editableJournal.subsections[selectedSubsectionIndex]?.title ||
-                  ''}
+                {editableJournal.subsections[selectedSubsectionIndex]?.title || ''}
               </h2>
             ) : selectedSubsectionId ? (
               <div className="flex items-center justify-between">

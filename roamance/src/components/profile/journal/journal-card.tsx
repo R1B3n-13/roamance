@@ -15,6 +15,7 @@ import {
   MapPin,
   Share2,
   Star,
+  Trash2,
 } from 'lucide-react';
 import React from 'react';
 import { getJournalColorScheme } from './colorscheme';
@@ -34,6 +35,7 @@ export const JournalCard: React.FC<JournalCardProps> = ({
   onView,
   onToggleFavorite,
   onToggleArchive,
+  onDelete,
 }) => {
   // Get consistent color scheme based on journal title
   const colorScheme = getJournalColorScheme(journal.title);
@@ -235,40 +237,42 @@ export const JournalCard: React.FC<JournalCardProps> = ({
               <span>View Details</span>
             </Button>
 
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={(e) => {
-                e.stopPropagation();
-                onToggleArchive(journal);
-              }}
-              className={cn(
-                'text-xs text-muted-foreground transition-colors duration-300 flex items-center gap-1.5',
-                journal.is_archived
-                  ? 'hover:text-violet hover:bg-violet/5'
-                  : 'hover:text-lavender hover:bg-lavender/5'
-              )}
-            >
-              {journal.is_archived ? (
-                <ArchiveRestore className="h-3.5 w-3.5" />
-              ) : (
-                <Archive className="h-3.5 w-3.5" />
-              )}
-              <span>{journal.is_archived ? 'Unarchive' : 'Archive'}</span>
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onToggleArchive(journal);
+                }}
+                className={cn(
+                  'text-xs text-muted-foreground transition-colors duration-300 flex items-center gap-1.5',
+                  journal.is_archived
+                    ? 'hover:text-violet hover:bg-violet/5'
+                    : 'hover:text-lavender hover:bg-lavender/5'
+                )}
+              >
+                {journal.is_archived ? (
+                  <ArchiveRestore className="h-3.5 w-3.5" />
+                ) : (
+                  <Archive className="h-3.5 w-3.5" />
+                )}
+                <span>{journal.is_archived ? 'Unarchive' : 'Archive'}</span>
+              </Button>
 
-            {/* <Button
-              size="sm"
-              variant="ghost"
-              onClick={(e) => {
-                e.stopPropagation();
-                onEdit(journal);
-              }}
-              className="text-xs text-muted-foreground hover:text-sunset hover:bg-sunset/5 transition-colors duration-300 flex items-center gap-1.5"
-            >
-              <Edit className="h-3.5 w-3.5" />
-              <span>Edit</span>
-            </Button> */}
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete(journal);
+                }}
+                className="text-xs text-muted-foreground hover:text-rose-600 hover:bg-rose-500/5 transition-colors duration-300 flex items-center gap-1.5"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                <span>Delete</span>
+              </Button>
+            </div>
           </div>
         </div>
       </Card>

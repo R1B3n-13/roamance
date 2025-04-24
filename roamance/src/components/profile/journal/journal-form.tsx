@@ -165,6 +165,46 @@ export const JournalForm: React.FC<JournalFormProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validate that title is not empty
+    if (!formData.title || formData.title.trim() === '') {
+      // Show an error message or toast notification
+      const titleInput = document.querySelector('input[name="title"]');
+      if (titleInput) {
+        titleInput.focus();
+        // Add shake animation to get user's attention
+        titleInput.classList.add('animate-shake');
+        setTimeout(() => {
+          titleInput.classList.remove('animate-shake');
+        }, 500);
+      }
+
+      // Add a red border to the title input to indicate error
+      document.querySelector('input[name="title"]')?.parentElement?.classList.add('ring-2', 'ring-destructive/50');
+
+      // Create a small error message under the input
+      const errorElement = document.createElement('p');
+      errorElement.className = 'text-xs text-destructive mt-1 animate-fade-in';
+      errorElement.textContent = 'Title is required';
+
+      // Remove any existing error message first
+      const existingError = document.querySelector('input[name="title"]')?.parentElement?.nextElementSibling;
+      if (existingError?.classList.contains('text-destructive')) {
+        existingError.remove();
+      }
+
+      document.querySelector('input[name="title"]')?.parentElement?.after(errorElement);
+
+      return; // Prevent form submission
+    }
+
+    // Remove any error styling if title is valid
+    document.querySelector('input[name="title"]')?.parentElement?.classList.remove('ring-2', 'ring-destructive/50');
+    const existingError = document.querySelector('input[name="title"]')?.parentElement?.nextElementSibling;
+    if (existingError?.classList.contains('text-destructive')) {
+      existingError.remove();
+    }
+
     await onSubmit(formData);
   };
 
@@ -263,7 +303,7 @@ export const JournalForm: React.FC<JournalFormProps> = ({
           </div>
 
           {/* Footer with action buttons */}
-          <div className="sticky bottom-0 w-full bg-muted/10 backdrop-blur-sm border-t border-muted/20 p-6 flex justify-between items-center">
+          <div className="sticky bottom-8 w-full bg-muted/10 backdrop-blur-sm border-t border-muted/20 p-6 flex justify-between items-center">
             <Button
               type="button"
               onClick={onClose}

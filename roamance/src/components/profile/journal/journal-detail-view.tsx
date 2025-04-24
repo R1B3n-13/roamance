@@ -24,6 +24,7 @@ import {
   PlusCircle,
   Save,
   Sparkles,
+  Trash2,
   X,
 } from 'lucide-react';
 import Image from 'next/image';
@@ -69,6 +70,9 @@ export const JournalDetailView: React.FC<JournalDetailViewProps> = ({
   const [subsectionToDelete, setSubsectionToDelete] = useState<number>(-1);
   const [subsectionDetails, setSubsectionDetails] = useState<{ [key: string]: SubsectionDetailResponseDto }>({});
   const [isLoadingSubsection, setIsLoadingSubsection] = useState<{ [key: string]: boolean }>({});
+  // Add delete journal confirmation state
+  const [isDeleteJournalDialogOpen, setIsDeleteJournalDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // For editing the journal
   const [editableJournal, setEditableJournal] = useState<JournalCreateRequest>({
@@ -103,14 +107,26 @@ export const JournalDetailView: React.FC<JournalDetailViewProps> = ({
     }
   }, [journal]);
 
-  // Update active subsection when journal changes
+  // Update active subsection when journal changes and start background loading of all subsections
   useEffect(() => {
     if (journal?.subsections && journal.subsections?.length > 0) {
       setActiveSubsection(journal.subsections[0].id);
+
+      // Start background loading of all subsections
+      journal.subsections.forEach(subsection => {
+        fetchSubsectionDetails(subsection.id);
+      });
     } else {
       setActiveSubsection(null);
     }
   }, [journal]);
+
+  // Reset edit mode when the dialog is opened/closed
+  useEffect(() => {
+    if (!isOpen) {
+      setEditMode(false);
+    }
+  }, [isOpen]);
 
   // Check if dark mode is enabled
   useEffect(() => {
@@ -242,10 +258,6 @@ export const JournalDetailView: React.FC<JournalDetailViewProps> = ({
   };
 
   const toggleSubsection = (id: string) => {
-    if (activeSubsection !== id) {
-      // Only fetch details if we're opening a new subsection
-      fetchSubsectionDetails(id);
-    }
     setActiveSubsection((currentId) => (currentId === id ? null : id));
   };
 
@@ -270,7 +282,8 @@ export const JournalDetailView: React.FC<JournalDetailViewProps> = ({
       }
     } catch (error) {
       console.error(`Failed to fetch subsection details for ID ${subsectionId}:`, error);
-      toast.error("Failed to load section details");
+      // Don't show error toast for background loading
+      // Only show errors when explicitly trying to view a subsection
     } finally {
       setIsLoadingSubsection(prev => ({...prev, [subsectionId]: false}));
     }
@@ -458,6 +471,9 @@ export const JournalDetailView: React.FC<JournalDetailViewProps> = ({
                 src={coverImage}
                 alt={journal.title}
                 fill
+                height={0}
+                width={0}
+                sizes="full"
                 className="object-cover"
                 onError={(e) => {
                   (e.target as HTMLImageElement).src =
@@ -828,14 +844,26 @@ export const JournalDetailView: React.FC<JournalDetailViewProps> = ({
 
         {/* Footer with buttons */}
         <div className="p-4 px-6 md:px-8 border-t border-muted/30 bg-muted/5 backdrop-blur-sm sticky bottom-0 flex justify-between items-center">
-          <Button
-            onClick={onClose}
-            variant="outline"
-            className="gap-2 text-muted-foreground hover:text-foreground transition-colors duration-200"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to Journals
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              onClick={onClose}
+              variant="outline"
+              className="gap-2 text-muted-foreground hover:text-foreground transition-colors duration-200"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back to Journals
+            </Button>
+
+            {/* Delete Button */}
+            <Button
+              onClick={() => setIsDeleteJournalDialogOpen(true)}
+              variant="outline"
+              className="gap-2 text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-900/10 border-rose-200 dark:border-rose-800/30 transition-colors duration-200"
+            >
+              <Trash2 className="w-4 h-4" />
+              Delete Journal
+            </Button>
+          </div>
 
           {/* Edit/Save Button */}
           {editMode ? (
@@ -943,6 +971,33 @@ export const JournalDetailView: React.FC<JournalDetailViewProps> = ({
         isLoading={false}
         onConfirm={confirmDeleteSubsection}
         onCancel={() => setDeleteSubsectionDialogOpen(false)}
+      />
+
+      {/* Confirm Delete Journal Dialog */}
+      <ConfirmDialog
+        isOpen={isDeleteJournalDialogOpen}
+        title="Delete Journal"
+        message={`Are you sure you want to delete "${journal.title}"? This action cannot be undone and will remove all sections and data associated with this journal.`}
+        confirmLabel="Delete Journal"
+        cancelLabel="Cancel"
+        isLoading={isDeleting}
+        onConfirm={async () => {
+          if (!journal?.id) return;
+
+          setIsDeleting(true);
+          try {
+            await journalService.deleteJournal(journal.id);
+            toast.success("Journal deleted successfully");
+            onClose(); // Close the detail view after deletion
+          } catch (error) {
+            console.error("Error deleting journal:", error);
+            toast.error("Failed to delete journal. Please try again.");
+          } finally {
+            setIsDeleting(false);
+            setIsDeleteJournalDialogOpen(false);
+          }
+        }}
+        onCancel={() => setIsDeleteJournalDialogOpen(false)}
       />
     </Dialog>
   );
