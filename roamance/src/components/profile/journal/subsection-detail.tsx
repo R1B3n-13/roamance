@@ -1,9 +1,11 @@
 import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
 import { Location } from '@/types';
 import {
   SubsectionDetailResponseDto,
   SubsectionType,
+  ChecklistItem
 } from '@/types/subsection';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
@@ -16,7 +18,10 @@ import {
   Route,
   Star,
 } from 'lucide-react';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import MDEditor from '@uiw/react-md-editor';
+import rehypeSanitize from 'rehype-sanitize';
+import { useTheme } from 'next-themes';
 
 interface SubsectionDetailProps {
   subsection: SubsectionDetailResponseDto;
@@ -38,6 +43,14 @@ export const SubsectionDetail: React.FC<SubsectionDetailProps> = ({
   colors,
   index,
 }) => {
+  const { theme } = useTheme();
+  const [themeState, setThemeState] = useState<'light' | 'dark'>('light');
+
+  // Update the theme state when the theme changes
+  useEffect(() => {
+    setThemeState(theme === 'dark' ? 'dark' : 'light');
+  }, [theme]);
+
   const getSubsectionIcon = (type: SubsectionType) => {
     switch (type) {
       case SubsectionType.SIGHTSEEING:
@@ -47,255 +60,285 @@ export const SubsectionDetail: React.FC<SubsectionDetailProps> = ({
       case SubsectionType.ROUTE:
         return <Route className="w-5 h-5" />;
       default:
-        return null;
+        return <MapPin className="w-5 h-5" />;
     }
   };
 
-  const getTypeColor = (type: SubsectionType) => {
+  const getTypeLabel = (type: SubsectionType) => {
     switch (type) {
       case SubsectionType.SIGHTSEEING:
-        return 'from-indigo-500 to-purple-600 text-white';
+        return 'Sightseeing';
       case SubsectionType.ACTIVITY:
-        return 'from-amber-500 to-yellow-600 text-white';
+        return 'Activity';
       case SubsectionType.ROUTE:
-        return 'from-emerald-500 to-teal-600 text-white';
+        return 'Route';
       default:
-        return 'from-gray-500 to-gray-600 text-white';
+        return 'Unknown';
     }
   };
+
+  // Format waypoint for display
+  const formatCoordinate = (coord: number): string => {
+    return coord.toFixed(4);
+  };
+
+  // Format location for display
+  const formatLocation = (location: Location | undefined): string => {
+    if (!location) return 'No location data';
+    return `${formatCoordinate(location.latitude)}, ${formatCoordinate(location.longitude)}`;
+  };
+
+  // Get the number of checklist items that are checked
+  const totalItemsCount = subsection.checklists?.length || 0;
 
   return (
     <motion.div
+      layout
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.05 + 0.1 }}
+      exit={{ opacity: 0, y: -10 }}
+      transition={{ duration: 0.2 }}
       className={cn(
-        'rounded-2xl bg-white dark:bg-gray-800 border border-muted/20 shadow-lg transition-colors duration-300',
-        isActive
-          ? cn(colors.border, 'shadow-xl')
-          : 'hover:border-muted/30'
+        'border rounded-xl overflow-hidden transition-all',
+        colors.border,
+        isActive ? 'shadow-md' : 'shadow-sm'
       )}
     >
-      <button
-        onClick={toggleSubsection}
+      {/* Header - always visible */}
+      <div
         className={cn(
-          'flex items-center justify-between w-full p-6 text-left rounded-t-2xl transition-colors duration-200',
-          isActive
-            ? cn('bg-muted/10', colors.bg)
-            : 'bg-white dark:bg-gray-800 hover:bg-muted/10'
+          'p-4 flex items-center justify-between cursor-pointer group',
+          colors.bg,
+          isActive ? 'border-b border-dashed' : '',
+          isActive ? colors.border : ''
         )}
+        onClick={toggleSubsection}
       >
-        <div className="flex items-center">
+        <div className="flex items-center gap-3">
           <div
-            className={`flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br ${getTypeColor(
-              subsection.type
-            )} shadow-sm`}
+            className={cn(
+              'w-10 h-10 rounded-full flex items-center justify-center',
+              isActive ? 'bg-white dark:bg-background' : colors.bg
+            )}
           >
-            {getSubsectionIcon(subsection.type)}
+            <span className={colors.icon}>
+              {getSubsectionIcon(subsection.type)}
+            </span>
           </div>
-          <div className="ml-4">
-            <h4 className="font-medium text-foreground">{subsection.title}</h4>
-            <div className="flex items-center text-xs text-muted-foreground mt-1 space-x-2">
-              <Badge variant="secondary" className={colors.badge}>
-                {subsection.type}
+
+          <div>
+            <h4 className="font-medium text-foreground">
+              {subsection.title || `Section ${index + 1}`}
+            </h4>
+            <div className="flex items-center gap-2 mt-1">
+              <Badge
+                variant="outline"
+                className={cn('text-xs px-2 py-0', colors.badge)}
+              >
+                {getTypeLabel(subsection.type)}
               </Badge>
 
-              {subsection.notes?.length > 0 && (
-                <span className="flex items-center">
-                  <Star className="w-3 h-3 mr-1" />
-                  {subsection.notes?.length} notes
-                </span>
-              )}
+              {/* Show time if it's a route */}
+              {subsection.type === SubsectionType.ROUTE &&
+                subsection.total_time > 0 && (
+                  <span className="text-xs text-muted-foreground flex items-center gap-1">
+                    <Clock className="w-3 h-3" />
+                    {subsection.total_time} min
+                  </span>
+                )}
 
-              {subsection.checklists?.length > 0 && (
-                <span className="flex items-center">
-                  <CheckCircle2 className="w-3 h-3 mr-1" />
-                  {subsection.checklists?.length} checklist items
-                </span>
-              )}
+              {/* Show completion status if there are checklist items */}
             </div>
           </div>
         </div>
+
         <div
           className={cn(
-            'w-8 h-8 rounded-full flex items-center justify-center transition-transform duration-300',
-            colors.bg,
-            isActive && 'rotate-180'
+            'w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300',
+            isActive
+              ? 'bg-white/90 dark:bg-muted/90 rotate-180'
+              : 'bg-muted/40 group-hover:bg-muted/70'
           )}
         >
-          <ChevronDown className={cn('w-5 h-5', colors.icon)} />
+          <ChevronDown
+            className={cn(
+              'w-4 h-4 transition-transform',
+              isActive ? colors.icon : 'text-muted-foreground'
+            )}
+          />
         </div>
-      </button>
+      </div>
 
+      {/* Content - only visible when active */}
       <AnimatePresence>
         {isActive && (
           <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3 }}
-            className="overflow-hidden border-t border-muted/20"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{
+              height: 'auto',
+              opacity: 1,
+              transition: { duration: 0.3 },
+            }}
+            exit={{ height: 0, opacity: 0, transition: { duration: 0.2 } }}
+            className="overflow-hidden bg-background/80"
           >
-            <div className={cn('p-6 space-y-6', colors.bg)}>
-              {/* Type-specific content */}
-              {subsection.type === SubsectionType.SIGHTSEEING && (
-                <div className="mb-5">
-                  <div className="flex items-center text-sm text-foreground bg-background/80 backdrop-blur-sm rounded-lg p-3 border border-muted/30">
-                    <MapPin className={cn('w-5 h-5 mr-3', colors.icon)} />
-                    <span>
-                      Location:{' '}
-                      {subsection.location
-                        ? `${subsection.location.latitude.toFixed(
-                            4
-                          )}, ${subsection.location.longitude.toFixed(4)}`
-                        : 'No location data available'}
+            <div className="p-4 space-y-4">
+              {/* Location - for sightseeing & activity types */}
+              {(subsection.type === SubsectionType.SIGHTSEEING ||
+                subsection.type === SubsectionType.ACTIVITY) &&
+                subsection.location && (
+                  <div className="flex items-center gap-2 text-sm">
+                    <MapPin className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-muted-foreground">
+                      Location: {formatLocation(subsection.location)}
                     </span>
                   </div>
-                </div>
-              )}
+                )}
 
-              {subsection.type === SubsectionType.ACTIVITY && (
-                <div className="mb-5 space-y-3">
-                  <div className="flex items-center text-sm text-foreground bg-background/80 backdrop-blur-sm rounded-lg p-3 border border-muted/30">
-                    <Activity className={cn('w-5 h-5 mr-3', colors.icon)} />
-                    <span>
-                      Activity: {subsection.activity_type || 'Unnamed activity'}
+              {/* Activity type - for activity type */}
+              {subsection.type === SubsectionType.ACTIVITY &&
+                subsection.activity_type && (
+                  <div className="flex items-center gap-2 text-sm">
+                    <Activity className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-muted-foreground">
+                      Activity: {subsection.activity_type.replace('_', ' ')}
                     </span>
                   </div>
+                )}
 
-                  <div className="flex items-center text-sm text-foreground bg-background/80 backdrop-blur-sm rounded-lg p-3 border border-muted/30">
-                    <MapPin className={cn('w-5 h-5 mr-3', colors.icon)} />
-                    <span>
-                      Location:{' '}
-                      {subsection.location
-                        ? `${subsection.location.latitude.toFixed(
-                            4
-                          )}, ${subsection.location.longitude.toFixed(4)}`
-                        : 'No location data available'}
-                    </span>
-                  </div>
-                </div>
-              )}
-
+              {/* Route details - for route type */}
               {subsection.type === SubsectionType.ROUTE && (
-                <div className="mb-5 space-y-3">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div className="flex items-center text-sm text-foreground bg-background/80 backdrop-blur-sm rounded-lg p-3 border border-muted/30">
-                      <Route className={cn('w-5 h-5 mr-3', colors.icon)} />
-                      <span>Distance: {subsection.total_distance || 0} km</span>
+                <div className="border rounded-lg p-3 space-y-3 bg-muted/10">
+                  <h5 className="font-medium flex items-center gap-2">
+                    <Route className="w-4 h-4 text-forest" />
+                    <span>Route Details</span>
+                  </h5>
+
+                  {/* Route stats */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <div className="text-xs text-muted-foreground">
+                        Total Distance
+                      </div>
+                      <div className="font-medium">
+                        {subsection.total_distance
+                          ? `${subsection.total_distance} km`
+                          : 'Not specified'}
+                      </div>
                     </div>
 
-                    <div className="flex items-center text-sm text-foreground bg-background/80 backdrop-blur-sm rounded-lg p-3 border border-muted/30">
-                      <Clock className={cn('w-5 h-5 mr-3', colors.icon)} />
-                      <span>Time: {subsection.total_time || 0} min</span>
+                    <div className="space-y-1">
+                      <div className="text-xs text-muted-foreground">
+                        Estimated Time
+                      </div>
+                      <div className="font-medium">
+                        {subsection.total_time
+                          ? `${subsection.total_time} minutes`
+                          : 'Not specified'}
+                      </div>
                     </div>
                   </div>
 
+                  {/* Waypoints */}
                   {subsection.waypoints && subsection.waypoints.length > 0 && (
-                    <div>
-                      <h5 className="text-sm font-medium mb-3 flex items-center">
-                        <Route className={cn('w-4 h-4 mr-2', colors.icon)} />
-                        Route Stops
-                      </h5>
-
-                      <div
-                        className={cn(
-                          'space-y-2 pl-4 border-l-2',
-                          colors.border
-                        )}
-                      >
-                        {subsection.waypoints.map(
-                          (location: Location, i: number) => (
-                            <div
-                              key={i}
-                              className="flex items-center text-sm relative pl-6"
-                            >
-                              <div
-                                className={cn(
-                                  'absolute -left-[17px] w-8 h-8 rounded-full flex items-center justify-center text-white z-10',
-                                  i === 0
-                                    ? 'bg-green-500'
-                                    : i === subsection.waypoints.length - 1
-                                      ? 'bg-red-500'
-                                      : colors.icon.replace('text-', 'bg-')
-                                )}
-                              >
-                                {i + 1}
-                              </div>
-                              <div className="bg-background/80 backdrop-blur-sm rounded-lg py-2 px-3 border border-muted/30 w-full">
-                                Stop {i + 1}: {location.latitude.toFixed(4)},{' '}
-                                {location.longitude.toFixed(4)}
-                              </div>
+                    <div className="mt-4">
+                      <h6 className="text-xs text-muted-foreground mb-2">
+                        Waypoints
+                      </h6>
+                      <div className="space-y-2">
+                        {subsection.waypoints.map((waypoint, i) => (
+                          <div
+                            key={i}
+                            className="flex items-center gap-2 p-2 rounded-md bg-muted/20 text-sm"
+                          >
+                            <div className="h-5 w-5 rounded-full bg-forest-light/50 dark:bg-forest-dark/30 flex items-center justify-center text-xs font-medium">
+                              {i + 1}
                             </div>
-                          )
-                        )}
+                            <span className="text-foreground/80">
+                              {formatLocation(waypoint)}
+                            </span>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   )}
                 </div>
               )}
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Notes section */}
-                {subsection.notes && subsection.notes?.length > 0 && (
-                  <div>
-                    <h5 className="text-sm font-medium mb-3 flex items-center">
-                      <Star className={cn('w-4 h-4 mr-2', colors.icon)} />
-                      Notes
-                      <Badge className={cn('ml-2 text-xs', colors.badge)}>
-                        {subsection.notes?.length}
-                      </Badge>
-                    </h5>
+              {/* Notes section */}
+              {subsection.note && subsection.note.length > 0 && (
+                <div className="space-y-3">
+                  <h5 className="font-medium flex items-center gap-2">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="w-4 h-4 text-muted-foreground"
+                    >
+                      <path d="M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0Z" />
+                    </svg>
+                    <span>Notes</span>
+                  </h5>
 
-                    <div className="space-y-2 max-h-[400px] overflow-y-auto pr-2 scrollbar-hide">
-                      {subsection.notes.map((note: string, i: number) => (
-                        <div key={i} className="group relative">
-                          <div className="absolute -left-2 top-3 w-4 h-4 rounded-full bg-background border-2 border-muted z-10 group-hover:border-indigo-400 transition-colors duration-300"></div>
-                          <div className="pl-6 py-2 pr-3 rounded-lg bg-background/80 backdrop-blur-sm border border-muted/30 group-hover:border-muted transition-colors duration-300">
-                            <p className="text-sm text-foreground/90">{note}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Checklists section */}
-                {subsection.checklists && subsection.checklists?.length > 0 && (
-                  <div>
-                    <h5 className="text-sm font-medium mb-3 flex items-center">
-                      <CheckCircle2
-                        className={cn('w-4 h-4 mr-2', colors.icon)}
+                  <div className="p-3 rounded-lg bg-muted/10 border border-muted/30">
+                    <div data-color-mode={themeState}>
+                      <MDEditor.Markdown
+                        source={subsection.note}
+                        rehypePlugins={[[rehypeSanitize]]}
+                        className="markdown-body text-sm"
                       />
-                      Checklist
-                      <Badge className={cn('ml-2 text-xs', colors.badge)}>
-                        {subsection.checklists?.length}
-                      </Badge>
-                    </h5>
-
-                    <div className="space-y-2 max-h-[400px] overflow-y-auto pr-2 scrollbar-hide">
-                      {subsection.checklists.map((item: string, i: number) => (
-                        <div
-                          key={i}
-                          className="flex items-center p-3 rounded-lg bg-background/80 backdrop-blur-sm border border-muted/30 text-sm text-foreground"
-                        >
-                          <div
-                            className={cn(
-                              'w-6 h-6 rounded-full flex items-center justify-center mr-3 flex-shrink-0',
-                              colors.bg
-                            )}
-                          >
-                            <CheckCircle2
-                              className={cn('w-4 h-4', colors.icon)}
-                            />
-                          </div>
-                          <span>{item}</span>
-                        </div>
-                      ))}
                     </div>
                   </div>
-                )}
-              </div>
+                </div>
+              )}
+
+              {/* Checklist section */}
+              {subsection.checklists && subsection.checklists.length > 0 && (
+                <div className="space-y-3">
+                  <h5 className="font-medium flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-muted-foreground" />
+                    <span>Checklist</span>
+                  </h5>
+
+                  <div className="space-y-2">
+                    {subsection.checklists.map((item, i) => (
+                      <div
+                        key={i}
+                        className={cn(
+                          'flex items-center gap-3 p-2 rounded-md text-sm',
+                          item.completed
+                            ? 'bg-forest-light/20 dark:bg-forest-dark/20'
+                            : 'bg-muted/10'
+                        )}
+                      >
+                        <Checkbox
+                          checked={item.completed}
+                          className={cn(
+                            item.completed
+                              ? 'border-forest text-forest-foreground'
+                              : 'border-muted-foreground/30'
+                          )}
+                          disabled
+                        />
+                        <span
+                          className={cn(
+                            'flex-1',
+                            item.completed
+                              ? 'text-foreground/70 line-through'
+                              : 'text-foreground'
+                          )}
+                        >
+                          {item.title}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </motion.div>
         )}

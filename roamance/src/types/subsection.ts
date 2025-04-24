@@ -3,6 +3,11 @@ import { Journal } from './journal';
 import { BaseResponse } from './response';
 import { Location } from './location';
 
+export interface ChecklistItem {
+  title: string;
+  completed: boolean;
+}
+
 export enum SubsectionType {
   SIGHTSEEING = 'SIGHTSEEING',
   ACTIVITY = 'ACTIVITY',
@@ -38,8 +43,8 @@ export interface RouteSubsection extends Subsection {
 export interface SubsectionRequestDto {
   title: string;
   journal_id: string;
-  notes: string[];
-  checklists: string[];
+  note: string;
+  checklists: ChecklistItem[];
 }
 
 export interface SightseeingSubsectionRequest extends SubsectionRequestDto {
@@ -76,8 +81,8 @@ export interface SubsectionBriefDto {
 }
 
 export type SubsectionDetailDto = Omit<SubsectionBriefDto, 'type'> & {
-  notes: string[];
-  checklists: string[];
+  note: string;
+  checklists: ChecklistItem[];
 };
 
 export interface SightseeingSubsectionDto extends SubsectionDetailDto {
