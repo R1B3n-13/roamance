@@ -31,7 +31,7 @@ public abstract class SubsectionUpdateRequestDto {
   @NotNull(message = "Type must not be null")
   private SubsectionType type;
 
-  private List<@NotBlank(message = "Note cannot be empty") String> notes = new ArrayList<>();
+  private String note;
 
   private List<@Valid ChecklistItem> checklists = new ArrayList<>();
 }

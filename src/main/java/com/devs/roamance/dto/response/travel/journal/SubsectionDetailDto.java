@@ -18,7 +18,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SubsectionDetailDto extends SubsectionBriefDto {
-  private List<String> notes = new ArrayList<>();
+  private String note;
   private List<ChecklistItem> checklists = new ArrayList<>();
 
   // For Activity Subsection

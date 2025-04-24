@@ -36,8 +36,7 @@ public abstract class SubsectionCreateRequestDto {
   @NotNull(message = "Journal ID must not be null")
   private UUID journalId;
 
-  @Size(max = 10, message = "Maximum 10 notes allowed")
-  private List<@NotBlank(message = "Note cannot be empty") String> notes = new ArrayList<>();
+  private String note;
 
   @Size(max = 50, message = "Maximum 10 checklist items allowed")
   private List<@Valid ChecklistItem> checklists = new ArrayList<>();

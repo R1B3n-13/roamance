@@ -38,6 +38,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -60,6 +61,7 @@ public class SubsectionServiceImpl implements SubsectionService {
   }
 
   @Override
+  @Transactional
   public SubsectionResponseDto create(SubsectionCreateRequestDto requestDto) {
     log.info(
         "Creating subsection with title: '{}' for journal with ID: {}",
@@ -94,6 +96,7 @@ public class SubsectionServiceImpl implements SubsectionService {
   }
 
   @Override
+  @Transactional(readOnly = true)
   public SubsectionListResponseDto getAll(
       int pageNumber, int pageSize, String sortBy, String sortDir) {
     log.info(
@@ -132,6 +135,7 @@ public class SubsectionServiceImpl implements SubsectionService {
   }
 
   @Override
+  @Transactional(readOnly = true)
   public SubsectionResponseDto get(UUID id) {
     log.info("Fetching subsection with id: {}", id);
     Subsection subsection =
@@ -154,6 +158,7 @@ public class SubsectionServiceImpl implements SubsectionService {
   }
 
   @Override
+  @Transactional
   public SubsectionResponseDto update(SubsectionUpdateRequestDto updateRequestDto, UUID id) {
     log.info("Updating subsection with id: {}", id);
 
@@ -182,6 +187,7 @@ public class SubsectionServiceImpl implements SubsectionService {
   }
 
   @Override
+  @Transactional
   public BaseResponseDto delete(UUID id) {
     log.info("Deleting subsection with id: {}", id);
 
