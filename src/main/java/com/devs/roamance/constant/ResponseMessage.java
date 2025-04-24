@@ -155,4 +155,10 @@ public final class ResponseMessage {
       "You don't have permission to update this Activity!";
   public static final String ACTIVITY_DELETE_ACTION_DENIED =
       "You don't have permission to delete this Activity!";
+
+  // ========================== AI Related ==========================
+
+  public static final String PROOFREAD_GENERATION_FAILED = "Proofread generation failed!";
+  public static final String PROOFREAD_INPUT_NULL = "Proofread input is null!";
+  public static final String GEMINI_MODEL_BUILD_FAILED = "Gemini model build failed!";
 }
