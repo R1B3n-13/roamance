@@ -7,7 +7,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import java.time.OffsetDateTime;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -40,7 +40,7 @@ public class JournalCreateRequestDto {
   @JsonProperty("is_shared")
   private Boolean isShared = false;
 
-  private OffsetDateTime date = OffsetDateTime.now();
+  private LocalDate date = LocalDate.now();
 
   @JsonProperty("cover_image")
   @Pattern(

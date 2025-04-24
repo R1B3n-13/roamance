@@ -127,6 +127,7 @@ public class JournalServiceImpl implements JournalService {
   }
 
   @Override
+  @Transactional(readOnly = true)
   public JournalListResponseDto getAll(
       int pageNumber, int pageSize, String sortBy, String sortDir) {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -174,6 +175,7 @@ public class JournalServiceImpl implements JournalService {
   }
 
   @Override
+  @Transactional(readOnly = true)
   public JournalResponseDto get(UUID id) {
     log.info("Fetching journal with id: {} using JOIN FETCH for subsections", id);
     Journal journal = findJournalByAccess(id);

@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import java.time.OffsetDateTime;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -35,7 +35,7 @@ public class JournalUpdateRequestDto {
   @JsonProperty("is_shared")
   private Boolean isShared;
 
-  private OffsetDateTime date = OffsetDateTime.now();
+  private LocalDate date;
 
   @JsonProperty("cover_image")
   @Pattern(

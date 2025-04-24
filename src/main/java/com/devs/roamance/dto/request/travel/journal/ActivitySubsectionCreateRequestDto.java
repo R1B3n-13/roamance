@@ -21,5 +21,5 @@ public class ActivitySubsectionCreateRequestDto extends SubsectionCreateRequestD
 
   @NotNull(message = "Activity type is required")
   @JsonProperty("activity_type")
-  private ActivityType activityType;
+  private ActivityType activityType = ActivityType.OTHER;
 }

@@ -3,7 +3,7 @@ package com.devs.roamance.dto.response.travel.journal;
 import com.devs.roamance.dto.response.AuditDto;
 import com.devs.roamance.dto.response.travel.LocationResponseDto;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.time.OffsetDateTime;
+import java.time.LocalDate;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -29,7 +29,7 @@ public class JournalDto {
   @JsonProperty("is_shared")
   private Boolean isShared;
 
-  private OffsetDateTime date = OffsetDateTime.now();
+  private LocalDate date;
 
   @JsonProperty("cover_image")
   private String coverImage;

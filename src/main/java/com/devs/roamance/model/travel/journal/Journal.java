@@ -20,7 +20,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
-import java.time.OffsetDateTime;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -58,7 +58,7 @@ public class Journal {
   private Boolean isFavorite;
   private Boolean isArchived;
   private Boolean isShared;
-  private OffsetDateTime date;
+  private LocalDate date;
 
   @Nullable private String coverImage;
 
