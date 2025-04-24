@@ -11,7 +11,6 @@ import {
   BookOpen,
   Calendar,
   Clock,
-  Edit,
   Lock,
   MapPin,
   Share2,
@@ -31,7 +30,7 @@ interface JournalCardProps {
 
 export const JournalCard: React.FC<JournalCardProps> = ({
   journal,
-  onEdit,
+  // onEdit,
   onView,
   onToggleFavorite,
   onToggleArchive,
@@ -61,7 +60,8 @@ export const JournalCard: React.FC<JournalCardProps> = ({
 
   // Get badge style based on colorScheme
   const getBadgeStyle = () => {
-    if (journal.is_favorite) return 'bg-sunset text-white border border-sunset/20 shadow-sm';
+    if (journal.is_favorite)
+      return 'bg-sunset text-white border border-sunset/20 shadow-sm';
 
     switch (colorScheme.type) {
       case 'ocean':
@@ -183,12 +183,14 @@ export const JournalCard: React.FC<JournalCardProps> = ({
         <div className="p-5">
           <div className="flex items-start justify-between">
             <div>
-              <h3 className={cn(
-                "font-semibold mb-1.5 transition-colors",
-                journal.is_favorite
-                  ? "group-hover:text-sunset"
-                  : "group-hover:text-ocean"
-              )}>
+              <h3
+                className={cn(
+                  'font-semibold mb-1.5 transition-colors',
+                  journal.is_favorite
+                    ? 'group-hover:text-sunset'
+                    : 'group-hover:text-ocean'
+                )}
+              >
                 {journal.title}
               </h3>
               {journal.destination && (
@@ -230,7 +232,7 @@ export const JournalCard: React.FC<JournalCardProps> = ({
               className="text-xs text-muted-foreground hover:text-forest hover:bg-forest/5 transition-colors duration-300 flex items-center gap-1.5"
             >
               <BookOpen className="h-3.5 w-3.5" />
-              <span>View</span>
+              <span>View Details</span>
             </Button>
 
             <Button
@@ -255,7 +257,7 @@ export const JournalCard: React.FC<JournalCardProps> = ({
               <span>{journal.is_archived ? 'Unarchive' : 'Archive'}</span>
             </Button>
 
-            <Button
+            {/* <Button
               size="sm"
               variant="ghost"
               onClick={(e) => {
@@ -266,7 +268,7 @@ export const JournalCard: React.FC<JournalCardProps> = ({
             >
               <Edit className="h-3.5 w-3.5" />
               <span>Edit</span>
-            </Button>
+            </Button> */}
           </div>
         </div>
       </Card>

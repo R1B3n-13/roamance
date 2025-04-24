@@ -67,7 +67,13 @@ export function getJournalColorScheme(title: string): JournalColorScheme {
   const hashNum = stringToHashNum(title);
 
   // Map the hash to one of the color schemes (ensures consistent assignment)
-  const colorTypes: ColorSchemeType[] = ['ocean', 'sunset', 'forest', 'violet', 'lavender'];
+  const colorTypes: ColorSchemeType[] = [
+    'ocean',
+    'sunset',
+    'forest',
+    'violet',
+    'lavender',
+  ];
   const typeIndex = hashNum % colorTypes.length;
   const colorType = colorTypes[typeIndex];
 

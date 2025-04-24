@@ -22,6 +22,7 @@ import { ConfirmDialog } from '../../common/confirm-dialog';
 import { JournalCard } from './journal-card';
 import { JournalDetailView } from './journal-detail-view';
 import { JournalForm } from './journal-form';
+import { JourneyPathAnimation } from './journey-path-animation';
 
 export const JournalManagement: React.FC = () => {
   const [journals, setJournals] = useState<JournalBrief[]>([]);
@@ -259,6 +260,70 @@ export const JournalManagement: React.FC = () => {
       );
     });
 
+  // Journal card skeleton for loading state
+  const JournalCardSkeleton = () => (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white/70 dark:bg-slate-900/70 backdrop-blur-sm shadow-sm overflow-hidden h-full"
+    >
+      <div className="relative h-48 bg-slate-100 dark:bg-slate-800/60 animate-pulse">
+        {/* Shimmer effect */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute -inset-x-full top-0 bottom-0 bg-gradient-to-r from-transparent via-white/20 dark:via-white/10 to-transparent animate-[shimmer_1.5s_infinite]" style={{transform: 'translateX(-10%) skewX(-20deg)'}} />
+        </div>
+
+        {/* Placeholder elements */}
+        <div className="absolute bottom-4 left-4 w-32 h-6 rounded-full bg-slate-200/80 dark:bg-slate-700/80"></div>
+      </div>
+      <div className="p-5 space-y-3">
+        <div className="h-5 w-3/4 bg-slate-200/80 dark:bg-slate-700/80 rounded-md animate-pulse"></div>
+        <div className="h-4 w-1/4 bg-slate-100/80 dark:bg-slate-800/80 rounded-md animate-pulse"></div>
+        <div className="space-y-2">
+          <div className="h-3.5 w-full bg-slate-100/80 dark:bg-slate-800/90 rounded-md animate-pulse"></div>
+          <div className="h-3.5 w-11/12 bg-slate-100/80 dark:bg-slate-800/90 rounded-md animate-pulse"></div>
+          <div className="h-3.5 w-4/5 bg-slate-100/80 dark:bg-slate-800/90 rounded-md animate-pulse"></div>
+        </div>
+        <div className="pt-4 border-t border-slate-200/50 dark:border-slate-700/50 flex justify-between">
+          <div className="h-8 w-16 bg-slate-100/80 dark:bg-slate-800/80 rounded-md animate-pulse"></div>
+          <div className="flex space-x-2">
+            <div className="h-8 w-8 rounded-full bg-slate-100/80 dark:bg-slate-800/80 animate-pulse"></div>
+            <div className="h-8 w-8 rounded-full bg-slate-100/80 dark:bg-slate-800/80 animate-pulse"></div>
+            <div className="h-8 w-8 rounded-full bg-slate-100/80 dark:bg-slate-800/80 animate-pulse"></div>
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+
+  // Custom loading component with journey path animation
+  const JournalsLoadingState = () => (
+    <div className="space-y-10 py-12">
+      <div className="flex flex-col items-center justify-center">
+        <JourneyPathAnimation color="purple" size="lg" className="mb-8" />
+        <div className="text-center space-y-3 max-w-md mx-auto">
+          <h3 className="text-xl font-medium bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent animate-pulse">
+            Loading your travel memories...
+          </h3>
+          <p className="text-muted-foreground text-sm">
+            Preparing your journals and adventures for exploration
+          </p>
+        </div>
+      </div>
+
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.2 }}
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+      >
+        {Array.from({ length: 3 }).map((_, index) => (
+          <JournalCardSkeleton key={index} />
+        ))}
+      </motion.div>
+    </div>
+  );
+
   return (
     <div className="space-y-8">
       {/* Header section with subtle background glow */}
@@ -405,15 +470,7 @@ export const JournalManagement: React.FC = () => {
 
       {/* Journals grid with staggered animations */}
       {isLoading ? (
-        <div className="flex flex-col justify-center items-center py-20">
-          <div className="relative">
-            <div className="h-16 w-16 rounded-full border-4 border-muted/20 border-t-indigo-600 animate-spin"></div>
-            <div className="absolute inset-0 rounded-full border-4 border-indigo-600/10"></div>
-          </div>
-          <span className="mt-4 text-muted-foreground font-medium">
-            Loading your journals...
-          </span>
-        </div>
+        <JournalsLoadingState />
       ) : filteredJournals.length > 0 ? (
         <motion.div
           variants={staggerContainer}
@@ -441,8 +498,12 @@ export const JournalManagement: React.FC = () => {
           transition={{ type: 'spring', stiffness: 200, damping: 25 }}
           className="rounded-2xl bg-gradient-to-br from-background/90 to-background/70 backdrop-blur-sm border border-muted/30 p-12 text-center"
         >
-          <div className="relative w-20 h-20 bg-gradient-to-br from-indigo-500/10 to-purple-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
-            <BookOpen className="w-10 h-10 text-indigo-500/70" />
+          <div className="relative w-24 h-24 mx-auto mb-6">
+            <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 rounded-full animate-pulse"></div>
+            <div className="absolute inset-0 rounded-full border-2 border-dashed border-indigo-200 dark:border-indigo-800/50 animate-spin-slow"></div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <BookOpen className="w-12 h-12 text-indigo-500/70" />
+            </div>
           </div>
 
           {searchQuery.trim() !== '' ? (

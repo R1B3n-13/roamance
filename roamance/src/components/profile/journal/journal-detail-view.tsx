@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils';
 import { journalService } from '@/service/journal-service';
 import { JournalCreateRequest, JournalDetail } from '@/types/journal';
 import { formatRelativeTime } from '@/utils/format';
-import { motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import {
   AlertCircle,
   ArrowLeft,
@@ -23,6 +23,7 @@ import {
   MapPin,
   PlusCircle,
   Save,
+  Sparkles,
   X,
 } from 'lucide-react';
 import Image from 'next/image';
@@ -38,10 +39,10 @@ import { subsectionService } from '@/service/subsection-service';
 import {
   SubsectionDetailResponseDto,
   SubsectionType,
-  ChecklistItem,
   SubsectionRequest
 } from '@/types/subsection';
 import { LocationMap } from '@/components/maps/LocationViwer';
+import { JourneyPathAnimation } from './journey-path-animation';
 
 interface JournalDetailViewProps {
   journal: JournalDetail | null; // Made optional to handle loading state
@@ -283,32 +284,84 @@ export const JournalDetailView: React.FC<JournalDetailViewProps> = ({
       <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
         <DialogContent className="bg-background rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col border border-muted/30 p-0">
           <DialogTitle className="sr-only">Loading Journal Details</DialogTitle>
-          {/* Simple loading header */}
-          <div className="bg-gradient-to-br from-indigo-600 via-purple-600 to-violet-600 p-8 relative">
-            <div className="h-16"></div>
-          </div>
 
-          {/* Loading spinner */}
-          <div className="flex-1 flex flex-col items-center justify-center p-12">
-            <div className="relative">
-              <div className="h-16 w-16 rounded-full border-4 border-muted/20 border-t-indigo-600 animate-spin"></div>
-              <div className="absolute inset-0 rounded-full border-4 border-indigo-600/10"></div>
+          {/* Header with JourneyPathAnimation */}
+          <div className="relative bg-gradient-to-br from-indigo-600/90 via-purple-600/90 to-violet-600/90 p-12 flex flex-col items-center justify-center">
+            <div className="absolute inset-0 overflow-hidden">
+              <div className="absolute -inset-x-full top-0 bottom-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-[shimmer_2s_infinite]" style={{transform: 'translateX(-10%) skewX(-15deg)'}} />
             </div>
-            <span className="mt-6 text-muted-foreground font-medium">
-              Loading journal details...
-            </span>
+
+            <JourneyPathAnimation color="violet" size="lg" className="mb-4" />
+
+            <div className="text-center z-10">
+              <div className="w-40 h-6 bg-white/20 rounded-full mb-3 mx-auto animate-pulse"></div>
+              <div className="w-64 h-8 bg-white/20 rounded-lg mb-4 mx-auto animate-pulse"></div>
+            </div>
           </div>
 
-          {/* Footer with back button */}
-          <div className="p-4 px-6 md:px-8 border-t border-muted/30 bg-muted/5 backdrop-blur-sm">
-            <Button
-              onClick={onClose}
-              variant="outline"
-              className="gap-2 text-muted-foreground hover:text-foreground transition-colors duration-200"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Back to Journals
-            </Button>
+          {/* Body content skeleton */}
+          <div className="flex-1 overflow-y-auto p-6 md:p-8 space-y-8">
+            {/* Description skeleton */}
+            <div className="p-5 rounded-xl bg-slate-100/50 dark:bg-slate-800/30 border border-slate-200/50 dark:border-slate-700/30 space-y-2">
+              <div className="h-4 bg-slate-200/70 dark:bg-slate-700/50 rounded-full w-full animate-pulse"></div>
+              <div className="h-4 bg-slate-200/70 dark:bg-slate-700/50 rounded-full w-11/12 animate-pulse"></div>
+              <div className="h-4 bg-slate-200/70 dark:bg-slate-700/50 rounded-full w-4/5 animate-pulse"></div>
+            </div>
+
+            {/* Metadata grid skeleton */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="flex items-center p-4 rounded-xl bg-indigo-50/50 dark:bg-indigo-900/10 border border-indigo-100/50 dark:border-indigo-800/20">
+                <div className="w-10 h-10 rounded-full bg-indigo-100/70 dark:bg-indigo-800/30 mr-3 flex-shrink-0"></div>
+                <div className="space-y-2">
+                  <div className="h-3 w-16 bg-indigo-200/70 dark:bg-indigo-700/40 rounded-full"></div>
+                  <div className="h-4 w-28 bg-indigo-200/50 dark:bg-indigo-700/30 rounded-full"></div>
+                </div>
+              </div>
+
+              <div className="flex items-center p-4 rounded-xl bg-purple-50/50 dark:bg-purple-900/10 border border-purple-100/50 dark:border-purple-800/20">
+                <div className="w-10 h-10 rounded-full bg-purple-100/70 dark:bg-purple-800/30 mr-3 flex-shrink-0"></div>
+                <div className="space-y-2">
+                  <div className="h-3 w-16 bg-purple-200/70 dark:bg-purple-700/40 rounded-full"></div>
+                  <div className="h-4 w-28 bg-purple-200/50 dark:bg-purple-700/30 rounded-full"></div>
+                </div>
+              </div>
+            </div>
+
+            {/* Sections header skeleton */}
+            <div className="flex items-center mb-4">
+              <div className="relative mr-3">
+                <div className="absolute left-0 top-1/2 w-1 h-6 bg-purple-500/50 rounded-r-full transform -translate-y-1/2"></div>
+                <div className="h-6 w-32 bg-slate-200/70 dark:bg-slate-700/50 rounded-full ml-3"></div>
+              </div>
+              <div className="w-12 h-5 rounded-full bg-indigo-100/50 dark:bg-indigo-900/20 border border-indigo-200/50 dark:border-indigo-800/30"></div>
+            </div>
+
+            {/* Sections skeleton */}
+            <div className="space-y-4">
+              {[1, 2, 3].map((_, i) => (
+                <div
+                  key={i}
+                  className="rounded-xl border border-slate-200/70 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-800/20 overflow-hidden"
+                >
+                  <div className="p-4 flex items-start justify-between">
+                    <div className="flex items-start space-x-3">
+                      <div className="w-10 h-10 rounded-full bg-slate-200/70 dark:bg-slate-700/40 flex-shrink-0 mt-0.5"></div>
+                      <div className="space-y-2">
+                        <div className="h-5 w-40 bg-slate-200/70 dark:bg-slate-700/50 rounded-full"></div>
+                        <div className="h-4 w-24 bg-slate-200/50 dark:bg-slate-700/30 rounded-full"></div>
+                      </div>
+                    </div>
+                    <div className="w-8 h-8 rounded-full bg-slate-200/50 dark:bg-slate-700/30"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Footer skeleton */}
+          <div className="p-4 px-6 md:px-8 border-t border-muted/30 bg-muted/5 backdrop-blur-sm flex justify-between items-center">
+            <div className="w-28 h-9 rounded-md bg-slate-200/50 dark:bg-slate-700/30 animate-pulse"></div>
+            <div className="w-32 h-9 rounded-md bg-indigo-200/50 dark:bg-indigo-700/30 animate-pulse"></div>
           </div>
         </DialogContent>
       </Dialog>
@@ -350,6 +403,8 @@ export const JournalDetailView: React.FC<JournalDetailViewProps> = ({
           border: 'border-indigo-200 dark:border-indigo-800/50',
           badge:
             'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300',
+          bgSolid: 'bg-indigo-500 dark:bg-indigo-600',
+          gradient: 'from-indigo-500 via-purple-500 to-violet-500',
         };
       case SubsectionType.ACTIVITY:
         return {
@@ -358,6 +413,8 @@ export const JournalDetailView: React.FC<JournalDetailViewProps> = ({
           border: 'border-amber-200 dark:border-amber-800/50',
           badge:
             'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300',
+          bgSolid: 'bg-amber-500 dark:bg-amber-600',
+          gradient: 'from-amber-500 via-orange-500 to-yellow-500',
         };
       case SubsectionType.ROUTE:
         return {
@@ -366,6 +423,8 @@ export const JournalDetailView: React.FC<JournalDetailViewProps> = ({
           border: 'border-emerald-200 dark:border-emerald-800/50',
           badge:
             'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300',
+          bgSolid: 'bg-emerald-500 dark:bg-emerald-600',
+          gradient: 'from-emerald-500 via-green-500 to-teal-500',
         };
       default:
         return {
@@ -374,6 +433,8 @@ export const JournalDetailView: React.FC<JournalDetailViewProps> = ({
           border: 'border-gray-200 dark:border-gray-700',
           badge:
             'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
+          bgSolid: 'bg-gray-500 dark:bg-gray-600',
+          gradient: 'from-gray-500 via-gray-600 to-gray-700',
         };
     }
   };
@@ -383,12 +444,12 @@ export const JournalDetailView: React.FC<JournalDetailViewProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="bg-background rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col border border-muted/30 p-0 sm:max-w-4xl">
-        <DialogTitle className="sr-only">{journal.title}</DialogTitle>
+      <DialogContent className="w-full max-w-4xl sm:max-w-4xl max-h-[90vh] overflow-hidden p-0 rounded-xl border border-muted/30 shadow-xl">
+        <DialogTitle className="sr-only">{journal?.title || 'Journal Details'}</DialogTitle>
         {/* Journal Header with Cover Image */}
         <div className="relative">
           {coverImage ? (
-            <div className="relative h-56 md:h-72 lg:h-80 overflow-hidden">
+            <div className="relative h-32 md:h-40 lg:h-52 overflow-hidden">
               {/* Overlay gradient */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-black/30 z-10" />
 
@@ -460,6 +521,15 @@ export const JournalDetailView: React.FC<JournalDetailViewProps> = ({
             </div>
           ) : (
             <div className="bg-gradient-to-br from-indigo-600 via-purple-600 to-violet-600 p-8 relative">
+              {/* Decorative elements */}
+              <div className="absolute -left-20 -top-20 w-56 h-56 bg-indigo-500/10 rounded-full blur-3xl"></div>
+              <div className="absolute -right-20 -bottom-10 w-56 h-56 bg-purple-500/10 rounded-full blur-3xl"></div>
+              <div className="absolute right-8 top-8">
+                <DialogClose className="p-2 rounded-full bg-white/10 text-white hover:bg-white/20 transition-all duration-300 backdrop-blur-sm hover:rotate-90">
+                  <X className="w-5 h-5" />
+                </DialogClose>
+              </div>
+
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -510,7 +580,7 @@ export const JournalDetailView: React.FC<JournalDetailViewProps> = ({
         </div>
 
         {/* Body content with scroll */}
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto max-h-[calc(90vh-300px)]">
           <div className="px-6 md:px-8 py-6">
             {/* Error banner if there's an error during editing */}
             {editError && (
@@ -539,6 +609,13 @@ export const JournalDetailView: React.FC<JournalDetailViewProps> = ({
             {editMode ? (
               <div className="space-y-6">
                 {/* Journal Metadata Form for editing */}
+                <div className="relative mb-6">
+                  <div className="absolute left-0 top-1/2 w-1 h-6 bg-indigo-500 rounded-r-full transform -translate-y-1/2"></div>
+                  <h3 className="text-lg font-medium pl-3 text-foreground">
+                    Journal Details
+                  </h3>
+                </div>
+
                 <div className="bg-muted/5 rounded-xl border border-muted/20 p-6 shadow-sm">
                   <JournalMetadataForm
                     formData={editableJournal}
@@ -657,13 +734,15 @@ export const JournalDetailView: React.FC<JournalDetailViewProps> = ({
                         transition={{ duration: 0.3 }}
                         className="overflow-hidden"
                       >
-                        <LocationMap
-                          location={journal.destination}
-                          type="single"
-                          height="270px"
-                          className="mt-4"
-                          zoom={12}
-                        />
+                        <div className="mt-4 rounded-xl overflow-hidden border border-muted">
+                          <LocationMap
+                            location={journal.destination}
+                            type="single"
+                            height="270px"
+                            className="w-full"
+                            zoom={12}
+                          />
+                        </div>
                       </motion.div>
                     )}
                   </div>
@@ -672,9 +751,12 @@ export const JournalDetailView: React.FC<JournalDetailViewProps> = ({
                 {/* Journal Sections */}
                 <div>
                   <div className="flex items-center mb-6">
-                    <h3 className="text-xl font-semibold text-foreground mr-3">
-                      Journal Sections
-                    </h3>
+                    <div className="relative mr-3">
+                      <div className="absolute left-0 top-1/2 w-1 h-6 bg-purple-500 rounded-r-full transform -translate-y-1/2"></div>
+                      <h3 className="text-xl font-semibold text-foreground pl-3">
+                        Journal Sections
+                      </h3>
+                    </div>
                     <Badge
                       variant="outline"
                       className="bg-indigo-50 text-indigo-700 dark:bg-indigo-900/20 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800/30"
@@ -713,15 +795,29 @@ export const JournalDetailView: React.FC<JournalDetailViewProps> = ({
                       animate={{ opacity: 1, y: 0 }}
                       className="rounded-xl bg-muted/10 border border-dashed border-muted/50 p-8 text-center"
                     >
-                      <div className="w-16 h-16 rounded-full bg-indigo-100 dark:bg-indigo-900/20 flex items-center justify-center mx-auto mb-4">
-                        <Eye className="w-8 h-8 text-indigo-500 dark:text-indigo-400" />
+                      <div className="relative w-16 h-16 mx-auto mb-4">
+                        <div className="absolute inset-0 bg-indigo-100 dark:bg-indigo-900/20 rounded-full animate-pulse"></div>
+                        <div className="absolute inset-0 rounded-full border-2 border-dashed border-indigo-200 dark:border-indigo-800/50 animate-spin-slow"></div>
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <Eye className="w-8 h-8 text-indigo-500 dark:text-indigo-400" />
+                        </div>
                       </div>
                       <h4 className="text-lg font-medium text-foreground mb-2">
                         No sections yet
                       </h4>
-                      <p className="text-muted-foreground max-w-md mx-auto">
+                      <p className="text-muted-foreground max-w-md mx-auto mb-4">
                         This journal doesn&apos;t have any sections added to it yet.
                       </p>
+                      {editMode && (
+                        <Button
+                          onClick={() => setSubsectionFormVisible(true)}
+                          variant="outline"
+                          className="bg-indigo-50 dark:bg-indigo-900/10 border-indigo-200 dark:border-indigo-800/30 text-indigo-700 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/20"
+                        >
+                          <PlusCircle className="w-4 h-4 mr-2" />
+                          Add a section
+                        </Button>
+                      )}
                     </motion.div>
                   )}
                 </div>
@@ -746,7 +842,11 @@ export const JournalDetailView: React.FC<JournalDetailViewProps> = ({
             <Button
               onClick={handleSaveChanges}
               disabled={isSaving}
-              className="gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6"
+              className={cn(
+                'gap-2 min-w-[140px] relative overflow-hidden',
+                'bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700',
+                'text-white shadow-md hover:shadow-lg transition-all duration-300'
+              )}
             >
               {isSaving ? (
                 <>
@@ -757,6 +857,18 @@ export const JournalDetailView: React.FC<JournalDetailViewProps> = ({
                 <>
                   <Save className="w-4 h-4" />
                   Save Changes
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: [0, 1, 0] }}
+                    transition={{
+                      repeat: Infinity,
+                      duration: 2,
+                      repeatDelay: 1,
+                    }}
+                    className="absolute -top-1 -right-1"
+                  >
+                    <Sparkles className="w-4 h-4 text-white/80" />
+                  </motion.div>
                 </>
               )}
             </Button>
@@ -773,51 +885,53 @@ export const JournalDetailView: React.FC<JournalDetailViewProps> = ({
       </DialogContent>
 
       {/* Subsection Form Modal */}
-      {subsectionFormVisible && (
-        <Dialog
-          open={subsectionFormVisible}
-          onOpenChange={setSubsectionFormVisible}
-        >
-          <DialogContent className="max-w-2xl sm:max-w-2xl max-h-[70vh] overflow-hidden p-0 rounded-xl border border-muted/30 shadow-xl">
-            <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-emerald-600/10 via-teal-600/10 to-cyan-600/10 z-0"></div>
-              <div className="absolute left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500"></div>
-              <div className="absolute -left-20 -top-20 w-56 h-56 bg-emerald-500/10 rounded-full blur-3xl"></div>
+      <AnimatePresence>
+        {subsectionFormVisible && (
+          <Dialog
+            open={subsectionFormVisible}
+            onOpenChange={setSubsectionFormVisible}
+          >
+            <DialogContent className="w-full max-w-4xl sm:max-w-4xl h-full max-h-[85vh] overflow-hidden p-0 rounded-xl border border-muted/30 shadow-xl">
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-emerald-600/10 via-teal-600/10 to-cyan-600/10 z-0"></div>
+                <div className="absolute left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500"></div>
+                <div className="absolute -left-20 -top-20 w-56 h-56 bg-emerald-500/10 rounded-full blur-3xl"></div>
 
-              <div className="relative p-6 pb-4 border-b border-muted/20 bg-background/80 backdrop-blur-md z-10 flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-md">
-                  <MapPin className="w-4 h-4 text-white" />
+                <div className="relative p-6 pb-4 border-b border-muted/20 bg-background/80 backdrop-blur-md z-10 flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-md">
+                    <MapPin className="w-4 h-4 text-white" />
+                  </div>
+                  <div>
+                    <DialogTitle className="text-xl font-semibold text-foreground m-0 p-0">
+                      Add New Journal Section
+                    </DialogTitle>
+                    <p className="text-muted-foreground text-sm mt-0.5">
+                      Document a specific part of your journey
+                    </p>
+                  </div>
+                  <DialogClose
+                    onClick={() => setSubsectionFormVisible(false)}
+                    className="ml-auto hover:bg-muted/80 transition-colors"
+                  >
+                    <X className="w-5 h-5 text-muted-foreground" />
+                  </DialogClose>
                 </div>
-                <div>
-                  <DialogTitle className="text-xl font-semibold text-foreground m-0 p-0">
-                    Add New Journal Section
-                  </DialogTitle>
-                  <p className="text-muted-foreground text-sm mt-0.5">
-                    Document a specific part of your journey
-                  </p>
-                </div>
-                <DialogClose
-                  onClick={() => setSubsectionFormVisible(false)}
-                  className="ml-auto hover:bg-muted/80 transition-colors rounded-full p-2 absolute right-4 top-4"
-                >
-                  <X className="w-5 h-5 text-muted-foreground" />
-                </DialogClose>
               </div>
-            </div>
 
-            <div className="max-h-[calc(70vh-140px)] overflow-y-auto">
-              <div className="p-6">
-                <SubsectionForm
-                  isSubmitting={isSubmittingSubsection}
-                  onAddSubsection={handleAddSubsection}
-                  onCancel={() => setSubsectionFormVisible(false)}
-                  journalId={journal?.id}
-                />
+              <div className="max-h-[calc(70vh-140px)] overflow-y-auto">
+                <div className="p-6">
+                  <SubsectionForm
+                    isSubmitting={isSubmittingSubsection}
+                    onAddSubsection={handleAddSubsection}
+                    onCancel={() => setSubsectionFormVisible(false)}
+                    journalId={journal?.id}
+                  />
+                </div>
               </div>
-            </div>
-          </DialogContent>
-        </Dialog>
-      )}
+            </DialogContent>
+          </Dialog>
+        )}
+      </AnimatePresence>
 
       {/* Confirm Delete Subsection Dialog */}
       <ConfirmDialog
