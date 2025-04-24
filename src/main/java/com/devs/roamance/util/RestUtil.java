@@ -57,7 +57,7 @@ public class RestUtil {
    * @param url the URL of the media to download
    * @return a CompletableFuture containing the downloaded bytes + MIME type
    */
-  @Async
+  @Async("asyncExecutor")
   public CompletableFuture<Media> downloadMediaWithMime(String url) {
 
     if (url == null || url.isBlank()) {
@@ -88,7 +88,7 @@ public class RestUtil {
    * @param urls list of media URLs
    * @return a CompletableFuture mapping each URL to its Media
    */
-  @Async
+  @Async("asyncExecutor")
   public CompletableFuture<Map<String, Media>> downloadMultipleMediaWithMime(List<String> urls) {
 
     if (urls == null || urls.isEmpty()) {

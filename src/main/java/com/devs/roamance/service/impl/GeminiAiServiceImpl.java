@@ -8,8 +8,6 @@ import com.devs.roamance.constant.AiSystemInstruction;
 import com.devs.roamance.constant.ResponseMessage;
 import com.devs.roamance.dto.request.ai.MultiModalAiRequestDto;
 import com.devs.roamance.dto.request.ai.UniModalAiRequestDto;
-import com.devs.roamance.dto.response.ai.AiDto;
-import com.devs.roamance.dto.response.ai.AiResponseDto;
 import com.devs.roamance.dto.response.ai.TidbitsAndSafetyResponseDto;
 import com.devs.roamance.exception.AiGenerationFailedException;
 import com.devs.roamance.service.GeminiAiService;
@@ -17,10 +15,13 @@ import com.devs.roamance.util.GeminiAiUtil;
 import com.devs.roamance.util.RestUtil;
 import dev.langchain4j.data.message.*;
 import dev.langchain4j.model.chat.ChatLanguageModel;
+import dev.langchain4j.model.chat.StreamingChatLanguageModel;
 import dev.langchain4j.model.chat.response.ChatResponse;
+import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
 import dev.langchain4j.model.output.FinishReason;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -28,6 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Sinks;
 
 @Service
 @Slf4j
@@ -46,7 +48,7 @@ public class GeminiAiServiceImpl implements GeminiAiService {
   }
 
   @Override
-  @Async
+  @Async("asyncExecutor")
   public CompletableFuture<TidbitsAndSafetyResponseDto> getTidbitsAndSafety(
       MultiModalAiRequestDto requestDto) {
 
@@ -104,33 +106,28 @@ public class GeminiAiServiceImpl implements GeminiAiService {
   }
 
   @Override
-  @Async
-  public CompletableFuture<AiResponseDto> getProofreading(UniModalAiRequestDto requestDto) {
+  @Async("asyncExecutor")
+  public void getProofreading(UniModalAiRequestDto requestDto, Sinks.Many<String> sink) {
 
-    ChatLanguageModel model;
+    StreamingChatLanguageModel model;
 
     try {
       model =
-          geminiAiUtil.geminiModelBuilder(
+          geminiAiUtil.geminiStreamingModelBuilder(
               apiKey, "gemini-2.0-flash", builder -> builder.temperature(0.5));
+
     } catch (Exception e) {
       log.error("Gemini model build failed: {}", e.getMessage(), e);
-      return CompletableFuture.completedFuture(new AiResponseDto(null));
+
+      sink.emitError(
+          new AiGenerationFailedException(ResponseMessage.GEMINI_MODEL_BUILD_FAILED),
+          Sinks.EmitFailureHandler.FAIL_FAST);
+
+      return;
     }
 
-    ChatResponse chatResponse =
-        generateResponse(model, AiSystemInstruction.FOR_PROOFREADING, null, requestDto.getText());
-
-    if (chatResponse == null) {
-      throw new AiGenerationFailedException(ResponseMessage.PROOFREAD_GENERATION_FAILED);
-    }
-
-    return CompletableFuture.completedFuture(
-        new AiResponseDto(
-            201,
-            true,
-            ResponseMessage.PROOFREAD_GENERATION_SUCCESS,
-            new AiDto(chatResponse.aiMessage().text())));
+    generateStreamingResponse(
+        model, AiSystemInstruction.FOR_PROOFREADING, null, requestDto.getText(), sink);
   }
 
   private ChatResponse generateResponse(
@@ -140,7 +137,6 @@ public class GeminiAiServiceImpl implements GeminiAiService {
       String text) {
 
     if ((text == null || text.isEmpty()) && (mediaBytes == null || mediaBytes.isEmpty())) {
-
       return null;
     }
 
@@ -166,6 +162,64 @@ public class GeminiAiServiceImpl implements GeminiAiService {
     } catch (Exception e) {
       log.error("AI response generation failed: {}", e.getMessage(), e);
       return null;
+    }
+  }
+
+  private void generateStreamingResponse(
+      StreamingChatLanguageModel model,
+      String systemInstruction,
+      Map<String, RestUtil.Media> mediaBytes,
+      String text,
+      Sinks.Many<String> sink) {
+
+    if ((text == null || text.isEmpty()) && (mediaBytes == null || mediaBytes.isEmpty())) {
+
+      sink.emitError(
+          new AiGenerationFailedException(ResponseMessage.PROOFREAD_INPUT_NULL),
+          Sinks.EmitFailureHandler.FAIL_FAST);
+
+      return;
+    }
+
+    try {
+      SystemMessage systemMessage = new SystemMessage(systemInstruction);
+
+      UserMessage.Builder userMessageBuilder = UserMessage.builder();
+      addContentToUserMessage(userMessageBuilder, mediaBytes, text);
+      UserMessage userMessage = userMessageBuilder.build();
+
+      List<ChatMessage> chatMessages = List.of(systemMessage, userMessage);
+
+      model.chat(
+          chatMessages,
+          new StreamingChatResponseHandler() {
+
+            @Override
+            public void onPartialResponse(String partialResponse) {
+
+              sink.emitNext(partialResponse, Sinks.EmitFailureHandler.FAIL_FAST);
+            }
+
+            @Override
+            public void onCompleteResponse(ChatResponse completeResponse) {
+              sink.emitComplete(Sinks.EmitFailureHandler.FAIL_FAST);
+            }
+
+            @Override
+            public void onError(Throwable error) {
+
+              sink.emitError(
+                  new AiGenerationFailedException(ResponseMessage.PROOFREAD_GENERATION_FAILED),
+                  Sinks.EmitFailureHandler.FAIL_FAST);
+            }
+          });
+
+    } catch (Exception e) {
+      log.error("AI streaming response generation failed: {}", e.getMessage(), e);
+
+      sink.emitError(
+          new AiGenerationFailedException(ResponseMessage.PROOFREAD_GENERATION_FAILED),
+          Sinks.EmitFailureHandler.FAIL_FAST);
     }
   }
 
