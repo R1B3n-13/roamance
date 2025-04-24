@@ -4,6 +4,7 @@ import com.devs.roamance.dto.request.ai.UniModalAiRequestDto;
 import com.devs.roamance.service.GeminiAiService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,7 +23,7 @@ public class GeminiAiController {
     this.geminiAiService = geminiAiService;
   }
 
-  @PostMapping("/proof-read")
+  @PostMapping(value = "/proof-read", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
   public Flux<String> generateProofreading(@Valid @RequestBody UniModalAiRequestDto requestDto) {
 
     Sinks.Many<String> sink = Sinks.many().multicast().onBackpressureBuffer();
@@ -34,6 +35,11 @@ public class GeminiAiController {
             err -> {
               log.error("Streaming failed with error :{}", err.getMessage(), err);
               return Flux.error(err);
+            })
+        .doOnCancel(
+            () -> {
+              log.debug("Client cancelled the proofreading stream");
+              sink.tryEmitComplete();
             });
   }
 }
