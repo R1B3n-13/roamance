@@ -1,16 +1,20 @@
 import { DialogXButton } from '@/components/common/button/dialog-x-button';
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 import { CloudinaryUploadResult } from '@/service/cloudinary-service';
 import { JournalCreateRequest, JournalDetail } from '@/types/journal';
 import { SubsectionRequest } from '@/types/subsection';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ArrowLeft, BookOpen, Loader2, MapPin, PlusCircle, Save, Sparkles } from 'lucide-react';
+import {
+  ArrowLeft,
+  BookOpen,
+  Loader2,
+  MapPin,
+  PlusCircle,
+  Save,
+  Sparkles,
+} from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { JournalMetadataForm } from './journal-metadata-form';
 import { SubsectionForm } from './subsection-form';
@@ -94,10 +98,17 @@ export const JournalForm: React.FC<JournalFormProps> = ({
     const { name, value } = e.target;
 
     // Special handling for checkbox fields
-    if (name === 'is_favorite' || name === 'is_archived' || name === 'is_shared') {
+    if (
+      name === 'is_favorite' ||
+      name === 'is_archived' ||
+      name === 'is_shared'
+    ) {
       setFormData((prev) => ({
         ...prev,
-        [name]: e.target.type === 'checkbox' ? (e.target as HTMLInputElement).checked : value === 'true',
+        [name]:
+          e.target.type === 'checkbox'
+            ? (e.target as HTMLInputElement).checked
+            : value === 'true',
       }));
     } else {
       setFormData((prev) => ({
@@ -186,7 +197,9 @@ export const JournalForm: React.FC<JournalFormProps> = ({
                   </span>
                 </DialogTitle>
                 <p className="text-muted-foreground text-sm mt-0.5">
-                  {journal ? 'Update your travel memories' : 'Document your travel experiences'}
+                  {journal
+                    ? 'Update your travel memories'
+                    : 'Document your travel experiences'}
                 </p>
               </div>
             </motion.div>
@@ -203,7 +216,9 @@ export const JournalForm: React.FC<JournalFormProps> = ({
               {/* Form header with decorative element */}
               <div className="relative mb-6">
                 <div className="absolute left-0 top-1/2 w-1 h-6 bg-indigo-500 rounded-r-full transform -translate-y-1/2"></div>
-                <h3 className="text-lg font-medium pl-3 text-foreground">Journal Details</h3>
+                <h3 className="text-lg font-medium pl-3 text-foreground">
+                  Journal Details
+                </h3>
               </div>
 
               {/* Journal Metadata Form */}
@@ -220,7 +235,9 @@ export const JournalForm: React.FC<JournalFormProps> = ({
               <div className="relative mb-6 flex justify-between items-center">
                 <div className="flex items-center">
                   <div className="absolute left-0 top-1/2 w-1 h-6 bg-purple-500 rounded-r-full transform -translate-y-1/2"></div>
-                  <h3 className="text-lg font-medium pl-3 text-foreground">Journal Sections</h3>
+                  <h3 className="text-lg font-medium pl-3 text-foreground">
+                    Journal Sections
+                  </h3>
                 </div>
 
                 <Button
@@ -262,9 +279,9 @@ export const JournalForm: React.FC<JournalFormProps> = ({
               onClick={handleSubmit}
               disabled={isLoading}
               className={cn(
-                "min-w-[180px] relative overflow-hidden gap-2",
-                "bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700",
-                "text-white shadow-md hover:shadow-lg transition-all duration-300"
+                'min-w-[180px] relative overflow-hidden gap-2',
+                'bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700',
+                'text-white shadow-md hover:shadow-lg transition-all duration-300'
               )}
             >
               {isLoading ? (
@@ -279,7 +296,11 @@ export const JournalForm: React.FC<JournalFormProps> = ({
                   <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: [0, 1, 0] }}
-                    transition={{ repeat: Infinity, duration: 2, repeatDelay: 1 }}
+                    transition={{
+                      repeat: Infinity,
+                      duration: 2,
+                      repeatDelay: 1,
+                    }}
                     className="absolute -top-1 -right-1"
                   >
                     <Sparkles className="w-4 h-4 text-white/80" />
@@ -297,7 +318,7 @@ export const JournalForm: React.FC<JournalFormProps> = ({
               open={subsectionFormVisible}
               onOpenChange={setSubsectionFormVisible}
             >
-              <DialogContent className="max-w-2xl sm:max-w-2xl max-h-[70vh] overflow-hidden p-0 rounded-xl border border-muted/30 shadow-xl">
+              <DialogContent className="w-full max-w-4xl sm:max-w-4xl h-full max-h-[85vh] overflow-hidden p-0 rounded-xl border border-muted/30 shadow-xl">
                 <div className="relative">
                   <div className="absolute inset-0 bg-gradient-to-r from-emerald-600/10 via-teal-600/10 to-cyan-600/10 z-0"></div>
                   <div className="absolute left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500"></div>

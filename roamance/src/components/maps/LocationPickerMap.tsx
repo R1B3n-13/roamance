@@ -1,14 +1,16 @@
 'use client';
 
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import L from 'leaflet';
 import { GeoSearchControl, OpenStreetMapProvider } from 'leaflet-geosearch';
 import 'leaflet-geosearch/dist/geosearch.css';
 import 'leaflet/dist/leaflet.css';
-import { MapPin } from 'lucide-react';
+import { LocateFixed, MapPin } from 'lucide-react';
 import { useTheme } from 'next-themes';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { MapContainer, TileLayer, useMap } from 'react-leaflet';
+import { createIcons, UserLocationMarker } from './markers/UserLocationMarker';
 
 // Map styles - similar to the main map component
 const mapStyles = {
@@ -86,17 +88,42 @@ function SearchControl({
 function MapInteractionHandler({
   initialLocation,
   onLocationChangeAction,
+  userLocation,
 }: {
   initialLocation: { latitude: number; longitude: number };
   onLocationChangeAction: (lat: number, lng: number) => void;
+  userLocation: { lat: number; lng: number } | null;
 }) {
   const map = useMap();
   const markerRef = useRef<L.Marker | null>(null);
+  const hasSetInitialLocation = useRef(false);
 
-  // Initialize marker position
+  // Initialize marker position with user location or initialLocation
   useEffect(() => {
+    // If we have user location and haven't set an initial location yet, use it
+    if (
+      userLocation &&
+      !hasSetInitialLocation.current &&
+      initialLocation.latitude === 0 &&
+      initialLocation.longitude === 0
+    ) {
+      // Update the form state with user's location
+      onLocationChangeAction(userLocation.lat, userLocation.lng);
+
+      const position = L.latLng(userLocation.lat, userLocation.lng);
+      map.setView(position, 13);
+
+      if (markerRef.current) {
+        markerRef.current.setLatLng(position);
+      }
+
+      hasSetInitialLocation.current = true;
+    }
     // If we have a valid initial location, use it
-    if (initialLocation.latitude !== 0 || initialLocation.longitude !== 0) {
+    else if (
+      (initialLocation.latitude !== 0 || initialLocation.longitude !== 0) &&
+      !hasSetInitialLocation.current
+    ) {
       const position = L.latLng(
         initialLocation.latitude,
         initialLocation.longitude
@@ -106,8 +133,10 @@ function MapInteractionHandler({
       if (markerRef.current) {
         markerRef.current.setLatLng(position);
       }
+
+      hasSetInitialLocation.current = true;
     }
-  }, [initialLocation, map]);
+  }, [initialLocation, map, userLocation, onLocationChangeAction]);
 
   // Handle map click events
   useEffect(() => {
@@ -130,10 +159,22 @@ function MapInteractionHandler({
   // Initialize marker when component mounts
   useEffect(() => {
     if (!markerRef.current) {
-      // Fix the type issue by ensuring we have a proper LatLngExpression
+      // Determine the best initial position: userLocation > initialLocation > map center
       let initialPosition: L.LatLngExpression;
 
-      if (initialLocation.latitude !== 0 || initialLocation.longitude !== 0) {
+      if (
+        userLocation &&
+        initialLocation.latitude === 0 &&
+        initialLocation.longitude === 0
+      ) {
+        initialPosition = [userLocation.lat, userLocation.lng] as [
+          number,
+          number,
+        ];
+      } else if (
+        initialLocation.latitude !== 0 ||
+        initialLocation.longitude !== 0
+      ) {
         initialPosition = [
           initialLocation.latitude,
           initialLocation.longitude,
@@ -142,14 +183,12 @@ function MapInteractionHandler({
         initialPosition = map.getCenter();
       }
 
+      // Get a fresh instance of the icon
+      const { placeLocationIcon } = createIcons();
+
       markerRef.current = L.marker(initialPosition, {
         draggable: true,
-        icon: new L.Icon({
-          iconUrl:
-            'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzYiIGhlaWdodD0iNTQiIHZpZXdCb3g9IjAgMCAzNiA1NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTE4IDUzLjVDMTggNTMuNSAzNiAzNS41ODUgMzYgMThDMzYgOC4wNTg5MSAyNy45NDExIDAgMTggMEM4LjA1ODkgMCAwIDguMDU4OTEgMCAxOEMwIDM1LjU4NSAxOCA1My41IDE4IDUzLjVaIiBmaWxsPSIjRTUzOTM1Ii8+CjxjaXJjbGUgY3g9IjE4IiBjeT0iMTgiIHI9IjkiIGZpbGw9IndoaXRlIi8+Cjwvc3ZnPg==',
-          iconSize: [28, 42],
-          iconAnchor: [14, 42],
-        }),
+        icon: placeLocationIcon,
       }).addTo(map);
 
       // Handle marker drag end
@@ -167,7 +206,19 @@ function MapInteractionHandler({
         markerRef.current = null;
       }
     };
-  }, [map, initialLocation, onLocationChangeAction]);
+  }, [map, initialLocation, onLocationChangeAction, userLocation]);
+
+  return null;
+}
+
+// Add this new component to handle map events and references
+function MapController({ onMapReady }: { onMapReady: (map: L.Map) => void }) {
+  const map = useMap();
+
+  // Use effect to ensure the map is ready and properly stored in the ref
+  useEffect(() => {
+    onMapReady(map);
+  }, [map, onMapReady]);
 
   return null;
 }
@@ -179,6 +230,27 @@ export function LocationPickerMap({
 }: LocationPickerMapProps) {
   const { theme } = useTheme();
   const isDarkMode = theme === 'dark';
+  const mapRef = useRef<L.Map | null>(null);
+
+  // State for user's current location
+  const [userLocation, setUserLocation] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
+
+  // Fetch user location on mount
+  useEffect(() => {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        setUserLocation({ lat: latitude, lng: longitude });
+      },
+      (error) => {
+        console.error('Error getting user location:', error);
+      },
+      { enableHighAccuracy: true }
+    );
+  }, []);
 
   // Add dark mode styles
   useEffect(() => {
@@ -222,15 +294,33 @@ export function LocationPickerMap({
     }
   }, [isDarkMode]);
 
-  // Default center (if no location provided)
-  const defaultCenter: [number, number] = [20.6295, 92.3208]; // Saint Martin Island
+  // Default center logic - prioritize user location, then initialLocation, then default
+  const defaultCenter: [number, number] = [20.6295, 92.3208]; // Saint Martin Island as fallback
+
+  // Calculate the map center based on available locations
   const center =
-    initialLocation.latitude !== 0 || initialLocation.longitude !== 0
-      ? ([initialLocation.latitude, initialLocation.longitude] as [
-          number,
-          number,
-        ])
-      : defaultCenter;
+    userLocation &&
+    initialLocation.latitude === 0 &&
+    initialLocation.longitude === 0
+      ? ([userLocation.lat, userLocation.lng] as [number, number])
+      : initialLocation.latitude !== 0 || initialLocation.longitude !== 0
+        ? ([initialLocation.latitude, initialLocation.longitude] as [
+            number,
+            number,
+          ])
+        : defaultCenter;
+
+  // Function to center the map on user location
+  const handleCenterOnUser = useCallback(() => {
+    if (userLocation && mapRef.current) {
+      mapRef.current.setView([userLocation.lat, userLocation.lng], 15);
+    }
+  }, [userLocation]);
+
+  // Callback to store map reference
+  const handleMapReady = useCallback((map: L.Map) => {
+    mapRef.current = map;
+  }, []);
 
   return (
     <div className="space-y-2">
@@ -250,11 +340,29 @@ export function LocationPickerMap({
       </div>
       <div
         className={cn(
-          'overflow-hidden rounded-lg border',
+          'relative overflow-hidden rounded-lg border',
           isDarkMode ? 'border-muted/30' : 'border-muted/60'
         )}
         style={{ height }}
       >
+        {/* Button to center on user location - using type="button" to prevent form submission */}
+        {userLocation && (
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            className={cn(
+              'absolute top-2 right-12 z-[1000] h-8 w-8 p-1.5',
+              isDarkMode
+                ? 'bg-background/80 hover:bg-muted/80 border-muted/30'
+                : 'bg-white/80 hover:bg-gray-100/80 border-muted/60'
+            )}
+            onClick={handleCenterOnUser}
+            title="Center on my location"
+          >
+            <LocateFixed className="h-full w-full" />
+          </Button>
+        )}
         <MapContainer
           center={center}
           zoom={13}
@@ -262,6 +370,7 @@ export function LocationPickerMap({
           zoomControl={true}
           className={cn({ 'dark-map-picker': isDarkMode })}
         >
+          <MapController onMapReady={handleMapReady} />
           <TileLayer
             attribution={mapAttribution}
             url={
@@ -272,7 +381,15 @@ export function LocationPickerMap({
           <MapInteractionHandler
             initialLocation={initialLocation}
             onLocationChangeAction={onLocationChangeAction}
+            userLocation={userLocation}
           />
+          {/* Render UserLocationMarker if location is available */}
+          {userLocation && (
+            <UserLocationMarker
+              position={userLocation}
+              isDarkMode={isDarkMode}
+            />
+          )}
         </MapContainer>
       </div>
     </div>

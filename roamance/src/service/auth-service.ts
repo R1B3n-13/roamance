@@ -20,7 +20,6 @@ export class AuthService {
       headers: {
         'Content-Type': 'application/json',
       },
-      timeout: 15000, // 15 seconds
     });
   }
 

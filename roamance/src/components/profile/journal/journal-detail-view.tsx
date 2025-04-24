@@ -9,7 +9,6 @@ import {
 import { cn } from '@/lib/utils';
 import { journalService } from '@/service/journal-service';
 import { JournalCreateRequest, JournalDetail } from '@/types/journal';
-import { SubsectionRequest, SubsectionType } from '@/types/subsection';
 import { formatRelativeTime } from '@/utils/format';
 import { motion } from 'framer-motion';
 import {
@@ -26,7 +25,6 @@ import {
   Save,
   X,
 } from 'lucide-react';
-import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
@@ -36,23 +34,14 @@ import { SubsectionDetail } from './subsection-detail';
 import { SubsectionForm } from './subsection-form';
 import { SubsectionList } from './subsection-list';
 import { CloudinaryUploadResult } from '@/service/cloudinary-service';
-
-// Dynamically import Leaflet components to avoid SSR issues
-const MapContainer = dynamic(
-  () => import('react-leaflet').then((mod) => mod.MapContainer),
-  { ssr: false }
-);
-
-const TileLayer = dynamic(
-  () => import('react-leaflet').then((mod) => mod.TileLayer),
-  { ssr: false }
-);
-
-const DestinationMarker = dynamic(
-  () =>
-    import('@/components/maps/MapMarkers').then((mod) => mod.DestinationMarker),
-  { ssr: false }
-);
+import { subsectionService } from '@/service/subsection-service';
+import {
+  SubsectionDetailResponseDto,
+  SubsectionType,
+  ChecklistItem,
+  SubsectionRequest
+} from '@/types/subsection';
+import { LocationMap } from '@/components/maps/LocationViwer';
 
 interface JournalDetailViewProps {
   journal: JournalDetail | null; // Made optional to handle loading state
@@ -77,6 +66,8 @@ export const JournalDetailView: React.FC<JournalDetailViewProps> = ({
   const [isSubmittingSubsection, setIsSubmittingSubsection] = useState(false);
   const [deleteSubsectionDialogOpen, setDeleteSubsectionDialogOpen] = useState(false);
   const [subsectionToDelete, setSubsectionToDelete] = useState<number>(-1);
+  const [subsectionDetails, setSubsectionDetails] = useState<{ [key: string]: SubsectionDetailResponseDto }>({});
+  const [isLoadingSubsection, setIsLoadingSubsection] = useState<{ [key: string]: boolean }>({});
 
   // For editing the journal
   const [editableJournal, setEditableJournal] = useState<JournalCreateRequest>({
@@ -250,7 +241,38 @@ export const JournalDetailView: React.FC<JournalDetailViewProps> = ({
   };
 
   const toggleSubsection = (id: string) => {
+    if (activeSubsection !== id) {
+      // Only fetch details if we're opening a new subsection
+      fetchSubsectionDetails(id);
+    }
     setActiveSubsection((currentId) => (currentId === id ? null : id));
+  };
+
+  // Function to fetch subsection details
+  const fetchSubsectionDetails = async (subsectionId: string) => {
+    if (subsectionDetails[subsectionId]) {
+      // Already loaded
+      return;
+    }
+
+    // Set loading state for this subsection
+    setIsLoadingSubsection(prev => ({...prev, [subsectionId]: true}));
+
+    try {
+      const response = await subsectionService.getSubsectionById(subsectionId);
+      if (response && response.data) {
+        // Add the fetched subsection to our cache
+        setSubsectionDetails(prev => ({
+          ...prev,
+          [subsectionId]: response.data
+        }));
+      }
+    } catch (error) {
+      console.error(`Failed to fetch subsection details for ID ${subsectionId}:`, error);
+      toast.error("Failed to load section details");
+    } finally {
+      setIsLoadingSubsection(prev => ({...prev, [subsectionId]: false}));
+    }
   };
 
   if (!isOpen) return null;
@@ -635,45 +657,13 @@ export const JournalDetailView: React.FC<JournalDetailViewProps> = ({
                         transition={{ duration: 0.3 }}
                         className="overflow-hidden"
                       >
-                        <div className="mt-4 h-72 rounded-xl border border-muted/50 overflow-hidden shadow-sm bg-muted/20">
-                          {typeof window !== 'undefined' && (
-                            <div className="h-full w-full relative">
-                              <link
-                                rel="stylesheet"
-                                href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-                              />
-
-                              <MapContainer
-                                center={[
-                                  journal.destination.latitude,
-                                  journal.destination.longitude,
-                                ]}
-                                zoom={12}
-                                style={{ height: '100%', width: '100%' }}
-                                zoomControl={true}
-                                className={cn({ 'dark-map': isDarkMode })}
-                              >
-                                <TileLayer
-                                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                                  url={
-                                    isDarkMode
-                                      ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-                                      : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
-                                  }
-                                />
-
-                                <DestinationMarker
-                                  position={{
-                                    lat: journal.destination.latitude,
-                                    lng: journal.destination.longitude,
-                                  }}
-                                  locationName={journal.title}
-                                  isDarkMode={isDarkMode}
-                                />
-                              </MapContainer>
-                            </div>
-                          )}
-                        </div>
+                        <LocationMap
+                          location={journal.destination}
+                          type="single"
+                          height="270px"
+                          className="mt-4"
+                          zoom={12}
+                        />
                       </motion.div>
                     )}
                   </div>

@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Activity, Eye, MapPin, PlusCircle, Route, Trash2 } from 'lucide-react';
 import React from 'react';
 import { getSubsectionTypeColors } from './colorscheme';
+import { LocationMap } from '@/components/maps/LocationViwer';
 
 interface SubsectionListProps {
   subsections: SubsectionRequest[];
@@ -94,13 +95,13 @@ export const SubsectionList: React.FC<SubsectionListProps> = ({
                     {/* Background gradient */}
                     <div className={`absolute inset-0 bg-gradient-to-r ${colors.gradient} opacity-10`} />
 
-                    <div className="flex items-center justify-between relative z-10">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-8 h-8 rounded-full ${colors.bgSolid} flex items-center justify-center shadow-sm`}>
+                    <div className="flex items-start justify-between relative z-10">
+                      <div className="flex items-start gap-3">
+                        <div className={`w-8 h-8 rounded-full ${colors.bgSolid} flex items-center justify-center shadow-sm mt-1`}>
                           {getSubsectionIcon(subsection.type)}
                         </div>
 
-                        <div>
+                        <div className="flex-1">
                           <h4 className="font-medium text-foreground line-clamp-1">
                             {subsection.title || 'Untitled Section'}
                           </h4>
@@ -110,12 +111,6 @@ export const SubsectionList: React.FC<SubsectionListProps> = ({
                             </span>
 
                             {/* Show additional metadata based on type */}
-                            {subsection.type === SubsectionType.SIGHTSEEING && subsection.location && (
-                              <span className="text-xs text-muted-foreground">
-                                Lat: {subsection.location.latitude.toFixed(2)}, Lng: {subsection.location.longitude.toFixed(2)}
-                              </span>
-                            )}
-
                             {subsection.type === SubsectionType.ACTIVITY && (
                               <span className="text-xs text-muted-foreground">
                                 {subsection.activity_type || 'General Activity'}
@@ -128,6 +123,34 @@ export const SubsectionList: React.FC<SubsectionListProps> = ({
                               </span>
                             )}
                           </div>
+
+                          {/* Display location map for sightseeing */}
+                          {subsection.type === SubsectionType.SIGHTSEEING && subsection.location && (
+                            <LocationMap
+                              location={subsection.location}
+                              type="single"
+                              height="120px"
+                              className="mt-2"
+                              zoomControl={false}
+                              attributionControl={false}
+                              dragging={false}
+                              scrollWheelZoom={false}
+                            />
+                          )}
+
+                          {/* Display route map for routes */}
+                          {subsection.type === SubsectionType.ROUTE && subsection.waypoints && subsection.waypoints.length > 0 && (
+                            <LocationMap
+                              waypoints={subsection.waypoints}
+                              type="route"
+                              height="120px"
+                              className="mt-2"
+                              zoomControl={false}
+                              attributionControl={false}
+                              dragging={false}
+                              scrollWheelZoom={false}
+                            />
+                          )}
                         </div>
                       </div>
 

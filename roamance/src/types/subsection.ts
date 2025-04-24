@@ -28,7 +28,7 @@ export interface SightseeingSubsection extends Subsection {
 export interface ActivitySubsection extends Subsection {
   type: SubsectionType.ACTIVITY;
   location: Location;
-  activity_name: string;
+  activity_type: string;
 }
 
 export interface RouteSubsection extends Subsection {

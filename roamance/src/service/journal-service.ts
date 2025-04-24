@@ -1,5 +1,5 @@
 import api from '@/api/roamance-api';
-import { JOURNAL_ENDPOINTS } from '@/constants/api';
+import { JOURNAL_ENDPOINTS, SUBSECTION_ENDPOINTS } from '@/constants/api';
 import {
   JournalBrief,
   JournalBriefResponse,
@@ -35,7 +35,31 @@ class JournalService {
       const response: AxiosResponse<JournalDetailResponse> = await api.get(
         JOURNAL_ENDPOINTS.GET_BY_ID(id)
       );
-      return response.data.data;
+      const journal = response.data.data;
+
+      // Immediately fetch detailed information for all subsections
+      if (journal.subsections && journal.subsections.length > 0) {
+        const detailedSubsections = await Promise.all(
+          journal.subsections.map(async (subsection) => {
+            try {
+              const subsectionResponse = await api.get(
+                `${SUBSECTION_ENDPOINTS.GET_BY_ID(subsection.id)}`
+              );
+              // Return the detailed subsection data
+              return subsectionResponse.data.data;
+            } catch (error) {
+              console.error(`Error fetching subsection ${subsection.id}:`, error);
+              // Return original subsection if we fail to get detailed version
+              return subsection;
+            }
+          })
+        );
+
+        // Replace journal's subsections array with the detailed subsections
+        journal.subsections = detailedSubsections;
+      }
+
+      return journal;
     } catch (error) {
       console.error(`Error fetching journal with ID ${id}:`, error);
       throw error;
