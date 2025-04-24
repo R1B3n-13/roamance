@@ -31,11 +31,7 @@ public class GeminiAiController {
     geminiAiService.getProofreading(requestDto, sink);
 
     return sink.asFlux()
-        .onErrorResume(
-            err -> {
-              log.error("Streaming failed with error :{}", err.getMessage(), err);
-              return Flux.error(err);
-            })
+        .doOnError(err -> log.error("Streaming failed with error :{}", err.getMessage(), err))
         .doOnCancel(
             () -> {
               log.debug("Client cancelled the proofreading stream");
