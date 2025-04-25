@@ -3,7 +3,7 @@ package com.devs.roamance.util;
 import com.devs.roamance.constant.ResponseMessage;
 import com.devs.roamance.dto.request.ai.MultiModalAiRequestDto;
 import com.devs.roamance.dto.request.social.PostRequestDto;
-import com.devs.roamance.dto.response.ai.TidbitsAndSafetyResponseDto;
+import com.devs.roamance.dto.response.ai.TidbitsAndSafetyDto;
 import com.devs.roamance.exception.ResourceNotFoundException;
 import com.devs.roamance.model.social.Post;
 import com.devs.roamance.repository.PostRepository;
@@ -32,7 +32,7 @@ public class PostUtil {
       MultiModalAiRequestDto aiRequestDto = new MultiModalAiRequestDto();
       setFields(aiRequestDto, createRequestDto);
 
-      TidbitsAndSafetyResponseDto responseDto = aiService.getTidbitsAndSafety(aiRequestDto).join();
+      TidbitsAndSafetyDto responseDto = aiService.getTidbitsAndSafety(aiRequestDto).join();
 
       Post post =
           postRepository
@@ -74,7 +74,7 @@ public class PostUtil {
     }
   }
 
-  private void updatePostWithAnalysis(TidbitsAndSafetyResponseDto responseDto, Post post) {
+  private void updatePostWithAnalysis(TidbitsAndSafetyDto responseDto, Post post) {
 
     if (responseDto.getFinishReason() == FinishReason.CONTENT_FILTER) {
       post.setIsSafe(false);

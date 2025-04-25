@@ -7,22 +7,27 @@ import static dev.langchain4j.model.googleai.GeminiHarmCategory.*;
 import com.devs.roamance.constant.AiSystemInstruction;
 import com.devs.roamance.constant.ResponseMessage;
 import com.devs.roamance.dto.request.ai.MultiModalAiRequestDto;
+import com.devs.roamance.dto.request.ai.MultiModalRagRequestDto;
 import com.devs.roamance.dto.request.ai.UniModalAiRequestDto;
 import com.devs.roamance.dto.response.ai.EmbeddingResponse;
-import com.devs.roamance.dto.response.ai.TidbitsAndSafetyResponseDto;
+import com.devs.roamance.dto.response.ai.PostIdListRagSearchDto;
+import com.devs.roamance.dto.response.ai.TidbitsAndSafetyDto;
 import com.devs.roamance.exception.AiGenerationFailedException;
 import com.devs.roamance.service.AiService;
-import com.devs.roamance.util.EmbeddingUtil;
 import com.devs.roamance.util.GeminiModelUtil;
 import com.devs.roamance.util.NomicImageEmbeddingUtil;
+import com.devs.roamance.util.RagUtil;
 import com.devs.roamance.util.RestUtil;
 import dev.langchain4j.data.document.Document;
 import dev.langchain4j.data.message.*;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.chat.StreamingChatLanguageModel;
+import dev.langchain4j.model.chat.request.ResponseFormat;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
 import dev.langchain4j.model.output.FinishReason;
+import dev.langchain4j.rag.RetrievalAugmentor;
+import dev.langchain4j.service.AiServices;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -46,30 +51,35 @@ public class AiServiceImpl implements AiService {
 
   private final RestUtil restUtil;
   private final GeminiModelUtil geminiModelUtil;
-  private final EmbeddingUtil embeddingUtil;
+  private final RagUtil ragUtil;
   private final NomicImageEmbeddingUtil nomicImageEmbeddingUtil;
 
   public AiServiceImpl(
       RestUtil restUtil,
       GeminiModelUtil geminiModelUtil,
-      EmbeddingUtil embeddingUtil,
+      RagUtil ragUtil,
       NomicImageEmbeddingUtil nomicImageEmbeddingUtil) {
 
     this.restUtil = restUtil;
     this.geminiModelUtil = geminiModelUtil;
-    this.embeddingUtil = embeddingUtil;
+    this.ragUtil = ragUtil;
     this.nomicImageEmbeddingUtil = nomicImageEmbeddingUtil;
+  }
+
+  private interface RagAssistant {
+
+    @dev.langchain4j.service.SystemMessage(AiSystemInstruction.FOR_POST_IDS_RETRIEVAL)
+    PostIdListRagSearchDto answer(String question);
   }
 
   @Override
   @Async("asyncExecutor")
-  public CompletableFuture<TidbitsAndSafetyResponseDto> getTidbitsAndSafety(
+  public CompletableFuture<TidbitsAndSafetyDto> getTidbitsAndSafety(
       MultiModalAiRequestDto requestDto) {
 
     Map<String, RestUtil.Media> mediaBytes = downloadMedia(requestDto.getMediaUrls());
 
     ChatLanguageModel model;
-
     try {
       model =
           geminiModelUtil.geminiModelBuilder(
@@ -88,8 +98,7 @@ public class AiServiceImpl implements AiService {
 
     } catch (Exception e) {
       log.error("Gemini model build failed : {}", e.getMessage(), e);
-      return CompletableFuture.completedFuture(
-          new TidbitsAndSafetyResponseDto(null, FinishReason.OTHER));
+      return CompletableFuture.completedFuture(new TidbitsAndSafetyDto(null, FinishReason.OTHER));
     }
 
     ChatResponse chatResponse =
@@ -97,13 +106,11 @@ public class AiServiceImpl implements AiService {
 
     if (chatResponse == null) {
 
-      return CompletableFuture.completedFuture(
-          new TidbitsAndSafetyResponseDto(null, FinishReason.OTHER));
+      return CompletableFuture.completedFuture(new TidbitsAndSafetyDto(null, FinishReason.OTHER));
     }
 
     return CompletableFuture.completedFuture(
-        new TidbitsAndSafetyResponseDto(
-            chatResponse.aiMessage().text(), chatResponse.finishReason()));
+        new TidbitsAndSafetyDto(chatResponse.aiMessage().text(), chatResponse.finishReason()));
   }
 
   @Override
@@ -111,17 +118,16 @@ public class AiServiceImpl implements AiService {
   public void getProofreading(UniModalAiRequestDto requestDto, Sinks.Many<String> sink) {
 
     StreamingChatLanguageModel model;
-
     try {
       model =
           geminiModelUtil.geminiStreamingModelBuilder(
               geminiApiKey, geminiModelName, builder -> builder.temperature(0.5));
 
     } catch (Exception e) {
-      log.error("Gemini model build failed: {}", e.getMessage(), e);
+      log.error("Gemini model build failed:{}", e.getMessage(), e);
 
       sink.emitError(
-          new AiGenerationFailedException(ResponseMessage.GEMINI_MODEL_BUILD_FAILED),
+          new AiGenerationFailedException(ResponseMessage.AI_MODEL_BUILD_FAILED),
           Sinks.EmitFailureHandler.FAIL_FAST);
 
       return;
@@ -137,7 +143,7 @@ public class AiServiceImpl implements AiService {
       MultiModalAiRequestDto requestDto, UUID contentId) {
 
     try {
-      embeddingUtil.embedAndStore(
+      ragUtil.embedAndStore(
           nomicApiKey,
           Document.from(requestDto.getText()),
           contentId.toString(),
@@ -151,7 +157,6 @@ public class AiServiceImpl implements AiService {
     Map<String, RestUtil.Media> mediaBytes = downloadMedia(requestDto.getMediaUrls());
 
     ChatLanguageModel model;
-
     try {
       model =
           geminiModelUtil.geminiModelBuilder(
@@ -161,14 +166,14 @@ public class AiServiceImpl implements AiService {
       log.error("Gemini model build failed: {}", e.getMessage(), e);
 
       return CompletableFuture.failedFuture(
-          new AiGenerationFailedException(ResponseMessage.GEMINI_MODEL_BUILD_FAILED));
+          new AiGenerationFailedException(ResponseMessage.AI_MODEL_BUILD_FAILED));
     }
 
     try {
       List<EmbeddingResponse> imageEmbeddings =
           nomicImageEmbeddingUtil.embedImageUrls(nomicApiKey, requestDto.getMediaUrls());
 
-      embeddingUtil.store(imageEmbeddings, 768, contentId.toString(), "image_embeddings");
+      ragUtil.store(imageEmbeddings, 768, contentId.toString(), "image_embeddings");
 
     } catch (InterruptedException e) {
       log.error("Image embeddings generation interrupted: {}", e.getMessage(), e);
@@ -186,7 +191,7 @@ public class AiServiceImpl implements AiService {
     }
 
     try {
-      embeddingUtil.embedAndStore(
+      ragUtil.embedAndStore(
           nomicApiKey,
           Document.from(chatResponse.aiMessage().text()),
           contentId.toString(),
@@ -198,6 +203,76 @@ public class AiServiceImpl implements AiService {
     }
 
     return CompletableFuture.completedFuture(null);
+  }
+
+  @Override
+  @Async("asyncExecutor")
+  public CompletableFuture<PostIdListRagSearchDto> getPostIdsUsingRag(
+      MultiModalRagRequestDto requestDto) {
+
+    ChatLanguageModel model;
+    try {
+      model =
+          geminiModelUtil.geminiModelBuilder(
+              geminiApiKey, geminiModelName, builder -> builder.temperature(0.1));
+
+    } catch (Exception e) {
+      log.error("Gemini model build failed: {}", e.getMessage(), e);
+
+      return CompletableFuture.failedFuture(
+          new AiGenerationFailedException(ResponseMessage.AI_MODEL_BUILD_FAILED));
+    }
+
+    Map<String, RestUtil.Media> mediaBytes = null;
+    if (requestDto.getImageUrl() != null && !requestDto.getImageUrl().isEmpty()) {
+      mediaBytes = downloadMedia(List.of(requestDto.getImageUrl()));
+    }
+
+    ChatResponse chatResponse =
+        generateResponse(model, AiSystemInstruction.FOR_IMAGE_DESCRIPTION, mediaBytes, null);
+
+    String query;
+    if (chatResponse != null && requestDto.getQuery() != null && !requestDto.getQuery().isEmpty()) {
+
+      query =
+          "Query: "
+              + requestDto.getQuery()
+              + "Query Image Description: "
+              + chatResponse.aiMessage().text();
+
+    } else if (requestDto.getQuery() != null && !requestDto.getQuery().isEmpty()) {
+      query = "Query: " + requestDto.getQuery();
+    } else {
+      log.info("Query is null or empty");
+      return CompletableFuture.completedFuture(new PostIdListRagSearchDto());
+    }
+
+    RetrievalAugmentor augmentor =
+        ragUtil.buildAugmentor(nomicApiKey, "search_query", "texts", "image_descriptions");
+
+    try {
+      model =
+          geminiModelUtil.geminiModelBuilder(
+              geminiApiKey,
+              geminiModelName,
+              builder -> builder.temperature(0.8).responseFormat(ResponseFormat.JSON));
+
+    } catch (Exception e) {
+      log.error("Gemini model build failed : {}", e.getMessage(), e);
+
+      return CompletableFuture.failedFuture(
+          new AiGenerationFailedException(ResponseMessage.AI_MODEL_BUILD_FAILED));
+    }
+
+    RagAssistant ragAssistant =
+        AiServices.builder(RagAssistant.class)
+            .chatLanguageModel(model)
+            .retrievalAugmentor(augmentor)
+            .build();
+
+    PostIdListRagSearchDto postIdListRagSearchDto = ragAssistant.answer(query);
+
+    return CompletableFuture.completedFuture(postIdListRagSearchDto);
   }
 
   private ChatResponse generateResponse(

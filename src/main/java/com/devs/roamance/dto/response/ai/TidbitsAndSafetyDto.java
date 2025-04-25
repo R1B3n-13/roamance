@@ -10,7 +10,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class TidbitsAndSafetyResponseDto {
+public class TidbitsAndSafetyDto {
 
   private String text;
   private FinishReason finishReason;
