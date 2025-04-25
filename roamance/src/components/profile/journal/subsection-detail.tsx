@@ -55,6 +55,7 @@ interface SubsectionDetailProps {
   };
   index: number;
   onUpdateSubsection?: (subsection: SubsectionDetailResponseDto) => Promise<void>;
+  editMode?: boolean; // Add editMode prop
 }
 
 type EditableField = 'title' | 'note' | 'checklist' | null;
@@ -66,6 +67,7 @@ export const SubsectionDetail: React.FC<SubsectionDetailProps> = ({
   colors,
   index,
   onUpdateSubsection,
+  editMode = false, // Default to false
 }) => {
   const { theme } = useTheme();
   const isDarkMode = theme === 'dark';
@@ -357,7 +359,7 @@ export const SubsectionDetail: React.FC<SubsectionDetailProps> = ({
                           Save
                         </Button>
                       </div>
-                    ) : (
+                    ) : editMode ? (
                       <Button
                         type="button"
                         size="sm"
@@ -368,7 +370,7 @@ export const SubsectionDetail: React.FC<SubsectionDetailProps> = ({
                         <Edit className="h-3 w-3 mr-1" />
                         Edit
                       </Button>
-                    )}
+                    ) : null}
                   </div>
 
                   {editingField === 'title' ? (
@@ -420,7 +422,7 @@ export const SubsectionDetail: React.FC<SubsectionDetailProps> = ({
                           Save
                         </Button>
                       </div>
-                    ) : (
+                    ) : editMode ? (
                       <Button
                         type="button"
                         size="sm"
@@ -431,7 +433,7 @@ export const SubsectionDetail: React.FC<SubsectionDetailProps> = ({
                         <Edit className="h-3 w-3 mr-1" />
                         Edit
                       </Button>
-                    )}
+                    ) : null}
                   </div>
 
                   {editingField === 'note' ? (
@@ -512,7 +514,7 @@ export const SubsectionDetail: React.FC<SubsectionDetailProps> = ({
                           Save
                         </Button>
                       </div>
-                    ) : (
+                    ) : editMode ? (
                       <Button
                         type="button"
                         size="sm"
@@ -523,7 +525,7 @@ export const SubsectionDetail: React.FC<SubsectionDetailProps> = ({
                         <Edit className="h-3 w-3 mr-1" />
                         Edit
                       </Button>
-                    )}
+                    ) : null}
                   </div>
 
                   <div className="rounded-md border border-muted overflow-hidden">
@@ -690,36 +692,38 @@ export const SubsectionDetail: React.FC<SubsectionDetailProps> = ({
                 )}
 
                 {/* Action buttons */}
-                <div className="pt-2 flex justify-end gap-2">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="text-muted-foreground h-9 border-muted gap-1"
-                      >
-                        <MoreHorizontal className="h-4 w-4" />
-                        Actions
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-48">
-                      <DropdownMenuItem className="gap-2 cursor-pointer">
-                        <Edit className="h-4 w-4" />
-                        Edit All Details
-                      </DropdownMenuItem>
-                      <DropdownMenuItem className="gap-2 cursor-pointer">
-                        <Pencil className="h-4 w-4" />
-                        Duplicate Section
-                      </DropdownMenuItem>
-                      <DropdownMenuTrigger className="w-full">
-                        <DropdownMenuItem className="gap-2 cursor-pointer text-destructive focus:text-destructive">
-                          <Trash2 className="h-4 w-4" />
-                          Delete Section
-                        </DropdownMenuItem>
+                {editMode && (
+                  <div className="pt-2 flex justify-end gap-2">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-muted-foreground h-9 border-muted gap-1"
+                        >
+                          <MoreHorizontal className="h-4 w-4" />
+                          Actions
+                        </Button>
                       </DropdownMenuTrigger>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
+                      <DropdownMenuContent align="end" className="w-48">
+                        <DropdownMenuItem className="gap-2 cursor-pointer">
+                          <Edit className="h-4 w-4" />
+                          Edit All Details
+                        </DropdownMenuItem>
+                        <DropdownMenuItem className="gap-2 cursor-pointer">
+                          <Pencil className="h-4 w-4" />
+                          Duplicate Section
+                        </DropdownMenuItem>
+                        <DropdownMenuTrigger className="w-full">
+                          <DropdownMenuItem className="gap-2 cursor-pointer text-destructive focus:text-destructive">
+                            <Trash2 className="h-4 w-4" />
+                            Delete Section
+                          </DropdownMenuItem>
+                        </DropdownMenuTrigger>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                )}
               </div>
             </motion.div>
           )}

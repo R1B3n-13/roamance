@@ -27,6 +27,9 @@ import { Badge } from '@/components/ui/badge';
 interface SubsectionContextType {
   subsections: SubsectionRequest[];
   onReorderSubsections?: (startIndex: number, endIndex: number) => void;
+  onSelectSubsection?: (subsectionId: string, index: number) => void;
+  selectedSubsectionId?: string | null;
+  editMode?: boolean;
 }
 
 const SubsectionContext = createContext<SubsectionContextType>({
@@ -38,6 +41,9 @@ interface SubsectionListProps {
   onRemoveSubsection: (index: number) => void;
   onAddSubsectionClick: () => void;
   onReorderSubsections?: (startIndex: number, endIndex: number) => void;
+  onSelectSubsection?: (subsectionId: string, index: number) => void;
+  selectedSubsectionId?: string | null;
+  editMode?: boolean;
 }
 
 // Sortable item component using dnd-kit
@@ -57,7 +63,23 @@ const SortableSubsectionItem: React.FC<SortableSubsectionItemProps> = ({
   isDraggable
 }) => {
   const colors = getSubsectionTypeColors(subsection.type);
-  const { subsections, onReorderSubsections } = React.useContext(SubsectionContext);
+  const { subsections, onReorderSubsections, onSelectSubsection, selectedSubsectionId, editMode } = React.useContext(SubsectionContext);
+
+  // Check if this item is selected
+  const isSelected = id === selectedSubsectionId || subsection.id === selectedSubsectionId;
+
+  // Handle click on the item to select it
+  const handleSelectSubsection = (e: React.MouseEvent) => {
+    // Don't trigger selection if clicking on buttons
+    if (e.target instanceof HTMLButtonElement ||
+        (e.target instanceof HTMLElement && e.target.closest('button'))) {
+      return;
+    }
+
+    if (onSelectSubsection && editMode) {
+      onSelectSubsection(subsection.id || id, index);
+    }
+  };
 
   const {
     attributes,
@@ -91,19 +113,23 @@ const SortableSubsectionItem: React.FC<SortableSubsectionItemProps> = ({
     <motion.div
       ref={setNodeRef}
       style={style}
-      className={cn("relative mb-2 rounded-lg overflow-hidden transition-all duration-300 group",
-        isDragging ? "shadow-lg" : "shadow-sm hover:shadow-md"
+      className={cn(
+        "relative mb-2 rounded-lg overflow-hidden transition-all duration-300 group",
+        isDragging ? "shadow-lg" : isSelected ? "shadow-md ring-2 ring-blue-500/40 dark:ring-blue-500/30" : "shadow-sm hover:shadow-md",
+        editMode && "cursor-pointer"
       )}
       {...attributes}
+      onClick={handleSelectSubsection}
     >
       <div className={cn(
-        "border border-muted/40 rounded-lg p-3 bg-white/60 dark:bg-slate-900/60 backdrop-blur-sm",
+        "border rounded-lg p-3 bg-white/60 dark:bg-slate-900/60 backdrop-blur-sm",
         colors.border,
-        isDragging ? "opacity-90 border-dashed" : "opacity-100"
+        isDragging ? "opacity-90 border-dashed" : "opacity-100",
+        isSelected && "bg-blue-50/50 dark:bg-blue-900/10"
       )}>
         <div className="flex items-center space-x-2">
           {/* Drag handle section */}
-          {isDraggable && (
+          {isDraggable && editMode && (
             <div
               {...listeners}
               className={cn(
@@ -111,6 +137,7 @@ const SortableSubsectionItem: React.FC<SortableSubsectionItemProps> = ({
                 colors.bg,
                 "hover:opacity-80 cursor-grab active:cursor-grabbing transition-all duration-200"
               )}
+              onClick={(e) => e.stopPropagation()}
             >
               <GripVertical className="h-4 w-4 text-foreground/60" />
             </div>
@@ -150,53 +177,70 @@ const SortableSubsectionItem: React.FC<SortableSubsectionItemProps> = ({
           </div>
 
           {/* Actions section */}
-          <div className="flex gap-1 opacity-80 group-hover:opacity-100 transition-opacity">
-            <Button
-              type="button"
-              size="icon"
-              variant="ghost"
-              className="h-8 w-8 rounded-full text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
-              onClick={() => onRemove()}
-              title="Remove subsection"
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-            {onReorderSubsections && (
-              <>
-                <Button
-                  type="button"
-                  size="icon"
-                  variant="ghost"
-                  className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors"
-                  onClick={() => index > 0 && onReorderSubsections(index, index - 1)}
-                  disabled={index === 0}
-                  title="Move up"
-                >
-                  <ArrowUp className="h-4 w-4" />
-                </Button>
-                <Button
-                  type="button"
-                  size="icon"
-                  variant="ghost"
-                  className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors"
-                  onClick={() => index < subsections.length - 1 && onReorderSubsections(index, index + 1)}
-                  disabled={index === subsections.length - 1}
-                  title="Move down"
-                >
-                  <ArrowDown className="h-4 w-4" />
-                </Button>
-              </>
-            )}
-            <Button
-              type="button"
-              size="icon"
-              variant="ghost"
-              className="h-8 w-8 rounded-full text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
-              title="View subsection"
-            >
-              <Eye className="h-4 w-4" />
-            </Button>
-          </div>
+          {editMode && (
+            <div className="flex gap-1 opacity-80 group-hover:opacity-100 transition-opacity">
+              <Button
+                type="button"
+                size="icon"
+                variant="ghost"
+                className="h-8 w-8 rounded-full text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onRemove();
+                }}
+                title="Remove subsection"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+              {onReorderSubsections && (
+                <>
+                  <Button
+                    type="button"
+                    size="icon"
+                    variant="ghost"
+                    className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      index > 0 && onReorderSubsections(index, index - 1);
+                    }}
+                    disabled={index === 0}
+                    title="Move up"
+                  >
+                    <ArrowUp className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    type="button"
+                    size="icon"
+                    variant="ghost"
+                    className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      index < subsections.length - 1 && onReorderSubsections(index, index + 1);
+                    }}
+                    disabled={index === subsections.length - 1}
+                    title="Move down"
+                  >
+                    <ArrowDown className="h-4 w-4" />
+                  </Button>
+                </>
+              )}
+              <Button
+                type="button"
+                size="icon"
+                variant="ghost"
+                className="h-8 w-8 rounded-full text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (onSelectSubsection) {
+                    onSelectSubsection(subsection.id || id, index);
+                  }
+                }}
+                title="View subsection"
+              >
+                <Eye className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     </motion.div>
@@ -208,6 +252,9 @@ export const SubsectionList: React.FC<SubsectionListProps> = ({
   onRemoveSubsection,
   onAddSubsectionClick,
   onReorderSubsections,
+  onSelectSubsection,
+  selectedSubsectionId,
+  editMode = false
 }) => {
   // Generate stable ids for drag and drop
   const [items, setItems] = useState<{ id: string; subsection: SubsectionRequest }[]>([]);
@@ -215,7 +262,7 @@ export const SubsectionList: React.FC<SubsectionListProps> = ({
   // Update items when subsections change
   useEffect(() => {
     setItems(subsections.map((subsection, index) => ({
-      id: `subsection-${index}`,
+      id: subsection.id || `subsection-${index}`,
       subsection
     })));
   }, [subsections]);
@@ -250,7 +297,13 @@ export const SubsectionList: React.FC<SubsectionListProps> = ({
   const isDragAndDropEnabled = Boolean(onReorderSubsections) && subsections.length > 1;
 
   return (
-    <SubsectionContext.Provider value={{ subsections, onReorderSubsections }}>
+    <SubsectionContext.Provider value={{
+      subsections,
+      onReorderSubsections,
+      onSelectSubsection,
+      selectedSubsectionId,
+      editMode
+    }}>
       <div className="space-y-4">
         <AnimatePresence initial={false}>
           {subsections.length === 0 ? (

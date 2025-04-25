@@ -583,6 +583,9 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
                 onRemoveSubsection={handleRemoveSubsection}
                 onAddSubsectionClick={handleCreateSubsection}
                 onReorderSubsections={handleReorderSubsections}
+                onSelectSubsection={handleSelectSubsection}
+                selectedSubsectionId={selectedSubsectionId}
+                editMode={true}
               />
             </div>
 

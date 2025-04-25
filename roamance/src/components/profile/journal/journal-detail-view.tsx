@@ -665,6 +665,21 @@ export const JournalDetailView: React.FC<JournalDetailViewProps> = ({
                     subsections={editableJournal.subsections}
                     onRemoveSubsection={handleRemoveSubsection}
                     onAddSubsectionClick={() => setSubsectionFormVisible(true)}
+                    onReorderSubsections={editMode ? (startIndex, endIndex) => {
+                      const newSubsections = [...editableJournal.subsections];
+                      const [moved] = newSubsections.splice(startIndex, 1);
+                      newSubsections.splice(endIndex, 0, moved);
+                      setEditableJournal(prev => ({
+                        ...prev,
+                        subsections: newSubsections
+                      }));
+                    } : undefined}
+                    onSelectSubsection={editMode ? (subsectionId, index) => {
+                      // Handle subsection selection in edit mode
+                      setActiveSubsection(subsectionId);
+                    } : undefined}
+                    selectedSubsectionId={activeSubsection}
+                    editMode={editMode}
                   />
                 </div>
               </div>
