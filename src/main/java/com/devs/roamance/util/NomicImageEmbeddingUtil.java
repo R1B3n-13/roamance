@@ -7,6 +7,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -17,7 +18,8 @@ import org.springframework.stereotype.Component;
 public class NomicImageEmbeddingUtil {
 
   private final ObjectMapper objectMapper = new ObjectMapper();
-  private final HttpClient httpClient = HttpClient.newBuilder().build();
+  private final HttpClient httpClient =
+      HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build();
 
   /**
    * Batch embedding of multiple image URLs

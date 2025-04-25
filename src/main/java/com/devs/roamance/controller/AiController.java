@@ -37,6 +37,7 @@ public class AiController {
 
     return sink.asFlux()
         .doOnError(err -> log.error("Streaming failed with error :{}", err.getMessage(), err))
+        .doOnTerminate(sink::tryEmitComplete)
         .doOnCancel(
             () -> {
               log.debug("Client cancelled the proofreading stream");

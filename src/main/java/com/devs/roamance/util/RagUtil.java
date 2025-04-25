@@ -66,7 +66,7 @@ public class RagUtil {
             .textSegmentTransformer(
                 textSegment ->
                     TextSegment.from(
-                        textSegment.metadata().getString(contentId) + "\n" + textSegment.text(),
+                        textSegment.metadata().getString(metadataKey) + "\n" + textSegment.text(),
                         textSegment.metadata()))
             .embeddingModel(embeddingModel)
             .embeddingStore(embeddingStore)

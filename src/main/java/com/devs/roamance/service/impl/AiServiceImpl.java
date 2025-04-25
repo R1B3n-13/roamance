@@ -255,7 +255,7 @@ public class AiServiceImpl implements AiService {
           geminiModelUtil.geminiModelBuilder(
               geminiApiKey,
               geminiModelName,
-              builder -> builder.temperature(0.8).responseFormat(ResponseFormat.JSON));
+              builder -> builder.temperature(0.4).responseFormat(ResponseFormat.JSON));
 
     } catch (Exception e) {
       log.error("Gemini model build failed : {}", e.getMessage(), e);
@@ -388,11 +388,14 @@ public class AiServiceImpl implements AiService {
 
   private Map<String, RestUtil.Media> downloadMedia(List<String> mediaUrls) {
 
-    Map<String, RestUtil.Media> mediaBytes = new HashMap<>();
+    if (mediaUrls == null || mediaUrls.isEmpty()) {
+      return Collections.emptyMap();
+    }
+
+    Map<String, RestUtil.Media> mediaBytes;
 
     try {
       mediaBytes = restUtil.downloadMultipleMediaWithMime(mediaUrls).get(10, TimeUnit.SECONDS);
-
       return mediaBytes;
 
     } catch (InterruptedException e) {

@@ -9,5 +9,5 @@ import lombok.Setter;
 @AllArgsConstructor
 public class EmbeddingResponse {
 
-  private final float[] embedding;
+  private float[] embedding;
 }
