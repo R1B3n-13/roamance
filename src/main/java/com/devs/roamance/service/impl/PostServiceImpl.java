@@ -68,6 +68,7 @@ public class PostServiceImpl implements PostService {
     postRepository.flush();
 
     postUtil.backgroundAiAnalysis(savedPost.getId(), createRequestDto);
+    postUtil.addToVectorDb(savedPost.getId(), createRequestDto);
 
     PostDto dto = modelMapper.map(savedPost, PostDto.class);
 

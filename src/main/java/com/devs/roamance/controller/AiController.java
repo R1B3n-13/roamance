@@ -1,7 +1,7 @@
 package com.devs.roamance.controller;
 
 import com.devs.roamance.dto.request.ai.UniModalAiRequestDto;
-import com.devs.roamance.service.GeminiAiService;
+import com.devs.roamance.service.AiService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -15,12 +15,12 @@ import reactor.core.publisher.Sinks;
 @Slf4j
 @RestController
 @RequestMapping("/ai")
-public class GeminiAiController {
+public class AiController {
 
-  private final GeminiAiService geminiAiService;
+  private final AiService aiService;
 
-  public GeminiAiController(GeminiAiService geminiAiService) {
-    this.geminiAiService = geminiAiService;
+  public AiController(AiService aiService) {
+    this.aiService = aiService;
   }
 
   @PostMapping(value = "/proof-read", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
@@ -28,7 +28,7 @@ public class GeminiAiController {
 
     Sinks.Many<String> sink = Sinks.many().multicast().onBackpressureBuffer();
 
-    geminiAiService.getProofreading(requestDto, sink);
+    aiService.getProofreading(requestDto, sink);
 
     return sink.asFlux()
         .doOnError(err -> log.error("Streaming failed with error :{}", err.getMessage(), err))
