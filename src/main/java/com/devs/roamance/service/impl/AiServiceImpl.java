@@ -140,7 +140,6 @@ public class AiServiceImpl implements AiService {
       embeddingUtil.embedAndStore(
           nomicApiKey,
           Document.from(requestDto.getText()),
-          768,
           contentId.toString(),
           "search_document",
           "texts");
@@ -190,7 +189,6 @@ public class AiServiceImpl implements AiService {
       embeddingUtil.embedAndStore(
           nomicApiKey,
           Document.from(chatResponse.aiMessage().text()),
-          768,
           contentId.toString(),
           "search_document",
           "image_descriptions");

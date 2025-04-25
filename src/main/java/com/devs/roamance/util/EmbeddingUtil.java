@@ -2,6 +2,7 @@ package com.devs.roamance.util;
 
 import com.devs.roamance.dto.response.ai.EmbeddingResponse;
 import dev.langchain4j.data.document.Document;
+import dev.langchain4j.data.document.Metadata;
 import dev.langchain4j.data.document.splitter.DocumentSplitters;
 import dev.langchain4j.data.embedding.Embedding;
 import dev.langchain4j.data.segment.TextSegment;
@@ -34,12 +35,7 @@ public class EmbeddingUtil {
   private String password;
 
   public void embedAndStore(
-      String apiKey,
-      Document document,
-      Integer dimension,
-      String contentId,
-      String taskType,
-      String tableName) {
+      String apiKey, Document document, String contentId, String taskType, String tableName) {
 
     EmbeddingModel embeddingModel =
         NomicEmbeddingModel.builder()
@@ -61,7 +57,7 @@ public class EmbeddingUtil {
             .user(user)
             .password(password)
             .table(tableName)
-            .dimension(dimension)
+            .dimension(embeddingModel.dimension())
             .useIndex(true)
             .indexListSize(100)
             .createTable(true)
@@ -110,6 +106,7 @@ public class EmbeddingUtil {
     embeddingResponses.forEach(
         embeddingResponse ->
             embeddingStore.add(
-                contentId, new Embedding(embeddingResponse.getEmbedding()))); // need to fix this
+                new Embedding(embeddingResponse.getEmbedding()),
+                TextSegment.from("An image.", Metadata.from("contentId", contentId))));
   }
 }
