@@ -1,190 +1,298 @@
-import { COMMENTS_ENDPOINTS, POSTS_ENDPOINTS, CHATS_ENDPOINTS, MESSAGES_ENDPOINTS } from '@/constants/api';
 import {
-  CommentDtoByEndpoints,
+  CHATS_ENDPOINTS,
+  COMMENTS_ENDPOINTS,
+  MESSAGES_ENDPOINTS,
+  POSTS_ENDPOINTS,
+} from '@/constants/api';
+import { BaseResponse } from '@/types';
+import {
+  ChatListResponse,
+  ChatResponse,
+  CommentListResponse,
   CommentRequestDto,
   CommentResponse,
-  CommentListResponse,
-  PostDtoByEndpoints,
-  PostRequestDto,
-  PostResponse,
-  PostListResponse,
-  ChatDtoByEndpoints,
-  ChatResponse,
-  ChatListResponse,
-  MessageDtoByEndpoints,
+  MessageListResponse,
   MessageRequestDto,
   MessageResponse,
-  MessageListResponse,
-  Post,
-  User
-} from '@/types/social';
-import { BaseResponse } from '@/types';
-
-// Helper function to handle fetch with authentication
-const fetchWithAuth = async <T>(
-  url: string,
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE' = 'GET',
-  body?: any
-): Promise<T> => {
-  const headers = new Headers({
-    'Content-Type': 'application/json',
-  });
-
-  // Get token from localStorage
-  const token = localStorage.getItem('token');
-  if (token) {
-    headers.append('Authorization', `Bearer ${token}`);
-  }
-
-  const response = await fetch(url, {
-    method,
-    headers,
-    body: body ? JSON.stringify(body) : undefined,
-  });
-
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
-  }
-
-  return response.json();
-};
+  PostListResponse,
+  PostRequestDto,
+  PostResponse,
+  User,
+} from '@/types';
+import { api } from '@/api/roamance-api';
+import { ApiError } from '@/api/errors';
 
 // Posts
 export const PostService = {
   createPost: async (post: PostRequestDto): Promise<PostResponse> => {
-    return fetchWithAuth<PostResponse>(
-      POSTS_ENDPOINTS.CREATE,
-      'POST',
-      post
-    );
+    try {
+      const response = await api.post<PostResponse, PostRequestDto>(POSTS_ENDPOINTS.CREATE, post);
+      return response.data;
+    } catch (error) {
+      if (error instanceof ApiError) {
+        throw new Error(`Failed to create post: ${error.message}`);
+      }
+      throw error;
+    }
   },
 
   getPost: async (postId: string): Promise<PostResponse> => {
-    return fetchWithAuth<PostResponse>(
-      POSTS_ENDPOINTS.GET(postId)
-    );
+    try {
+      const response = await api.get<PostResponse>(POSTS_ENDPOINTS.GET(postId));
+      return response.data;
+    } catch (error) {
+      if (error instanceof ApiError) {
+        throw new Error(`Failed to get post: ${error.message}`);
+      }
+      throw error;
+    }
   },
 
   getAllPosts: async (): Promise<PostListResponse> => {
-    return fetchWithAuth<PostListResponse>(
-      POSTS_ENDPOINTS.GET_ALL
-    );
+    try {
+      const response = await api.get<PostListResponse>(POSTS_ENDPOINTS.GET_ALL);
+      return response.data;
+    } catch (error) {
+      if (error instanceof ApiError) {
+        throw new Error(`Failed to get all posts: ${error.message}`);
+      }
+      throw error;
+    }
   },
 
-  updatePost: async (postId: string, post: PostRequestDto): Promise<PostResponse> => {
-    return fetchWithAuth<PostResponse>(
-      POSTS_ENDPOINTS.UPDATE(postId),
-      'PUT',
-      post
-    );
+  updatePost: async (
+    postId: string,
+    post: PostRequestDto
+  ): Promise<PostResponse> => {
+    try {
+      const response = await api.put<PostResponse, PostRequestDto>(
+        POSTS_ENDPOINTS.UPDATE(postId),
+        post
+      );
+      return response.data;
+    } catch (error) {
+      if (error instanceof ApiError) {
+        throw new Error(`Failed to update post: ${error.message}`);
+      }
+      throw error;
+    }
   },
 
   getPostsByIds: async (postIds: string[]): Promise<PostListResponse> => {
-    return fetchWithAuth<PostListResponse>(
-      POSTS_ENDPOINTS.GET_BY_IDS,
-      'POST',
-      { ids: postIds }
-    );
+    try {
+      const response = await api.post<PostListResponse, { ids: string[] }>(
+        POSTS_ENDPOINTS.GET_BY_IDS,
+        { ids: postIds }
+      );
+      return response.data;
+    } catch (error) {
+      if (error instanceof ApiError) {
+        throw new Error(`Failed to get posts by IDs: ${error.message}`);
+      }
+      throw error;
+    }
   },
 
   getPostsByUserId: async (userId: string): Promise<PostListResponse> => {
-    return fetchWithAuth<PostListResponse>(
-      POSTS_ENDPOINTS.GET_BY_USER_ID(userId)
-    );
+    try {
+      const response = await api.get<PostListResponse>(
+        POSTS_ENDPOINTS.GET_BY_USER_ID(userId)
+      );
+      return response.data;
+    } catch (error) {
+      if (error instanceof ApiError) {
+        throw new Error(`Failed to get posts by user ID: ${error.message}`);
+      }
+      throw error;
+    }
   },
 
   savePost: async (postId: string): Promise<BaseResponse<null>> => {
-    return fetchWithAuth<BaseResponse<null>>(
-      POSTS_ENDPOINTS.SAVE(postId),
-      'POST'
-    );
+    try {
+      const response = await api.post<BaseResponse<null>, null>(
+        POSTS_ENDPOINTS.SAVE(postId)
+      );
+      return response.data;
+    } catch (error) {
+      if (error instanceof ApiError) {
+        throw new Error(`Failed to save post: ${error.message}`);
+      }
+      throw error;
+    }
   },
 
   getSavedPosts: async (): Promise<PostListResponse> => {
-    return fetchWithAuth<PostListResponse>(
-      POSTS_ENDPOINTS.GET_SAVED
-    );
+    try {
+      const response = await api.get<PostListResponse>(POSTS_ENDPOINTS.GET_SAVED);
+      return response.data;
+    } catch (error) {
+      if (error instanceof ApiError) {
+        throw new Error(`Failed to get saved posts: ${error.message}`);
+      }
+      throw error;
+    }
   },
 
   likePost: async (postId: string): Promise<BaseResponse<null>> => {
-    return fetchWithAuth<BaseResponse<null>>(
-      POSTS_ENDPOINTS.LIKE(postId),
-      'POST'
-    );
+    try {
+      const response = await api.post<BaseResponse<null>, null>(
+        POSTS_ENDPOINTS.LIKE(postId)
+      );
+      return response.data;
+    } catch (error) {
+      if (error instanceof ApiError) {
+        throw new Error(`Failed to like post: ${error.message}`);
+      }
+      throw error;
+    }
   },
 
   getLikedByUsers: async (postId: string): Promise<BaseResponse<User[]>> => {
-    return fetchWithAuth<BaseResponse<User[]>>(
-      POSTS_ENDPOINTS.LIKED_BY(postId)
-    );
+    try {
+      const response = await api.get<BaseResponse<User[]>>(
+        POSTS_ENDPOINTS.LIKED_BY(postId)
+      );
+      return response.data;
+    } catch (error) {
+      if (error instanceof ApiError) {
+        throw new Error(`Failed to get users who liked post: ${error.message}`);
+      }
+      throw error;
+    }
   },
 
   deletePost: async (postId: string): Promise<BaseResponse<null>> => {
-    return fetchWithAuth<BaseResponse<null>>(
-      POSTS_ENDPOINTS.DELETE(postId),
-      'DELETE'
-    );
-  }
+    try {
+      const response = await api.delete<BaseResponse<null>>(
+        POSTS_ENDPOINTS.DELETE(postId)
+      );
+      return response.data;
+    } catch (error) {
+      if (error instanceof ApiError) {
+        throw new Error(`Failed to delete post: ${error.message}`);
+      }
+      throw error;
+    }
+  },
 };
 
 // Comments
 export const CommentService = {
-  createComment: async (postId: string, comment: CommentRequestDto): Promise<CommentResponse> => {
-    return fetchWithAuth<CommentResponse>(
-      COMMENTS_ENDPOINTS.CREATE(postId),
-      'POST',
-      comment
-    );
+  createComment: async (
+    postId: string,
+    comment: CommentRequestDto
+  ): Promise<CommentResponse> => {
+    try {
+      const response = await api.post<CommentResponse, CommentRequestDto>(
+        COMMENTS_ENDPOINTS.CREATE(postId),
+        comment
+      );
+      return response.data;
+    } catch (error) {
+      if (error instanceof ApiError) {
+        throw new Error(`Failed to create comment: ${error.message}`);
+      }
+      throw error;
+    }
   },
 
   getComment: async (commentId: string): Promise<CommentResponse> => {
-    return fetchWithAuth<CommentResponse>(
-      COMMENTS_ENDPOINTS.GET(commentId)
-    );
+    try {
+      const response = await api.get<CommentResponse>(COMMENTS_ENDPOINTS.GET(commentId));
+      return response.data;
+    } catch (error) {
+      if (error instanceof ApiError) {
+        throw new Error(`Failed to get comment: ${error.message}`);
+      }
+      throw error;
+    }
   },
 
   getCommentsByPostId: async (postId: string): Promise<CommentListResponse> => {
-    return fetchWithAuth<CommentListResponse>(
-      COMMENTS_ENDPOINTS.GET_BY_POST_ID(postId)
-    );
-  }
+    try {
+      const response = await api.get<CommentListResponse>(
+        COMMENTS_ENDPOINTS.GET_BY_POST_ID(postId)
+      );
+      return response.data;
+    } catch (error) {
+      if (error instanceof ApiError) {
+        throw new Error(`Failed to get comments by post ID: ${error.message}`);
+      }
+      throw error;
+    }
+  },
 };
 
 // Chats
 export const ChatService = {
   createChat: async (userId: string): Promise<ChatResponse> => {
-    return fetchWithAuth<ChatResponse>(
-      CHATS_ENDPOINTS.CREATE(userId),
-      'POST'
-    );
+    try {
+      const response = await api.post<ChatResponse, null>(CHATS_ENDPOINTS.CREATE(userId));
+      return response.data;
+    } catch (error) {
+      if (error instanceof ApiError) {
+        throw new Error(`Failed to create chat: ${error.message}`);
+      }
+      throw error;
+    }
   },
 
   getChat: async (chatId: string): Promise<ChatResponse> => {
-    return fetchWithAuth<ChatResponse>(
-      CHATS_ENDPOINTS.GET(chatId)
-    );
+    try {
+      const response = await api.get<ChatResponse>(CHATS_ENDPOINTS.GET(chatId));
+      return response.data;
+    } catch (error) {
+      if (error instanceof ApiError) {
+        throw new Error(`Failed to get chat: ${error.message}`);
+      }
+      throw error;
+    }
   },
 
   getAllChats: async (): Promise<ChatListResponse> => {
-    return fetchWithAuth<ChatListResponse>(
-      CHATS_ENDPOINTS.GET_ALL
-    );
-  }
+    try {
+      const response = await api.get<ChatListResponse>(CHATS_ENDPOINTS.GET_ALL);
+      return response.data;
+    } catch (error) {
+      if (error instanceof ApiError) {
+        throw new Error(`Failed to get all chats: ${error.message}`);
+      }
+      throw error;
+    }
+  },
 };
 
 // Messages
 export const MessageService = {
-  createMessage: async (chatId: string, message: MessageRequestDto): Promise<MessageResponse> => {
-    return fetchWithAuth<MessageResponse>(
-      MESSAGES_ENDPOINTS.CREATE(chatId),
-      'POST',
-      message
-    );
+  createMessage: async (
+    chatId: string,
+    message: MessageRequestDto
+  ): Promise<MessageResponse> => {
+    try {
+      const response = await api.post<MessageResponse, MessageRequestDto>(
+        MESSAGES_ENDPOINTS.CREATE(chatId),
+        message
+      );
+      return response.data;
+    } catch (error) {
+      if (error instanceof ApiError) {
+        throw new Error(`Failed to create message: ${error.message}`);
+      }
+      throw error;
+    }
   },
 
   getMessagesByChatId: async (chatId: string): Promise<MessageListResponse> => {
-    return fetchWithAuth<MessageListResponse>(
-      MESSAGES_ENDPOINTS.GET_BY_CHAT_ID(chatId)
-    );
-  }
+    try {
+      const response = await api.get<MessageListResponse>(
+        MESSAGES_ENDPOINTS.GET_BY_CHAT_ID(chatId)
+      );
+      return response.data;
+    } catch (error) {
+      if (error instanceof ApiError) {
+        throw new Error(`Failed to get messages by chat ID: ${error.message}`);
+      }
+      throw error;
+    }
+  },
 };

@@ -47,7 +47,7 @@ export type Post = {
   video_paths: string[];
   location: Location;
   is_safe: boolean;
-  tidbits: string[];
+  tidbits: string;
   likes_count: number;
   comments_count: number;
   user: User;
@@ -71,7 +71,7 @@ export type PostResponseDto = {
   video_paths: string[];
   location: Location;
   is_safe: boolean;
-  tidbits: string[];
+  tidbits: string;
   likes_count: number;
   comments_count: number;
   user: User;
