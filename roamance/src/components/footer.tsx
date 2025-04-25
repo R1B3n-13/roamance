@@ -2,9 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { Facebook, Twitter, Instagram } from '@/components/Icons';
 import { routes } from '@/constants/routes';
+import { ImageWrapper } from '@/components/common/image-wrapper';
 
 export function Footer() {
   const [currentYear, setCurrentYear] = useState<string>('');
@@ -19,8 +19,8 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="space-y-4">
             <div className="flex items-end gap-2">
-              <Image
-                src="/images/roamance-logo-no-text.png"
+              <ImageWrapper
+                src="roamance-logo-no-text.png"
                 alt="Roamance Logo"
                 width={30}
                 height={30}

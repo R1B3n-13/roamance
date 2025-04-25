@@ -1,6 +1,6 @@
-import Image from 'next/image';
-import Link from 'next/link';
 import { routes } from '@/constants/routes';
+import { ImageWrapper } from '@/components/common/image-wrapper';
+import Link from 'next/link';
 
 export function NavLogo() {
   return (
@@ -9,8 +9,8 @@ export function NavLogo() {
         href={routes.home.href}
         className="flex items-center gap-2 cursor-pointer transition-opacity duration-200 hover:opacity-80"
       >
-        <Image
-          src="/images/roamance-logo-no-text.png"
+        <ImageWrapper
+          src="roamance-logo-no-text.png"
           alt="Logo"
           width={40}
           height={40}
