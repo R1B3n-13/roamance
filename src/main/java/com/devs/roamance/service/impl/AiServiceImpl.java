@@ -8,21 +8,22 @@ import com.devs.roamance.constant.AiSystemInstruction;
 import com.devs.roamance.constant.ResponseMessage;
 import com.devs.roamance.dto.request.ai.MultiModalAiRequestDto;
 import com.devs.roamance.dto.request.ai.UniModalAiRequestDto;
+import com.devs.roamance.dto.response.ai.EmbeddingResponse;
 import com.devs.roamance.dto.response.ai.TidbitsAndSafetyResponseDto;
 import com.devs.roamance.exception.AiGenerationFailedException;
-import com.devs.roamance.service.GeminiAiService;
-import com.devs.roamance.util.GeminiAiUtil;
+import com.devs.roamance.service.AiService;
+import com.devs.roamance.util.EmbeddingUtil;
+import com.devs.roamance.util.GeminiModelUtil;
+import com.devs.roamance.util.NomicImageEmbeddingUtil;
 import com.devs.roamance.util.RestUtil;
+import dev.langchain4j.data.document.Document;
 import dev.langchain4j.data.message.*;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.chat.StreamingChatLanguageModel;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
 import dev.langchain4j.model.output.FinishReason;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
@@ -33,18 +34,31 @@ import reactor.core.publisher.Sinks;
 
 @Service
 @Slf4j
-public class GeminiAiServiceImpl implements GeminiAiService {
+public class AiServiceImpl implements AiService {
 
   @Value("${application.gemini.api-key}")
-  private String apiKey;
+  private String geminiApiKey;
+
+  @Value("${application.nomic.api-key}")
+  private String nomicApiKey;
+
+  private String geminiModelName = "gemini-2.0-flash";
 
   private final RestUtil restUtil;
-  private final GeminiAiUtil geminiAiUtil;
+  private final GeminiModelUtil geminiModelUtil;
+  private final EmbeddingUtil embeddingUtil;
+  private final NomicImageEmbeddingUtil nomicImageEmbeddingUtil;
 
-  public GeminiAiServiceImpl(RestUtil restUtil, GeminiAiUtil geminiAiUtil) {
+  public AiServiceImpl(
+      RestUtil restUtil,
+      GeminiModelUtil geminiModelUtil,
+      EmbeddingUtil embeddingUtil,
+      NomicImageEmbeddingUtil nomicImageEmbeddingUtil) {
 
     this.restUtil = restUtil;
-    this.geminiAiUtil = geminiAiUtil;
+    this.geminiModelUtil = geminiModelUtil;
+    this.embeddingUtil = embeddingUtil;
+    this.nomicImageEmbeddingUtil = nomicImageEmbeddingUtil;
   }
 
   @Override
@@ -52,29 +66,15 @@ public class GeminiAiServiceImpl implements GeminiAiService {
   public CompletableFuture<TidbitsAndSafetyResponseDto> getTidbitsAndSafety(
       MultiModalAiRequestDto requestDto) {
 
-    Map<String, RestUtil.Media> mediaBytes = new HashMap<>();
-
-    try {
-      mediaBytes =
-          restUtil
-              .downloadMultipleMediaWithMime(requestDto.getMediaUrls())
-              .get(10, TimeUnit.SECONDS);
-
-    } catch (InterruptedException e) {
-      log.error("Media download interrupted: {}", e.getMessage(), e);
-      Thread.currentThread().interrupt();
-
-    } catch (Exception e) {
-      log.error("Media download failed: {}", e.getMessage(), e);
-    }
+    Map<String, RestUtil.Media> mediaBytes = downloadMedia(requestDto.getMediaUrls());
 
     ChatLanguageModel model;
 
     try {
       model =
-          geminiAiUtil.geminiModelBuilder(
-              apiKey,
-              "gemini-2.0-flash",
+          geminiModelUtil.geminiModelBuilder(
+              geminiApiKey,
+              geminiModelName,
               builder ->
                   builder
                       .safetySettings(
@@ -85,8 +85,9 @@ public class GeminiAiServiceImpl implements GeminiAiService {
                               HARM_CATEGORY_HATE_SPEECH, BLOCK_LOW_AND_ABOVE,
                               HARM_CATEGORY_CIVIC_INTEGRITY, BLOCK_MEDIUM_AND_ABOVE))
                       .temperature(0.3));
+
     } catch (Exception e) {
-      log.error("Gemini model build failed: {}", e.getMessage(), e);
+      log.error("Gemini model build failed : {}", e.getMessage(), e);
       return CompletableFuture.completedFuture(
           new TidbitsAndSafetyResponseDto(null, FinishReason.OTHER));
     }
@@ -113,8 +114,8 @@ public class GeminiAiServiceImpl implements GeminiAiService {
 
     try {
       model =
-          geminiAiUtil.geminiStreamingModelBuilder(
-              apiKey, "gemini-2.0-flash", builder -> builder.temperature(0.5));
+          geminiModelUtil.geminiStreamingModelBuilder(
+              geminiApiKey, geminiModelName, builder -> builder.temperature(0.5));
 
     } catch (Exception e) {
       log.error("Gemini model build failed: {}", e.getMessage(), e);
@@ -128,6 +129,77 @@ public class GeminiAiServiceImpl implements GeminiAiService {
 
     generateStreamingResponse(
         model, AiSystemInstruction.FOR_PROOFREADING, null, requestDto.getText(), sink);
+  }
+
+  @Override
+  @Async("asyncExecutor")
+  public CompletableFuture<Void> addContentToVectorDb(
+      MultiModalAiRequestDto requestDto, UUID contentId) {
+
+    try {
+      embeddingUtil.embedAndStore(
+          nomicApiKey,
+          Document.from(requestDto.getText()),
+          768,
+          contentId.toString(),
+          "search_document",
+          "texts");
+
+    } catch (Exception e) {
+      log.error("Text embeddings generation failed: {}", e.getMessage(), e);
+    }
+
+    Map<String, RestUtil.Media> mediaBytes = downloadMedia(requestDto.getMediaUrls());
+
+    ChatLanguageModel model;
+
+    try {
+      model =
+          geminiModelUtil.geminiModelBuilder(
+              geminiApiKey, geminiModelName, builder -> builder.temperature(0.1));
+
+    } catch (Exception e) {
+      log.error("Gemini model build failed: {}", e.getMessage(), e);
+
+      return CompletableFuture.failedFuture(
+          new AiGenerationFailedException(ResponseMessage.GEMINI_MODEL_BUILD_FAILED));
+    }
+
+    try {
+      List<EmbeddingResponse> imageEmbeddings =
+          nomicImageEmbeddingUtil.embedImageUrls(nomicApiKey, requestDto.getMediaUrls());
+
+      embeddingUtil.store(imageEmbeddings, 768, contentId.toString(), "image_embeddings");
+
+    } catch (InterruptedException e) {
+      log.error("Image embeddings generation interrupted: {}", e.getMessage(), e);
+      Thread.currentThread().interrupt();
+
+    } catch (Exception e) {
+      log.error("Image embeddings generation failed: {}", e.getMessage(), e);
+    }
+
+    ChatResponse chatResponse =
+        generateResponse(model, AiSystemInstruction.FOR_IMAGE_DESCRIPTION, mediaBytes, null);
+
+    if (chatResponse == null) {
+      return CompletableFuture.completedFuture(null);
+    }
+
+    try {
+      embeddingUtil.embedAndStore(
+          nomicApiKey,
+          Document.from(chatResponse.aiMessage().text()),
+          768,
+          contentId.toString(),
+          "search_document",
+          "image_descriptions");
+
+    } catch (Exception e) {
+      log.error("Text embeddings generation failed: {}", e.getMessage(), e);
+    }
+
+    return CompletableFuture.completedFuture(null);
   }
 
   private ChatResponse generateResponse(
@@ -238,6 +310,28 @@ public class GeminiAiServiceImpl implements GeminiAiService {
       String base64Image = Base64.getEncoder().encodeToString(entry.getValue().content());
       ImageContent imageContent = ImageContent.from(base64Image, entry.getValue().mimeType());
       userMessageBuilder.addContent(imageContent);
+    }
+  }
+
+  private Map<String, RestUtil.Media> downloadMedia(List<String> mediaUrls) {
+
+    Map<String, RestUtil.Media> mediaBytes = new HashMap<>();
+
+    try {
+      mediaBytes = restUtil.downloadMultipleMediaWithMime(mediaUrls).get(10, TimeUnit.SECONDS);
+
+      return mediaBytes;
+
+    } catch (InterruptedException e) {
+      log.error("Media download interrupted: {}", e.getMessage(), e);
+      Thread.currentThread().interrupt();
+
+      return Collections.emptyMap();
+
+    } catch (Exception e) {
+      log.error("Media download failed: {}", e.getMessage(), e);
+
+      return Collections.emptyMap();
     }
   }
 }

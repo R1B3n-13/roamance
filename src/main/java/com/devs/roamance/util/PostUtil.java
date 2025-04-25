@@ -7,7 +7,7 @@ import com.devs.roamance.dto.response.ai.TidbitsAndSafetyResponseDto;
 import com.devs.roamance.exception.ResourceNotFoundException;
 import com.devs.roamance.model.social.Post;
 import com.devs.roamance.repository.PostRepository;
-import com.devs.roamance.service.GeminiAiService;
+import com.devs.roamance.service.AiService;
 import dev.langchain4j.model.output.FinishReason;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
@@ -18,23 +18,21 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class PostUtil {
 
-  private final GeminiAiService geminiAiService;
+  private final AiService aiService;
   private final PostRepository postRepository;
 
-  public PostUtil(GeminiAiService geminiAiService, PostRepository postRepository) {
-    this.geminiAiService = geminiAiService;
+  public PostUtil(AiService aiService, PostRepository postRepository) {
+    this.aiService = aiService;
     this.postRepository = postRepository;
   }
 
-  @Async
+  @Async("asyncExecutor")
   public void backgroundAiAnalysis(UUID postId, PostRequestDto createRequestDto) {
     try {
       MultiModalAiRequestDto aiRequestDto = new MultiModalAiRequestDto();
-
       setFields(aiRequestDto, createRequestDto);
 
-      TidbitsAndSafetyResponseDto responseDto =
-          geminiAiService.getTidbitsAndSafety(aiRequestDto).join();
+      TidbitsAndSafetyResponseDto responseDto = aiService.getTidbitsAndSafety(aiRequestDto).join();
 
       Post post =
           postRepository
@@ -51,6 +49,16 @@ public class PostUtil {
     } catch (Exception e) {
       log.error("Error in background AI analysis for post {}: {}", postId, e.getMessage(), e);
     }
+  }
+
+  public void addToVectorDb(UUID postId, PostRequestDto requestDto) {
+
+    requestDto.setVideoPaths(null);
+
+    MultiModalAiRequestDto aiRequestDto = new MultiModalAiRequestDto();
+    setFields(aiRequestDto, requestDto);
+
+    aiService.addContentToVectorDb(aiRequestDto, postId);
   }
 
   private void setFields(MultiModalAiRequestDto aiRequestDto, PostRequestDto createRequestDto) {

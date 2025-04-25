@@ -10,7 +10,7 @@ import java.util.function.Consumer;
 import org.springframework.stereotype.Component;
 
 @Component
-public final class GeminiAiUtil {
+public final class GeminiModelUtil {
 
   /**
    * Creates a GoogleAiGeminiChatModel with required parameters and additional configuration
