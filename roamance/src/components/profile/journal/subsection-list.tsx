@@ -75,266 +75,131 @@ const SortableSubsectionItem: React.FC<SortableSubsectionItemProps> = ({
     position: 'relative' as const,
   };
 
-  // Get subsection icon based on type
-  const getSubsectionIcon = (type: SubsectionType) => {
-    switch (type) {
-      case SubsectionType.SIGHTSEEING:
-        return <Eye className="w-4 h-4" />;
+  // Get appropriate icon based on subsection type
+  const getIcon = () => {
+    switch (subsection.type) {
       case SubsectionType.ACTIVITY:
-        return <Activity className="w-4 h-4" />;
+        return <Activity className={cn("h-5 w-5", colors.icon)} />;
       case SubsectionType.ROUTE:
-        return <Route className="w-4 h-4" />;
+        return <Route className={cn("h-5 w-5", colors.icon)} />;
       default:
-        return <MapPin className="w-4 h-4" />;
-    }
-  };
-
-  // Get badge text based on type
-  const getSubsectionTypeLabel = (type: SubsectionType) => {
-    switch (type) {
-      case SubsectionType.SIGHTSEEING:
-        return 'Sightseeing';
-      case SubsectionType.ACTIVITY:
-        return 'Activity';
-      case SubsectionType.ROUTE:
-        return 'Route';
-      default:
-        return 'Unknown';
+        return <MapPin className={cn("h-5 w-5", colors.icon)} />;
     }
   };
 
   return (
-    <div ref={setNodeRef} style={style} className="touch-manipulation">
-      <Card
-        className={cn(
-          'border relative overflow-hidden transition-all duration-200',
-          'backdrop-blur-sm',
-          isDragging ? [
-            'ring-2 ring-offset-2 dark:ring-offset-slate-900',
-            colors.border,
-            'shadow-lg scale-[1.02] rotate-1 opacity-90 z-50'
-          ] : [
-            'hover:ring-1 hover:ring-offset-1 dark:hover:ring-offset-slate-900',
-            colors.border,
-            'shadow-sm hover:shadow-md'
-          ],
-          'bg-white/70 dark:bg-slate-800/70',
-          'border-slate-200/80 dark:border-slate-700/80',
-          isDraggable && !isDragging && 'hover:translate-y-[-2px]'
-        )}
-      >
-        {/* Enhanced background gradient for dragging state */}
-        <div className={cn(
-          "absolute inset-0 bg-gradient-to-br",
-          colors.gradient,
-          isDragging ? "opacity-20 animate-pulse" : "opacity-5"
-        )} />
-
-        {/* Frost effect overlay */}
-        <div className="absolute inset-0 bg-white/20 dark:bg-slate-900/20 backdrop-blur-[1px]" />
-
-        {/* Visual drag indicator - more prominent when draggable */}
-        {isDraggable && (
-          <div className={cn(
-            "absolute left-0 top-0 bottom-0 w-1.5",
-            colors.bgSolid,
-            isDragging ? "opacity-100" : "opacity-40 group-hover:opacity-100 transition-opacity"
-          )} />
-        )}
-
-        {/* Drop highlight overlay for when dragging */}
-        {isDragging && (
-          <div className={cn(
-            "absolute inset-0 border-2 border-dashed z-10 rounded-lg",
-            colors.border,
-            "animate-pulse"
-          )} />
-        )}
-
-        <div className={cn(
-          "flex items-start justify-between relative z-10",
-          "p-3",
-          isDragging && "p-4" // Slightly larger padding when dragging to show animation
-        )}>
-          {/* Enhanced drag handle with improved visual feedback */}
+    <motion.div
+      ref={setNodeRef}
+      style={style}
+      className={cn("relative mb-2 rounded-lg overflow-hidden transition-all duration-300 group",
+        isDragging ? "shadow-lg" : "shadow-sm hover:shadow-md"
+      )}
+      {...attributes}
+    >
+      <div className={cn(
+        "border border-muted/40 rounded-lg p-3 bg-white/60 dark:bg-slate-900/60 backdrop-blur-sm",
+        colors.border,
+        isDragging ? "opacity-90 border-dashed" : "opacity-100"
+      )}>
+        <div className="flex items-center space-x-2">
+          {/* Drag handle section */}
           {isDraggable && (
-            <div className="flex h-full self-stretch -ml-1 mr-2">
-              <button
-                type="button"
-                {...attributes}
-                {...listeners}
-                className={cn(
-                  "flex h-full self-stretch px-2 py-1 justify-center items-center",
-                  "rounded group/handle transition-all duration-200",
-                  isDragging ? [
-                    "cursor-grabbing bg-opacity-100",
-                    colors.bgSolid,
-                    "text-white scale-110"
-                  ] : [
-                    "cursor-grab",
-                    "hover:bg-muted/50 active:bg-muted",
-                    "text-muted-foreground"
-                  ],
-                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                )}
-                aria-label={isDragging ? "Dragging section. Release to drop." : "Drag to reorder section"}
-                title="Drag to reorder"
-              >
-                <span className={cn(
-                  "transition-transform",
-                  isDragging ? "scale-110" : "group-hover/handle:scale-110"
-                )}>
-                  <GripVertical className="w-5 h-5" />
-                </span>
-              </button>
+            <div
+              {...listeners}
+              className={cn(
+                "flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center",
+                colors.bg,
+                "hover:opacity-80 cursor-grab active:cursor-grabbing transition-all duration-200"
+              )}
+            >
+              <GripVertical className="h-4 w-4 text-foreground/60" />
             </div>
           )}
 
-          <div className="flex items-start gap-3 flex-1 min-w-0">
-            <div
-              className={cn(
-                `w-10 h-10 rounded-full flex items-center justify-center mt-0.5 flex-shrink-0`,
-                colors.bgSolid,
-                'shadow-sm ring-1 ring-inset ring-black/5 dark:ring-white/5',
-                isDragging ? "scale-110 shadow-md" : "transition-transform group-hover:scale-105"
-              )}
-            >
-              <span className={cn('transition-transform', colors.icon)}>
-                {getSubsectionIcon(subsection.type)}
-              </span>
-            </div>
+          {/* Icon and title section */}
+          <div className={cn(
+            "flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center",
+            colors.bg
+          )}>
+            {getIcon()}
+          </div>
 
-            <div className="flex-1 min-w-0 pt-0.5">
-              <h4 className={cn(
-                "font-medium text-foreground line-clamp-1 tracking-tight",
-                isDragging && "font-semibold"
-              )}>
-                {subsection.title || 'Untitled Section'}
+          <div className="flex-1 min-w-0">
+            <div className="flex flex-col">
+              <h4 className="text-sm font-medium truncate text-foreground">
+                {subsection.title || "Untitled Section"}
               </h4>
-              <div className="flex items-center gap-2 mt-1 flex-wrap">
+              <div className="flex items-center gap-2 mt-0.5">
                 <Badge
                   variant="outline"
                   className={cn(
-                    'px-1.5 py-0 h-5 text-[0.65rem] font-medium',
-                    colors.badge,
-                    isDragging && "ring-1 ring-offset-1 ring-white/20 dark:ring-black/20"
+                    "text-xs px-2 h-5 font-medium",
+                    colors.badge
                   )}
                 >
-                  {getSubsectionTypeLabel(subsection.type)}
+                  {subsection.type}
                 </Badge>
-
-                {/* Show additional metadata based on type */}
-                {subsection.type === SubsectionType.ACTIVITY && (
-                  <span className="text-xs text-muted-foreground/80 tracking-tight">
-                    {subsection.activity_type || 'General Activity'}
-                  </span>
-                )}
-
-                {subsection.type === SubsectionType.ROUTE && (
-                  <span className="text-xs text-muted-foreground/80 tracking-tight">
-                    {subsection.waypoints?.length || 0} waypoints
-                  </span>
+                {subsection.location && subsection.location.latitude !== 0 && (
+                  <div className="text-xs text-muted-foreground flex items-center gap-1">
+                    <MapPin className="h-3 w-3" />
+                    <span>Location set</span>
+                  </div>
                 )}
               </div>
-
-              {/* Display location map for sightseeing */}
-              {subsection.type === SubsectionType.SIGHTSEEING && subsection.location && (
-                <div className={cn(
-                  "mt-3 overflow-hidden rounded-md shadow-sm border border-slate-200/80 dark:border-slate-700/80",
-                  isDragging && "shadow-md brightness-105"
-                )}>
-                  <LocationMap
-                    location={subsection.location}
-                    type="single"
-                    height="120px"
-                    className="w-full"
-                    zoomControl={false}
-                    attributionControl={false}
-                    dragging={false}
-                    scrollWheelZoom={false}
-                  />
-                </div>
-              )}
-
-              {/* Display route map for routes */}
-              {subsection.type === SubsectionType.ROUTE && subsection.waypoints && subsection.waypoints.length > 0 && (
-                <div className={cn(
-                  "mt-3 overflow-hidden rounded-md shadow-sm border border-slate-200/80 dark:border-slate-700/80",
-                  isDragging && "shadow-md brightness-105"
-                )}>
-                  <LocationMap
-                    waypoints={subsection.waypoints}
-                    type="route"
-                    height="120px"
-                    className="w-full"
-                    zoomControl={false}
-                    attributionControl={false}
-                    dragging={false}
-                    scrollWheelZoom={false}
-                  />
-                </div>
-              )}
             </div>
           </div>
 
-          {/* Action buttons with improved hover states */}
-          <div className="flex flex-col gap-1 ml-2 mt-0.5">
+          {/* Actions section */}
+          <div className="flex gap-1 opacity-80 group-hover:opacity-100 transition-opacity">
             <Button
-              variant="ghost"
+              type="button"
               size="icon"
-              className={cn(
-                "h-7 w-7 rounded-full",
-                "text-muted-foreground/60 hover:text-destructive",
-                "hover:bg-destructive/10 focus:bg-destructive/10",
-                "transition-colors"
-              )}
-              onClick={onRemove}
-              aria-label="Remove section"
+              variant="ghost"
+              className="h-8 w-8 rounded-full text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+              onClick={() => onRemove()}
+              title="Remove subsection"
             >
-              <Trash2 className="w-3.5 h-3.5" />
+              <Trash2 className="h-4 w-4" />
             </Button>
-
-            {!isDraggable && (
+            {onReorderSubsections && (
               <>
-                {index > 0 && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className={cn(
-                      "h-7 w-7 rounded-full",
-                      "text-muted-foreground/60 hover:text-sky-600",
-                      "hover:bg-sky-50 dark:hover:bg-sky-900/20",
-                      "transition-colors"
-                    )}
-                    onClick={() => onReorderSubsections?.(index, index - 1)}
-                    aria-label="Move section up"
-                  >
-                    <ArrowUp className="w-3.5 h-3.5" />
-                  </Button>
-                )}
-
-                {index < subsections.length - 1 && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className={cn(
-                      "h-7 w-7 rounded-full",
-                      "text-muted-foreground/60 hover:text-sky-600",
-                      "hover:bg-sky-50 dark:hover:bg-sky-900/20",
-                      "transition-colors"
-                    )}
-                    onClick={() => onReorderSubsections?.(index, index + 1)}
-                    aria-label="Move section down"
-                  >
-                    <ArrowDown className="w-3.5 h-3.5" />
-                  </Button>
-                )}
+                <Button
+                  type="button"
+                  size="icon"
+                  variant="ghost"
+                  className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors"
+                  onClick={() => index > 0 && onReorderSubsections(index, index - 1)}
+                  disabled={index === 0}
+                  title="Move up"
+                >
+                  <ArrowUp className="h-4 w-4" />
+                </Button>
+                <Button
+                  type="button"
+                  size="icon"
+                  variant="ghost"
+                  className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors"
+                  onClick={() => index < subsections.length - 1 && onReorderSubsections(index, index + 1)}
+                  disabled={index === subsections.length - 1}
+                  title="Move down"
+                >
+                  <ArrowDown className="h-4 w-4" />
+                </Button>
               </>
             )}
+            <Button
+              type="button"
+              size="icon"
+              variant="ghost"
+              className="h-8 w-8 rounded-full text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+              title="View subsection"
+            >
+              <Eye className="h-4 w-4" />
+            </Button>
           </div>
         </div>
-      </Card>
-    </div>
+      </div>
+    </motion.div>
   );
 };
 

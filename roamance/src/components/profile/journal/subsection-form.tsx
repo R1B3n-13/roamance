@@ -76,94 +76,102 @@ const SortableChecklistItem: React.FC<SortableChecklistItemProps> = ({
     transform: CSS.Transform.toString(transform),
     transition,
     zIndex: isDragging ? 10 : 1,
+    position: 'relative' as const,
   };
 
-  const handleSubmit = () => {
-    if (editedTitle.trim()) {
-      onTitleChange(editedTitle.trim());
-      setIsEditing(false);
+  const handleBlur = () => {
+    setIsEditing(false);
+    if (editedTitle.trim() !== title.trim()) {
+      onTitleChange(editedTitle);
     }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
-      handleSubmit();
-    } else if (e.key === 'Escape') {
-      setEditedTitle(title);
       setIsEditing(false);
+      onTitleChange(editedTitle);
+    } else if (e.key === 'Escape') {
+      setIsEditing(false);
+      setEditedTitle(title);
     }
   };
 
   return (
-    <div
+    <motion.div
       ref={setNodeRef}
       style={style}
       className={cn(
-        "group flex items-center gap-2 p-3 rounded-lg border",
-        "bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm",
-        "transition-all duration-200",
-        "border-slate-200 dark:border-slate-800",
-        isDragging
-          ? "shadow-md ring-2 ring-indigo-500/30 dark:ring-indigo-500/20"
-          : "shadow-sm hover:shadow-md hover:border-indigo-300 dark:hover:border-indigo-700/70"
+        "relative mb-2 rounded-lg overflow-hidden transition-all duration-300 group",
+        isDragging ? "shadow-md" : "shadow-sm hover:shadow-sm",
+        completed ? "opacity-80" : "opacity-100"
       )}
+      {...attributes}
     >
       <div
-        {...attributes}
-        {...listeners}
-        className="cursor-grab touch-none mr-1 text-slate-400 hover:text-slate-600 dark:text-slate-600 dark:hover:text-slate-400 transition-colors"
+        className={cn(
+          "border rounded-lg p-2.5 flex items-center space-x-2",
+          "bg-white/70 dark:bg-slate-900/50 backdrop-blur-sm",
+          isDragging ? "border-dashed border-indigo-300 dark:border-indigo-700" : "border-slate-200 dark:border-slate-700",
+          completed ? "bg-muted/40 dark:bg-muted/10" : ""
+        )}
       >
-        <GripVertical className="h-4 w-4" />
-      </div>
+        <div
+          {...listeners}
+          className="flex-shrink-0 cursor-grab active:cursor-grabbing h-6 w-6 rounded-full hover:bg-muted/60 flex items-center justify-center transition-colors"
+        >
+          <GripVertical className="h-3.5 w-3.5 text-muted-foreground" />
+        </div>
 
-      <div className="flex-shrink-0">
         <Checkbox
           checked={completed}
-          onCheckedChange={onToggleCompleted}
+          onCheckedChange={() => onToggleCompleted()}
           className={cn(
-            "h-5 w-5 rounded-md data-[state=checked]:bg-indigo-600 data-[state=checked]:text-white",
-            "border-slate-300 dark:border-slate-700"
+            "h-5 w-5 rounded-md border-slate-300 dark:border-slate-600",
+            completed
+              ? "data-[state=checked]:bg-indigo-500 data-[state=checked]:border-indigo-500"
+              : ""
           )}
         />
-      </div>
 
-      <div className="flex-1 min-w-0">
         {isEditing ? (
           <Input
+            type="text"
             value={editedTitle}
             onChange={(e) => setEditedTitle(e.target.value)}
-            onBlur={handleSubmit}
+            onBlur={handleBlur}
             onKeyDown={handleKeyDown}
+            className="flex-1 h-8 bg-background"
             autoFocus
-            className={cn(
-              "h-8 px-2 text-sm focus-visible:ring-1 focus-visible:ring-indigo-500",
-              "border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950"
-            )}
           />
         ) : (
           <div
+            className="flex-1 min-w-0"
             onClick={() => setIsEditing(true)}
-            className={cn(
-              "px-1.5 py-1 -mx-1.5 rounded text-sm cursor-text transition-colors",
-              "hover:bg-slate-100 dark:hover:bg-slate-800/80",
-              completed && "line-through text-slate-500 dark:text-slate-400"
-            )}
           >
-            {title}
+            <span
+              className={cn(
+                "text-sm transition-colors cursor-text",
+                completed
+                  ? "text-muted-foreground line-through"
+                  : "text-foreground hover:text-indigo-600 dark:hover:text-indigo-400"
+              )}
+            >
+              {title}
+            </span>
           </div>
         )}
-      </div>
 
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon"
-        onClick={onRemove}
-        className="h-7 w-7 rounded-full opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity text-slate-400 hover:text-red-500 dark:text-slate-500 dark:hover:text-red-400"
-      >
-        <X className="h-3.5 w-3.5" />
-      </Button>
-    </div>
+        <Button
+          type="button"
+          size="icon"
+          variant="ghost"
+          onClick={onRemove}
+          className="h-7 w-7 rounded-full opacity-60 hover:opacity-100 hover:bg-rose-50 dark:hover:bg-rose-900/20 text-muted-foreground hover:text-rose-600 dark:hover:text-rose-400 transition-all"
+        >
+          <X className="h-3.5 w-3.5" />
+        </Button>
+      </div>
+    </motion.div>
   );
 };
 
