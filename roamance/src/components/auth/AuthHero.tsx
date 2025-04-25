@@ -1,9 +1,9 @@
 import React from 'react';
-import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { LucideIcon } from 'lucide-react';
 import { AuthFeatureItem } from './AuthFeatureItem';
 import { GradientBadge } from '@/components/common/gradient-badge';
+import { ImageWrapper } from '@/components';
 
 interface AuthHeroProps {
   badge: string;
@@ -47,8 +47,8 @@ export function AuthHero({ badge, title, subtitle, features }: AuthHeroProps) {
 
       {/* Brand Logo */}
       <div className="hidden md:flex items-center pt-8 mt-4 border-t border-border/40">
-        <Image
-          src="/images/roamance-logo-no-text.png"
+        <ImageWrapper
+          src="roamance-logo-no-text.png"
           alt="Roamance Logo"
           width={48}
           height={48}
