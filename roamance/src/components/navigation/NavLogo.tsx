@@ -1,5 +1,5 @@
 import { routes } from '@/constants/routes';
-import { ImageWrapper } from '@/components/common/image-wrapper';
+import { ImageWrapper } from '@/components';
 import Link from 'next/link';
 
 export function NavLogo() {

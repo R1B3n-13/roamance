@@ -8,7 +8,7 @@ import {
 import { cn } from '@/lib/utils';
 import { ImageOff } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { ImageWrapper } from '@/components/common/image-wrapper';
+import { ImageWrapper } from '@/components';
 
 interface PlaceImagesCarouselProps {
   images: string[];

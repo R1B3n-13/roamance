@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { LucideIcon } from 'lucide-react';
 import { AuthFeatureItem } from './AuthFeatureItem';
 import { GradientBadge } from '@/components/common/gradient-badge';
-import { ImageWrapper } from '@/components/common/image-wrapper';
+import { ImageWrapper } from '@/components';
 
 interface AuthHeroProps {
   badge: string;

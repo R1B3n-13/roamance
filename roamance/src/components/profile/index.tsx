@@ -11,7 +11,7 @@ import { ProfileTabs } from './profile-tabs';
 import { ProfileTrips } from './profile-trips';
 import { User, UserInfo } from '@/types';
 import { userService } from '@/service/user-service';
-import { getImagePath } from '@/components/common/image-wrapper';
+import { getImagePath } from '@/components';
 
 export function ProfilePage() {
   const [activeTab, setActiveTab] = useState('info');
@@ -98,8 +98,8 @@ export function ProfilePage() {
       transition: {
         duration: 0.4,
         ease: [0.4, 0.0, 0.2, 1.0],
-      }
-    }
+      },
+    },
   };
 
   const itemVariants = {
@@ -119,8 +119,8 @@ export function ProfilePage() {
       y: -20,
       transition: {
         duration: 0.3,
-      }
-    }
+      },
+    },
   };
 
   return (
@@ -139,7 +139,9 @@ export function ProfilePage() {
       {/* Extra subtle patterns for visual texture */}
       <div
         className="fixed inset-0 bg-repeat opacity-[0.015] mix-blend-overlay pointer-events-none"
-        style={{ backgroundImage: `url('${getImagePath('roamance-logo-no-text.png')}')` }}
+        style={{
+          backgroundImage: `url('${getImagePath('roamance-logo-no-text.png')}')`,
+        }}
       />
 
       <motion.div

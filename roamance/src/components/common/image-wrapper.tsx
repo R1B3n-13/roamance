@@ -20,8 +20,6 @@ export function getImagePath(src: string, baseDirectory = 'images'): string {
 
   const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
 
-  console.log('Base path:', basePath); // Debugging line
-
   return src.startsWith('/')
     ? `${basePath}${src}`
     : `${basePath}/${baseDirectory}/${src}`;
@@ -33,9 +31,5 @@ export function ImageWrapper({
   ...rest
 }: ImageWrapperProps) {
   const fullPath = getImagePath(src, baseDirectory);
-
-  console.log('Image src:', fullPath); // Debugging line
-  console.log('Image baseDirectory:', baseDirectory); // Debugging line
-
   return <Image src={fullPath} {...rest} />;
 }

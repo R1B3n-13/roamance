@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Facebook, Twitter, Instagram } from '@/components/Icons';
 import { routes } from '@/constants/routes';
-import { ImageWrapper } from '@/components/common/image-wrapper';
+import { ImageWrapper } from '@/components';
 
 export function Footer() {
   const [currentYear, setCurrentYear] = useState<string>('');
