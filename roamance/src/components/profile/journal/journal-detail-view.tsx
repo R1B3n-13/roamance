@@ -1,3 +1,4 @@
+import { LocationMap } from '@/components/maps/LocationViwer';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -7,8 +8,15 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
+import { CloudinaryUploadResult } from '@/service/cloudinary-service';
 import { journalService } from '@/service/journal-service';
+import { subsectionService } from '@/service/subsection-service';
 import { JournalCreateRequest, JournalDetail } from '@/types/journal';
+import {
+  SubsectionDetailResponseDto,
+  SubsectionRequest,
+  SubsectionType,
+} from '@/types/subsection';
 import { formatRelativeTime } from '@/utils/format';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
@@ -32,18 +40,10 @@ import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { ConfirmDialog } from '../../common/confirm-dialog';
 import { JournalMetadataForm } from './journal-metadata-form';
+import { JourneyPathAnimation } from './journey-path-animation';
 import { SubsectionDetail } from './subsection-detail';
 import { SubsectionForm } from './subsection-form';
 import { SubsectionList } from './subsection-list';
-import { CloudinaryUploadResult } from '@/service/cloudinary-service';
-import { subsectionService } from '@/service/subsection-service';
-import {
-  SubsectionDetailResponseDto,
-  SubsectionType,
-  SubsectionRequest
-} from '@/types/subsection';
-import { LocationMap } from '@/components/maps/LocationViwer';
-import { JourneyPathAnimation } from './journey-path-animation';
 
 interface JournalDetailViewProps {
   journal: JournalDetail | null; // Made optional to handle loading state
@@ -66,12 +66,18 @@ export const JournalDetailView: React.FC<JournalDetailViewProps> = ({
   const [editError, setEditError] = useState<string | null>(null);
   const [subsectionFormVisible, setSubsectionFormVisible] = useState(false);
   const [isSubmittingSubsection, setIsSubmittingSubsection] = useState(false);
-  const [deleteSubsectionDialogOpen, setDeleteSubsectionDialogOpen] = useState(false);
+  const [deleteSubsectionDialogOpen, setDeleteSubsectionDialogOpen] =
+    useState(false);
   const [subsectionToDelete, setSubsectionToDelete] = useState<number>(-1);
-  const [subsectionDetails, setSubsectionDetails] = useState<{ [key: string]: SubsectionDetailResponseDto }>({});
-  const [isLoadingSubsection, setIsLoadingSubsection] = useState<{ [key: string]: boolean }>({});
+  const [subsectionDetails, setSubsectionDetails] = useState<{
+    [key: string]: SubsectionDetailResponseDto;
+  }>({});
+  const [isLoadingSubsection, setIsLoadingSubsection] = useState<{
+    [key: string]: boolean;
+  }>({});
   // Add delete journal confirmation state
-  const [isDeleteJournalDialogOpen, setIsDeleteJournalDialogOpen] = useState(false);
+  const [isDeleteJournalDialogOpen, setIsDeleteJournalDialogOpen] =
+    useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
   // For editing the journal
@@ -113,7 +119,7 @@ export const JournalDetailView: React.FC<JournalDetailViewProps> = ({
       setActiveSubsection(journal.subsections[0].id);
 
       // Start background loading of all subsections
-      journal.subsections.forEach(subsection => {
+      journal.subsections.forEach((subsection) => {
         fetchSubsectionDetails(subsection.id);
       });
     } else {
@@ -155,10 +161,17 @@ export const JournalDetailView: React.FC<JournalDetailViewProps> = ({
     const { name, value } = e.target;
 
     // Special handling for checkbox fields
-    if (name === 'is_favorite' || name === 'is_archived' || name === 'is_shared') {
+    if (
+      name === 'is_favorite' ||
+      name === 'is_archived' ||
+      name === 'is_shared'
+    ) {
       setEditableJournal((prev) => ({
         ...prev,
-        [name]: e.target.type === 'checkbox' ? (e.target as HTMLInputElement).checked : value === 'true',
+        [name]:
+          e.target.type === 'checkbox'
+            ? (e.target as HTMLInputElement).checked
+            : value === 'true',
       }));
     } else {
       setEditableJournal((prev) => ({
@@ -242,7 +255,7 @@ export const JournalDetailView: React.FC<JournalDetailViewProps> = ({
       await journalService.updateJournal(journal.id, editableJournal);
 
       setEditMode(false);
-      toast.success("Journal updated successfully");
+      toast.success('Journal updated successfully');
 
       // Refresh the journal data (ideally this would update through a callback to the parent)
       // In a real app, we would probably use a state management solution like Redux
@@ -250,8 +263,11 @@ export const JournalDetailView: React.FC<JournalDetailViewProps> = ({
       onClose();
     } catch (err: unknown) {
       console.error('Error updating journal:', err);
-      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
-      setEditError(errorMessage || 'Failed to update journal. Please try again.');
+      const errorMessage =
+        err instanceof Error ? err.message : 'An unknown error occurred';
+      setEditError(
+        errorMessage || 'Failed to update journal. Please try again.'
+      );
     } finally {
       setIsSaving(false);
     }
@@ -269,23 +285,26 @@ export const JournalDetailView: React.FC<JournalDetailViewProps> = ({
     }
 
     // Set loading state for this subsection
-    setIsLoadingSubsection(prev => ({...prev, [subsectionId]: true}));
+    setIsLoadingSubsection((prev) => ({ ...prev, [subsectionId]: true }));
 
     try {
       const response = await subsectionService.getSubsectionById(subsectionId);
       if (response && response.data) {
         // Add the fetched subsection to our cache
-        setSubsectionDetails(prev => ({
+        setSubsectionDetails((prev) => ({
           ...prev,
-          [subsectionId]: response.data
+          [subsectionId]: response.data,
         }));
       }
     } catch (error) {
-      console.error(`Failed to fetch subsection details for ID ${subsectionId}:`, error);
+      console.error(
+        `Failed to fetch subsection details for ID ${subsectionId}:`,
+        error
+      );
       // Don't show error toast for background loading
       // Only show errors when explicitly trying to view a subsection
     } finally {
-      setIsLoadingSubsection(prev => ({...prev, [subsectionId]: false}));
+      setIsLoadingSubsection((prev) => ({ ...prev, [subsectionId]: false }));
     }
   };
 
@@ -301,7 +320,10 @@ export const JournalDetailView: React.FC<JournalDetailViewProps> = ({
           {/* Header with JourneyPathAnimation */}
           <div className="relative bg-gradient-to-br from-indigo-600/90 via-purple-600/90 to-violet-600/90 p-12 flex flex-col items-center justify-center">
             <div className="absolute inset-0 overflow-hidden">
-              <div className="absolute -inset-x-full top-0 bottom-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-[shimmer_2s_infinite]" style={{transform: 'translateX(-10%) skewX(-15deg)'}} />
+              <div
+                className="absolute -inset-x-full top-0 bottom-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-[shimmer_2s_infinite]"
+                style={{ transform: 'translateX(-10%) skewX(-15deg)' }}
+              />
             </div>
 
             <JourneyPathAnimation color="violet" size="lg" className="mb-4" />
@@ -458,7 +480,9 @@ export const JournalDetailView: React.FC<JournalDetailViewProps> = ({
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="w-full max-w-4xl sm:max-w-4xl max-h-[90vh] overflow-hidden p-0 rounded-xl border border-muted/30 shadow-xl">
-        <DialogTitle className="sr-only">{journal?.title || 'Journal Details'}</DialogTitle>
+        <DialogTitle className="sr-only">
+          {journal?.title || 'Journal Details'}
+        </DialogTitle>
         {/* Journal Header with Cover Image */}
         <div className="relative">
           {coverImage ? (
@@ -608,7 +632,9 @@ export const JournalDetailView: React.FC<JournalDetailViewProps> = ({
                 <div className="flex items-start">
                   <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
                   <div className="ml-3 flex-1">
-                    <p className="text-sm font-medium text-destructive">{editError}</p>
+                    <p className="text-sm font-medium text-destructive">
+                      {editError}
+                    </p>
                   </div>
                   <button
                     onClick={() => setEditError(null)}
@@ -645,7 +671,9 @@ export const JournalDetailView: React.FC<JournalDetailViewProps> = ({
                 <div className="relative mb-6 flex justify-between items-center">
                   <div className="flex items-center">
                     <div className="absolute left-0 top-1/2 w-1 h-6 bg-purple-500 rounded-r-full transform -translate-y-1/2"></div>
-                    <h3 className="text-lg font-medium pl-3 text-foreground">Journal Sections</h3>
+                    <h3 className="text-lg font-medium pl-3 text-foreground">
+                      Journal Sections
+                    </h3>
                   </div>
 
                   <Button
@@ -665,19 +693,32 @@ export const JournalDetailView: React.FC<JournalDetailViewProps> = ({
                     subsections={editableJournal.subsections}
                     onRemoveSubsection={handleRemoveSubsection}
                     onAddSubsectionClick={() => setSubsectionFormVisible(true)}
-                    onReorderSubsections={editMode ? (startIndex, endIndex) => {
-                      const newSubsections = [...editableJournal.subsections];
-                      const [moved] = newSubsections.splice(startIndex, 1);
-                      newSubsections.splice(endIndex, 0, moved);
-                      setEditableJournal(prev => ({
-                        ...prev,
-                        subsections: newSubsections
-                      }));
-                    } : undefined}
-                    onSelectSubsection={editMode ? (subsectionId, index) => {
-                      // Handle subsection selection in edit mode
-                      setActiveSubsection(subsectionId);
-                    } : undefined}
+                    onReorderSubsections={
+                      editMode
+                        ? (startIndex, endIndex) => {
+                            const newSubsections = [
+                              ...editableJournal.subsections,
+                            ];
+                            const [moved] = newSubsections.splice(
+                              startIndex,
+                              1
+                            );
+                            newSubsections.splice(endIndex, 0, moved);
+                            setEditableJournal((prev) => ({
+                              ...prev,
+                              subsections: newSubsections,
+                            }));
+                          }
+                        : undefined
+                    }
+                    onSelectSubsection={
+                      editMode
+                        ? (subsectionId) => {
+                            // Handle subsection selection in edit mode
+                            setActiveSubsection(subsectionId);
+                          }
+                        : undefined
+                    }
                     selectedSubsectionId={activeSubsection}
                     editMode={editMode}
                   />
@@ -813,7 +854,9 @@ export const JournalDetailView: React.FC<JournalDetailViewProps> = ({
                             key={subsection.id}
                             subsection={subsection}
                             isActive={isActive}
-                            toggleSubsection={() => toggleSubsection(subsection.id)}
+                            toggleSubsection={() =>
+                              toggleSubsection(subsection.id)
+                            }
                             colors={colors}
                             index={index}
                           />
@@ -837,7 +880,8 @@ export const JournalDetailView: React.FC<JournalDetailViewProps> = ({
                         No sections yet
                       </h4>
                       <p className="text-muted-foreground max-w-md mx-auto mb-4">
-                        This journal doesn&apos;t have any sections added to it yet.
+                        This journal doesn&apos;t have any sections added to it
+                        yet.
                       </p>
                       {editMode && (
                         <Button
@@ -1002,11 +1046,11 @@ export const JournalDetailView: React.FC<JournalDetailViewProps> = ({
           setIsDeleting(true);
           try {
             await journalService.deleteJournal(journal.id);
-            toast.success("Journal deleted successfully");
+            toast.success('Journal deleted successfully');
             onClose(); // Close the detail view after deletion
           } catch (error) {
-            console.error("Error deleting journal:", error);
-            toast.error("Failed to delete journal. Please try again.");
+            console.error('Error deleting journal:', error);
+            toast.error('Failed to delete journal. Please try again.');
           } finally {
             setIsDeleting(false);
             setIsDeleteJournalDialogOpen(false);

@@ -18,13 +18,13 @@ import {
   PlusCircle,
   Save,
 } from 'lucide-react';
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import { getSubsectionTypeColors } from './colorscheme';
 import { JournalMetadataForm } from './journal-metadata-form';
 import { SubsectionDetail } from './subsection-detail';
 import { SubsectionForm } from './subsection-form';
 import { SubsectionList } from './subsection-list';
-import { getSubsectionTypeColors } from './colorscheme';
 
 interface JournalEditorProps {
   journal: JournalDetail;
@@ -583,7 +583,7 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
                 onRemoveSubsection={handleRemoveSubsection}
                 onAddSubsectionClick={handleCreateSubsection}
                 onReorderSubsections={handleReorderSubsections}
-                onSelectSubsection={handleSelectSubsection}
+                onSelectSubsection={handleEditSubsection}
                 selectedSubsectionId={selectedSubsectionId}
                 editMode={true}
               />

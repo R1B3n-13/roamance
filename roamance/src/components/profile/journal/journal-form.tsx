@@ -169,7 +169,9 @@ export const JournalForm: React.FC<JournalFormProps> = ({
     // Validate that title is not empty
     if (!formData.title || formData.title.trim() === '') {
       // Show an error message or toast notification
-      const titleInput = document.querySelector('input[name="title"]');
+      const titleInput = document.querySelector(
+        'input[name="title"]'
+      ) as HTMLInputElement;
       if (titleInput) {
         titleInput.focus();
         // Add shake animation to get user's attention
@@ -180,7 +182,9 @@ export const JournalForm: React.FC<JournalFormProps> = ({
       }
 
       // Add a red border to the title input to indicate error
-      document.querySelector('input[name="title"]')?.parentElement?.classList.add('ring-2', 'ring-destructive/50');
+      document
+        .querySelector('input[name="title"]')
+        ?.parentElement?.classList.add('ring-2', 'ring-destructive/50');
 
       // Create a small error message under the input
       const errorElement = document.createElement('p');
@@ -188,19 +192,25 @@ export const JournalForm: React.FC<JournalFormProps> = ({
       errorElement.textContent = 'Title is required';
 
       // Remove any existing error message first
-      const existingError = document.querySelector('input[name="title"]')?.parentElement?.nextElementSibling;
+      const existingError = document.querySelector('input[name="title"]')
+        ?.parentElement?.nextElementSibling;
       if (existingError?.classList.contains('text-destructive')) {
         existingError.remove();
       }
 
-      document.querySelector('input[name="title"]')?.parentElement?.after(errorElement);
+      document
+        .querySelector('input[name="title"]')
+        ?.parentElement?.after(errorElement);
 
       return; // Prevent form submission
     }
 
     // Remove any error styling if title is valid
-    document.querySelector('input[name="title"]')?.parentElement?.classList.remove('ring-2', 'ring-destructive/50');
-    const existingError = document.querySelector('input[name="title"]')?.parentElement?.nextElementSibling;
+    document
+      .querySelector('input[name="title"]')
+      ?.parentElement?.classList.remove('ring-2', 'ring-destructive/50');
+    const existingError = document.querySelector('input[name="title"]')
+      ?.parentElement?.nextElementSibling;
     if (existingError?.classList.contains('text-destructive')) {
       existingError.remove();
     }

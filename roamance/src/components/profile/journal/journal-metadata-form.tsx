@@ -1,41 +1,43 @@
+import { FileUploader } from '@/components/common/file-uploader';
 import { LocationPickerMap } from '@/components/maps/LocationPickerMap';
+import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { JournalCreateRequest } from '@/types/journal';
 import { CloudinaryUploadResult } from '@/service/cloudinary-service';
+import { JournalCreateRequest } from '@/types/journal';
 import {
-  Calendar,
-  ImageIcon,
-  MapPin,
-  Share2,
   Archive,
-  Star,
-  Info,
-  Camera,
-  Map,
-  ChevronDown,
-  X,
-  Globe,
-  Upload,
-  PlusCircle,
+  Calendar,
   Eye,
-  Settings2
+  Globe,
+  ImageIcon,
+  Info,
+  Map,
+  MapPin,
+  Settings2,
+  Share2,
+  Star,
+  X,
 } from 'lucide-react';
-import React, { useState } from 'react';
-import { cn } from '@/lib/utils';
-import { AnimatePresence, motion } from 'framer-motion';
 import Image from 'next/image';
-import { FileUploader } from '@/components/common/file-uploader';
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { toast } from 'sonner';
-import { Badge } from '@/components/ui/badge';
+import React, { useState } from 'react';
 
 interface JournalMetadataFormProps {
   formData: JournalCreateRequest;
-  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
+  onChange: (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => void;
   onLocationChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onCoverImageUpload: (result: CloudinaryUploadResult) => void;
 }
@@ -93,22 +95,18 @@ export const JournalMetadataForm: React.FC<JournalMetadataFormProps> = ({
             <div className="absolute bottom-0 left-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
               <div className="flex justify-between">
                 <FileUploader
-                  onUploadComplete={onCoverImageUpload}
-                  uploadPreset="journal_covers"
-                  buttonClassName="bg-white/90 hover:bg-white text-slate-800 h-8 text-xs px-2 gap-1"
-                  buttonContent={
-                    <>
-                      <Camera className="h-3.5 w-3.5" /> Change Photo
-                    </>
-                  }
+                  onUploadSuccess={onCoverImageUpload}
+                  height="h-48"
                 />
 
                 <Button
                   variant="destructive"
                   size="sm"
-                  onClick={() => onChange({
-                    target: { name: 'cover_image', value: '' }
-                  } as React.ChangeEvent<HTMLInputElement>)}
+                  onClick={() =>
+                    onChange({
+                      target: { name: 'cover_image', value: '' },
+                    } as React.ChangeEvent<HTMLInputElement>)
+                  }
                   className="h-8 text-xs px-2 gap-1 bg-red-500/90 hover:bg-red-600"
                 >
                   <X className="h-3.5 w-3.5" />
@@ -119,22 +117,9 @@ export const JournalMetadataForm: React.FC<JournalMetadataFormProps> = ({
           </div>
         ) : (
           <div className="flex items-center justify-center border border-dashed border-muted rounded-lg bg-muted/10 h-32">
-            <FileUploader
-              onUploadComplete={onCoverImageUpload}
-              uploadPreset="journal_covers"
-              buttonClassName="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white h-9 gap-1.5 shadow-sm hover:shadow-md transition-all duration-200"
-              buttonContent={
-                <>
-                  <Upload className="h-4 w-4" /> Upload Cover Image
-                </>
-              }
-            />
+            <FileUploader onUploadSuccess={onCoverImageUpload} height="h-48" />
           </div>
         )}
-
-        <p className="text-xs text-muted-foreground">
-          Upload a cover image to make your journal more visually appealing
-        </p>
       </div>
 
       {/* Title and Date */}
@@ -194,7 +179,8 @@ export const JournalMetadataForm: React.FC<JournalMetadataFormProps> = ({
           className="resize-y min-h-[100px] border-muted focus-visible:ring-blue-500/20 focus-visible:border-blue-500"
         />
         <p className="text-xs text-muted-foreground mt-1">
-          Tip: Add "Destination: [Name]" and "Travel Dates: [Dates]" at the start to highlight key information
+          Tip: Add &quot;Destination: [Name]&quot; and &quot;Travel Dates:
+          [Dates]&quot; at the start to highlight key information
         </p>
       </div>
 
@@ -220,10 +206,7 @@ export const JournalMetadataForm: React.FC<JournalMetadataFormProps> = ({
         {/* Coordinates Inputs */}
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label
-              htmlFor="latitude"
-              className="text-xs text-muted-foreground"
-            >
+            <Label htmlFor="latitude" className="text-xs text-muted-foreground">
               Latitude
             </Label>
             <Input
@@ -257,37 +240,41 @@ export const JournalMetadataForm: React.FC<JournalMetadataFormProps> = ({
 
         {/* Preview location indicator */}
         {formData.destination &&
-          (formData.destination.latitude !== 0 || formData.destination.longitude !== 0) && (
-          <div className="flex items-center justify-between mt-2 p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/40">
-            <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-full bg-blue-100 dark:bg-blue-800/60 flex items-center justify-center">
-                <MapPin className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-              </div>
-              <div>
-                <div className="text-sm font-medium text-blue-700 dark:text-blue-400">
-                  Location Set
+          (formData.destination.latitude !== 0 ||
+            formData.destination.longitude !== 0) && (
+            <div className="flex items-center justify-between mt-2 p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/40">
+              <div className="flex items-center gap-2">
+                <div className="h-8 w-8 rounded-full bg-blue-100 dark:bg-blue-800/60 flex items-center justify-center">
+                  <MapPin className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                 </div>
-                <div className="text-xs text-blue-600/80 dark:text-blue-500/80">
-                  {formData.destination.latitude.toFixed(6)}, {formData.destination.longitude.toFixed(6)}
+                <div>
+                  <div className="text-sm font-medium text-blue-700 dark:text-blue-400">
+                    Location Set
+                  </div>
+                  <div className="text-xs text-blue-600/80 dark:text-blue-500/80">
+                    {formData.destination.latitude.toFixed(6)},{' '}
+                    {formData.destination.longitude.toFixed(6)}
+                  </div>
                 </div>
               </div>
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onChange({
-                target: {
-                  name: 'destination',
-                  value: { latitude: 0, longitude: 0 }
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() =>
+                  onChange({
+                    target: {
+                      name: 'destination',
+                      value: { latitude: 0, longitude: 0 },
+                    },
+                  } as unknown as React.ChangeEvent<HTMLInputElement>)
                 }
-              } as any)}
-              className="h-8 px-2 text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-100 dark:hover:bg-blue-800/30"
-            >
-              <X className="h-3.5 w-3.5 mr-1" />
-              Clear
-            </Button>
-          </div>
-        )}
+                className="h-8 px-2 text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-100 dark:hover:bg-blue-800/30"
+              >
+                <X className="h-3.5 w-3.5 mr-1" />
+                Clear
+              </Button>
+            </div>
+          )}
       </div>
 
       {/* Journal Flags/Settings */}
@@ -310,7 +297,7 @@ export const JournalMetadataForm: React.FC<JournalMetadataFormProps> = ({
                     value: checked,
                     type: 'checkbox',
                     checked: checked as boolean,
-                  }
+                  },
                 } as React.ChangeEvent<HTMLInputElement>);
               }}
               className="h-5 w-5 mt-0.5 text-amber-500 border-muted data-[state=checked]:bg-amber-500 data-[state=checked]:border-amber-500"
@@ -341,7 +328,7 @@ export const JournalMetadataForm: React.FC<JournalMetadataFormProps> = ({
                     value: checked,
                     type: 'checkbox',
                     checked: checked as boolean,
-                  }
+                  },
                 } as React.ChangeEvent<HTMLInputElement>);
               }}
               className="h-5 w-5 mt-0.5 text-blue-500 border-muted data-[state=checked]:bg-blue-500 data-[state=checked]:border-blue-500"
@@ -372,7 +359,7 @@ export const JournalMetadataForm: React.FC<JournalMetadataFormProps> = ({
                     value: checked,
                     type: 'checkbox',
                     checked: checked as boolean,
-                  }
+                  },
                 } as React.ChangeEvent<HTMLInputElement>);
               }}
               className="h-5 w-5 mt-0.5 text-slate-500 border-muted data-[state=checked]:bg-slate-500 data-[state=checked]:border-slate-500"
@@ -414,8 +401,8 @@ export const JournalMetadataForm: React.FC<JournalMetadataFormProps> = ({
                   target: {
                     name: 'destination',
                     value: { latitude: lat, longitude: lng },
-                  }
-                } as any);
+                  },
+                } as unknown as React.ChangeEvent<HTMLInputElement>);
               }}
               height="400px"
             />
@@ -425,7 +412,8 @@ export const JournalMetadataForm: React.FC<JournalMetadataFormProps> = ({
             <div className="text-sm">
               <span className="text-muted-foreground">Selected: </span>
               <span className="font-medium">
-                {formData.destination.latitude.toFixed(6)}, {formData.destination.longitude.toFixed(6)}
+                {formData.destination.latitude.toFixed(6)},{' '}
+                {formData.destination.longitude.toFixed(6)}
               </span>
             </div>
             <Button

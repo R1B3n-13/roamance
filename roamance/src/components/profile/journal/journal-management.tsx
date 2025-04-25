@@ -1,19 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { journalService } from '@/service/journal-service';
@@ -22,28 +9,26 @@ import {
   JournalCreateRequest,
   JournalDetail,
 } from '@/types/journal';
-import { AnimatePresence, motion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
   AlertCircle,
   Archive,
   BookOpen,
   Edit2,
-  Filter,
   PlusCircle,
   Search,
   Share2,
   Star,
-  X
+  X,
 } from 'lucide-react';
 import React, { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { ConfirmDialog } from '../../common/confirm-dialog';
+import { EmptyState } from './empty-state';
 import { JournalCard } from './journal-card';
 import { JournalCardSkeleton } from './journal-card-skeleton';
 import { JournalDetailView } from './journal-detail-view';
 import { JournalForm } from './journal-form';
-import { JourneyPathAnimation } from './journey-path-animation';
-import { EmptyState } from './empty-state';
 import { NoResultsState } from './no-results-state';
 
 export const JournalManagement: React.FC = () => {
@@ -248,15 +233,11 @@ export const JournalManagement: React.FC = () => {
       });
       setJournals((prevJournals) =>
         prevJournals.map((j) =>
-          j.id === journal.id
-            ? { ...j, is_favorite: !journal.is_favorite }
-            : j
+          j.id === journal.id ? { ...j, is_favorite: !journal.is_favorite } : j
         )
       );
       toast.success(
-        journal.is_favorite
-          ? 'Removed from favorites'
-          : 'Added to favorites'
+        journal.is_favorite ? 'Removed from favorites' : 'Added to favorites'
       );
     } catch (err: unknown) {
       console.error('Error updating favorite status:', err);
@@ -276,15 +257,11 @@ export const JournalManagement: React.FC = () => {
       });
       setJournals((prevJournals) =>
         prevJournals.map((j) =>
-          j.id === journal.id
-            ? { ...j, is_archived: !journal.is_archived }
-            : j
+          j.id === journal.id ? { ...j, is_archived: !journal.is_archived } : j
         )
       );
       toast.success(
-        journal.is_archived
-          ? 'Journal unarchived'
-          : 'Journal archived'
+        journal.is_archived ? 'Journal unarchived' : 'Journal archived'
       );
     } catch (err: unknown) {
       console.error('Error updating archive status:', err);
@@ -314,7 +291,9 @@ export const JournalManagement: React.FC = () => {
       const matchesArchived = !filters.archived || journal.is_archived;
       const matchesShared = !filters.shared || journal.is_shared;
 
-      return matchesSearch && matchesFavorite && matchesArchived && matchesShared;
+      return (
+        matchesSearch && matchesFavorite && matchesArchived && matchesShared
+      );
     });
   }, [journals, searchQuery, filters]);
 
@@ -331,7 +310,7 @@ export const JournalManagement: React.FC = () => {
 
       {/* Search and Filters */}
       <motion.div variants={fadeInUp}>
-        <Card className="border-muted/40 bg-gradient-to-b from-background to-background/95 backdrop-blur-sm shadow-md overflow-hidden">
+        <Card className="border-muted/40 bg-gradient-to-b from-background to-background/95 backdrop-blur-sm shadow-md overflow-hidden pt-0">
           <div className="relative px-6">
             {/* Decorative accent line */}
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-violet-500 opacity-80" />
@@ -362,13 +341,13 @@ export const JournalManagement: React.FC = () => {
 
               <div className="flex gap-2 overflow-x-auto pb-2 flex-wrap md:justify-end">
                 <Button
-                  variant={filters.favorites ? "default" : "outline"}
+                  variant={filters.favorites ? 'default' : 'outline'}
                   size="sm"
                   className={cn(
-                    "rounded-full flex items-center gap-1.5 transition-all duration-300 shadow-sm",
+                    'rounded-full flex items-center gap-1.5 transition-all duration-300 shadow-sm',
                     filters.favorites
-                      ? "bg-amber-500 text-white font-medium"
-                      : "border-amber-200 hover:bg-amber-50/30 text-amber-700 hover:text-amber-800 dark:border-amber-800 dark:hover:bg-amber-900/10 dark:text-amber-400 dark:hover:text-amber-300 font-medium"
+                      ? 'bg-amber-500 text-white font-medium'
+                      : 'border-amber-200 hover:bg-amber-50/30 text-amber-700 hover:text-amber-800 dark:border-amber-800 dark:hover:bg-amber-900/10 dark:text-amber-400 dark:hover:text-amber-300 font-medium'
                   )}
                   onClick={() => handleFilterToggle('favorites')}
                 >
@@ -377,13 +356,13 @@ export const JournalManagement: React.FC = () => {
                 </Button>
 
                 <Button
-                  variant={filters.archived ? "default" : "outline"}
+                  variant={filters.archived ? 'default' : 'outline'}
                   size="sm"
                   className={cn(
-                    "rounded-full flex items-center gap-1.5 transition-all duration-300 shadow-sm",
+                    'rounded-full flex items-center gap-1.5 transition-all duration-300 shadow-sm',
                     filters.archived
-                      ? "bg-slate-500 text-white font-medium"
-                      : "border-slate-200 hover:bg-slate-50/30 text-slate-700 hover:text-slate-800 dark:border-slate-800 dark:hover:bg-slate-900/10 dark:text-slate-400 dark:hover:text-slate-300 font-medium"
+                      ? 'bg-slate-500 text-white font-medium'
+                      : 'border-slate-200 hover:bg-slate-50/30 text-slate-700 hover:text-slate-800 dark:border-slate-800 dark:hover:bg-slate-900/10 dark:text-slate-400 dark:hover:text-slate-300 font-medium'
                   )}
                   onClick={() => handleFilterToggle('archived')}
                 >
@@ -392,13 +371,13 @@ export const JournalManagement: React.FC = () => {
                 </Button>
 
                 <Button
-                  variant={filters.shared ? "default" : "outline"}
+                  variant={filters.shared ? 'default' : 'outline'}
                   size="sm"
                   className={cn(
-                    "rounded-full flex items-center gap-1.5 transition-all duration-300 shadow-sm",
+                    'rounded-full flex items-center gap-1.5 transition-all duration-300 shadow-sm',
                     filters.shared
-                      ? "bg-blue-500 text-white font-medium"
-                      : "border-blue-200 hover:bg-blue-50/30 text-blue-700 hover:text-blue-800 dark:border-blue-800 dark:hover:bg-blue-900/10 dark:text-blue-400 dark:hover:text-blue-300 font-medium"
+                      ? 'bg-blue-500 text-white font-medium'
+                      : 'border-blue-200 hover:bg-blue-50/30 text-blue-700 hover:text-blue-800 dark:border-blue-800 dark:hover:bg-blue-900/10 dark:text-blue-400 dark:hover:text-blue-300 font-medium'
                   )}
                   onClick={() => handleFilterToggle('shared')}
                 >
@@ -418,7 +397,7 @@ export const JournalManagement: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center justify-between">
               <p className="text-muted-foreground text-sm flex items-center gap-1.5">
                 <BookOpen className="h-3.5 w-3.5 text-indigo-500" />
                 <span>Showing {filteredJournals.length} journals</span>
@@ -446,7 +425,9 @@ export const JournalManagement: React.FC = () => {
         >
           <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
           <div>
-            <h3 className="font-medium text-destructive mb-1">Error loading journals</h3>
+            <h3 className="font-medium text-destructive mb-1">
+              Error loading journals
+            </h3>
             <p className="text-sm text-destructive/90">{error}</p>
             <Button
               variant="outline"
@@ -549,7 +530,11 @@ export const JournalManagement: React.FC = () => {
       <ConfirmDialog
         isOpen={isConfirmDeleteOpen}
         title="Delete Journal"
-        message={journalToDelete ? `Are you sure you want to delete "${journalToDelete.title}"? This action cannot be undone.` : ''}
+        message={
+          journalToDelete
+            ? `Are you sure you want to delete "${journalToDelete.title}"? This action cannot be undone.`
+            : ''
+        }
         confirmLabel="Delete"
         cancelLabel="Cancel"
         isLoading={isDeleting}

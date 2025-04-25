@@ -6,7 +6,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger
+  DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
@@ -15,6 +15,7 @@ import {
   SubsectionDetailResponseDto,
   SubsectionType,
 } from '@/types/subsection';
+import { formatRelativeTime } from '@/utils/format';
 import MDEditor from '@uiw/react-md-editor';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
@@ -24,7 +25,6 @@ import {
   ChevronDown,
   Clock,
   Edit,
-  Eye,
   ListChecks,
   Loader2,
   MapPin,
@@ -35,11 +35,9 @@ import {
   Save,
   StickyNote,
   Trash2,
-  X,
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import React, { useCallback, useEffect, useState } from 'react';
-import { formatRelativeTime } from '@/utils/format';
 
 interface SubsectionDetailProps {
   subsection: SubsectionDetailResponseDto;
@@ -54,7 +52,9 @@ interface SubsectionDetailProps {
     gradient: string;
   };
   index: number;
-  onUpdateSubsection?: (subsection: SubsectionDetailResponseDto) => Promise<void>;
+  onUpdateSubsection?: (
+    subsection: SubsectionDetailResponseDto
+  ) => Promise<void>;
   editMode?: boolean; // Add editMode prop
 }
 
@@ -65,7 +65,6 @@ export const SubsectionDetail: React.FC<SubsectionDetailProps> = ({
   isActive,
   toggleSubsection,
   colors,
-  index,
   onUpdateSubsection,
   editMode = false, // Default to false
 }) => {
@@ -80,7 +79,9 @@ export const SubsectionDetail: React.FC<SubsectionDetailProps> = ({
   );
   const [newChecklistItem, setNewChecklistItem] = useState('');
   const [isSaving, setIsSaving] = useState(false);
-  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const [saveStatus, setSaveStatus] = useState<
+    'idle' | 'saving' | 'saved' | 'error'
+  >('idle');
 
   // Reset edited values when subsection changes
   useEffect(() => {
@@ -90,44 +91,47 @@ export const SubsectionDetail: React.FC<SubsectionDetailProps> = ({
     setEditingField(null);
   }, [subsection]);
 
-  const handleSave = useCallback(async (field: EditableField) => {
-    if (!onUpdateSubsection) return;
+  const handleSave = useCallback(
+    async (field: EditableField) => {
+      if (!onUpdateSubsection) return;
 
-    setIsSaving(true);
-    setSaveStatus('saving');
+      setIsSaving(true);
+      setSaveStatus('saving');
 
-    try {
-      const updatedSubsection = { ...subsection };
+      try {
+        const updatedSubsection = { ...subsection };
 
-      if (field === 'title') {
-        updatedSubsection.title = editedTitle;
-      } else if (field === 'note') {
-        updatedSubsection.note = editedNote;
-      } else if (field === 'checklist') {
-        updatedSubsection.checklists = editedChecklist;
+        if (field === 'title') {
+          updatedSubsection.title = editedTitle;
+        } else if (field === 'note') {
+          updatedSubsection.note = editedNote;
+        } else if (field === 'checklist') {
+          updatedSubsection.checklists = editedChecklist;
+        }
+
+        await onUpdateSubsection(updatedSubsection);
+        setSaveStatus('saved');
+
+        // Reset status after 2 seconds
+        setTimeout(() => {
+          setSaveStatus('idle');
+        }, 2000);
+
+        setEditingField(null);
+      } catch (error) {
+        console.error('Error saving subsection:', error);
+        setSaveStatus('error');
+
+        // Reset status after 2 seconds
+        setTimeout(() => {
+          setSaveStatus('idle');
+        }, 2000);
+      } finally {
+        setIsSaving(false);
       }
-
-      await onUpdateSubsection(updatedSubsection);
-      setSaveStatus('saved');
-
-      // Reset status after 2 seconds
-      setTimeout(() => {
-        setSaveStatus('idle');
-      }, 2000);
-
-      setEditingField(null);
-    } catch (error) {
-      console.error('Error saving subsection:', error);
-      setSaveStatus('error');
-
-      // Reset status after 2 seconds
-      setTimeout(() => {
-        setSaveStatus('idle');
-      }, 2000);
-    } finally {
-      setIsSaving(false);
-    }
-  }, [subsection, editedTitle, editedNote, editedChecklist, onUpdateSubsection]);
+    },
+    [subsection, editedTitle, editedNote, editedChecklist, onUpdateSubsection]
+  );
 
   const handleToggleCheckItem = async (index: number) => {
     const newChecklist = [...editedChecklist];
@@ -142,7 +146,7 @@ export const SubsectionDetail: React.FC<SubsectionDetailProps> = ({
     if (editingField !== 'checklist' && onUpdateSubsection) {
       const updatedSubsection = {
         ...subsection,
-        checklists: newChecklist
+        checklists: newChecklist,
       };
 
       setSaveStatus('saving');
@@ -195,8 +199,20 @@ export const SubsectionDetail: React.FC<SubsectionDetailProps> = ({
             className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 text-xs font-medium"
           >
             <svg className="animate-spin h-3 w-3" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+                fill="none"
+              ></circle>
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              ></path>
             </svg>
             Saving changes...
           </motion.span>
@@ -234,11 +250,11 @@ export const SubsectionDetail: React.FC<SubsectionDetailProps> = ({
   const getIcon = () => {
     switch (subsection.type) {
       case SubsectionType.ACTIVITY:
-        return <Activity className={cn("h-5 w-5", colors.icon)} />;
+        return <Activity className={cn('h-5 w-5', colors.icon)} />;
       case SubsectionType.ROUTE:
-        return <Route className={cn("h-5 w-5", colors.icon)} />;
+        return <Route className={cn('h-5 w-5', colors.icon)} />;
       default:
-        return <MapPin className={cn("h-5 w-5", colors.icon)} />;
+        return <MapPin className={cn('h-5 w-5', colors.icon)} />;
     }
   };
 
@@ -247,37 +263,41 @@ export const SubsectionDetail: React.FC<SubsectionDetailProps> = ({
       <motion.div
         layout
         className={cn(
-          "border rounded-xl overflow-hidden transition-all duration-300",
-          isActive ? "shadow-md" : "shadow-sm hover:shadow-md",
+          'border rounded-xl overflow-hidden transition-all duration-300',
+          isActive ? 'shadow-md' : 'shadow-sm hover:shadow-md',
           colors.border,
-          isActive ? "bg-white dark:bg-slate-900" : "bg-white/80 dark:bg-slate-900/80"
+          isActive
+            ? 'bg-white dark:bg-slate-900'
+            : 'bg-white/80 dark:bg-slate-900/80'
         )}
       >
         {/* Header */}
         <div
           onClick={toggleSubsection}
           className={cn(
-            "p-4 flex items-center justify-between cursor-pointer",
-            isActive ? "border-b border-muted/40" : "",
-            "hover:bg-muted/5 transition-colors duration-200"
+            'p-4 flex items-center justify-between cursor-pointer',
+            isActive ? 'border-b border-muted/40' : '',
+            'hover:bg-muted/5 transition-colors duration-200'
           )}
         >
           <div className="flex items-center gap-3">
-            <div className={cn(
-              "w-10 h-10 rounded-full flex items-center justify-center",
-              colors.bg
-            )}>
+            <div
+              className={cn(
+                'w-10 h-10 rounded-full flex items-center justify-center',
+                colors.bg
+              )}
+            >
               {getIcon()}
             </div>
 
             <div>
               <h3 className="font-medium text-foreground">
-                {subsection.title || "Untitled Section"}
+                {subsection.title || 'Untitled Section'}
               </h3>
               <div className="flex items-center gap-2 mt-0.5">
                 <Badge
                   variant="outline"
-                  className={cn("text-xs font-medium", colors.badge)}
+                  className={cn('text-xs font-medium', colors.badge)}
                 >
                   {subsection.type}
                 </Badge>
@@ -286,7 +306,9 @@ export const SubsectionDetail: React.FC<SubsectionDetailProps> = ({
                 {subsection.audit && (
                   <span className="text-xs text-muted-foreground flex items-center gap-1">
                     <Clock className="h-3 w-3" />
-                    {formatRelativeTime(new Date(subsection.audit.last_modified_at))}
+                    {formatRelativeTime(
+                      new Date(subsection.audit.last_modified_at)
+                    )}
                   </span>
                 )}
               </div>
@@ -300,8 +322,8 @@ export const SubsectionDetail: React.FC<SubsectionDetailProps> = ({
               variant="ghost"
               size="icon"
               className={cn(
-                "h-8 w-8 rounded-full transition-transform duration-300",
-                isActive && "rotate-180"
+                'h-8 w-8 rounded-full transition-transform duration-300',
+                isActive && 'rotate-180'
               )}
               onClick={(e) => {
                 e.stopPropagation();
@@ -382,7 +404,7 @@ export const SubsectionDetail: React.FC<SubsectionDetailProps> = ({
                     />
                   ) : (
                     <p className="text-foreground rounded-md py-2 px-3 bg-muted/30">
-                      {subsection.title || "Untitled Section"}
+                      {subsection.title || 'Untitled Section'}
                     </p>
                   )}
                 </div>
@@ -437,15 +459,15 @@ export const SubsectionDetail: React.FC<SubsectionDetailProps> = ({
                   </div>
 
                   {editingField === 'note' ? (
-                    <div data-color-mode={isDarkMode ? "dark" : "light"}>
+                    <div data-color-mode={isDarkMode ? 'dark' : 'light'}>
                       <MDEditor
                         value={editedNote}
                         onChange={(value) => setEditedNote(value || '')}
                         preview="edit"
                         height={200}
                         className={cn(
-                          "border border-blue-200 dark:border-blue-800 rounded-md overflow-hidden",
-                          isDarkMode ? "dark-md-editor" : ""
+                          'border border-blue-200 dark:border-blue-800 rounded-md overflow-hidden',
+                          isDarkMode ? 'dark-md-editor' : ''
                         )}
                       />
                     </div>
@@ -454,30 +476,36 @@ export const SubsectionDetail: React.FC<SubsectionDetailProps> = ({
                       {subsection.note ? (
                         <MDEditor.Markdown source={subsection.note} />
                       ) : (
-                        <p className="text-muted-foreground italic">No notes added yet.</p>
+                        <p className="text-muted-foreground italic">
+                          No notes added yet.
+                        </p>
                       )}
                     </div>
                   )}
                 </div>
 
                 {/* Location map (if available) */}
-                {subsection.location && subsection.location.latitude !== 0 && subsection.location.longitude !== 0 && (
-                  <div className="space-y-2">
-                    <h4 className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
-                      <MapPin className="h-3.5 w-3.5" />
-                      Location
-                    </h4>
-                    <div className="rounded-md overflow-hidden border border-muted">
-                      <LocationMap
-                        location={subsection.location}
-                        type="single"
-                        height="200px"
-                        className="w-full"
-                        zoom={14}
-                      />
+                {(subsection.type === SubsectionType.ACTIVITY ||
+                  subsection.type === SubsectionType.SIGHTSEEING) &&
+                  subsection.location &&
+                  subsection.location.latitude !== 0 &&
+                  subsection.location.longitude !== 0 && (
+                    <div className="space-y-2">
+                      <h4 className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
+                        <MapPin className="h-3.5 w-3.5" />
+                        Location
+                      </h4>
+                      <div className="rounded-md overflow-hidden border border-muted">
+                        <LocationMap
+                          location={subsection.location}
+                          type="single"
+                          height="200px"
+                          className="w-full"
+                          zoom={14}
+                        />
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
                 {/* Checklist section */}
                 <div className="space-y-2">
@@ -533,7 +561,10 @@ export const SubsectionDetail: React.FC<SubsectionDetailProps> = ({
                       <div>
                         <div className="divide-y divide-muted">
                           {editedChecklist.map((item, index) => (
-                            <div key={index} className="flex items-center p-3 gap-2 bg-background">
+                            <div
+                              key={index}
+                              className="flex items-center p-3 gap-2 bg-background"
+                            >
                               <Checkbox
                                 checked={item.completed}
                                 onCheckedChange={() => {
@@ -576,7 +607,9 @@ export const SubsectionDetail: React.FC<SubsectionDetailProps> = ({
                             <Input
                               placeholder="Add new item"
                               value={newChecklistItem}
-                              onChange={(e) => setNewChecklistItem(e.target.value)}
+                              onChange={(e) =>
+                                setNewChecklistItem(e.target.value)
+                              }
                               onKeyDown={(e) => {
                                 if (e.key === 'Enter') {
                                   handleAddChecklistItem();
@@ -597,31 +630,34 @@ export const SubsectionDetail: React.FC<SubsectionDetailProps> = ({
                       </div>
                     ) : (
                       <div className="divide-y divide-muted/50 bg-muted/10">
-                        {subsection.checklists && subsection.checklists.length > 0 ? (
+                        {subsection.checklists &&
+                        subsection.checklists.length > 0 ? (
                           subsection.checklists.map((item, index) => (
                             <div
                               key={index}
                               className={cn(
-                                "flex items-center p-3 gap-3",
-                                item.completed ? "opacity-80" : "opacity-100"
+                                'flex items-center p-3 gap-3',
+                                item.completed ? 'opacity-80' : 'opacity-100'
                               )}
                             >
                               <Checkbox
                                 checked={item.completed}
-                                onCheckedChange={() => handleToggleCheckItem(index)}
+                                onCheckedChange={() =>
+                                  handleToggleCheckItem(index)
+                                }
                                 className={cn(
-                                  "h-4 w-4",
+                                  'h-4 w-4',
                                   item.completed
-                                    ? "data-[state=checked]:bg-green-500 data-[state=checked]:border-green-500"
-                                    : "data-[state=checked]:bg-blue-500 data-[state=checked]:border-blue-500"
+                                    ? 'data-[state=checked]:bg-green-500 data-[state=checked]:border-green-500'
+                                    : 'data-[state=checked]:bg-blue-500 data-[state=checked]:border-blue-500'
                                 )}
                               />
                               <span
                                 className={cn(
-                                  "text-sm",
+                                  'text-sm',
                                   item.completed
-                                    ? "line-through text-muted-foreground"
-                                    : "text-foreground"
+                                    ? 'line-through text-muted-foreground'
+                                    : 'text-foreground'
                                 )}
                               >
                                 {item.title}
@@ -640,56 +676,72 @@ export const SubsectionDetail: React.FC<SubsectionDetailProps> = ({
                 </div>
 
                 {/* Additional information (routes, etc.) */}
-                {subsection.type === SubsectionType.ROUTE && subsection.waypoints && subsection.waypoints.length > 0 && (
-                  <div className="space-y-2">
-                    <h4 className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
-                      <Route className="h-3.5 w-3.5" />
-                      Route Details
-                    </h4>
+                {subsection.type === SubsectionType.ROUTE &&
+                  subsection.waypoints &&
+                  subsection.waypoints.length > 0 && (
+                    <div className="space-y-2">
+                      <h4 className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
+                        <Route className="h-3.5 w-3.5" />
+                        Route Details
+                      </h4>
 
-                    <div className="rounded-md border border-muted overflow-hidden">
-                      <div className="grid grid-cols-2 gap-4 p-3 bg-muted/10">
-                        <div className="flex items-center gap-2">
-                          <Clock className="h-4 w-4 text-muted-foreground" />
-                          <div>
-                            <p className="text-xs text-muted-foreground">Total Time</p>
-                            <p className="font-medium">
-                              {subsection.total_time ? `${subsection.total_time} minutes` : 'Not specified'}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Route className="h-4 w-4 text-muted-foreground" />
-                          <div>
-                            <p className="text-xs text-muted-foreground">Total Distance</p>
-                            <p className="font-medium">
-                              {subsection.total_distance ? `${subsection.total_distance} km` : 'Not specified'}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="p-3 border-t border-muted">
-                        <h5 className="text-xs font-medium text-muted-foreground mb-2">Waypoints</h5>
-                        <div className="space-y-2">
-                          {subsection.waypoints.map((waypoint, index) => (
-                            <div key={index} className="bg-muted/20 p-2 rounded text-sm flex justify-between">
-                              <div className="flex items-center gap-2">
-                                <div className="h-5 w-5 rounded-full bg-muted/60 flex items-center justify-center text-xs font-medium">
-                                  {index + 1}
-                                </div>
-                                <span>Waypoint {index + 1}</span>
-                              </div>
-                              <div className="text-muted-foreground text-xs">
-                                {waypoint.latitude.toFixed(6)}, {waypoint.longitude.toFixed(6)}
-                              </div>
+                      <div className="rounded-md border border-muted overflow-hidden">
+                        <div className="grid grid-cols-2 gap-4 p-3 bg-muted/10">
+                          <div className="flex items-center gap-2">
+                            <Clock className="h-4 w-4 text-muted-foreground" />
+                            <div>
+                              <p className="text-xs text-muted-foreground">
+                                Total Time
+                              </p>
+                              <p className="font-medium">
+                                {subsection.total_time
+                                  ? `${subsection.total_time} minutes`
+                                  : 'Not specified'}
+                              </p>
                             </div>
-                          ))}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Route className="h-4 w-4 text-muted-foreground" />
+                            <div>
+                              <p className="text-xs text-muted-foreground">
+                                Total Distance
+                              </p>
+                              <p className="font-medium">
+                                {subsection.total_distance
+                                  ? `${subsection.total_distance} km`
+                                  : 'Not specified'}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="p-3 border-t border-muted">
+                          <h5 className="text-xs font-medium text-muted-foreground mb-2">
+                            Waypoints
+                          </h5>
+                          <div className="space-y-2">
+                            {subsection.waypoints.map((waypoint, index) => (
+                              <div
+                                key={index}
+                                className="bg-muted/20 p-2 rounded text-sm flex justify-between"
+                              >
+                                <div className="flex items-center gap-2">
+                                  <div className="h-5 w-5 rounded-full bg-muted/60 flex items-center justify-center text-xs font-medium">
+                                    {index + 1}
+                                  </div>
+                                  <span>Waypoint {index + 1}</span>
+                                </div>
+                                <div className="text-muted-foreground text-xs">
+                                  {waypoint.latitude.toFixed(6)},{' '}
+                                  {waypoint.longitude.toFixed(6)}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
                 {/* Action buttons */}
                 {editMode && (
