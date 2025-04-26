@@ -56,7 +56,7 @@ export const PostCard = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
-      className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 border border-gray-100/80 dark:border-gray-700/30 flex flex-col md:flex-row"
+      className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 border border-gray-100/80 dark:border-gray-700/30 flex flex-col md:flex-row"
     >
       {/* Post Media - Left Side (only shown if media exists) */}
       {hasMedia && (
@@ -66,10 +66,13 @@ export const PostCard = ({
         />
       )}
 
-      {/* Right Side Content Container - Full width when no media */}
-      <div className="flex flex-col flex-grow overflow-hidden">
+      {/* Content Container with glass morphism effect */}
+      <div className="flex flex-col flex-grow overflow-hidden relative">
+        {/* Decorative gradient accent */}
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 via-indigo-500 to-pink-500 opacity-80"></div>
+
         {/* Post Header */}
-        <div className="flex items-center justify-between p-5">
+        <div className="flex items-center justify-between p-5 pb-3">
           <PostHeader
             user={post.user}
             timestamp={post.audit.created_at}
@@ -114,13 +117,13 @@ export const PostCard = ({
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   onClick={() => setShowTidbitPopover(true)}
-                  className="py-2 px-3 w-full rounded-lg bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 text-sm flex items-center justify-center gap-2 font-medium"
+                  className="py-2 px-3 w-full rounded-lg bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20 text-amber-600 dark:text-amber-400 text-sm flex items-center justify-center gap-2 font-medium border border-amber-100/50 dark:border-amber-800/30 hover:shadow-md transition-all"
                 >
                   <Star className="h-4 w-4" />
                   View Travel Tidbits
                 </motion.button>
               </PopoverTrigger>
-              <PopoverContent className="w-80 p-4 bg-white/95 dark:bg-gray-800/95 backdrop-blur-lg shadow-xl border border-purple-100 dark:border-purple-800/30">
+              <PopoverContent className="w-80 p-4 bg-white/95 dark:bg-gray-800/95 backdrop-blur-lg shadow-xl border border-purple-100 dark:border-purple-800/30 rounded-xl">
                 <div>
                   <h3 className="text-base font-semibold text-gray-900 dark:text-white flex items-center mb-2">
                     <Star className="h-4 w-4 mr-2 text-amber-500" fill="currentColor" />

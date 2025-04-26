@@ -34,8 +34,14 @@ export const SocialFeed = ({
       setError(null);
       const response = await PostService.getAllPosts();
       if (response.success) {
-        // @ts-ignore - Types mismatch, but we know the data structure
-        setPosts(response.data);
+        setPosts(
+          response.data.map((dto) => ({
+            ...dto,
+            liked_by: [],
+            saved_by: [],
+            comments: []
+          }))
+        );
       } else {
         setError('Failed to fetch posts');
       }
@@ -52,8 +58,14 @@ export const SocialFeed = ({
       setRefreshing(true);
       const response = await PostService.getAllPosts();
       if (response.success) {
-        // @ts-ignore - Types mismatch, but we know the data structure
-        setPosts(response.data);
+        setPosts(
+          response.data.map((dto) => ({
+            ...dto,
+            liked_by: [],
+            saved_by: [],
+            comments: []
+          }))
+        );
         toast.success('Feed refreshed!');
       } else {
         toast.error('Failed to refresh feed');

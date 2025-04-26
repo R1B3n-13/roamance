@@ -1,9 +1,10 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { MediaIndicator } from '../ui/shared-components';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 
 export interface PostMediaProps {
   imagePaths: string[];
@@ -48,25 +49,47 @@ export const PostMedia = ({
         className="aspect-[16/10] md:aspect-square h-full cursor-pointer"
         onClick={() => onMediaClick?.(currentIndex)}
       >
-        {currentIndex < imagePaths.length ? (
-          <Image
-            src={imagePaths[currentIndex]}
-            alt={`Post image ${currentIndex + 1}`}
-            fill
-            style={{ objectFit: 'cover' }}
-            className="transition-all duration-700 group-hover:scale-[1.03]"
-          />
-        ) : (
-          <video
-            src={videoPaths[currentIndex - imagePaths.length]}
-            className="w-full h-full object-cover"
-            controls
-            preload="metadata"
-          />
-        )}
+        <AnimatePresence mode="wait">
+          {currentIndex < imagePaths.length ? (
+            <motion.div
+              key={`image-${currentIndex}`}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="relative h-full w-full"
+            >
+              <Image
+                src={imagePaths[currentIndex]}
+                alt={`Post image ${currentIndex + 1}`}
+                fill
+                style={{ objectFit: 'cover' }}
+                className="transition-all duration-700 group-hover:scale-[1.03]"
+              />
+              {/* Glassmorphism overlay gradient */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-60"></div>
+            </motion.div>
+          ) : (
+            <motion.div
+              key={`video-${currentIndex}`}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="h-full w-full"
+            >
+              <video
+                src={videoPaths[currentIndex - imagePaths.length]}
+                className="w-full h-full object-cover"
+                controls
+                preload="metadata"
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
-      {/* Navigation arrows */}
+      {/* Navigation arrows with improved design */}
       {totalMedia > 1 && (
         <div className="absolute inset-x-0 top-1/2 transform -translate-y-1/2 flex items-center justify-between px-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
           <NavigationButton onClick={handlePrev} direction="prev" />
@@ -74,13 +97,13 @@ export const PostMedia = ({
         </div>
       )}
 
-      {/* Media indicators (dots) */}
+      {/* Media indicators (dots) with glass effect */}
       {totalMedia > 1 && (
-        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2 bg-black/40 backdrop-blur-xl rounded-full px-3 py-2 transition-opacity duration-300">
+        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2 bg-black/40 backdrop-blur-xl rounded-full px-3 py-2 transition-opacity duration-300 shadow-md">
           {Array.from({ length: totalMedia }).map((_, index) => (
             <motion.button
               key={index}
-              whileHover={{ scale: 1.2 }}
+              whileHover={{ scale: 1.3 }}
               onClick={() => setCurrentIndex(index)}
               className={`rounded-full transition-all duration-300 ${
                 currentIndex === index
@@ -93,7 +116,7 @@ export const PostMedia = ({
         </div>
       )}
 
-      {/* Media type indicators */}
+      {/* Media type indicators with glass effect */}
       <div className="absolute top-4 right-4 flex space-x-2">
         {imagePaths.length > 0 && (
           <MediaIndicator type="image" count={imagePaths.length} />
@@ -113,27 +136,15 @@ interface NavigationButtonProps {
 
 const NavigationButton = ({ onClick, direction }: NavigationButtonProps) => (
   <motion.button
-    whileHover={{ scale: 1.1 }}
+    whileHover={{ scale: 1.1, backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
     whileTap={{ scale: 0.9 }}
     onClick={onClick}
-    className="h-10 w-10 rounded-full bg-black/30 backdrop-blur-xl flex items-center justify-center text-white border border-white/20 shadow-lg transform transition-transform"
+    className="h-10 w-10 rounded-full bg-black/30 backdrop-blur-xl flex items-center justify-center text-white border border-white/20 shadow-lg transform transition-all"
   >
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      {direction === 'prev' ? (
-        <polyline points="15 18 9 12 15 6"></polyline>
-      ) : (
-        <polyline points="9 18 15 12 9 6"></polyline>
-      )}
-    </svg>
+    {direction === 'prev' ? (
+      <ArrowLeft size={18} strokeWidth={2.5} />
+    ) : (
+      <ArrowRight size={18} strokeWidth={2.5} />
+    )}
   </motion.button>
 );

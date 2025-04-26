@@ -7,16 +7,18 @@ import { Flame, Sparkles, TrendingUp, Users } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
-/* -------------------------------- User Avatar ------------------------------- */
+/* -------------------------------- User Avatar with Improved UI ------------------------------- */
 
 export interface UserAvatarProps {
   user?: User;
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
   href?: string;
   className?: string;
   imageUrl?: string;
   alt?: string;
   showBorder?: boolean;
+  showHoverEffect?: boolean;
+  isOnline?: boolean;
 }
 
 export const UserAvatar = ({
@@ -27,17 +29,31 @@ export const UserAvatar = ({
   imageUrl,
   alt,
   showBorder = true,
+  showHoverEffect = true,
+  isOnline = false,
 }: UserAvatarProps) => {
   const sizeClasses = {
+    xs: 'h-6 w-6',
     sm: 'h-8 w-8',
     md: 'h-10 w-10',
     lg: 'h-12 w-12',
+    xl: 'h-16 w-16',
+  };
+
+  // Online indicator positioning based on avatar size
+  const onlineIndicatorClasses = {
+    xs: 'h-1.5 w-1.5 -right-0.5 -bottom-0.5',
+    sm: 'h-2 w-2 -right-0.5 -bottom-0.5',
+    md: 'h-2.5 w-2.5 -right-0.5 -bottom-0.5',
+    lg: 'h-3 w-3 -right-0.5 -bottom-0.5',
+    xl: 'h-3.5 w-3.5 right-0 bottom-0',
   };
 
   const avatarImage = (
     <div
       className={cn(
-        'relative rounded-full overflow-hidden flex-shrink-0 transition-transform duration-500 group-hover:scale-110',
+        'relative rounded-full overflow-hidden flex-shrink-0 transition-all duration-300',
+        showHoverEffect && 'group-hover:scale-105',
         showBorder &&
           'ring-2 ring-purple-200 dark:ring-purple-700 ring-offset-2 ring-offset-white dark:ring-offset-gray-800',
         sizeClasses[size],
@@ -53,7 +69,14 @@ export const UserAvatar = ({
         style={{ objectFit: 'cover' }}
         className="rounded-full"
       />
-      <div className="absolute inset-0 bg-gradient-to-tr from-black/10 to-black/0 group-hover:from-purple-500/20 group-hover:to-blue-500/10 transition-colors duration-500 rounded-full"></div>
+      <div className="absolute inset-0 bg-gradient-to-tr from-black/10 to-black/0 group-hover:from-purple-500/20 group-hover:to-blue-500/10 transition-colors duration-300 rounded-full"></div>
+
+      {isOnline && (
+        <span className={cn(
+          'absolute block rounded-full bg-green-500 dark:bg-green-400 ring-2 ring-white dark:ring-gray-800',
+          onlineIndicatorClasses[size]
+        )}></span>
+      )}
     </div>
   );
 
@@ -68,29 +91,52 @@ export const UserAvatar = ({
   return avatarImage;
 };
 
-/* ----------------------------- Trending Icons ------------------------------ */
+/* ----------------------------- Trending Icons with Enhanced Animation ------------------------------ */
 
 export interface TrendingIconProps {
   type: 'topic' | 'hashtag' | 'location' | 'user';
   className?: string;
+  animate?: boolean;
 }
 
-export const TrendingIcon = ({ type, className }: TrendingIconProps) => {
-  switch (type) {
-    case 'topic':
-      return <Sparkles className={cn('h-4 w-4 text-purple-500', className)} />;
-    case 'hashtag':
-      return <TrendingUp className={cn('h-4 w-4 text-blue-500', className)} />;
-    case 'location':
-      return <Flame className={cn('h-4 w-4 text-amber-500', className)} />;
-    case 'user':
-      return <Users className={cn('h-4 w-4 text-green-500', className)} />;
-    default:
-      return null;
+export const TrendingIcon = ({ type, className, animate = false }: TrendingIconProps) => {
+  const icon = () => {
+    switch (type) {
+      case 'topic':
+        return <Sparkles className={cn('h-4 w-4 text-purple-500', className)} />;
+      case 'hashtag':
+        return <TrendingUp className={cn('h-4 w-4 text-blue-500', className)} />;
+      case 'location':
+        return <Flame className={cn('h-4 w-4 text-amber-500', className)} />;
+      case 'user':
+        return <Users className={cn('h-4 w-4 text-green-500', className)} />;
+      default:
+        return null;
+    }
+  };
+
+  if (animate) {
+    return (
+      <motion.div
+        animate={{
+          scale: [1, 1.1, 1],
+          rotate: [0, 3, 0],
+        }}
+        transition={{
+          repeat: Infinity,
+          repeatType: 'reverse',
+          duration: 2,
+        }}
+      >
+        {icon()}
+      </motion.div>
+    );
   }
+
+  return icon();
 };
 
-/* ---------------------------- Media Indicators ---------------------------- */
+/* ---------------------------- Media Indicators with Glassmorphism ---------------------------- */
 
 export interface MediaIndicatorProps {
   count: number;
@@ -134,8 +180,8 @@ export const MediaIndicator = ({ count, type }: MediaIndicatorProps) => {
 
   return (
     <motion.div
-      whileHover={{ scale: 1.05 }}
-      className="px-3 py-1.5 bg-black/40 backdrop-blur-xl rounded-lg text-white text-xs font-medium flex items-center shadow-lg"
+      whileHover={{ scale: 1.05, y: -2 }}
+      className="px-3 py-1.5 bg-black/40 backdrop-blur-xl rounded-lg text-white text-xs font-medium flex items-center shadow-lg border border-white/5"
     >
       <Icon className="h-3.5 w-3.5 mr-1.5" />
       <span>{count}</span>
@@ -143,7 +189,7 @@ export const MediaIndicator = ({ count, type }: MediaIndicatorProps) => {
   );
 };
 
-/* ----------------------------- Action Button ------------------------------ */
+/* ----------------------------- Action Button with Improved Animation ------------------------------ */
 
 export interface ActionButtonProps {
   icon: React.ReactNode;
@@ -152,6 +198,7 @@ export interface ActionButtonProps {
   count?: number;
   onClick?: () => void;
   label?: string;
+  showBg?: boolean;
 }
 
 export const ActionButton = ({
@@ -161,14 +208,14 @@ export const ActionButton = ({
   count,
   onClick,
   label,
+  showBg = false,
 }: ActionButtonProps) => {
   const colorClasses = {
     pink: 'text-pink-500 dark:text-pink-400 fill-pink-500 dark:fill-pink-400',
     blue: 'text-blue-500 dark:text-blue-400 fill-blue-500 dark:fill-blue-400',
-    purple:
-      'text-purple-500 dark:text-purple-400 fill-purple-500 dark:fill-purple-400',
-    amber:
-      'text-amber-500 dark:text-amber-400 fill-amber-500 dark:fill-amber-400',
+    purple: 'text-purple-500 dark:text-purple-400 fill-purple-500 dark:fill-purple-400',
+    amber: 'text-amber-500 dark:text-amber-400 fill-amber-500 dark:fill-amber-400',
+    green: 'text-green-500 dark:text-green-400 fill-green-500 dark:fill-green-400',
   };
 
   const hoverColor = {
@@ -176,6 +223,15 @@ export const ActionButton = ({
     blue: 'group-hover:text-blue-500 dark:group-hover:text-blue-400',
     purple: 'group-hover:text-purple-500 dark:group-hover:text-purple-400',
     amber: 'group-hover:text-amber-500 dark:group-hover:text-amber-400',
+    green: 'group-hover:text-green-500 dark:group-hover:text-green-400',
+  };
+
+  const bgColor = {
+    pink: 'bg-pink-50 dark:bg-pink-900/10',
+    blue: 'bg-blue-50 dark:bg-blue-900/10',
+    purple: 'bg-purple-50 dark:bg-purple-900/10',
+    amber: 'bg-amber-50 dark:bg-amber-900/10',
+    green: 'bg-green-50 dark:bg-green-900/10',
   };
 
   return (
@@ -183,7 +239,11 @@ export const ActionButton = ({
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
       onClick={onClick}
-      className="group flex items-center relative"
+      className={cn(
+        "group flex items-center relative rounded-full transition-all",
+        showBg && (active ? bgColor[activeColor as keyof typeof bgColor] : "hover:bg-gray-100 dark:hover:bg-gray-800/70"),
+        showBg && "px-3 py-1.5"
+      )}
     >
       <div
         className={cn(
@@ -207,7 +267,7 @@ export const ActionButton = ({
             !active && hoverColor[activeColor as keyof typeof hoverColor]
           )}
         >
-          {count}
+          {count > 0 ? count.toLocaleString() : ''}
         </span>
       )}
 
@@ -224,15 +284,22 @@ export const ActionButton = ({
           {label}
         </span>
       )}
+
+      {active && showBg && (
+        <motion.span
+          layoutId={`active-pill-${activeColor}`}
+          className="absolute inset-0 rounded-full opacity-10"
+        />
+      )}
     </motion.button>
   );
 };
 
-/* ----------------------------- Loading States ----------------------------- */
+/* ----------------------------- Loading States with Enhanced UI ----------------------------- */
 
 export const PostCardSkeleton = () => {
   return (
-    <div className="animate-pulse space-y-4 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-3xl overflow-hidden shadow-sm border border-gray-100/80 dark:border-gray-700/30 p-5">
+    <div className="animate-pulse space-y-4 bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-3xl overflow-hidden shadow-sm border border-gray-100/80 dark:border-gray-700/30 p-5">
       <div className="flex items-center space-x-3">
         <div className="h-12 w-12 rounded-full bg-gray-200 dark:bg-gray-700"></div>
         <div className="flex-1 space-y-2">
@@ -258,5 +325,22 @@ export const TrendingItemSkeleton = () => {
         <div className="h-3 w-1/2 bg-gray-200 dark:bg-gray-700 rounded"></div>
       </div>
     </div>
+  );
+};
+
+export const UserAvatarSkeleton = ({ size = 'md' }: { size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' }) => {
+  const sizeClasses = {
+    xs: 'h-6 w-6',
+    sm: 'h-8 w-8',
+    md: 'h-10 w-10',
+    lg: 'h-12 w-12',
+    xl: 'h-16 w-16',
+  };
+
+  return (
+    <div className={cn(
+      'rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse',
+      sizeClasses[size]
+    )} />
   );
 };

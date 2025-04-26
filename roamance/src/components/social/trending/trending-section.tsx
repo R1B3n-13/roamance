@@ -3,9 +3,10 @@
 import { cn } from '@/lib/utils';
 import { User } from '@/types';
 import { TrendingUp, Users } from 'lucide-react';
-import { TrendingItemSkeleton } from '../ui/shared-components';
 import { TrendingItem, TrendingItemProps } from './trending-item';
 import { TrendingUser } from './trending-user';
+import { TrendingItemSkeleton } from '../ui/shared-components';
+import { motion } from 'framer-motion';
 
 export interface TrendingSectionProps {
   trendingItems: TrendingItemProps[];
@@ -27,8 +28,18 @@ export const TrendingSection = ({
   }
 
   return (
-    <div className="bg-white dark:bg-gray-800/90 backdrop-blur-md rounded-2xl overflow-hidden shadow-md border border-gray-100 dark:border-gray-700/50">
-      <TrendingSectionHeader title="Trending Now" icon={<TrendingUp className="h-5 w-5 mr-2 text-indigo-500 dark:text-indigo-400" />} />
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-md rounded-2xl overflow-hidden shadow-lg border border-gray-100 dark:border-gray-700/50 transition-all hover:shadow-xl"
+    >
+      {/* Decorative top gradient line */}
+      <div className="h-1 w-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"></div>
+
+      <TrendingSectionHeader
+        title="Trending Now"
+        icon={<TrendingUp className="h-5 w-5 mr-2 text-indigo-500 dark:text-indigo-400" />}
+      />
 
       <div className="divide-y divide-gray-50 dark:divide-gray-700/30 max-h-[300px] overflow-y-auto scrollbar-hide">
         {trendingItems.map(item => (
@@ -41,15 +52,15 @@ export const TrendingSection = ({
       </div>
 
       {trendingUsers && trendingUsers.length > 0 && (
-        <>
+        <div className="mt-1">
           <TrendingSectionHeader
             title="Travelers to Follow"
             icon={<Users className="h-4 w-4 mr-2 text-indigo-500 dark:text-indigo-400" />}
-            className="mt-2"
+            className="pt-2"
             bordered
           />
 
-          <div className="p-3 flex flex-wrap gap-2 max-h-[150px] overflow-y-auto scrollbar-hide">
+          <div className="p-4 grid grid-cols-3 gap-1 max-h-[150px] overflow-y-auto scrollbar-hide">
             {trendingUsers.slice(0, 6).map(user => (
               <TrendingUser
                 key={user.id}
@@ -58,9 +69,9 @@ export const TrendingSection = ({
               />
             ))}
           </div>
-        </>
+        </div>
       )}
-    </div>
+    </motion.div>
   );
 };
 
@@ -73,7 +84,7 @@ interface TrendingSectionHeaderProps {
 
 const TrendingSectionHeader = ({ title, icon, className, bordered = false }: TrendingSectionHeaderProps) => (
   <div className={cn(
-    "p-4",
+    "p-4 flex items-center",
     bordered && "border-t border-b border-gray-100 dark:border-gray-700/30",
     className
   )}>
@@ -84,12 +95,14 @@ const TrendingSectionHeader = ({ title, icon, className, bordered = false }: Tre
   </div>
 );
 
-const TrendingSectionSkeleton = () => (
-  <div className="bg-white dark:bg-gray-800/90 backdrop-blur-md rounded-2xl overflow-hidden shadow-md border border-gray-100 dark:border-gray-700/50">
-    <div className="p-4 border-b border-gray-100 dark:border-gray-700/30">
-      <div className="h-6 w-1/2 bg-gray-200 dark:bg-gray-700 rounded"></div>
+// Skeleton loader for the trending section
+export const TrendingSectionSkeleton = () => (
+  <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-md rounded-2xl overflow-hidden shadow-md border border-gray-100 dark:border-gray-700/50">
+    <div className="h-1 w-full bg-gradient-to-r from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600"></div>
+    <div className="p-4 flex items-center">
+      <div className="h-5 w-5 mr-2 bg-gray-200 dark:bg-gray-700 rounded"></div>
+      <div className="h-5 w-32 bg-gray-200 dark:bg-gray-700 rounded"></div>
     </div>
-
     <div className="divide-y divide-gray-50 dark:divide-gray-700/30">
       {Array(4).fill(0).map((_, i) => (
         <TrendingItemSkeleton key={i} />

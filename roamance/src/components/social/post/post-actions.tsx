@@ -1,10 +1,9 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Heart, MessageCircle, Share2 } from 'lucide-react';
+import { Heart, MessageCircle, Share2, Bookmark } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
-import { ActionButton } from '../ui/shared-components';
 
 export interface PostActionsProps {
   likesCount: number;
@@ -43,9 +42,9 @@ export const PostActions = ({
   };
 
   return (
-    <div className="px-5 py-4 border-t border-gray-100/80 dark:border-gray-700/30 flex items-center justify-between mt-auto">
+    <div className="px-5 py-4 border-t border-gray-100/50 dark:border-gray-700/30 flex items-center justify-between mt-auto">
       <div className="flex items-center space-x-8">
-        {/* Like button with animation */}
+        {/* Like button with improved animation */}
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
@@ -80,51 +79,46 @@ export const PostActions = ({
                 : 'text-gray-500 dark:text-gray-400 group-hover:text-pink-500 dark:group-hover:text-pink-400'
             )}
           >
-            {likesCount}
+            {likesCount > 0 ? likesCount.toLocaleString() : ''}
           </span>
         </motion.button>
 
-        {/* Comment button */}
-        <ActionButton
-          icon={<MessageCircle className="h-6 w-6 mr-2" />}
-          count={commentsCount}
+        {/* Comment button with subtle hover effect */}
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
           onClick={onComment}
-          activeColor="blue"
-        />
+          className="group flex items-center relative"
+        >
+          <MessageCircle className={cn(
+            'h-6 w-6 mr-2 transition-colors',
+            'text-gray-400 dark:text-gray-500 group-hover:text-blue-500 dark:group-hover:text-blue-400'
+          )} />
+          <span className="text-sm font-medium text-gray-500 dark:text-gray-400 group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-colors">
+            {commentsCount > 0 ? commentsCount.toLocaleString() : ''}
+          </span>
+        </motion.button>
       </div>
 
       <div className="flex items-center space-x-5">
-        {/* Save button */}
+        {/* Save button with animation */}
         <motion.button
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
           onClick={onSave}
-          className="group flex items-center relative"
+          className="group relative"
         >
-          <div className="relative">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill={isSaved ? 'currentColor' : 'none'}
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className={cn(
-                'h-5 w-5 transition-all duration-300',
-                isSaved
-                  ? 'text-purple-500 dark:text-purple-400'
-                  : 'text-gray-400 dark:text-gray-500 group-hover:text-purple-500 dark:group-hover:text-purple-400'
-              )}
-            >
-              <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z" />
-            </svg>
-          </div>
+          <Bookmark
+            className={cn(
+              'h-5 w-5 transition-all duration-300',
+              isSaved
+                ? 'fill-purple-500 text-purple-500 dark:fill-purple-400 dark:text-purple-400'
+                : 'text-gray-400 dark:text-gray-500 group-hover:text-purple-500 dark:group-hover:text-purple-400'
+            )}
+          />
         </motion.button>
 
-        {/* Share button */}
+        {/* Share button with tooltip */}
         <motion.button
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
@@ -133,11 +127,16 @@ export const PostActions = ({
         >
           <Share2 className="h-5 w-5 text-gray-400 dark:text-gray-500 group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-colors" />
 
-          {/* Share tooltip */}
+          {/* Enhanced share tooltip */}
           {shareTooltip && (
-            <div className="absolute -top-12 right-0 bg-black/80 text-white text-xs px-3 py-1.5 rounded-lg backdrop-blur-sm animate-fade-in-out z-10">
+            <motion.div
+              initial={{ opacity: 0, y: 5 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              className="absolute -top-12 right-0 bg-black/80 text-white text-xs px-3 py-1.5 rounded-lg backdrop-blur-sm z-10 shadow-md"
+            >
               Link copied to clipboard!
-            </div>
+            </motion.div>
           )}
         </motion.button>
       </div>
