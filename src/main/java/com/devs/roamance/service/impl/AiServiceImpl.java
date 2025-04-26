@@ -16,6 +16,7 @@ import com.devs.roamance.dto.response.ai.EmbeddingResponse;
 import com.devs.roamance.dto.response.ai.PostIdListRagSearchDto;
 import com.devs.roamance.dto.response.ai.TidbitsAndSafetyDto;
 import com.devs.roamance.exception.AiGenerationFailedException;
+import com.devs.roamance.pojo.ItineraryPojo;
 import com.devs.roamance.service.AiService;
 import com.devs.roamance.util.GeminiModelUtil;
 import com.devs.roamance.util.NomicImageEmbeddingUtil;
@@ -37,6 +38,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -45,6 +47,8 @@ import reactor.core.publisher.Sinks;
 @Service
 @Slf4j
 public class AiServiceImpl implements AiService {
+
+  private final ModelMapper modelMapper;
 
   @Value("${application.gemini.api-key}")
   private String geminiApiKey;
@@ -63,12 +67,14 @@ public class AiServiceImpl implements AiService {
       RestUtil restUtil,
       GeminiModelUtil geminiModelUtil,
       RagUtil ragUtil,
-      NomicImageEmbeddingUtil nomicImageEmbeddingUtil) {
+      NomicImageEmbeddingUtil nomicImageEmbeddingUtil,
+      ModelMapper modelMapper) {
 
     this.restUtil = restUtil;
     this.geminiModelUtil = geminiModelUtil;
     this.ragUtil = ragUtil;
     this.nomicImageEmbeddingUtil = nomicImageEmbeddingUtil;
+    this.modelMapper = modelMapper;
   }
 
   private interface RagAssistant {
@@ -82,7 +88,7 @@ public class AiServiceImpl implements AiService {
     @dev.langchain4j.service.SystemMessage(AiSystemInstruction.FOR_ITINERARY_GENERATION)
     @dev.langchain4j.service.UserMessage(
         "Create a travel itinerary for {{location}} starting on {{startDate}} for {{numberOfDays}} days with a {{budgetLevel}} budget for {{numberOfPeople}} people.")
-    AiPoweredItineraryDto generateItinerary(
+    ItineraryPojo generateItinerary(
         @V("location") String location,
         @V("startDate") LocalDate startDate,
         @V("numberOfDays") Integer numberOfDays,
@@ -317,13 +323,16 @@ public class AiServiceImpl implements AiService {
     ItineraryAiService itineraryAiService =
         AiServices.builder(ItineraryAiService.class).chatLanguageModel(model).build();
 
-    AiPoweredItineraryDto aiPoweredItineraryDto =
+    ItineraryPojo itineraryPojo =
         itineraryAiService.generateItinerary(
             requestDto.getLocation(),
             requestDto.getStartDate(),
             requestDto.getNumberOfDays(),
             requestDto.getBudgetLevel(),
             requestDto.getNumberOfPeople());
+
+    AiPoweredItineraryDto aiPoweredItineraryDto =
+        modelMapper.map(itineraryPojo, AiPoweredItineraryDto.class);
 
     return CompletableFuture.completedFuture(
         new AiPoweredItineraryResponseDto(

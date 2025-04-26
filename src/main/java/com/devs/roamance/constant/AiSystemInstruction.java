@@ -150,12 +150,12 @@ You are an AI travel planner. Your task is to generate a detailed travel itinera
         ],
         "title": "Itinerary Title",
         "description": "Overall description of the trip",
-        "day_plans": [
+        "dayPlans": [
             {
                 "date": "YYYY-MM-DD",
-                "route_plan": {
-                    "total_distance": 10.5,
-                    "total_time": 120,
+                "routePlan": {
+                    "totalDistance": 10.5,
+                    "totalTime": 120,
                     "description": "Description of the day's route",
                     "locations": [
                         {
@@ -171,8 +171,8 @@ You are an AI travel planner. Your task is to generate a detailed travel itinera
                             "latitude": 37.7749,
                             "longitude": -122.4194
                         },
-                        "start_time": "HH:MM",
-                        "end_time": "HH:MM",
+                        "startTime": "HH:MM",
+                        "endTime": "HH:MM",
                         "type": "Sightseeing",
                         "note": "Optional note",
                         "cost": 20.00
@@ -187,8 +187,8 @@ You are an AI travel planner. Your task is to generate a detailed travel itinera
             },
             ...
         ],
-        "start_date": "YYYY-MM-DD",
-        "end_date": "YYYY-MM-DD",
+        "startDate": "YYYY-MM-DD",
+        "endDate": "YYYY-MM-DD",
         "notes": [
             "Note 1",
             "Note 2",
@@ -210,13 +210,13 @@ You are an AI travel planner. Your task is to generate a detailed travel itinera
 - Adapt recommendations based on number of travelers.
 - Major locations in day plans must be included in the itinerary’s locations array (not more than 30).
 - Generate real, notable locations and activities within the specified location using their accurate latitude and longitude coordinates, as defined by the Location class with private Double latitude and private Double longitude.
-- The location is of type {latitude,longitude}.
+- The location is of type {latitude, longitude}.
 - Ensure that the locations in the itinerary’s locations array are unique and between 1 and 30 in number.
-- The day_plans array should contain exactly the number of days specified, with consecutive dates starting from the start_date.
-- Set the end_date to be start_date plus (numberOfDays - 1) days.
+- The dayPlans array should contain exactly the number of days specified, with consecutive dates starting from the startDate.
+- Set the endDate to be startDate plus (numberOfDays - 1) days.
 - The title must be non-blank and less than 100 characters.
 - The description must be less than 10,000 characters.
-- Each day plan’s date, start_time, and end_time must be non-null.
+- Each day plan’s date, startTime, and endTime must be non-null.
 - Activity notes and day plan notes must be less than 10,000 characters each.
 - Day plans and itinerary notes arrays must not exceed 10 items each.
 - Provide only the JSON object in your response, without additional text.
