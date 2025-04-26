@@ -2,7 +2,7 @@
 
 import { PostCard } from './post-card';
 import { useState, useEffect } from 'react';
-import { Post, User } from '@/types/social';
+import { Post, User } from '@/types';
 import { AnimatePresence, motion } from 'framer-motion';
 import { PostService } from '@/service/social-service';
 import { toast } from 'sonner';
@@ -13,7 +13,10 @@ interface SocialFeedProps {
   initialPosts?: Post[];
 }
 
-export const SocialFeed = ({ currentUser, initialPosts = [] }: SocialFeedProps) => {
+export const SocialFeed = ({
+  currentUser,
+  initialPosts = [],
+}: SocialFeedProps) => {
   const [posts, setPosts] = useState<Post[]>(initialPosts);
   const [isLoading, setIsLoading] = useState(!initialPosts.length);
   const [error, setError] = useState<string | null>(null);
@@ -66,21 +69,25 @@ export const SocialFeed = ({ currentUser, initialPosts = [] }: SocialFeedProps) 
   const handleLike = async (postId: string) => {
     try {
       // Check if user already liked the post
-      const post = posts.find(p => p.id === postId);
-      const isLiked = post?.liked_by?.some(user => user.id === currentUser?.id);
+      const post = posts.find((p) => p.id === postId);
+      const isLiked = post?.liked_by?.some(
+        (user) => user.id === currentUser?.id
+      );
 
       await PostService.likePost(postId);
 
       // Optimistic update
-      setPosts(prev =>
-        prev.map(post =>
+      setPosts((prev) =>
+        prev.map((post) =>
           post.id === postId
             ? {
                 ...post,
-                likes_count: isLiked ? post.likes_count - 1 : post.likes_count + 1,
+                likes_count: isLiked
+                  ? post.likes_count - 1
+                  : post.likes_count + 1,
                 liked_by: isLiked
-                  ? post.liked_by.filter(user => user.id !== currentUser?.id)
-                  : [...(post.liked_by || []), currentUser!]
+                  ? post.liked_by.filter((user) => user.id !== currentUser?.id)
+                  : [...(post.liked_by || []), currentUser!],
               }
             : post
         )
@@ -96,20 +103,22 @@ export const SocialFeed = ({ currentUser, initialPosts = [] }: SocialFeedProps) 
   const handleSave = async (postId: string) => {
     try {
       // Check if user already saved the post
-      const post = posts.find(p => p.id === postId);
-      const isSaved = post?.saved_by?.some(user => user.id === currentUser?.id);
+      const post = posts.find((p) => p.id === postId);
+      const isSaved = post?.saved_by?.some(
+        (user) => user.id === currentUser?.id
+      );
 
       await PostService.savePost(postId);
 
       // Optimistic update
-      setPosts(prev =>
-        prev.map(post =>
+      setPosts((prev) =>
+        prev.map((post) =>
           post.id === postId
             ? {
                 ...post,
                 saved_by: isSaved
-                  ? post.saved_by.filter(user => user.id !== currentUser?.id)
-                  : [...(post.saved_by || []), currentUser!]
+                  ? post.saved_by.filter((user) => user.id !== currentUser?.id)
+                  : [...(post.saved_by || []), currentUser!],
               }
             : post
         )
@@ -125,7 +134,11 @@ export const SocialFeed = ({ currentUser, initialPosts = [] }: SocialFeedProps) 
   const handleDeletePost = async (postId: string) => {
     try {
       // Show confirmation toast before deleting
-      if (!confirm('Are you sure you want to delete this post? This action cannot be undone.')) {
+      if (
+        !confirm(
+          'Are you sure you want to delete this post? This action cannot be undone.'
+        )
+      ) {
         return;
       }
 
@@ -133,7 +146,7 @@ export const SocialFeed = ({ currentUser, initialPosts = [] }: SocialFeedProps) 
 
       if (response.success) {
         // Remove post from state
-        setPosts(prev => prev.filter(post => post.id !== postId));
+        setPosts((prev) => prev.filter((post) => post.id !== postId));
         toast.success('Post deleted successfully!');
       } else {
         toast.error('Failed to delete post. Please try again.');
@@ -180,7 +193,9 @@ export const SocialFeed = ({ currentUser, initialPosts = [] }: SocialFeedProps) 
       {/* Error message */}
       {error && (
         <div className="p-6 mb-8 rounded-2xl bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-950/20 dark:to-pink-950/20 border border-red-100 dark:border-red-800/30 text-center">
-          <p className="text-red-600 dark:text-red-400 mb-2 font-medium">{error}</p>
+          <p className="text-red-600 dark:text-red-400 mb-2 font-medium">
+            {error}
+          </p>
           <button
             onClick={fetchPosts}
             className="px-4 py-2 bg-white dark:bg-gray-800 rounded-full text-sm font-medium text-red-600 dark:text-red-400 shadow-sm hover:shadow-md transition-all"
@@ -215,9 +230,12 @@ export const SocialFeed = ({ currentUser, initialPosts = [] }: SocialFeedProps) 
           <div className="inline-flex justify-center items-center w-20 h-20 rounded-full bg-white dark:bg-gray-800 shadow-md mb-6">
             <Sparkles className="h-10 w-10 text-purple-500 dark:text-purple-400" />
           </div>
-          <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-3">Share Your Journey</h3>
+          <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-3">
+            Share Your Journey
+          </h3>
           <p className="text-gray-600 dark:text-gray-400 max-w-md mx-auto mb-6">
-            Be the first to share your travel moments and inspire fellow adventurers around the world.
+            Be the first to share your travel moments and inspire fellow
+            adventurers around the world.
           </p>
           <button className="px-6 py-3 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-medium shadow-md hover:shadow-lg transition-all">
             Create Your First Post
@@ -235,7 +253,7 @@ export const SocialFeed = ({ currentUser, initialPosts = [] }: SocialFeedProps) 
                 transition={{
                   duration: 0.5,
                   ease: [0.23, 1, 0.32, 1],
-                  delay: index * 0.1
+                  delay: index * 0.1,
                 }}
               >
                 <PostCard

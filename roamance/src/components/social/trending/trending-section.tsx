@@ -30,7 +30,7 @@ export const TrendingSection = ({
     <div className="bg-white dark:bg-gray-800/90 backdrop-blur-md rounded-2xl overflow-hidden shadow-md border border-gray-100 dark:border-gray-700/50">
       <TrendingSectionHeader title="Trending Now" icon={<TrendingUp className="h-5 w-5 mr-2 text-indigo-500 dark:text-indigo-400" />} />
 
-      <div className="divide-y divide-gray-50 dark:divide-gray-700/30">
+      <div className="divide-y divide-gray-50 dark:divide-gray-700/30 max-h-[300px] overflow-y-auto scrollbar-hide">
         {trendingItems.map(item => (
           <TrendingItem
             key={item.id}
@@ -49,7 +49,7 @@ export const TrendingSection = ({
             bordered
           />
 
-          <div className="p-3 flex flex-wrap gap-2">
+          <div className="p-3 flex flex-wrap gap-2 max-h-[150px] overflow-y-auto scrollbar-hide">
             {trendingUsers.slice(0, 6).map(user => (
               <TrendingUser
                 key={user.id}

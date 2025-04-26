@@ -2,8 +2,8 @@ import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   /* config options here */
-  output: 'export',
-  basePath: '/devs',
+  // output: 'export',
+  // basePath: '/devs',
   images: {
     remotePatterns: [
       {
@@ -21,6 +21,12 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'res.cloudinary.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'ichef.bbci.co.uk',
         port: '',
         pathname: '/**',
       },

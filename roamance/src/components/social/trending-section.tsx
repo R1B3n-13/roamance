@@ -1,8 +1,7 @@
-import { User } from '@/types/social';
+import { User } from '@/types';
 import { motion } from 'framer-motion';
 import { Flame, Sparkles, TrendingUp, Users } from 'lucide-react';
 import Image from 'next/image';
-import { cn } from '@/lib/utils';
 
 interface TrendingItemProps {
   id: string;
@@ -66,7 +65,10 @@ const TrendingItem = ({ title, imageSrc, count, type }: TrendingItemProps) => {
   );
 };
 
-export const TrendingSection = ({ trendingItems, trendingUsers = [] }: TrendingSectionProps) => {
+export const TrendingSection = ({
+  trendingItems,
+  trendingUsers = [],
+}: TrendingSectionProps) => {
   return (
     <div className="bg-white dark:bg-gray-800/90 backdrop-blur-md rounded-2xl overflow-hidden shadow-md border border-gray-100 dark:border-gray-700/50">
       <div className="p-4 border-b border-gray-100 dark:border-gray-700/30">
@@ -77,7 +79,7 @@ export const TrendingSection = ({ trendingItems, trendingUsers = [] }: TrendingS
       </div>
 
       <div className="divide-y divide-gray-50 dark:divide-gray-700/30">
-        {trendingItems.map(item => (
+        {trendingItems.map((item) => (
           <TrendingItem key={item.id} {...item} />
         ))}
       </div>
@@ -92,21 +94,23 @@ export const TrendingSection = ({ trendingItems, trendingUsers = [] }: TrendingS
           </div>
 
           <div className="p-3 flex flex-wrap gap-2">
-            {trendingUsers.slice(0, 6).map(user => (
+            {trendingUsers.slice(0, 6).map((user) => (
               <div
                 key={user.id}
                 className="flex flex-col items-center gap-1 p-2 cursor-pointer group"
               >
                 <div className="relative h-14 w-14 rounded-full overflow-hidden border-2 border-purple-100 dark:border-purple-800/30 group-hover:border-purple-300 dark:group-hover:border-purple-700 transition-colors">
                   <Image
-                    src={user.profile_image_url || '/images/roamance-logo-no-text.png'}
-                    alt={user.username || user.full_name || 'User'}
+                    src={
+                      user.profile_image || '/images/roamance-logo-no-text.png'
+                    }
+                    alt={user.name || user.email || 'User'}
                     fill
                     style={{ objectFit: 'cover' }}
                   />
                 </div>
                 <span className="text-xs font-medium text-gray-700 dark:text-gray-300 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors text-center truncate max-w-[60px]">
-                  {user.username || user.full_name}
+                  {user.name || user.email}
                 </span>
               </div>
             ))}

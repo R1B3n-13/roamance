@@ -1,4 +1,4 @@
-import { Comment, User } from '@/types/social';
+import { Comment, User } from '@/types';
 import { MoreHorizontal, ThumbsUp } from 'lucide-react';
 import Image from 'next/image';
 import { useState } from 'react';
@@ -11,7 +11,7 @@ interface CommentCardProps {
   onReply?: (commentId: string) => void;
 }
 
-export const CommentCard = ({ comment,  onLike, onReply }: CommentCardProps) => {
+export const CommentCard = ({ comment, onLike, onReply }: CommentCardProps) => {
   const [isLiked, setIsLiked] = useState(false);
 
   const handleLike = () => {
@@ -23,7 +23,10 @@ export const CommentCard = ({ comment,  onLike, onReply }: CommentCardProps) => 
     <div className="flex gap-3 group animate-in fade-in">
       <div className="relative h-8 w-8 rounded-full overflow-hidden flex-shrink-0">
         <Image
-          src={comment.user.profile_image_url || '/images/roamance-logo-no-text.png'}
+          src={
+            comment.user.profile_image_url ||
+            '/images/roamance-logo-no-text.png'
+          }
           alt={comment.user.full_name || 'User'}
           fill
           style={{ objectFit: 'cover' }}
@@ -74,11 +77,18 @@ export const CommentCard = ({ comment,  onLike, onReply }: CommentCardProps) => 
           <button
             onClick={handleLike}
             className={cn(
-              "flex items-center gap-1 hover:text-purple-600 dark:hover:text-purple-400 transition-colors",
-              isLiked ? "text-purple-600 dark:text-purple-400" : "text-gray-500 dark:text-gray-400"
+              'flex items-center gap-1 hover:text-purple-600 dark:hover:text-purple-400 transition-colors',
+              isLiked
+                ? 'text-purple-600 dark:text-purple-400'
+                : 'text-gray-500 dark:text-gray-400'
             )}
           >
-            <ThumbsUp className={cn("h-3.5 w-3.5", isLiked ? "fill-purple-600 dark:fill-purple-400" : "")} />
+            <ThumbsUp
+              className={cn(
+                'h-3.5 w-3.5',
+                isLiked ? 'fill-purple-600 dark:fill-purple-400' : ''
+              )}
+            />
             <span>Like</span>
           </button>
 
@@ -94,7 +104,7 @@ export const CommentCard = ({ comment,  onLike, onReply }: CommentCardProps) => 
               month: 'short',
               day: 'numeric',
               hour: '2-digit',
-              minute: '2-digit'
+              minute: '2-digit',
             })}
           </span>
         </div>
