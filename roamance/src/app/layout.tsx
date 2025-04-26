@@ -1,3 +1,4 @@
+import { FeedProvider } from '@/context/FeedContext';
 import { ThemeProvider } from '@/components/common/theme-provider';
 import { Toaster } from '@/components/ui/sonner';
 import type { Metadata } from 'next';
@@ -22,23 +23,19 @@ export const metadata: Metadata = {
     'travel, adventure, destinations, cultural experience, travel plans, world exploration',
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} min-h-screen antialiased`}
-      >
+      <body className={`${geistSans.variable} ${geistMono.variable} min-h-screen antialiased`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange
         >
-          {children}
+          <FeedProvider>
+            {children}
+          </FeedProvider>
         </ThemeProvider>
         <Toaster />
       </body>

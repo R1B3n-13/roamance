@@ -9,6 +9,7 @@ import { Sparkles, Loader2, RefreshCw } from 'lucide-react';
 import { PostCard } from '../post/post-card';
 import { EmptyFeed } from './empty-feed';
 import { FeedSkeleton } from './feed-skeleton';
+import { useFeedContext } from '@/context/FeedContext';
 
 export interface SocialFeedProps {
   currentUser?: User;
@@ -16,6 +17,7 @@ export interface SocialFeedProps {
 }
 
 export const SocialFeed = ({ currentUser, initialPosts = [] }: SocialFeedProps) => {
+  const { postCreated } = useFeedContext();
   const [posts, setPosts] = useState<Post[]>(initialPosts);
   const [isLoading, setIsLoading] = useState(!initialPosts.length);
   const [error, setError] = useState<string | null>(null);
@@ -26,6 +28,12 @@ export const SocialFeed = ({ currentUser, initialPosts = [] }: SocialFeedProps) 
       fetchPosts();
     }
   }, [initialPosts]);
+
+  useEffect(() => {
+    if (postCreated) {
+      fetchPosts();
+    }
+  }, [postCreated]);
 
   const fetchPosts = async () => {
     try {

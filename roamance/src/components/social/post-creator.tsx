@@ -18,6 +18,7 @@ import Image from 'next/image';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from '@/components/ui/dialog'
+import { useFeedContext } from '@/context/FeedContext';
 
 interface PostCreatorProps {
   currentUser?: User;
@@ -30,11 +31,8 @@ interface PostCreatorProps {
   isSubmitting?: boolean;
 }
 
-export const PostCreator = ({
-  currentUser,
-  onSubmit,
-  isSubmitting = false,
-}: PostCreatorProps) => {
+export const PostCreator = ({ currentUser, onSubmit, isSubmitting = false }: PostCreatorProps) => {
+  const { triggerRefresh } = useFeedContext();
   const [text, setText] = useState('');
   const [imagePaths, setImagePaths] = useState<string[]>([]);
   const [videoPaths, setVideoPaths] = useState<string[]>([]);
@@ -167,7 +165,6 @@ export const PostCreator = ({
         });
       } catch (apiError) {
         console.error('API error when creating post:', apiError);
-        // We don't show this error to the user since the post was already added to the UI
       }
 
       // Reset form
@@ -179,6 +176,8 @@ export const PostCreator = ({
       setIsExpanded(false);
 
       toast.success('Post shared successfully!');
+      // Trigger feed refresh
+      triggerRefresh();
     } catch (error) {
       console.error('Error creating post:', error);
       toast.error('Failed to create post. Please try again.');
