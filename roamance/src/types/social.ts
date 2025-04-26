@@ -27,7 +27,7 @@ export type CommentResponseDto = {
   audit: Audit;
 };
 
-export type CommentListResponseDto = Array<CommentRequestDto>;
+export type CommentListResponseDto = Array<CommentResponseDto>;
 
 export type CommentListResponse = BaseResponse<CommentListResponseDto>;
 export type CommentResponse = BaseResponse<CommentResponseDto>;
@@ -78,7 +78,7 @@ export type PostResponseDto = {
   audit: Audit;
 };
 
-export type PostListResponseDto = Array<PostRequestDto>;
+export type PostListResponseDto = Array<PostResponseDto>;
 
 export type PostListResponse = BaseResponse<PostListResponseDto>;
 export type PostResponse = BaseResponse<PostResponseDto>;
@@ -93,7 +93,7 @@ export type PostDtoByEndpoints = {
   SAVE: { request: undefined; response: BaseResponse<null> };
   GET_SAVED: { request: undefined; response: PostListResponse };
   LIKE: { request: undefined; response: BaseResponse<null> };
-  LIKED_BY: { request: undefined; response: User[] };
+  LIKED_BY: { request: undefined; response: BaseResponse<User[]> };
   DELETE: { request: undefined; response: BaseResponse<null> };
 };
 
@@ -124,11 +124,10 @@ export type MessageResponseDto = {
   audit: Audit;
 };
 
-export type MessageListResponseDto = Array<MessageRequestDto>;
+export type MessageListResponseDto = Array<MessageResponseDto>;
 
 export type MessageListResponse = BaseResponse<MessageListResponseDto>;
 export type MessageResponse = BaseResponse<MessageResponseDto>;
-
 
 export type MessageDtoByEndpoints = {
   CREATE: { request: MessageRequestDto; response: MessageResponse };
