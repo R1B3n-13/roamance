@@ -32,8 +32,8 @@ export const TrendingItem = ({
           <Image
             src={imageSrc}
             alt={title}
-            layout="fill"
-            objectFit="cover"
+            fill
+            style={{ objectFit: 'cover' }}
           />
         </div>
       ) : (

@@ -1,16 +1,23 @@
 'use client';
 
-import { User } from '@/types/social';
+import FileUploader from '@/components/common/file-uploader';
+import { cn } from '@/lib/utils';
+import { PostService } from '@/service/social-service';
+import { User } from '@/types';
+import { AnimatePresence, motion } from 'framer-motion';
 import {
-  Camera, ImageIcon, MapPin, Smile, Video, X, Loader2, ChevronDown
+  ChevronDown,
+  ImageIcon,
+  Loader2,
+  MapPin,
+  Smile,
+  Video,
+  X,
 } from 'lucide-react';
 import Image from 'next/image';
-import { useRef, useState } from 'react';
-import { cn } from '@/lib/utils';
-import { AnimatePresence, motion } from 'framer-motion';
-import { PostService } from '@/service/social-service';
+import { useState } from 'react';
 import { toast } from 'sonner';
-import { CloudinaryService } from '@/service/cloudinary-service';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from '@/components/ui/dialog'
 
 interface PostCreatorProps {
   currentUser?: User;
@@ -23,18 +30,25 @@ interface PostCreatorProps {
   isSubmitting?: boolean;
 }
 
-export const PostCreator = ({ currentUser, onSubmit, isSubmitting = false }: PostCreatorProps) => {
+export const PostCreator = ({
+  currentUser,
+  onSubmit,
+  isSubmitting = false,
+}: PostCreatorProps) => {
   const [text, setText] = useState('');
   const [imagePaths, setImagePaths] = useState<string[]>([]);
   const [videoPaths, setVideoPaths] = useState<string[]>([]);
-  const [location, setLocation] = useState<{ latitude: number; longitude: number; name?: string } | null>(null);
+  const [showUploaderDialog, setShowUploaderDialog] = useState(false);
+  const [uploaderType, setUploaderType] = useState<'image' | 'video'>('image');
+  const [location, setLocation] = useState<{
+    latitude: number;
+    longitude: number;
+    name?: string;
+  } | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
   const [uploadingMedia, setUploadingMedia] = useState(false);
   const [charCount, setCharCount] = useState(0);
   const MAX_CHARS = 500;
-
-  const imageInputRef = useRef<HTMLInputElement>(null);
-  const videoInputRef = useRef<HTMLInputElement>(null);
 
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
@@ -48,98 +62,12 @@ export const PostCreator = ({ currentUser, onSubmit, isSubmitting = false }: Pos
     }
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files && files.length > 0) {
-      try {
-        setUploadingMedia(true);
-        setIsExpanded(true);
-
-        // Convert FileList to array and upload each file
-        const uploads = Array.from(files).map(async (file) => {
-          // Create a temporary URL for preview
-          const previewUrl = URL.createObjectURL(file);
-
-          try {
-            // Upload to Cloudinary
-            const uploadedUrl = await CloudinaryService.uploadImage(file);
-            return { previewUrl, uploadedUrl };
-          } catch (error) {
-            console.error("Error uploading image:", error);
-            return { previewUrl, error: true };
-          }
-        });
-
-        // Wait for all uploads to complete
-        const results = await Promise.all(uploads);
-
-        // Add uploaded images to state
-        const newPaths = results.map(result => result.uploadedUrl || result.previewUrl);
-        setImagePaths(prev => [...prev, ...newPaths]);
-
-        // Show error toast if any uploads failed
-        const failedUploads = results.filter(r => r.error).length;
-        if (failedUploads > 0) {
-          toast.error(`Failed to upload ${failedUploads} image${failedUploads > 1 ? 's' : ''}.`);
-        }
-      } catch (error) {
-        console.error('Error uploading images:', error);
-        toast.error('Failed to upload images. Please try again.');
-      } finally {
-        setUploadingMedia(false);
-      }
-    }
-  };
-
-  const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files && files.length > 0) {
-      try {
-        setUploadingMedia(true);
-        setIsExpanded(true);
-
-        // Convert FileList to array and upload each file
-        const uploads = Array.from(files).map(async (file) => {
-          // Create a temporary URL for preview
-          const previewUrl = URL.createObjectURL(file);
-
-          try {
-            // Upload to Cloudinary
-            const uploadedUrl = await CloudinaryService.uploadVideo(file);
-            return { previewUrl, uploadedUrl };
-          } catch (error) {
-            console.error("Error uploading video:", error);
-            return { previewUrl, error: true };
-          }
-        });
-
-        // Wait for all uploads to complete
-        const results = await Promise.all(uploads);
-
-        // Add uploaded videos to state
-        const newPaths = results.map(result => result.uploadedUrl || result.previewUrl);
-        setVideoPaths(prev => [...prev, ...newPaths]);
-
-        // Show error toast if any uploads failed
-        const failedUploads = results.filter(r => r.error).length;
-        if (failedUploads > 0) {
-          toast.error(`Failed to upload ${failedUploads} video${failedUploads > 1 ? 's' : ''}.`);
-        }
-      } catch (error) {
-        console.error('Error uploading videos:', error);
-        toast.error('Failed to upload videos. Please try again.');
-      } finally {
-        setUploadingMedia(false);
-      }
-    }
-  };
-
   const handleRemoveImage = (index: number) => {
-    setImagePaths(prev => prev.filter((_, i) => i !== index));
+    setImagePaths((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleRemoveVideo = (index: number) => {
-    setVideoPaths(prev => prev.filter((_, i) => i !== index));
+    setVideoPaths((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleLocationAdd = () => {
@@ -160,7 +88,8 @@ export const PostCreator = ({ currentUser, onSubmit, isSubmitting = false }: Pos
 
           // Try to get a shorter name if possible
           if (data.address) {
-            locationName = data.address.city ||
+            locationName =
+              data.address.city ||
               data.address.town ||
               data.address.village ||
               data.address.suburb ||
@@ -172,7 +101,7 @@ export const PostCreator = ({ currentUser, onSubmit, isSubmitting = false }: Pos
           setLocation({
             latitude: position.coords.latitude,
             longitude: position.coords.longitude,
-            name: locationName
+            name: locationName,
           });
 
           toast.dismiss(locationToast);
@@ -183,7 +112,7 @@ export const PostCreator = ({ currentUser, onSubmit, isSubmitting = false }: Pos
           // Fallback to coordinates only
           setLocation({
             latitude: position.coords.latitude,
-            longitude: position.coords.longitude
+            longitude: position.coords.longitude,
           });
 
           toast.dismiss(locationToast);
@@ -193,7 +122,9 @@ export const PostCreator = ({ currentUser, onSubmit, isSubmitting = false }: Pos
       (error) => {
         console.error('Error getting location:', error);
         toast.dismiss(locationToast);
-        toast.error('Could not get your location. Please check your permissions.');
+        toast.error(
+          'Could not get your location. Please check your permissions.'
+        );
 
         // Ask user to enter location manually
         const manualLocation = window.prompt('Enter a location name:');
@@ -201,7 +132,7 @@ export const PostCreator = ({ currentUser, onSubmit, isSubmitting = false }: Pos
           setLocation({
             latitude: 0, // Default coordinates
             longitude: 0,
-            name: manualLocation
+            name: manualLocation,
           });
         }
       }
@@ -223,7 +154,7 @@ export const PostCreator = ({ currentUser, onSubmit, isSubmitting = false }: Pos
         text,
         image_paths: imagePaths,
         video_paths: videoPaths,
-        location: location || undefined
+        location: location || undefined,
       });
 
       // Now also try to submit to the actual API
@@ -232,10 +163,10 @@ export const PostCreator = ({ currentUser, onSubmit, isSubmitting = false }: Pos
           text,
           image_paths: imagePaths,
           video_paths: videoPaths,
-          location: location || { latitude: 0, longitude: 0 }
+          location: location || { latitude: 0, longitude: 0 },
         });
       } catch (apiError) {
-        console.error("API error when creating post:", apiError);
+        console.error('API error when creating post:', apiError);
         // We don't show this error to the user since the post was already added to the UI
       }
 
@@ -260,10 +191,13 @@ export const PostCreator = ({ currentUser, onSubmit, isSubmitting = false }: Pos
         <div className="flex gap-3">
           <div className="relative h-10 w-10 rounded-full overflow-hidden flex-shrink-0 border-2 border-purple-200 dark:border-purple-700">
             <Image
-              src={currentUser?.profile_image_url || '/images/roamance-logo-no-text.png'}
-              alt={currentUser?.full_name || 'User'}
-              layout="fill"
-              objectFit="cover"
+              src={
+                currentUser?.profile_image ||
+                '/images/roamance-logo-no-text.png'
+              }
+              alt={currentUser?.name || 'User'}
+              fill
+              style={{ objectFit: 'cover' }}
               className="rounded-full"
             />
           </div>
@@ -279,14 +213,16 @@ export const PostCreator = ({ currentUser, onSubmit, isSubmitting = false }: Pos
             />
 
             {/* Character count */}
-            <div className={cn(
-              "mt-1 text-xs text-right transition-colors",
-              charCount > MAX_CHARS * 0.8
-                ? charCount > MAX_CHARS * 0.9
-                  ? "text-red-500 dark:text-red-400"
-                  : "text-amber-500 dark:text-amber-400"
-                : "text-gray-400 dark:text-gray-500"
-            )}>
+            <div
+              className={cn(
+                'mt-1 text-xs text-right transition-colors',
+                charCount > MAX_CHARS * 0.8
+                  ? charCount > MAX_CHARS * 0.9
+                    ? 'text-red-500 dark:text-red-400'
+                    : 'text-amber-500 dark:text-amber-400'
+                  : 'text-gray-400 dark:text-gray-500'
+              )}
+            >
               {charCount}/{MAX_CHARS}
             </div>
 
@@ -302,12 +238,15 @@ export const PostCreator = ({ currentUser, onSubmit, isSubmitting = false }: Pos
                   {(imagePaths.length > 0 || videoPaths.length > 0) && (
                     <div className="mt-3 flex gap-2 flex-wrap">
                       {imagePaths.map((path, index) => (
-                        <div key={`img-${index}`} className="relative w-20 h-20 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 group">
+                        <div
+                          key={`img-${index}`}
+                          className="relative w-20 h-20 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 group"
+                        >
                           <Image
                             src={path}
                             alt={`Uploaded image ${index}`}
-                            layout="fill"
-                            objectFit="cover"
+                            fill
+                            style={{ objectFit: 'cover' }}
                             className="transition-transform group-hover:scale-110"
                           />
                           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors"></div>
@@ -321,7 +260,10 @@ export const PostCreator = ({ currentUser, onSubmit, isSubmitting = false }: Pos
                       ))}
 
                       {videoPaths.map((path, index) => (
-                        <div key={`vid-${index}`} className="relative w-24 h-20 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 group">
+                        <div
+                          key={`vid-${index}`}
+                          className="relative w-24 h-20 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 group"
+                        >
                           <video
                             src={path}
                             className="w-full h-full object-cover"
@@ -353,7 +295,8 @@ export const PostCreator = ({ currentUser, onSubmit, isSubmitting = false }: Pos
                     <div className="mt-3 flex items-center bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 text-sm text-gray-700 dark:text-gray-300 rounded-full py-1.5 px-3 w-fit group border border-gray-100 dark:border-gray-700/50">
                       <MapPin className="h-3.5 w-3.5 mr-1.5 text-purple-500 dark:text-purple-400" />
                       <span className="group-hover:underline transition-all">
-                        {location.name || `${location.latitude.toFixed(2)}, ${location.longitude.toFixed(2)}`}
+                        {location.name ||
+                          `${location.latitude.toFixed(2)}, ${location.longitude.toFixed(2)}`}
                       </span>
                       <button
                         onClick={handleRemoveLocation}
@@ -380,45 +323,33 @@ export const PostCreator = ({ currentUser, onSubmit, isSubmitting = false }: Pos
           >
             <div className="flex flex-wrap justify-between items-center gap-y-2">
               <div className="flex items-center gap-2 flex-wrap">
-                <input
-                  type="file"
-                  ref={imageInputRef}
-                  onChange={handleImageUpload}
-                  accept="image/*"
-                  multiple
-                  className="hidden"
-                  disabled={uploadingMedia || isSubmitting}
-                />
+                {/* Buttons to open FileUploader dialog */}
                 <button
-                  onClick={() => imageInputRef.current?.click()}
+                  onClick={() => {
+                    setUploaderType('image');
+                    setShowUploaderDialog(true);
+                  }}
                   className={cn(
-                    "flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-full transition-all",
+                    'flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-full transition-all',
                     uploadingMedia || isSubmitting
-                      ? "bg-gray-100 dark:bg-gray-700/50 text-gray-400 dark:text-gray-500 cursor-not-allowed"
-                      : "bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 text-purple-600 dark:text-purple-400 border border-purple-100 dark:border-purple-800/30 hover:shadow-sm"
+                      ? 'bg-gray-100 dark:bg-gray-700/50 text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                      : 'bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 text-purple-600 dark:text-purple-400 border border-purple-100 dark:border-purple-800/30 hover:shadow-sm'
                   )}
                   disabled={uploadingMedia || isSubmitting}
                 >
                   <ImageIcon className="h-4 w-4" />
                   <span>Photo</span>
                 </button>
-
-                <input
-                  type="file"
-                  ref={videoInputRef}
-                  onChange={handleVideoUpload}
-                  accept="video/*"
-                  multiple
-                  className="hidden"
-                  disabled={uploadingMedia || isSubmitting}
-                />
                 <button
-                  onClick={() => videoInputRef.current?.click()}
+                  onClick={() => {
+                    setUploaderType('video');
+                    setShowUploaderDialog(true);
+                  }}
                   className={cn(
-                    "flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-full transition-all",
+                    'flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-full transition-all',
                     uploadingMedia || isSubmitting
-                      ? "bg-gray-100 dark:bg-gray-700/50 text-gray-400 dark:text-gray-500 cursor-not-allowed"
-                      : "bg-gradient-to-r from-teal-50 to-green-50 dark:from-teal-900/20 dark:to-green-900/20 text-teal-600 dark:text-teal-400 border border-teal-100 dark:border-teal-800/30 hover:shadow-sm"
+                      ? 'bg-gray-100 dark:bg-gray-700/50 text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                      : 'bg-gradient-to-r from-teal-50 to-green-50 dark:from-teal-900/20 dark:to-green-900/20 text-teal-600 dark:text-teal-400 border border-teal-100 dark:border-teal-800/30 hover:shadow-sm'
                   )}
                   disabled={uploadingMedia || isSubmitting}
                 >
@@ -429,10 +360,10 @@ export const PostCreator = ({ currentUser, onSubmit, isSubmitting = false }: Pos
                 <button
                   onClick={handleLocationAdd}
                   className={cn(
-                    "flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-full transition-all",
+                    'flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-full transition-all',
                     uploadingMedia || isSubmitting
-                      ? "bg-gray-100 dark:bg-gray-700/50 text-gray-400 dark:text-gray-500 cursor-not-allowed"
-                      : "bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-800/30 hover:shadow-sm"
+                      ? 'bg-gray-100 dark:bg-gray-700/50 text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                      : 'bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-800/30 hover:shadow-sm'
                   )}
                   disabled={uploadingMedia || isSubmitting}
                 >
@@ -442,10 +373,10 @@ export const PostCreator = ({ currentUser, onSubmit, isSubmitting = false }: Pos
 
                 <button
                   className={cn(
-                    "flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-full transition-all",
+                    'flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-full transition-all',
                     uploadingMedia || isSubmitting
-                      ? "bg-gray-100 dark:bg-gray-700/50 text-gray-400 dark:text-gray-500 cursor-not-allowed"
-                      : "bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20 text-yellow-600 dark:text-yellow-400 border border-yellow-100 dark:border-yellow-800/30 hover:shadow-sm"
+                      ? 'bg-gray-100 dark:bg-gray-700/50 text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                      : 'bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20 text-yellow-600 dark:text-yellow-400 border border-yellow-100 dark:border-yellow-800/30 hover:shadow-sm'
                   )}
                   disabled={uploadingMedia || isSubmitting}
                 >
@@ -458,10 +389,10 @@ export const PostCreator = ({ currentUser, onSubmit, isSubmitting = false }: Pos
                 onClick={handleSubmit}
                 disabled={isSubmitting || uploadingMedia || text.trim() === ''}
                 className={cn(
-                  "px-5 py-2 rounded-full text-sm font-medium transition-all",
+                  'px-5 py-2 rounded-full text-sm font-medium transition-all',
                   text.trim() !== '' && !uploadingMedia && !isSubmitting
-                    ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-sm hover:shadow hover:from-purple-500 hover:to-indigo-500 hover:-translate-y-0.5 active:translate-y-0"
-                    : "bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed"
+                    ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-sm hover:shadow hover:from-purple-500 hover:to-indigo-500 hover:-translate-y-0.5 active:translate-y-0'
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
                 )}
               >
                 {isSubmitting ? (
@@ -485,6 +416,48 @@ export const PostCreator = ({ currentUser, onSubmit, isSubmitting = false }: Pos
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Uploader Dialog */}
+      <Dialog open={showUploaderDialog} onOpenChange={setShowUploaderDialog}>
+        <DialogContent className="w-11/12 max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {uploaderType === 'image' ? 'Upload Photo' : 'Upload Video'}
+            </DialogTitle>
+          </DialogHeader>
+          <FileUploader
+            acceptedFileTypes={
+              uploaderType === 'image' ? 'image/*' : 'video/*'
+            }
+            multiple
+            showPreview={false}
+            onUploadSuccess={(result) => {
+              if (result.resource_type === 'image')
+                setImagePaths((prev) => [...prev, result.url]);
+              if (result.resource_type === 'video')
+                setVideoPaths((prev) => [...prev, result.url]);
+              // close uploader dialog on successful upload
+              setShowUploaderDialog(false);
+            }}
+            onUploadError={(err) => {
+              toast.error(err.message);
+              // close uploader dialog on error
+              setShowUploaderDialog(false);
+            }}
+            onClose={() => setShowUploaderDialog(false)}
+            className=""
+          />
+          <DialogFooter>
+            <DialogClose asChild>
+              <button
+                className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-sm rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600"
+              >
+                Close
+              </button>
+            </DialogClose>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

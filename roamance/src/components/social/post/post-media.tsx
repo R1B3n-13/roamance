@@ -52,8 +52,8 @@ export const PostMedia = ({
           <Image
             src={imagePaths[currentIndex]}
             alt={`Post image ${currentIndex + 1}`}
-            layout="fill"
-            objectFit="cover"
+            fill
+            style={{ objectFit: 'cover' }}
             className="transition-all duration-700 group-hover:scale-[1.03]"
           />
         ) : (

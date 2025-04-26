@@ -44,8 +44,8 @@ const TrendingItem = ({ title, imageSrc, count, type }: TrendingItemProps) => {
           <Image
             src={imageSrc}
             alt={title}
-            layout="fill"
-            objectFit="cover"
+            fill
+            style={{ objectFit: 'cover' }}
           />
         </div>
       ) : (
@@ -101,8 +101,8 @@ export const TrendingSection = ({ trendingItems, trendingUsers = [] }: TrendingS
                   <Image
                     src={user.profile_image_url || '/images/roamance-logo-no-text.png'}
                     alt={user.username || user.full_name || 'User'}
-                    layout="fill"
-                    objectFit="cover"
+                    fill
+                    style={{ objectFit: 'cover' }}
                   />
                 </div>
                 <span className="text-xs font-medium text-gray-700 dark:text-gray-300 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors text-center truncate max-w-[60px]">

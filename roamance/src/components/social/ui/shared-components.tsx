@@ -50,7 +50,7 @@ export const UserAvatar = ({
         }
         alt={alt || user?.name || 'User'}
         layout="fill"
-        objectFit="cover"
+        style={{ objectFit: 'cover' }}
         className="rounded-full"
       />
       <div className="absolute inset-0 bg-gradient-to-tr from-black/10 to-black/0 group-hover:from-purple-500/20 group-hover:to-blue-500/10 transition-colors duration-500 rounded-full"></div>

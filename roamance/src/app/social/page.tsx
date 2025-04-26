@@ -1,29 +1,28 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { PostCreator } from '@/components/social/post-creator';
 import { SocialFeed } from '@/components/social/social-feed';
 import { TrendingSection } from '@/components/social/trending-section';
-import { PostService } from '@/service/social-service';
-import { Post, User } from '@/types/social';
+import { cn } from '@/lib/utils';
+import { Post, User } from '@/types';
+import { AnimatePresence, motion } from 'framer-motion';
 import {
   Bell,
+  Bookmark,
   Compass,
   Globe,
   Hash,
   Home,
   Menu,
+  MessageCircle,
+  Search,
   Sparkles,
   User as UserIcon,
   X,
-  Search,
-  MessageCircle,
-  Bookmark
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { cn } from '@/lib/utils';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 
 const mockTrendingItems = [
   { id: '1', title: 'Paris', count: 1245, type: 'location' as const },
@@ -35,62 +34,82 @@ const mockTrendingItems = [
 
 const mockCurrentUser: User = {
   id: 'current-user',
-  full_name: 'Alex Traveler',
-  profile_image_url: '/images/roamance-logo-no-text.png',
-  username: 'alex_travels',
+  name: 'Alex Traveler',
   email: 'alex@example.com',
-  is_verified: true,
+  profile_image: '/images/roamance-logo-no-text.png',
   audit: {
     created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-    created_by: 'system',
-    updated_by: 'system'
-  }
+    last_modified_at: new Date().toISOString(),
+  },
 };
 
 const mockTrendingUsers: User[] = [
   {
     id: 'user1',
-    full_name: 'Maya Expedition',
-    username: 'maya_exp',
-    profile_image_url: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330',
-    audit: { created_at: new Date().toISOString(), updated_at: new Date().toISOString(), created_by: 'system', updated_by: 'system' }
+    name: 'Maya Expedition',
+    email: 'maya@mail.com',
+    profile_image:
+      'https://images.unsplash.com/photo-1494790108377-be9c29b29330',
+    audit: {
+      created_at: new Date().toISOString(),
+      last_modified_at: new Date().toISOString(),
+    },
   },
   {
     id: 'user2',
-    full_name: 'Ravi Explorer',
-    username: 'ravi_world',
-    profile_image_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d',
-    audit: { created_at: new Date().toISOString(), updated_at: new Date().toISOString(), created_by: 'system', updated_by: 'system' }
+    name: 'Ravi Explorer',
+    email: '',
+    profile_image:
+      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d',
+    audit: {
+      created_at: new Date().toISOString(),
+      last_modified_at: new Date().toISOString(),
+    },
   },
   {
     id: 'user3',
-    full_name: 'Emma Nomad',
-    username: 'nomad_em',
-    profile_image_url: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80',
-    audit: { created_at: new Date().toISOString(), updated_at: new Date().toISOString(), created_by: 'system', updated_by: 'system' }
+    name: 'Emma Nomad',
+    email: '',
+    profile_image:
+      'https://images.unsplash.com/photo-1438761681033-6461ffad8d80',
+    audit: {
+      created_at: new Date().toISOString(),
+      last_modified_at: new Date().toISOString(),
+    },
   },
   {
     id: 'user4',
-    full_name: 'Leo Wanderer',
-    username: 'leo_wanders',
-    profile_image_url: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d',
-    audit: { created_at: new Date().toISOString(), updated_at: new Date().toISOString(), created_by: 'system', updated_by: 'system' }
+    name: 'Leo Wanderer',
+    email: '',
+    profile_image:
+      'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d',
+    audit: {
+      created_at: new Date().toISOString(),
+      last_modified_at: new Date().toISOString(),
+    },
   },
   {
     id: 'user5',
-    full_name: 'Sofia Journey',
-    username: 'journey_sof',
-    profile_image_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb',
-    audit: { created_at: new Date().toISOString(), updated_at: new Date().toISOString(), created_by: 'system', updated_by: 'system' }
+    name: 'Sofia Journey',
+    email: '',
+    profile_image:
+      'https://images.unsplash.com/photo-1534528741775-53994a69daeb',
+    audit: {
+      created_at: new Date().toISOString(),
+      last_modified_at: new Date().toISOString(),
+    },
   },
   {
     id: 'user6',
-    full_name: 'Kai Adventure',
-    username: 'kai_adv',
-    profile_image_url: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6',
-    audit: { created_at: new Date().toISOString(), updated_at: new Date().toISOString(), created_by: 'system', updated_by: 'system' }
-  }
+    name: 'Kai Adventure',
+    email: '',
+    profile_image:
+      'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6',
+    audit: {
+      created_at: new Date().toISOString(),
+      last_modified_at: new Date().toISOString(),
+    },
+  },
 ];
 
 interface NavItemProps {
@@ -104,15 +123,13 @@ const NavItem = ({ icon, label, isActive = false, onClick }: NavItemProps) => (
   <button
     onClick={onClick}
     className={cn(
-      "flex items-center gap-3 p-3 rounded-xl transition-all whitespace-nowrap",
+      'flex items-center gap-3 p-3 rounded-xl transition-all whitespace-nowrap',
       isActive
-        ? "bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 text-purple-700 dark:text-purple-400 font-medium border border-purple-100 dark:border-purple-800/30 shadow-sm"
-        : "hover:bg-gray-100 dark:hover:bg-gray-800/70 text-gray-700 dark:text-gray-300"
+        ? 'bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 text-purple-700 dark:text-purple-400 font-medium border border-purple-100 dark:border-purple-800/30 shadow-sm'
+        : 'hover:bg-gray-100 dark:hover:bg-gray-800/70 text-gray-700 dark:text-gray-300'
     )}
   >
-    <div>
-      {icon}
-    </div>
+    <div>{icon}</div>
     <span>{label}</span>
   </button>
 );
@@ -145,7 +162,7 @@ export default function SocialPage() {
       setIsSubmittingPost(true);
       // In a real app, you would call the PostService.createPost method
       // For now, we'll simulate an API call with a timeout
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       // Create a mock post to add to the UI
       const mockPost: Post = {
@@ -153,13 +170,15 @@ export default function SocialPage() {
         text: postData.text,
         image_paths: postData.image_paths,
         video_paths: postData.video_paths,
-        location: postData.location ? {
-          latitude: postData.location.latitude,
-          longitude: postData.location.longitude,
-          ...postData.location.name && { name: postData.location.name }
-        } : { latitude: 0, longitude: 0 },
+        location: postData.location
+          ? {
+              latitude: postData.location.latitude,
+              longitude: postData.location.longitude,
+              ...(postData.location.name && { name: postData.location.name }),
+            }
+          : { latitude: 0, longitude: 0 },
         is_safe: true,
-        tidbits: [],
+        tidbits: '',
         likes_count: 0,
         comments_count: 0,
         user: mockCurrentUser,
@@ -168,15 +187,14 @@ export default function SocialPage() {
         comments: [],
         audit: {
           created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
+          last_modified_at: new Date().toISOString(),
           created_by: mockCurrentUser.id,
-          updated_by: mockCurrentUser.id
-        }
+          last_modified_by: mockCurrentUser.id,
+        },
       };
 
       // Add the post to the state
-      setPosts(prev => [mockPost, ...prev]);
-
+      setPosts((prev) => [mockPost, ...prev]);
     } catch (error) {
       console.error('Error creating post:', error);
     } finally {
@@ -229,8 +247,8 @@ export default function SocialPage() {
 
             <button className="relative h-8 w-8 rounded-full overflow-hidden border-2 border-purple-200 dark:border-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400">
               <Image
-                src={mockCurrentUser.profile_image_url}
-                alt={mockCurrentUser.full_name}
+                src={mockCurrentUser.profile_image || ''}
+                alt={mockCurrentUser.name}
                 layout="fill"
                 objectFit="cover"
               />
@@ -445,10 +463,7 @@ export default function SocialPage() {
               </div>
 
               {/* Posts feed */}
-              <SocialFeed
-                currentUser={mockCurrentUser}
-                initialPosts={posts}
-              />
+              <SocialFeed currentUser={mockCurrentUser} initialPosts={posts} />
             </div>
           </div>
 
@@ -474,7 +489,9 @@ export default function SocialPage() {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end p-4">
                     <div className="text-white">
                       <h4 className="font-medium text-sm">Bali, Indonesia</h4>
-                      <p className="text-xs text-white/80">Explore paradise islands</p>
+                      <p className="text-xs text-white/80">
+                        Explore paradise islands
+                      </p>
                     </div>
                   </div>
                 </div>

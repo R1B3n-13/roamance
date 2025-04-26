@@ -11,7 +11,7 @@ interface CommentCardProps {
   onReply?: (commentId: string) => void;
 }
 
-export const CommentCard = ({ comment, currentUser, onLike, onReply }: CommentCardProps) => {
+export const CommentCard = ({ comment,  onLike, onReply }: CommentCardProps) => {
   const [isLiked, setIsLiked] = useState(false);
 
   const handleLike = () => {
@@ -25,8 +25,8 @@ export const CommentCard = ({ comment, currentUser, onLike, onReply }: CommentCa
         <Image
           src={comment.user.profile_image_url || '/images/roamance-logo-no-text.png'}
           alt={comment.user.full_name || 'User'}
-          layout="fill"
-          objectFit="cover"
+          fill
+          style={{ objectFit: 'cover' }}
           className="rounded-full"
         />
       </div>
