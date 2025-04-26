@@ -16,9 +16,11 @@ import com.devs.roamance.repository.PostRepository;
 import com.devs.roamance.repository.UserRepository;
 import com.devs.roamance.service.PostService;
 import com.devs.roamance.util.PaginationSortingUtil;
+import com.devs.roamance.util.PostUtil;
 import com.devs.roamance.util.UserUtil;
 import java.util.List;
 import java.util.UUID;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -28,21 +30,25 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Slf4j
 public class PostServiceImpl implements PostService {
 
   private final PostRepository postRepository;
   private final UserRepository userRepository;
+  private final PostUtil postUtil;
   private final UserUtil userUtil;
   private final ModelMapper modelMapper;
 
   public PostServiceImpl(
       PostRepository postRepository,
       UserRepository userRepository,
+      PostUtil postUtil,
       UserUtil userUtil,
       ModelMapper modelMapper) {
 
     this.postRepository = postRepository;
     this.userRepository = userRepository;
+    this.postUtil = postUtil;
     this.userUtil = userUtil;
     this.modelMapper = modelMapper;
   }
@@ -56,9 +62,12 @@ public class PostServiceImpl implements PostService {
     Post post = modelMapper.map(createRequestDto, Post.class);
 
     post.setUser(user);
+    post.setIsSafe(true);
 
     Post savedPost = postRepository.save(post);
     postRepository.flush();
+
+    postUtil.backgroundAiAnalysis(savedPost.getId(), createRequestDto);
 
     PostDto dto = modelMapper.map(savedPost, PostDto.class);
 
