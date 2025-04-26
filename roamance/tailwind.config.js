@@ -129,6 +129,26 @@ module.exports = {
           '0%': { opacity: 0, transform: 'scale(0.95)' },
           '100%': { opacity: 1, transform: 'scale(1)' },
         },
+        'spin-slow': {
+          '0%': { transform: 'rotate(0deg)' },
+          '100%': { transform: 'rotate(360deg)' },
+        },
+        shimmer: {
+          '0%': { transform: 'translateX(-100%)' },
+          '100%': { transform: 'translateX(100%)' },
+        },
+        'scale-up-down': {
+          '0%, 100%': { transform: 'scale(1)' },
+          '50%': { transform: 'scale(1.1)' },
+        },
+        'fade-in-out': {
+          '0%, 100%': { opacity: 0.5 },
+          '50%': { opacity: 1 },
+        },
+        'slide-up-fade': {
+          '0%': { opacity: 0, transform: 'translateY(10px)' },
+          '100%': { opacity: 1, transform: 'translateY(0)' },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
@@ -138,6 +158,11 @@ module.exports = {
         zoom: 'zoom 4s ease-in-out infinite',
         'globe-spin': 'globe-spin 20s linear infinite',
         'map-reveal': 'map-reveal 1s ease-out',
+        'spin-slow': 'spin-slow 8s linear infinite',
+        'shimmer': 'shimmer 2.5s infinite',
+        'scale-up-down': 'scale-up-down 3s ease-in-out infinite',
+        'fade-in-out': 'fade-in-out 3s ease-in-out infinite',
+        'slide-up-fade': 'slide-up-fade 0.4s ease-out',
       },
       backgroundImage: {
         'world-map': "url('/world-map-pattern.png')",

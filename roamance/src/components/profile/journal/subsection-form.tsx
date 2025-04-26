@@ -52,6 +52,7 @@ interface SortableChecklistItemProps {
   onTitleChange: (title: string) => void;
 }
 
+// SortableChecklistItem component with improved UI
 const SortableChecklistItem: React.FC<SortableChecklistItemProps> = ({
   id,
   title,
@@ -75,103 +76,97 @@ const SortableChecklistItem: React.FC<SortableChecklistItemProps> = ({
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    zIndex: isDragging ? 10 : 1,
-    position: 'relative' as const,
+    zIndex: isDragging ? 999 : 1,
   };
 
-  const handleBlur = () => {
-    setIsEditing(false);
-    if (editedTitle.trim() !== title.trim()) {
-      onTitleChange(editedTitle);
+  // Handle title edit
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEditedTitle(e.target.value);
+  };
+
+  // Save edited title
+  const handleSave = () => {
+    if (editedTitle.trim()) {
+      onTitleChange(editedTitle.trim());
+      setIsEditing(false);
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  // Handle key press in input
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
-      setIsEditing(false);
-      onTitleChange(editedTitle);
+      handleSave();
     } else if (e.key === 'Escape') {
-      setIsEditing(false);
       setEditedTitle(title);
+      setIsEditing(false);
     }
   };
 
   return (
-    <motion.div
+    <div
       ref={setNodeRef}
       style={style}
-      className={cn(
-        "relative mb-2 rounded-lg overflow-hidden transition-all duration-300 group",
-        isDragging ? "shadow-md" : "shadow-sm hover:shadow-sm",
-        completed ? "opacity-80" : "opacity-100"
-      )}
       {...attributes}
+      className={cn(
+        "group flex items-center gap-2 p-2.5 rounded-lg border mb-2 bg-white dark:bg-slate-900 relative",
+        isDragging ? "shadow-lg border-dashed border-indigo-300 dark:border-indigo-700/50" : "border-slate-200 dark:border-slate-800 hover:border-indigo-300 dark:hover:border-indigo-700/50",
+        "transition-all duration-200"
+      )}
     >
-      <div
+      <button
+        type="button"
         className={cn(
-          "border rounded-lg p-2.5 flex items-center space-x-2",
-          "bg-white/70 dark:bg-slate-900/50 backdrop-blur-sm",
-          isDragging ? "border-dashed border-indigo-300 dark:border-indigo-700" : "border-slate-200 dark:border-slate-700",
-          completed ? "bg-muted/40 dark:bg-muted/10" : ""
+          "h-5 w-5 rounded-md border relative transition-colors duration-200",
+          completed
+            ? "bg-indigo-500 border-indigo-500 dark:bg-indigo-600 dark:border-indigo-600"
+            : "border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800"
         )}
+        onClick={onToggleCompleted}
       >
-        <div
-          {...listeners}
-          className="flex-shrink-0 cursor-grab active:cursor-grabbing h-6 w-6 rounded-full hover:bg-muted/60 flex items-center justify-center transition-colors"
-        >
-          <GripVertical className="h-3.5 w-3.5 text-muted-foreground" />
-        </div>
-
-        <Checkbox
-          checked={completed}
-          onCheckedChange={() => onToggleCompleted()}
-          className={cn(
-            "h-5 w-5 rounded-md border-slate-300 dark:border-slate-600",
-            completed
-              ? "data-[state=checked]:bg-indigo-500 data-[state=checked]:border-indigo-500"
-              : ""
-          )}
-        />
-
-        {isEditing ? (
-          <Input
-            type="text"
-            value={editedTitle}
-            onChange={(e) => setEditedTitle(e.target.value)}
-            onBlur={handleBlur}
-            onKeyDown={handleKeyDown}
-            className="flex-1 h-8 bg-background"
-            autoFocus
-          />
-        ) : (
-          <div
-            className="flex-1 min-w-0"
-            onClick={() => setIsEditing(true)}
-          >
-            <span
-              className={cn(
-                "text-sm transition-colors cursor-text",
-                completed
-                  ? "text-muted-foreground line-through"
-                  : "text-foreground hover:text-indigo-600 dark:hover:text-indigo-400"
-              )}
-            >
-              {title}
-            </span>
-          </div>
+        {completed && (
+          <CheckCircle2 className="h-4 w-4 text-white absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
         )}
+      </button>
 
-        <Button
-          type="button"
-          size="icon"
-          variant="ghost"
-          onClick={onRemove}
-          className="h-7 w-7 rounded-full opacity-60 hover:opacity-100 hover:bg-rose-50 dark:hover:bg-rose-900/20 text-muted-foreground hover:text-rose-600 dark:hover:text-rose-400 transition-all"
+      {isEditing ? (
+        <Input
+          type="text"
+          value={editedTitle}
+          onChange={handleTitleChange}
+          onBlur={handleSave}
+          onKeyDown={handleKeyDown}
+          className="flex-1 px-2 py-0.5 h-7 text-sm border-slate-300 dark:border-slate-700 focus:border-indigo-400 dark:focus:border-indigo-600"
+          autoFocus
+        />
+      ) : (
+        <div
+          onClick={() => setIsEditing(true)}
+          className={cn(
+            "flex-1 cursor-text text-sm transition-colors duration-150",
+            completed ? "line-through text-slate-500 dark:text-slate-400" : "text-slate-800 dark:text-slate-200"
+          )}
         >
-          <X className="h-3.5 w-3.5" />
-        </Button>
+          {title}
+        </div>
+      )}
+
+      {/* Drag handle */}
+      <div
+        {...listeners}
+        className="h-6 w-6 rounded-md flex items-center justify-center cursor-grab active:cursor-grabbing text-slate-400 dark:text-slate-600 hover:text-slate-600 dark:hover:text-slate-400 transition-colors duration-150 opacity-0 group-hover:opacity-100"
+      >
+        <GripVertical className="h-4 w-4" />
       </div>
-    </motion.div>
+
+      {/* Remove button */}
+      <button
+        type="button"
+        onClick={onRemove}
+        className="h-6 w-6 rounded-md flex items-center justify-center text-slate-400 dark:text-slate-600 hover:text-rose-600 dark:hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors duration-150 opacity-0 group-hover:opacity-100"
+      >
+        <X className="h-4 w-4" />
+      </button>
+    </div>
   );
 };
 

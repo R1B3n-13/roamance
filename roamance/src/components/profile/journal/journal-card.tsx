@@ -9,16 +9,25 @@ import {
   Archive,
   ArchiveRestore,
   BookOpen,
-  Calendar,
+  CalendarIcon,
   Clock,
+  Edit,
+  ExternalLink,
+  GripVertical,
+  ImageIcon,
   Lock,
   MapPin,
+  MoreHorizontal,
+  Route,
   Share2,
   Star,
   Trash2,
 } from 'lucide-react';
+import Image from 'next/image';
 import React from 'react';
 import { getJournalColorScheme } from './colorscheme';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface JournalCardProps {
   journal: JournalBrief;
@@ -31,7 +40,7 @@ interface JournalCardProps {
 
 export const JournalCard: React.FC<JournalCardProps> = ({
   journal,
-  // onEdit,
+  onEdit,
   onView,
   onToggleFavorite,
   onToggleArchive,
@@ -39,47 +48,6 @@ export const JournalCard: React.FC<JournalCardProps> = ({
 }) => {
   // Get consistent color scheme based on journal title
   const colorScheme = getJournalColorScheme(journal.title);
-
-  // Get gradient based on colorScheme
-  const getGradient = () => {
-    if (journal.is_favorite) return 'from-sunset/80 to-sunset-dark/80';
-
-    switch (colorScheme.type) {
-      case 'ocean':
-        return 'from-ocean/80 to-ocean-dark/80';
-      case 'sunset':
-        return 'from-sunset/80 to-sand/80';
-      case 'forest':
-        return 'from-forest/80 to-forest-dark/80';
-      case 'violet':
-        return 'from-violet/80 to-violet-dark/80';
-      case 'lavender':
-        return 'from-lavender/80 to-lavender-dark/80';
-      default:
-        return 'from-ocean/80 to-ocean-dark/80';
-    }
-  };
-
-  // Get badge style based on colorScheme
-  const getBadgeStyle = () => {
-    if (journal.is_favorite)
-      return 'bg-sunset text-white border border-sunset/20 shadow-sm';
-
-    switch (colorScheme.type) {
-      case 'ocean':
-        return 'bg-ocean text-white border border-ocean/20 shadow-sm';
-      case 'sunset':
-        return 'bg-sunset text-white border border-sunset/20 shadow-sm';
-      case 'forest':
-        return 'bg-forest text-white border border-forest/20 shadow-sm';
-      case 'violet':
-        return 'bg-violet text-white border border-violet/20 shadow-sm';
-      case 'lavender':
-        return 'bg-lavender text-white border border-lavender/20 shadow-sm';
-      default:
-        return 'bg-ocean text-white border border-ocean/20 shadow-sm';
-    }
-  };
 
   // Format created date
   const formatDate = (dateStr: string) => {
@@ -91,114 +59,295 @@ export const JournalCard: React.FC<JournalCardProps> = ({
     });
   };
 
+  // Get CSS classes based on the color scheme
+  const getCardStyles = () => {
+    const baseGradient = 'bg-gradient-to-tr';
+    const basePattern = "bg-[url('/images/roamance-logo-no-text.png')] bg-repeat-space bg-contain mix-blend-overlay";
+    const baseBadge = 'text-white border shadow-sm';
+
+    // Determine styles based on journal type and favorite status
+    if (journal.is_favorite) {
+      return {
+        gradient: `${baseGradient} from-amber-500/90 via-orange-500/90 to-yellow-500/90`,
+        pattern: `${basePattern} opacity-10`,
+        badge: `${baseBadge} bg-amber-500 border-amber-400/20`,
+        accentColor: 'text-amber-500',
+        accentHoverBg: 'hover:bg-amber-50 dark:hover:bg-amber-900/10',
+        accentBorder: 'border-amber-200 dark:border-amber-800/40',
+        starBg: 'bg-amber-500/85 hover:bg-amber-500 border-amber-400/30',
+        shimmerColor: 'via-white/20',
+      };
+    }
+
+    switch (colorScheme.type) {
+      case 'ocean':
+        return {
+          gradient: `${baseGradient} from-blue-500/90 via-cyan-500/90 to-sky-500/90`,
+          pattern: `${basePattern} opacity-15`,
+          badge: `${baseBadge} bg-blue-500 border-blue-400/20`,
+          accentColor: 'text-blue-500',
+          accentHoverBg: 'hover:bg-blue-50 dark:hover:bg-blue-900/10',
+          accentBorder: 'border-blue-200 dark:border-blue-800/40',
+          starBg: 'bg-white/15 hover:bg-white/30 border-white/20',
+          shimmerColor: 'via-white/20',
+        };
+      case 'sunset':
+        return {
+          gradient: `${baseGradient} from-rose-500/90 via-pink-500/90 to-orange-500/90`,
+          pattern: `${basePattern} opacity-10`,
+          badge: `${baseBadge} bg-rose-500 border-rose-400/20`,
+          accentColor: 'text-rose-500',
+          accentHoverBg: 'hover:bg-rose-50 dark:hover:bg-rose-900/10',
+          accentBorder: 'border-rose-200 dark:border-rose-800/40',
+          starBg: 'bg-white/15 hover:bg-white/30 border-white/20',
+          shimmerColor: 'via-white/15',
+        };
+      case 'forest':
+        return {
+          gradient: `${baseGradient} from-emerald-500/90 via-green-500/90 to-teal-500/90`,
+          pattern: `${basePattern} opacity-15`,
+          badge: `${baseBadge} bg-emerald-500 border-emerald-400/20`,
+          accentColor: 'text-emerald-500',
+          accentHoverBg: 'hover:bg-emerald-50 dark:hover:bg-emerald-900/10',
+          accentBorder: 'border-emerald-200 dark:border-emerald-800/40',
+          starBg: 'bg-white/15 hover:bg-white/30 border-white/20',
+          shimmerColor: 'via-white/20',
+        };
+      case 'violet':
+        return {
+          gradient: `${baseGradient} from-violet-500/90 via-purple-500/90 to-indigo-500/90`,
+          pattern: `${basePattern} opacity-10`,
+          badge: `${baseBadge} bg-violet-500 border-violet-400/20`,
+          accentColor: 'text-violet-500',
+          accentHoverBg: 'hover:bg-violet-50 dark:hover:bg-violet-900/10',
+          accentBorder: 'border-violet-200 dark:border-violet-800/40',
+          starBg: 'bg-white/15 hover:bg-white/30 border-white/20',
+          shimmerColor: 'via-white/15',
+        };
+      case 'lavender':
+        return {
+          gradient: `${baseGradient} from-indigo-400/90 via-purple-400/90 to-fuchsia-400/90`,
+          pattern: `${basePattern} opacity-15`,
+          badge: `${baseBadge} bg-indigo-500 border-indigo-400/20`,
+          accentColor: 'text-indigo-500',
+          accentHoverBg: 'hover:bg-indigo-50 dark:hover:bg-indigo-900/10',
+          accentBorder: 'border-indigo-200 dark:border-indigo-800/40',
+          starBg: 'bg-white/15 hover:bg-white/30 border-white/20',
+          shimmerColor: 'via-white/15',
+        };
+      default:
+        return {
+          gradient: `${baseGradient} from-indigo-500/90 via-purple-500/90 to-indigo-400/90`,
+          pattern: `${basePattern} opacity-15`,
+          badge: `${baseBadge} bg-indigo-500 border-indigo-400/20`,
+          accentColor: 'text-indigo-500',
+          accentHoverBg: 'hover:bg-indigo-50 dark:hover:bg-indigo-900/10',
+          accentBorder: 'border-indigo-200 dark:border-indigo-800/40',
+          starBg: 'bg-white/15 hover:bg-white/30 border-white/20',
+          shimmerColor: 'via-white/15',
+        };
+    }
+  };
+
+  const styles = getCardStyles();
+
+  // Card animations
+  const cardVariants = {
+    hover: {
+      y: -8,
+      scale: 1.02,
+      boxShadow: "0 20px 40px -20px rgba(0, 0, 0, 0.15)",
+      transition: { type: "spring", stiffness: 300, damping: 15 }
+    }
+  };
+
+  // Button animations
+  const buttonVariants = {
+    hover: {
+      scale: 1.08,
+      transition: { type: "spring", stiffness: 400, damping: 15 }
+    },
+    tap: {
+      scale: 0.92
+    }
+  };
+
+  // Shimmer delay based on journal ID for staggered effect
+  const getShimmerDelay = () => {
+    // Create a hash from the journal id
+    const hash = journal.id.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
+    return `${hash % 5}s`; // 0-4 second delay
+  };
+
   return (
     <motion.div
-      whileHover={{ y: -5 }}
-      transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+      whileHover="hover"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 20 }}
+      transition={{ duration: 0.3 }}
+      className="h-full"
     >
-      <Card className="overflow-hidden group border-muted/40 bg-gradient-to-b from-background to-background/95 backdrop-blur-sm shadow-md transition-all duration-300 hover:shadow-xl py-0">
+      <Card
+        variants={cardVariants}
+        className="overflow-hidden group h-full flex flex-col border-slate-200/60 dark:border-slate-800/60 bg-white dark:bg-slate-900 backdrop-blur-sm shadow-sm hover:shadow-xl transition-all duration-300 rounded-xl"
+        onClick={() => onView(journal)}
+      >
         {/* Journal Header Image */}
-        <div className="h-48 relative overflow-hidden">
-          <div
-            className={cn(
-              'absolute inset-0 flex items-center justify-center bg-gradient-to-tr',
-              getGradient()
-            )}
-          >
-            {/* Decorative pattern overlay */}
-            <div className="absolute inset-0 bg-[url('/images/roamance-logo-no-text.png')] bg-repeat-space bg-contain opacity-10 mix-blend-overlay" />
+        <div className="h-52 relative overflow-hidden flex-shrink-0">
+          {journal.cover_image ? (
+            <div className="h-full w-full relative">
+              <Image
+                src={journal.cover_image}
+                alt={journal.title}
+                fill
+                className="object-cover transition-transform duration-700 ease-in-out will-change-transform group-hover:scale-110"
+              />
+              {/* Gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent opacity-80 group-hover:opacity-70 transition-opacity duration-500"></div>
+            </div>
+          ) : (
+            <div className={cn('absolute inset-0 flex items-center justify-center', styles.gradient)}>
+              {/* Decorative pattern overlay */}
+              <div className={cn("absolute inset-0", styles.pattern)} />
 
-            <div className="relative z-10 text-center px-4">
-              <p className="text-white text-xl font-bold drop-shadow-md">
+              {/* Enhanced shimmer effect */}
+              <div className="absolute inset-0 overflow-hidden">
+                <motion.div
+                  className={cn(
+                    "absolute -inset-x-full top-0 bottom-0 bg-gradient-to-r from-transparent",
+                    styles.shimmerColor,
+                    "to-transparent animate-[shimmer_3s_infinite]"
+                  )}
+                  style={{
+                    transform: 'translateX(-10%) skewX(-15deg)',
+                    animationDelay: getShimmerDelay(),
+                    animationDuration: '3s'
+                  }}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Title overlay for cover images */}
+          {journal.cover_image && (
+            <div className="absolute inset-x-0 bottom-0 p-4 z-10">
+              <h3 className="text-white text-xl font-bold drop-shadow-md leading-tight line-clamp-2 tracking-tight">
+                {journal.title}
+              </h3>
+            </div>
+          )}
+
+          {/* Centered title for gradient backgrounds */}
+          {!journal.cover_image && (
+            <div className="relative z-10 text-center px-6 h-full flex items-center justify-center">
+              <p className="text-white text-2xl font-bold drop-shadow-md leading-tight tracking-tight">
                 {journal.title}
               </p>
             </div>
-          </div>
+          )}
 
-          {/* Badges section */}
-          <div className="absolute top-3 left-3">
+          {/* Top badges row */}
+          <div className="absolute top-3 left-3 right-3 flex justify-between items-center z-20">
             <Badge
               className={cn(
-                'capitalize rounded-full shadow-md px-2.5',
-                getBadgeStyle()
+                'capitalize rounded-full px-3 py-1 font-medium backdrop-blur-sm',
+                styles.badge
               )}
             >
               {journal.total_subsections}{' '}
               {journal.total_subsections === 1 ? 'section' : 'sections'}
             </Badge>
-          </div>
 
-          {/* Shared badge */}
-          <div className="absolute top-3 right-3">
+            {/* Shared/Private badge */}
             <Badge
               className={cn(
-                'flex items-center gap-1 font-medium rounded-full shadow-md',
+                'flex items-center gap-1.5 font-medium rounded-full px-3 py-1 backdrop-blur-sm',
                 journal.is_shared
-                  ? 'bg-ocean text-white border border-ocean-light/30'
-                  : 'bg-mountain text-white border border-mountain-light/30'
+                  ? 'bg-sky-500/90 text-white border border-sky-400/30'
+                  : 'bg-slate-700/90 text-white border border-slate-600/30'
               )}
             >
               {journal.is_shared ? (
-                <Share2 className="h-3 w-3" />
+                <Share2 className="h-3.5 w-3.5" />
               ) : (
-                <Lock className="h-3 w-3" />
+                <Lock className="h-3.5 w-3.5" />
               )}
               {journal.is_shared ? 'Shared' : 'Private'}
             </Badge>
           </div>
 
-          {/* Created date badge */}
-          <div className="absolute bottom-3 left-3">
+          {/* Bottom badges row */}
+          <div className="absolute bottom-3 left-3 right-3 flex justify-between items-center z-20">
+            {/* Date badge */}
             <Badge
               variant="outline"
-              className="bg-black/50 text-white border-white/30 flex items-center gap-1.5 rounded-full backdrop-blur-sm shadow-sm"
+              className="bg-black/50 text-white border-white/30 flex items-center gap-1.5 rounded-full backdrop-blur-sm px-3 py-1"
             >
-              <Calendar className="h-3 w-3" />
+              <CalendarIcon className="h-3.5 w-3.5" />
               <span className="text-xs font-medium">
-                Created {formatDate(journal.audit.created_at)}
+                {formatDate(journal.audit.created_at)}
               </span>
             </Badge>
+
+            {/* Favorite button */}
+            <TooltipProvider delayDuration={300}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <motion.button
+                    variants={buttonVariants}
+                    whileTap="tap"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onToggleFavorite(journal);
+                    }}
+                    className={cn(
+                      'h-9 w-9 rounded-full flex items-center justify-center backdrop-blur-md border transition-all duration-300 shadow-md',
+                      styles.starBg,
+                      journal.is_favorite ? 'text-white' : 'text-white'
+                    )}
+                  >
+                    <Star
+                      className={cn('h-4 w-4', journal.is_favorite ? 'fill-white' : '')}
+                    />
+                  </motion.button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{journal.is_favorite ? 'Remove from favorites' : 'Add to favorites'}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
 
-          {/* Favorite/Bookmark button */}
-          <Button
-            size="icon"
-            variant="ghost"
-            onClick={(e) => {
-              e.stopPropagation();
-              onToggleFavorite(journal);
-            }}
-            className={cn(
-              'absolute bottom-3 right-3 h-9 w-9 rounded-full backdrop-blur-md border transition-all duration-300 shadow-sm hover:shadow-md',
-              journal.is_favorite
-                ? 'bg-sunset/85 hover:bg-sunset text-white border-sunset-light/30'
-                : 'bg-white/15 hover:bg-white/30 text-white border-white/20'
-            )}
-          >
-            <Star
-              className={cn('h-4 w-4', journal.is_favorite ? 'fill-white' : '')}
-            />
-          </Button>
+          {/* Archived indicator if applicable */}
+          {journal.is_archived && (
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center z-30">
+              <div className="bg-white/90 dark:bg-slate-800/90 rounded-lg py-2 px-4 shadow-lg backdrop-blur-sm border border-slate-200 dark:border-slate-700 transform rotate-[-5deg]">
+                <div className="flex items-center gap-2 text-slate-800 dark:text-slate-200">
+                  <Archive className="h-4 w-4" />
+                  <span className="font-medium">Archived</span>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Journal Content */}
-        <div className="p-5">
-          <div className="flex items-start justify-between">
+        <div className="p-5 flex-1 flex flex-col">
+          {!journal.cover_image && (
             <div>
               <h3
                 className={cn(
-                  'font-semibold mb-1.5 transition-colors',
-                  journal.is_favorite
-                    ? 'group-hover:text-sunset'
-                    : 'group-hover:text-ocean'
+                  'font-semibold text-lg mb-1.5 transition-colors group-hover:text-indigo-600 dark:group-hover:text-indigo-400',
+                  styles.accentColor
                 )}
               >
                 {journal.title}
               </h3>
               {journal.destination && (
-                <div className="flex items-center text-muted-foreground text-sm gap-1.5">
+                <div className="flex items-center text-slate-500 dark:text-slate-400 text-sm gap-1.5">
                   <MapPin className="h-3.5 w-3.5" />
-                  <span>
+                  <span className="truncate max-w-[180px]">
                     {journal.destination
                       ? `${journal.destination.latitude.toFixed(2)}, ${journal.destination.longitude.toFixed(2)}`
                       : 'No location'}
@@ -206,74 +355,175 @@ export const JournalCard: React.FC<JournalCardProps> = ({
                 </div>
               )}
             </div>
-          </div>
+          )}
 
-          <p className="text-muted-foreground text-sm mt-3 line-clamp-2 leading-relaxed">
-            {journal.description}
-          </p>
-
-          {/* Time indicator */}
-          <div className="flex items-center text-xs text-muted-foreground mt-4">
-            <div className="flex items-center gap-1.5">
-              <Clock className="h-3.5 w-3.5 text-muted-foreground" />
-              <span>
-                {formatRelativeTime(new Date(journal.audit.created_at))}
-              </span>
+          {/* Description with elegant empty state */}
+          {journal.description ? (
+            <p className="text-slate-600 dark:text-slate-300 text-sm mt-3.5 line-clamp-3 leading-relaxed flex-1">
+              {journal.description}
+            </p>
+          ) : (
+            <div className="flex items-center justify-center flex-1 mt-3.5 py-4 rounded-lg border border-dashed border-slate-200 dark:border-slate-800/70 bg-slate-50/50 dark:bg-slate-900/50">
+              <p className="text-slate-400 dark:text-slate-500 text-sm italic">
+                No description provided for this journal
+              </p>
             </div>
-          </div>
+          )}
 
-          {/* Action buttons */}
-          <div className="mt-4 pt-4 border-t border-muted/20 flex justify-between">
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={(e) => {
-                e.stopPropagation();
-                onView(journal);
-              }}
-              className="text-xs text-muted-foreground hover:text-forest hover:bg-forest/5 transition-colors duration-300 flex items-center gap-1.5"
-            >
-              <BookOpen className="h-3.5 w-3.5" />
-              <span>View Details</span>
-            </Button>
+          {/* Time indicator and actions */}
+          <div className="mt-5 pt-4 border-t border-slate-200/70 dark:border-slate-800/70 flex justify-between items-center">
+            <div className="flex items-center text-xs text-slate-500 dark:text-slate-400">
+              <div className="flex items-center gap-1.5">
+                <Clock className="h-3.5 w-3.5" />
+                <span>
+                  {formatRelativeTime(new Date(journal.audit.created_at))}
+                </span>
+              </div>
+            </div>
 
-            <div className="flex gap-2">
-              <Button
-                size="sm"
-                variant="ghost"
+            {/* Action buttons */}
+            <div className="flex gap-1.5">
+              <motion.button
+                variants={buttonVariants}
+                whileTap="tap"
                 onClick={(e) => {
                   e.stopPropagation();
-                  onToggleArchive(journal);
+                  onView(journal);
                 }}
                 className={cn(
-                  'text-xs text-muted-foreground transition-colors duration-300 flex items-center gap-1.5',
-                  journal.is_archived
-                    ? 'hover:text-violet hover:bg-violet/5'
-                    : 'hover:text-lavender hover:bg-lavender/5'
+                  "flex items-center justify-center h-8 w-8 rounded-full text-slate-500 dark:text-slate-400 transition-colors duration-200",
+                  "hover:bg-indigo-50 dark:hover:bg-indigo-900/10 hover:text-indigo-600 dark:hover:text-indigo-400"
                 )}
               >
-                {journal.is_archived ? (
-                  <ArchiveRestore className="h-3.5 w-3.5" />
-                ) : (
-                  <Archive className="h-3.5 w-3.5" />
-                )}
-                <span>{journal.is_archived ? 'Unarchive' : 'Archive'}</span>
-              </Button>
+                <BookOpen className="h-4 w-4" />
+              </motion.button>
 
-              <Button
-                size="sm"
-                variant="ghost"
+              <motion.button
+                variants={buttonVariants}
+                whileTap="tap"
                 onClick={(e) => {
                   e.stopPropagation();
-                  onDelete(journal);
+                  onEdit(journal);
                 }}
-                className="text-xs text-muted-foreground hover:text-rose-600 hover:bg-rose-500/5 transition-colors duration-300 flex items-center gap-1.5"
+                className={cn(
+                  "flex items-center justify-center h-8 w-8 rounded-full text-slate-500 dark:text-slate-400 transition-colors duration-200",
+                  "hover:bg-blue-50 dark:hover:bg-blue-900/10 hover:text-blue-600 dark:hover:text-blue-400"
+                )}
               >
-                <Trash2 className="h-3.5 w-3.5" />
-                <span>Delete</span>
-              </Button>
+                <Edit className="h-4 w-4" />
+              </motion.button>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <motion.button
+                    variants={buttonVariants}
+                    whileTap="tap"
+                    onClick={(e) => e.stopPropagation()}
+                    className={cn(
+                      "flex items-center justify-center h-8 w-8 rounded-full text-slate-500 dark:text-slate-400 transition-colors duration-200",
+                      "hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-300"
+                    )}
+                  >
+                    <MoreHorizontal className="h-4 w-4" />
+                  </motion.button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onView(journal);
+                    }}
+                    className="cursor-pointer flex items-center gap-2"
+                  >
+                    <BookOpen className="h-4 w-4 text-indigo-500" />
+                    <span>Open Journal</span>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onEdit(journal);
+                    }}
+                    className="cursor-pointer flex items-center gap-2"
+                  >
+                    <Edit className="h-4 w-4 text-blue-500" />
+                    <span>Edit Journal</span>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuSeparator />
+
+                  <DropdownMenuItem
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onToggleFavorite(journal);
+                    }}
+                    className="cursor-pointer flex items-center gap-2"
+                  >
+                    <Star
+                      className={cn("h-4 w-4",
+                        journal.is_favorite ? "text-amber-500 fill-amber-500" : "text-slate-500"
+                      )}
+                    />
+                    <span>
+                      {journal.is_favorite ? "Remove from Favorites" : "Add to Favorites"}
+                    </span>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onToggleArchive(journal);
+                    }}
+                    className="cursor-pointer flex items-center gap-2"
+                  >
+                    {journal.is_archived ? (
+                      <>
+                        <ArchiveRestore className="h-4 w-4 text-indigo-500" />
+                        <span>Unarchive Journal</span>
+                      </>
+                    ) : (
+                      <>
+                        <Archive className="h-4 w-4 text-violet-500" />
+                        <span>Archive Journal</span>
+                      </>
+                    )}
+                  </DropdownMenuItem>
+
+                  <DropdownMenuSeparator />
+
+                  <DropdownMenuItem
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDelete(journal);
+                    }}
+                    className="cursor-pointer flex items-center gap-2 text-rose-500 focus:text-rose-500"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    <span>Delete Journal</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
+
+          {/* Stats indicator if needed */}
+          {(journal.total_subsections > 0 || journal.subsection_types?.length > 0) && (
+            <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800/50 flex gap-2 flex-wrap">
+              {journal.subsection_types?.map((type, index) => (
+                <Badge
+                  key={index}
+                  variant="outline"
+                  className="rounded-full px-2 py-0.5 text-xs bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 flex items-center gap-1"
+                >
+                  {type === 'LOCATION' && <MapPin className="h-3 w-3" />}
+                  {type === 'ACTIVITY' && <ImageIcon className="h-3 w-3" />}
+                  {type === 'ROUTE' && <Route className="h-3 w-3" />}
+                  {type === 'MAP' && <MapPin className="h-3 w-3" />}
+                  {type.charAt(0).toUpperCase() + type.slice(1).toLowerCase()}
+                </Badge>
+              ))}
+            </div>
+          )}
         </div>
       </Card>
     </motion.div>

@@ -214,7 +214,7 @@ export const SubsectionDetail: React.FC<SubsectionDetailProps> = ({
                 d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
               ></path>
             </svg>
-            Saving changes...
+            <span>Saving changes...</span>
           </motion.span>
         );
       case 'saved':
@@ -223,10 +223,10 @@ export const SubsectionDetail: React.FC<SubsectionDetailProps> = ({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 text-xs font-medium"
+            className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 text-xs font-medium"
           >
             <CheckCircle2 className="h-3 w-3" />
-            Changes saved
+            <span>Changes saved</span>
           </motion.span>
         );
       case 'error':
@@ -235,10 +235,10 @@ export const SubsectionDetail: React.FC<SubsectionDetailProps> = ({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-xs font-medium"
+            className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 text-xs font-medium"
           >
             <AlertCircle className="h-3 w-3" />
-            Error saving changes
+            <span>Error saving</span>
           </motion.span>
         );
       default:
@@ -250,288 +250,324 @@ export const SubsectionDetail: React.FC<SubsectionDetailProps> = ({
   const getIcon = () => {
     switch (subsection.type) {
       case SubsectionType.ACTIVITY:
-        return <Activity className={cn('h-5 w-5', colors.icon)} />;
+        return <Activity className={cn("h-5 w-5", colors.icon)} />;
       case SubsectionType.ROUTE:
-        return <Route className={cn('h-5 w-5', colors.icon)} />;
+        return <Route className={cn("h-5 w-5", colors.icon)} />;
       default:
-        return <MapPin className={cn('h-5 w-5', colors.icon)} />;
+        return <MapPin className={cn("h-5 w-5", colors.icon)} />;
     }
   };
 
+  // Format creation date
+  const getFormattedDate = () => {
+    if (!subsection.audit?.created_at) return '';
+    const date = new Date(subsection.audit.created_at);
+    return date.toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+    });
+  };
+
   return (
-    <div className="mb-4">
-      <motion.div
-        layout
+    <div
+      className={cn(
+        "rounded-xl border bg-white dark:bg-slate-900 backdrop-blur-sm shadow-sm overflow-hidden transition-all duration-300 group",
+        isActive ? "shadow-md" : "shadow-sm hover:shadow-md",
+        isActive ? colors.border : "border-slate-200 dark:border-slate-800",
+        "mb-4"
+      )}
+    >
+      {/* Header section - always visible */}
+      <div
         className={cn(
-          'border rounded-xl overflow-hidden transition-all duration-300',
-          isActive ? 'shadow-md' : 'shadow-sm hover:shadow-md',
-          colors.border,
-          isActive
-            ? 'bg-white dark:bg-slate-900'
-            : 'bg-white/80 dark:bg-slate-900/80'
+          "p-4 flex items-center justify-between cursor-pointer",
+          isActive && `bg-${colors.bgColor}/5 dark:bg-${colors.bgColor}/10`
         )}
+        onClick={toggleSubsection}
       >
-        {/* Header */}
-        <div
-          onClick={toggleSubsection}
-          className={cn(
-            'p-4 flex items-center justify-between cursor-pointer',
-            isActive ? 'border-b border-muted/40' : '',
-            'hover:bg-muted/5 transition-colors duration-200'
-          )}
-        >
-          <div className="flex items-center gap-3">
-            <div
-              className={cn(
-                'w-10 h-10 rounded-full flex items-center justify-center',
-                colors.bg
-              )}
-            >
-              {getIcon()}
-            </div>
-
-            <div>
-              <h3 className="font-medium text-foreground">
-                {subsection.title || 'Untitled Section'}
-              </h3>
-              <div className="flex items-center gap-2 mt-0.5">
-                <Badge
-                  variant="outline"
-                  className={cn('text-xs font-medium', colors.badge)}
-                >
-                  {subsection.type}
-                </Badge>
-
-                {/* Created/Updated time */}
-                {subsection.audit && (
-                  <span className="text-xs text-muted-foreground flex items-center gap-1">
-                    <Clock className="h-3 w-3" />
-                    {formatRelativeTime(
-                      new Date(subsection.audit.last_modified_at)
-                    )}
-                  </span>
-                )}
-              </div>
-            </div>
+        <div className="flex items-center space-x-3">
+          <div className={cn(
+            "flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center",
+            colors.bg
+          )}>
+            {getIcon()}
           </div>
-
-          <div className="flex items-center gap-2">
-            {getSaveStatusIndicator()}
-
-            <Button
-              variant="ghost"
-              size="icon"
-              className={cn(
-                'h-8 w-8 rounded-full transition-transform duration-300',
-                isActive && 'rotate-180'
+          <div>
+            <h4 className="font-medium text-slate-900 dark:text-slate-100">
+              {subsection.title || "Untitled Section"}
+            </h4>
+            <div className="flex items-center gap-2 mt-1">
+              <Badge
+                variant="outline"
+                className={cn("text-xs px-2 h-5", colors.badge)}
+              >
+                {subsection.type.charAt(0).toUpperCase() + subsection.type.slice(1).toLowerCase()}
+              </Badge>
+              {subsection.audit?.created_at && (
+                <span className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                  <Clock className="h-3 w-3" />
+                  {formatRelativeTime(new Date(subsection.audit.created_at))}
+                </span>
               )}
-              onClick={(e) => {
-                e.stopPropagation();
-                toggleSubsection();
-              }}
-            >
-              <ChevronDown className="h-4 w-4 text-muted-foreground" />
-            </Button>
+            </div>
           </div>
         </div>
+        <div className="flex items-center">
+          {saveStatus !== 'idle' && (
+            <div className="mr-3">
+              <AnimatePresence>
+                {getSaveStatusIndicator()}
+              </AnimatePresence>
+            </div>
+          )}
+          <Button
+            variant="ghost"
+            size="icon"
+            className={cn(
+              "rounded-full h-8 w-8 transition-transform duration-300",
+              isActive ? "rotate-180" : ""
+            )}
+          >
+            <ChevronDown className="h-5 w-5 text-slate-500 dark:text-slate-400" />
+          </Button>
+        </div>
+      </div>
 
-        {/* Subsection Content (expanded) */}
-        <AnimatePresence initial={false}>
-          {isActive && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              className="overflow-hidden"
-            >
-              <div className="p-5 space-y-6">
-                {/* Title editing */}
-                <div className="space-y-2">
+      {/* Expanded content */}
+      <AnimatePresence initial={false}>
+        {isActive && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            className="overflow-hidden"
+          >
+            <div className="border-t border-slate-200/50 dark:border-slate-800/50 px-4 py-5 space-y-6">
+              {/* Title section - editable */}
+              {editingField === 'title' ? (
+                <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <h4 className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
-                      <Pencil className="h-3.5 w-3.5" />
-                      Title
-                    </h4>
-
-                    {editingField === 'title' ? (
-                      <div className="flex gap-2">
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => handleCancel('title')}
-                          className="h-7 px-2 text-xs font-medium"
-                          disabled={isSaving}
-                        >
-                          Cancel
-                        </Button>
-                        <Button
-                          type="button"
-                          size="sm"
-                          onClick={() => handleSave('title')}
-                          className="h-7 px-2 text-xs font-medium bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white"
-                          disabled={isSaving}
-                        >
-                          {isSaving ? (
-                            <Loader2 className="h-3 w-3 animate-spin" />
-                          ) : (
-                            <Save className="h-3 w-3 mr-1" />
-                          )}
-                          Save
-                        </Button>
-                      </div>
-                    ) : editMode ? (
+                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                      Section Title
+                    </label>
+                    <div className="flex gap-2">
                       <Button
-                        type="button"
                         size="sm"
-                        variant="ghost"
-                        onClick={() => setEditingField('title')}
-                        className="h-7 px-2 text-xs font-medium text-muted-foreground hover:text-blue-600 dark:hover:text-blue-400"
+                        variant="outline"
+                        className="h-7 px-2 text-xs border-slate-200 dark:border-slate-700"
+                        onClick={() => handleCancel('title')}
+                        disabled={isSaving}
                       >
-                        <Edit className="h-3 w-3 mr-1" />
-                        Edit
+                        Cancel
                       </Button>
-                    ) : null}
-                  </div>
-
-                  {editingField === 'title' ? (
-                    <Input
-                      value={editedTitle}
-                      onChange={(e) => setEditedTitle(e.target.value)}
-                      className="border border-blue-200 dark:border-blue-800 focus-visible:ring-blue-500/20 focus-visible:ring-offset-0"
-                      autoFocus
-                    />
-                  ) : (
-                    <p className="text-foreground rounded-md py-2 px-3 bg-muted/30">
-                      {subsection.title || 'Untitled Section'}
-                    </p>
-                  )}
-                </div>
-
-                {/* Notes section */}
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
-                      <StickyNote className="h-3.5 w-3.5" />
-                      Notes
-                    </h4>
-
-                    {editingField === 'note' ? (
-                      <div className="flex gap-2">
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => handleCancel('note')}
-                          className="h-7 px-2 text-xs font-medium"
-                          disabled={isSaving}
-                        >
-                          Cancel
-                        </Button>
-                        <Button
-                          type="button"
-                          size="sm"
-                          onClick={() => handleSave('note')}
-                          className="h-7 px-2 text-xs font-medium bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white"
-                          disabled={isSaving}
-                        >
-                          {isSaving ? (
-                            <Loader2 className="h-3 w-3 animate-spin" />
-                          ) : (
-                            <Save className="h-3 w-3 mr-1" />
-                          )}
-                          Save
-                        </Button>
-                      </div>
-                    ) : editMode ? (
                       <Button
-                        type="button"
                         size="sm"
-                        variant="ghost"
-                        onClick={() => setEditingField('note')}
-                        className="h-7 px-2 text-xs font-medium text-muted-foreground hover:text-blue-600 dark:hover:text-blue-400"
+                        className="h-7 px-2 text-xs bg-blue-500 hover:bg-blue-600 text-white"
+                        onClick={() => handleSave('title')}
+                        disabled={isSaving || !editedTitle.trim()}
                       >
-                        <Edit className="h-3 w-3 mr-1" />
-                        Edit
-                      </Button>
-                    ) : null}
-                  </div>
-
-                  {editingField === 'note' ? (
-                    <div data-color-mode={isDarkMode ? 'dark' : 'light'}>
-                      <MDEditor
-                        value={editedNote}
-                        onChange={(value) => setEditedNote(value || '')}
-                        preview="edit"
-                        height={200}
-                        className={cn(
-                          'border border-blue-200 dark:border-blue-800 rounded-md overflow-hidden',
-                          isDarkMode ? 'dark-md-editor' : ''
+                        {isSaving ? (
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                        ) : (
+                          <Save className="h-3 w-3 mr-1" />
                         )}
-                      />
+                        Save
+                      </Button>
                     </div>
-                  ) : (
-                    <div className="rounded-md py-3 px-4 bg-muted/30 prose prose-sm dark:prose-invert max-w-none min-h-[60px]">
-                      {subsection.note ? (
-                        <MDEditor.Markdown source={subsection.note} />
-                      ) : (
-                        <p className="text-muted-foreground italic">
-                          No notes added yet.
-                        </p>
-                      )}
+                  </div>
+                  <Input
+                    value={editedTitle}
+                    onChange={(e) => setEditedTitle(e.target.value)}
+                    className="w-full border-slate-300 dark:border-slate-700 focus:border-blue-500"
+                    disabled={isSaving}
+                    autoFocus
+                  />
+                </div>
+              ) : (
+                <div className="flex items-start justify-between group/title">
+                  <div className="space-y-1.5">
+                    <div className="flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400">
+                      <StickyNote className="w-3.5 h-3.5" />
+                      <span>Title</span>
                     </div>
+                    <h3 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
+                      {subsection.title}
+                    </h3>
+                  </div>
+                  {editMode && (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-8 w-8 rounded-full opacity-0 group-hover/title:opacity-100 transition-opacity text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setEditingField('title');
+                      }}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
                   )}
                 </div>
+              )}
 
-                {/* Location map (if available) */}
-                {(subsection.type === SubsectionType.ACTIVITY ||
-                  subsection.type === SubsectionType.SIGHTSEEING) &&
-                  subsection.location &&
-                  subsection.location.latitude !== 0 &&
-                  subsection.location.longitude !== 0 && (
-                    <div className="space-y-2">
-                      <h4 className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
-                        <MapPin className="h-3.5 w-3.5" />
-                        Location
-                      </h4>
-                      <div className="rounded-md overflow-hidden border border-muted">
-                        <LocationMap
-                          location={subsection.location}
-                          type="single"
-                          height="200px"
-                          className="w-full"
-                          zoom={14}
+              {/* Notes section - editable */}
+              {subsection.note || editingField === 'note' ? (
+                <div className="pt-2">
+                  {editingField === 'note' ? (
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <label className="text-sm font-medium text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                          <StickyNote className="w-4 h-4" />
+                          Notes (Markdown Supported)
+                        </label>
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-7 px-2 text-xs border-slate-200 dark:border-slate-700"
+                            onClick={() => handleCancel('note')}
+                            disabled={isSaving}
+                          >
+                            Cancel
+                          </Button>
+                          <Button
+                            size="sm"
+                            className="h-7 px-2 text-xs bg-blue-500 hover:bg-blue-600 text-white"
+                            onClick={() => handleSave('note')}
+                            disabled={isSaving}
+                          >
+                            {isSaving ? (
+                              <Loader2 className="h-3 w-3 animate-spin" />
+                            ) : (
+                              <Save className="h-3 w-3 mr-1" />
+                            )}
+                            Save
+                          </Button>
+                        </div>
+                      </div>
+                      <div data-color-mode={isDarkMode ? "dark" : "light"}>
+                        <MDEditor
+                          value={editedNote}
+                          onChange={(val) => setEditedNote(val || '')}
+                          preview="edit"
+                          height={200}
+                          className={cn(
+                            "w-full border rounded-md overflow-hidden",
+                            isDarkMode ? "dark-md-editor" : ""
+                          )}
                         />
                       </div>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">
+                        Tip: Use markdown for formatting. *italic*, **bold**, # Heading, etc.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="group/note">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400">
+                          <StickyNote className="h-3.5 w-3.5" />
+                          <span>Notes</span>
+                        </div>
+                        {editMode && (
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-8 w-8 rounded-full opacity-0 group-hover/note:opacity-100 transition-opacity text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setEditingField('note');
+                            }}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+                      <div className="bg-slate-50/70 dark:bg-slate-800/50 rounded-lg p-4 border border-slate-200/70 dark:border-slate-700/50">
+                        <div data-color-mode={isDarkMode ? "dark" : "light"}>
+                          <MDEditor.Markdown
+                            source={subsection.note}
+                            className={cn(
+                              "prose dark:prose-invert prose-sm max-w-none",
+                              "prose-headings:font-semibold prose-headings:text-slate-900 dark:prose-headings:text-slate-100",
+                              "prose-p:text-slate-700 dark:prose-p:text-slate-300 prose-p:m-0 prose-p:leading-relaxed"
+                            )}
+                          />
+                        </div>
+                      </div>
                     </div>
                   )}
+                </div>
+              ) : null}
 
-                {/* Checklist section */}
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
-                      <ListChecks className="h-3.5 w-3.5" />
-                      Checklist
-                    </h4>
+              {/* Location map (if location is set) */}
+              {subsection.location &&
+                subsection.location.latitude !== 0 &&
+                subsection.location.longitude !== 0 && (
+                  <div className="pt-2">
+                    <div className="flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400 mb-3">
+                      <MapPin className="h-3.5 w-3.5" />
+                      <span>Location</span>
+                    </div>
+                    <div className="border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
+                      <LocationMap
+                        location={subsection.location}
+                        type="single"
+                        height="200px"
+                        zoom={14}
+                      />
+                    </div>
+                    <div className="mt-2 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+                      <div>
+                        <span>Lat: {subsection.location.latitude.toFixed(6)}</span>
+                        <span className="mx-3">|</span>
+                        <span>Lng: {subsection.location.longitude.toFixed(6)}</span>
+                      </div>
+                      {editMode && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-7 px-2 text-xs border-slate-200 dark:border-slate-700"
+                          onClick={() => {
+                            // Ideally we would open a location picker here
+                            // But for simplicity, let's just use alert to inform user
+                            alert('Location editing is not available in this view');
+                          }}
+                        >
+                          <MapPin className="h-3 w-3 mr-1" />
+                          Change Location
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                )}
 
-                    {editingField === 'checklist' ? (
+              {/* Checklist section - editable */}
+              <div className="pt-2 group/checklist">
+                {editingField === 'checklist' ? (
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <label className="text-sm font-medium text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                        <ListChecks className="w-4 h-4" />
+                        Checklist
+                      </label>
                       <div className="flex gap-2">
                         <Button
-                          type="button"
                           size="sm"
-                          variant="ghost"
+                          variant="outline"
+                          className="h-7 px-2 text-xs border-slate-200 dark:border-slate-700"
                           onClick={() => handleCancel('checklist')}
-                          className="h-7 px-2 text-xs font-medium"
                           disabled={isSaving}
                         >
                           Cancel
                         </Button>
                         <Button
-                          type="button"
                           size="sm"
+                          className="h-7 px-2 text-xs bg-blue-500 hover:bg-blue-600 text-white"
                           onClick={() => handleSave('checklist')}
-                          className="h-7 px-2 text-xs font-medium bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white"
                           disabled={isSaving}
                         >
                           {isSaving ? (
@@ -542,245 +578,203 @@ export const SubsectionDetail: React.FC<SubsectionDetailProps> = ({
                           Save
                         </Button>
                       </div>
-                    ) : editMode ? (
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => setEditingField('checklist')}
-                        className="h-7 px-2 text-xs font-medium text-muted-foreground hover:text-blue-600 dark:hover:text-blue-400"
-                      >
-                        <Edit className="h-3 w-3 mr-1" />
-                        Edit
-                      </Button>
-                    ) : null}
-                  </div>
+                    </div>
 
-                  <div className="rounded-md border border-muted overflow-hidden">
-                    {editingField === 'checklist' ? (
-                      <div>
-                        <div className="divide-y divide-muted">
-                          {editedChecklist.map((item, index) => (
-                            <div
-                              key={index}
-                              className="flex items-center p-3 gap-2 bg-background"
-                            >
-                              <Checkbox
-                                checked={item.completed}
-                                onCheckedChange={() => {
-                                  const newList = [...editedChecklist];
-                                  newList[index] = {
-                                    ...newList[index],
-                                    completed: !newList[index].completed,
-                                  };
-                                  setEditedChecklist(newList);
-                                }}
-                                className="h-4 w-4 data-[state=checked]:bg-blue-500 data-[state=checked]:border-blue-500"
-                              />
-                              <Input
-                                value={item.title}
-                                onChange={(e) => {
-                                  const newList = [...editedChecklist];
-                                  newList[index] = {
-                                    ...newList[index],
-                                    title: e.target.value,
-                                  };
-                                  setEditedChecklist(newList);
-                                }}
-                                className="flex-1 border-muted h-8"
-                              />
-                              <Button
-                                type="button"
-                                size="icon"
-                                variant="ghost"
-                                onClick={() => handleRemoveChecklistItem(index)}
-                                className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          ))}
-                        </div>
-
-                        <div className="p-3 bg-muted/20 border-t border-muted">
-                          <div className="flex gap-2">
-                            <Input
-                              placeholder="Add new item"
-                              value={newChecklistItem}
-                              onChange={(e) =>
-                                setNewChecklistItem(e.target.value)
-                              }
-                              onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
-                                  handleAddChecklistItem();
-                                }
-                              }}
-                              className="flex-1 border-muted h-8"
-                            />
-                            <Button
-                              type="button"
-                              size="sm"
-                              onClick={handleAddChecklistItem}
-                              className="h-8 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white"
-                            >
-                              <Plus className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="divide-y divide-muted/50 bg-muted/10">
-                        {subsection.checklists &&
-                        subsection.checklists.length > 0 ? (
-                          subsection.checklists.map((item, index) => (
-                            <div
-                              key={index}
-                              className={cn(
-                                'flex items-center p-3 gap-3',
-                                item.completed ? 'opacity-80' : 'opacity-100'
-                              )}
-                            >
-                              <Checkbox
-                                checked={item.completed}
-                                onCheckedChange={() =>
-                                  handleToggleCheckItem(index)
-                                }
-                                className={cn(
-                                  'h-4 w-4',
-                                  item.completed
-                                    ? 'data-[state=checked]:bg-green-500 data-[state=checked]:border-green-500'
-                                    : 'data-[state=checked]:bg-blue-500 data-[state=checked]:border-blue-500'
-                                )}
-                              />
-                              <span
-                                className={cn(
-                                  'text-sm',
-                                  item.completed
-                                    ? 'line-through text-muted-foreground'
-                                    : 'text-foreground'
-                                )}
-                              >
-                                {item.title}
-                              </span>
-                            </div>
-                          ))
-                        ) : (
-                          <div className="p-4 text-center text-muted-foreground text-sm">
-                            <CheckCircle2 className="w-6 h-6 mx-auto mb-2 opacity-40" />
-                            <p>No checklist items added yet</p>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Additional information (routes, etc.) */}
-                {subsection.type === SubsectionType.ROUTE &&
-                  subsection.waypoints &&
-                  subsection.waypoints.length > 0 && (
-                    <div className="space-y-2">
-                      <h4 className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
-                        <Route className="h-3.5 w-3.5" />
-                        Route Details
-                      </h4>
-
-                      <div className="rounded-md border border-muted overflow-hidden">
-                        <div className="grid grid-cols-2 gap-4 p-3 bg-muted/10">
-                          <div className="flex items-center gap-2">
-                            <Clock className="h-4 w-4 text-muted-foreground" />
-                            <div>
-                              <p className="text-xs text-muted-foreground">
-                                Total Time
-                              </p>
-                              <p className="font-medium">
-                                {subsection.total_time
-                                  ? `${subsection.total_time} minutes`
-                                  : 'Not specified'}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Route className="h-4 w-4 text-muted-foreground" />
-                            <div>
-                              <p className="text-xs text-muted-foreground">
-                                Total Distance
-                              </p>
-                              <p className="font-medium">
-                                {subsection.total_distance
-                                  ? `${subsection.total_distance} km`
-                                  : 'Not specified'}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="p-3 border-t border-muted">
-                          <h5 className="text-xs font-medium text-muted-foreground mb-2">
-                            Waypoints
-                          </h5>
+                    <div className="border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden bg-white dark:bg-slate-900">
+                      {/* Checklist items */}
+                      <div className="p-2 max-h-60 overflow-y-auto">
+                        {editedChecklist.length > 0 ? (
                           <div className="space-y-2">
-                            {subsection.waypoints.map((waypoint, index) => (
+                            {editedChecklist.map((item, index) => (
                               <div
                                 key={index}
-                                className="bg-muted/20 p-2 rounded text-sm flex justify-between"
+                                className="flex items-center gap-2 p-2 rounded-md hover:bg-slate-50 dark:hover:bg-slate-800/60 group/item"
                               >
-                                <div className="flex items-center gap-2">
-                                  <div className="h-5 w-5 rounded-full bg-muted/60 flex items-center justify-center text-xs font-medium">
-                                    {index + 1}
-                                  </div>
-                                  <span>Waypoint {index + 1}</span>
+                                <Checkbox
+                                  checked={item.completed}
+                                  onCheckedChange={() => {
+                                    const newChecklist = [...editedChecklist];
+                                    newChecklist[index] = {
+                                      ...newChecklist[index],
+                                      completed: !newChecklist[index].completed,
+                                    };
+                                    setEditedChecklist(newChecklist);
+                                  }}
+                                  className="h-4 w-4 border-slate-300 dark:border-slate-700 rounded"
+                                />
+                                <div
+                                  className={cn(
+                                    "flex-1 text-sm",
+                                    item.completed
+                                      ? "line-through text-slate-500 dark:text-slate-400"
+                                      : "text-slate-900 dark:text-slate-100"
+                                  )}
+                                >
+                                  {item.title}
                                 </div>
-                                <div className="text-muted-foreground text-xs">
-                                  {waypoint.latitude.toFixed(6)},{' '}
-                                  {waypoint.longitude.toFixed(6)}
-                                </div>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  className="h-7 w-7 p-0 rounded-full text-slate-400 hover:text-rose-600 dark:hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 opacity-0 group-hover/item:opacity-100 transition-opacity"
+                                  onClick={() => handleRemoveChecklistItem(index)}
+                                >
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </Button>
                               </div>
                             ))}
                           </div>
+                        ) : (
+                          <div className="text-center py-6 text-slate-500 dark:text-slate-400 text-sm">
+                            <ListChecks className="h-8 w-8 mx-auto mb-2 opacity-40" />
+                            <p>No checklist items yet</p>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Add new checklist item */}
+                      <div className="border-t border-slate-200 dark:border-slate-700 p-2 bg-slate-50 dark:bg-slate-800/50">
+                        <div className="flex gap-2">
+                          <Input
+                            placeholder="Add new item"
+                            value={newChecklistItem}
+                            onChange={(e) => setNewChecklistItem(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                handleAddChecklistItem();
+                              }
+                            }}
+                            className="flex-1 h-8 text-sm border-slate-300 dark:border-slate-700"
+                          />
+                          <Button
+                            size="sm"
+                            onClick={handleAddChecklistItem}
+                            disabled={!newChecklistItem.trim()}
+                            className="h-8 bg-blue-500 hover:bg-blue-600 text-white px-3"
+                          >
+                            <Plus className="h-3.5 w-3.5 mr-1" /> Add
+                          </Button>
                         </div>
                       </div>
                     </div>
-                  )}
-
-                {/* Action buttons */}
-                {editMode && (
-                  <div className="pt-2 flex justify-end gap-2">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
+                  </div>
+                ) : (
+                  <div>
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400">
+                        <ListChecks className="h-3.5 w-3.5" />
+                        <span>Checklist</span>
+                        {subsection.checklists && subsection.checklists.length > 0 && (
+                          <Badge variant="outline" className="ml-1.5 h-5 px-1.5 text-xs font-normal bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700">
+                            {subsection.checklists.filter(item => item.completed).length} / {subsection.checklists.length}
+                          </Badge>
+                        )}
+                      </div>
+                      {editMode && (
                         <Button
-                          variant="outline"
                           size="sm"
-                          className="text-muted-foreground h-9 border-muted gap-1"
+                          variant="ghost"
+                          className="h-8 w-8 rounded-full opacity-0 group-hover/checklist:opacity-100 transition-opacity text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEditingField('checklist');
+                          }}
                         >
-                          <MoreHorizontal className="h-4 w-4" />
-                          Actions
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-48">
-                        <DropdownMenuItem className="gap-2 cursor-pointer">
-                          <Edit className="h-4 w-4" />
-                          Edit All Details
-                        </DropdownMenuItem>
-                        <DropdownMenuItem className="gap-2 cursor-pointer">
                           <Pencil className="h-4 w-4" />
-                          Duplicate Section
-                        </DropdownMenuItem>
-                        <DropdownMenuTrigger className="w-full">
-                          <DropdownMenuItem className="gap-2 cursor-pointer text-destructive focus:text-destructive">
-                            <Trash2 className="h-4 w-4" />
-                            Delete Section
-                          </DropdownMenuItem>
-                        </DropdownMenuTrigger>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                        </Button>
+                      )}
+                    </div>
+
+                    {subsection.checklists && subsection.checklists.length > 0 ? (
+                      <div className="space-y-2 bg-slate-50/70 dark:bg-slate-800/50 rounded-lg p-3 border border-slate-200/70 dark:border-slate-700/50">
+                        {subsection.checklists.map((item, index) => (
+                          <div
+                            key={index}
+                            className="flex items-start gap-2 p-2 rounded-md bg-white dark:bg-slate-900/80 border border-slate-100 dark:border-slate-800/80"
+                          >
+                            <div
+                              className={cn(
+                                "mt-0.5 flex-shrink-0 h-4.5 w-4.5 rounded border cursor-pointer transition-colors duration-200",
+                                item.completed
+                                  ? `${colors.bgSolid} border-transparent`
+                                  : "border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800"
+                              )}
+                              onClick={() => handleToggleCheckItem(index)}
+                            >
+                              {item.completed && (
+                                <CheckCircle2 className="h-4 w-4 text-white" />
+                              )}
+                            </div>
+                            <div
+                              className={cn(
+                                "flex-1 text-sm transition-colors duration-200",
+                                item.completed
+                                  ? "line-through text-slate-500 dark:text-slate-400"
+                                  : "text-slate-900 dark:text-slate-100"
+                              )}
+                            >
+                              {item.title}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="bg-slate-50/70 dark:bg-slate-800/50 rounded-lg p-4 text-center border border-slate-200/70 dark:border-slate-700/50">
+                        <p className="text-sm text-slate-500 dark:text-slate-400">
+                          No checklist items found
+                        </p>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.div>
+
+              {/* Metadata (date created, last updated, etc.) */}
+              <div className="pt-3 mt-2 border-t border-slate-200/70 dark:border-slate-800/50 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+                <div className="flex items-center gap-1">
+                  <Clock className="h-3.5 w-3.5" />
+                  <span>Created: {getFormattedDate()}</span>
+                </div>
+                {editMode && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 w-7 p-0 rounded-full"
+                      >
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-48">
+                      <DropdownMenuItem
+                        className="cursor-pointer"
+                        onClick={() => setEditingField('title')}
+                      >
+                        <Edit className="h-4 w-4 mr-2" />
+                        <span>Edit Title</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        className="cursor-pointer"
+                        onClick={() => setEditingField('note')}
+                      >
+                        <StickyNote className="h-4 w-4 mr-2" />
+                        <span>Edit Notes</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        className="cursor-pointer"
+                        onClick={() => setEditingField('checklist')}
+                      >
+                        <ListChecks className="h-4 w-4 mr-2" />
+                        <span>Edit Checklist</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

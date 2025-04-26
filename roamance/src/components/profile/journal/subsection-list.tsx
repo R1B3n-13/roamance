@@ -101,11 +101,11 @@ const SortableSubsectionItem: React.FC<SortableSubsectionItemProps> = ({
   const getIcon = () => {
     switch (subsection.type) {
       case SubsectionType.ACTIVITY:
-        return <Activity className={cn("h-5 w-5", colors.icon)} />;
+        return <Activity className={cn("h-4.5 w-4.5", colors.icon)} />;
       case SubsectionType.ROUTE:
-        return <Route className={cn("h-5 w-5", colors.icon)} />;
+        return <Route className={cn("h-4.5 w-4.5", colors.icon)} />;
       default:
-        return <MapPin className={cn("h-5 w-5", colors.icon)} />;
+        return <MapPin className={cn("h-4.5 w-4.5", colors.icon)} />;
     }
   };
 
@@ -115,48 +115,50 @@ const SortableSubsectionItem: React.FC<SortableSubsectionItemProps> = ({
       style={style}
       className={cn(
         "relative mb-2 rounded-lg overflow-hidden transition-all duration-300 group",
-        isDragging ? "shadow-lg" : isSelected ? "shadow-md ring-2 ring-blue-500/40 dark:ring-blue-500/30" : "shadow-sm hover:shadow-md",
+        isDragging ? "shadow-lg scale-[1.02]" : isSelected ? "shadow-md ring-2 ring-blue-500/40 dark:ring-blue-500/30" : "shadow-sm hover:shadow-md",
         editMode && "cursor-pointer"
       )}
       {...attributes}
       onClick={handleSelectSubsection}
+      whileHover={{ scale: isDragging ? 1.02 : 1.01 }}
     >
       <div className={cn(
-        "border rounded-lg p-3 bg-white/60 dark:bg-slate-900/60 backdrop-blur-sm",
-        colors.border,
+        "border rounded-lg p-3.5 bg-white dark:bg-slate-900/95 backdrop-blur-sm",
+        isSelected ? `border-${colors.borderColor} dark:border-${colors.borderColor}/70` : "border-slate-200 dark:border-slate-800",
         isDragging ? "opacity-90 border-dashed" : "opacity-100",
-        isSelected && "bg-blue-50/50 dark:bg-blue-900/10"
+        isSelected ? `bg-${colors.bgColor}/5 dark:bg-${colors.bgColor}/10` : ""
       )}>
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-3">
           {/* Drag handle section */}
           {isDraggable && editMode && (
-            <div
+            <button
               {...listeners}
               className={cn(
                 "flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center",
-                colors.bg,
-                "hover:opacity-80 cursor-grab active:cursor-grabbing transition-all duration-200"
+                "bg-slate-100 dark:bg-slate-800",
+                "hover:bg-slate-200 dark:hover:bg-slate-700 cursor-grab active:cursor-grabbing transition-all duration-200"
               )}
               onClick={(e) => e.stopPropagation()}
             >
-              <GripVertical className="h-4 w-4 text-foreground/60" />
-            </div>
+              <GripVertical className="h-4 w-4 text-slate-500 dark:text-slate-400" />
+            </button>
           )}
 
           {/* Icon and title section */}
           <div className={cn(
-            "flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center",
-            colors.bg
+            "flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center border",
+            colors.bg,
+            colors.border
           )}>
             {getIcon()}
           </div>
 
           <div className="flex-1 min-w-0">
             <div className="flex flex-col">
-              <h4 className="text-sm font-medium truncate text-foreground">
+              <h4 className="font-medium truncate text-slate-900 dark:text-slate-100">
                 {subsection.title || "Untitled Section"}
               </h4>
-              <div className="flex items-center gap-2 mt-0.5">
+              <div className="flex items-center gap-2 mt-1">
                 <Badge
                   variant="outline"
                   className={cn(
@@ -164,12 +166,12 @@ const SortableSubsectionItem: React.FC<SortableSubsectionItemProps> = ({
                     colors.badge
                   )}
                 >
-                  {subsection.type}
+                  {subsection.type.charAt(0).toUpperCase() + subsection.type.slice(1).toLowerCase()}
                 </Badge>
                 {subsection.location && subsection.location.latitude !== 0 && (
-                  <div className="text-xs text-muted-foreground flex items-center gap-1">
+                  <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1">
                     <MapPin className="h-3 w-3" />
-                    <span>Location set</span>
+                    <span>Has location</span>
                   </div>
                 )}
               </div>
@@ -178,12 +180,12 @@ const SortableSubsectionItem: React.FC<SortableSubsectionItemProps> = ({
 
           {/* Actions section */}
           {editMode && (
-            <div className="flex gap-1 opacity-80 group-hover:opacity-100 transition-opacity">
+            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
               <Button
                 type="button"
                 size="icon"
                 variant="ghost"
-                className="h-8 w-8 rounded-full text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                className="h-8 w-8 rounded-full text-slate-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors"
                 onClick={(e) => {
                   e.stopPropagation();
                   onRemove();
@@ -198,7 +200,7 @@ const SortableSubsectionItem: React.FC<SortableSubsectionItemProps> = ({
                     type="button"
                     size="icon"
                     variant="ghost"
-                    className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors"
+                    className="h-8 w-8 rounded-full text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                     onClick={(e) => {
                       e.stopPropagation();
                       index > 0 && onReorderSubsections(index, index - 1);
@@ -212,7 +214,7 @@ const SortableSubsectionItem: React.FC<SortableSubsectionItemProps> = ({
                     type="button"
                     size="icon"
                     variant="ghost"
-                    className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors"
+                    className="h-8 w-8 rounded-full text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                     onClick={(e) => {
                       e.stopPropagation();
                       index < subsections.length - 1 && onReorderSubsections(index, index + 1);
@@ -228,7 +230,7 @@ const SortableSubsectionItem: React.FC<SortableSubsectionItemProps> = ({
                 type="button"
                 size="icon"
                 variant="ghost"
-                className="h-8 w-8 rounded-full text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+                className="h-8 w-8 rounded-full text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
                 onClick={(e) => {
                   e.stopPropagation();
                   if (onSelectSubsection) {
