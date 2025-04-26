@@ -102,7 +102,8 @@ public class AiServiceImpl implements AiService {
     }
 
     ChatResponse chatResponse =
-        generateResponse(model, AiSystemInstruction.FOR_TIDBITS, mediaBytes, requestDto.getText());
+        generateResponse(
+            model, AiSystemInstruction.FOR_TIDBITS_GENERATION, mediaBytes, requestDto.getText());
 
     if (chatResponse == null) {
 
