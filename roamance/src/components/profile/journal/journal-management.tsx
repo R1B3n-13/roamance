@@ -21,7 +21,7 @@ import {
   Search,
   Share2,
   Star,
-  X
+  X,
 } from 'lucide-react';
 import React, { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
@@ -31,6 +31,7 @@ import { JournalCard } from './journal-card';
 import { JournalCardSkeleton } from './journal-card-skeleton';
 import { JournalDetailView } from './journal-detail-view';
 import { JournalForm } from './journal-form';
+import { JournalSkeleton } from './journal-skeleton';
 
 export const JournalManagement: React.FC = () => {
   const [journals, setJournals] = useState<JournalBrief[]>([]);
@@ -549,43 +550,50 @@ export const JournalManagement: React.FC = () => {
       )}
 
       {/* Journal Creation/Edit Form */}
-      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-        <DialogContent className="sm:max-w-3xl p-0 rounded-xl overflow-hidden border-muted/30 shadow-xl bg-gradient-to-br from-background via-background/95 to-background/90">
-          <div className="relative">
-            <div className="absolute -left-20 -top-20 w-56 h-56 bg-indigo-500/10 rounded-full blur-3xl"></div>
-            <div className="absolute -right-20 -bottom-10 w-56 h-56 bg-purple-500/10 rounded-full blur-3xl"></div>
+      {isDetailLoading ? (
+        <JournalSkeleton
+          isOpen={isFormOpen}
+          onClose={() => setIsFormOpen(false)}
+        />
+      ) : (
+        <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+          <DialogContent className="sm:max-w-3xl p-0 rounded-xl overflow-hidden border-muted/30 shadow-xl bg-gradient-to-br from-background via-background/95 to-background/90">
+            <div className="relative">
+              <div className="absolute -left-20 -top-20 w-56 h-56 bg-indigo-500/10 rounded-full blur-3xl"></div>
+              <div className="absolute -right-20 -bottom-10 w-56 h-56 bg-purple-500/10 rounded-full blur-3xl"></div>
 
-            <div className="px-6 py-4 border-b border-muted/20 backdrop-blur-md relative z-10 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center shadow-md">
-                {journalToEdit ? (
-                  <Pencil className="h-5 w-5 text-white" />
-                ) : (
-                  <BookHeart className="h-5 w-5 text-white" />
-                )}
+              <div className="px-6 py-4 border-b border-muted/20 backdrop-blur-md relative z-10 flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center shadow-md">
+                  {journalToEdit ? (
+                    <Pencil className="h-5 w-5 text-white" />
+                  ) : (
+                    <BookHeart className="h-5 w-5 text-white" />
+                  )}
+                </div>
+
+                <DialogTitle className="flex flex-col gap-0.5 m-0 p-0">
+                  <span className="text-xl font-semibold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                    {journalToEdit ? 'Edit Journal' : 'Create New Journal'}
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    {journalToEdit
+                      ? 'Update your travel memories'
+                      : 'Document your adventures'}
+                  </span>
+                </DialogTitle>
               </div>
-
-              <DialogTitle className="flex flex-col gap-0.5 m-0 p-0">
-                <span className="text-xl font-semibold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                  {journalToEdit ? 'Edit Journal' : 'Create New Journal'}
-                </span>
-                <span className="text-xs text-muted-foreground">
-                  {journalToEdit
-                    ? 'Update your travel memories'
-                    : 'Document your adventures'}
-                </span>
-              </DialogTitle>
             </div>
-          </div>
 
-          <JournalForm
-            journal={journalToEdit || undefined}
-            isOpen={isFormOpen}
-            onClose={() => setIsFormOpen(false)}
-            onSubmit={handleFormSubmit}
-            isLoading={isSubmitting}
-          />
-        </DialogContent>
-      </Dialog>
+            <JournalForm
+              journal={journalToEdit || undefined}
+              isOpen={isFormOpen}
+              onClose={() => setIsFormOpen(false)}
+              onSubmit={handleFormSubmit}
+              isLoading={isSubmitting}
+            />
+          </DialogContent>
+        </Dialog>
+      )}
 
       {/* Journal Detail View */}
       <JournalDetailView

@@ -239,12 +239,15 @@ export const JournalForm: React.FC<JournalFormProps> = ({
   if (!isOpen) return null;
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => {
-      if (!open) {
-        setSubsectionFormVisible(false);
-        onClose();
-      }
-    }}>
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) {
+          setSubsectionFormVisible(false);
+          onClose();
+        }
+      }}
+    >
       <DialogContent className="w-full max-w-4xl sm:max-w-4xl max-h-[85vh] overflow-hidden p-0 rounded-xl border border-muted/30 shadow-xl">
         {/* Decorative header with gradient background */}
         <div className="relative">
@@ -276,19 +279,18 @@ export const JournalForm: React.FC<JournalFormProps> = ({
                 </p>
               </div>
             </motion.div>
-            <DialogXButton
-              onClick={onClose}
-              className="hover:bg-muted/80 transition-colors"
-            />
+            <DialogXButton onClick={onClose} />
           </div>
         </div>
 
-        <div className="flex flex-col flex-1 h-full max-h-[calc(85vh-80px)] overflow-hidden">
+        <div className="flex flex-col flex-1 h-full max-h-[calc(85vh-200px)] overflow-hidden">
           {isInitialLoading ? (
             <div className="flex-1 flex justify-center items-center p-10">
               <div className="flex flex-col items-center space-y-3">
                 <Loader2 className="w-10 h-10 text-indigo-500 animate-spin" />
-                <p className="text-muted-foreground text-sm animate-pulse">Loading journal data...</p>
+                <p className="text-muted-foreground text-sm animate-pulse">
+                  Loading journal data...
+                </p>
               </div>
             </div>
           ) : (
@@ -346,7 +348,7 @@ export const JournalForm: React.FC<JournalFormProps> = ({
         </div>
 
         {/* Footer with action buttons */}
-        <div className="sticky z-[999] bottom-8 w-full bg-muted/10 backdrop-blur-sm border-t border-muted/20 p-6 flex justify-between items-center">
+        <div className="sticky z-[999] bottom-0 w-full bg-muted/10 backdrop-blur-sm border-t border-muted/20 p-6 flex justify-between items-center">
           <Button
             type="button"
             onClick={onClose}
@@ -420,7 +422,7 @@ export const JournalForm: React.FC<JournalFormProps> = ({
                     </div>
                     <DialogXButton
                       onClick={() => setSubsectionFormVisible(false)}
-                      className="ml-auto hover:bg-muted/80 transition-colors"
+                      className="ml-auto"
                     />
                   </div>
                 </div>
