@@ -1,4 +1,5 @@
 import { LocationMap } from '@/components/maps/LocationViwer';
+import { RouteVisualization } from '@/components/maps/RouteVisualization';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -27,6 +28,7 @@ import {
   Edit,
   ListChecks,
   Loader2,
+  Map,
   MapPin,
   MoreHorizontal,
   Pencil,
@@ -555,6 +557,89 @@ export const SubsectionDetail: React.FC<SubsectionDetailProps> = ({
                   </div>
                 )}
 
+              {/* Route visualization for ROUTE type subsections */}
+              {subsection.type === SubsectionType.ROUTE &&
+                subsection.waypoints &&
+                subsection.waypoints.length >= 2 && (
+                  <div className="pt-2">
+                    <div className="flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400 mb-3">
+                      <Route className="h-3.5 w-3.5" />
+                      <span>Route Details</span>
+                    </div>
+                    <div className="border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
+                      <RouteVisualization
+                        locations={subsection.waypoints}
+                        height="300px"
+                        autoFit={true}
+                        showDistance={true}
+                        showTravelTime={true}
+                        travelMode={
+                          subsection.total_time && subsection.total_distance
+                            ? subsection.total_distance /
+                              (subsection.total_time / 3600) // Calculate speed in km/h if both values exist
+                            : 'driving'
+                        }
+                        highlightEndpoints={true}
+                        routeStyle={{
+                          color: isDarkMode ? '#10b981' : '#059669',
+                          weight: 4,
+                          opacity: 0.85,
+                        }}
+                      />
+                    </div>
+                    <div className="mt-3 flex flex-col sm:flex-row items-start sm:items-center sm:justify-between gap-2 text-xs">
+                      <div className="flex flex-wrap gap-2">
+                        <Badge
+                          variant="outline"
+                          className="px-2 py-0.5 bg-slate-50 dark:bg-slate-800 flex items-center gap-1.5 border-slate-200 dark:border-slate-700"
+                        >
+                          <MapPin className="h-3 w-3 text-slate-500 dark:text-slate-400" />
+                          <span>{subsection.waypoints.length} waypoints</span>
+                        </Badge>
+                        {subsection.total_distance && (
+                          <Badge
+                            variant="outline"
+                            className="px-2 py-0.5 bg-slate-50 dark:bg-slate-800 flex items-center gap-1.5 border-slate-200 dark:border-slate-700"
+                          >
+                            <Map className="h-3 w-3 text-emerald-500 dark:text-emerald-400" />
+                            <span>
+                              {(subsection.total_distance / 1000).toFixed(2)} km
+                            </span>
+                          </Badge>
+                        )}
+                        {subsection.total_time && (
+                          <Badge
+                            variant="outline"
+                            className="px-2 py-0.5 bg-slate-50 dark:bg-slate-800 flex items-center gap-1.5 border-slate-200 dark:border-slate-700"
+                          >
+                            <Clock className="h-3 w-3 text-amber-500 dark:text-amber-400" />
+                            <span>
+                              {Math.floor(subsection.total_time / 3600) > 0
+                                ? `${Math.floor(subsection.total_time / 3600)}h ${Math.floor((subsection.total_time % 3600) / 60)}m`
+                                : `${Math.floor(subsection.total_time / 60)}m`}
+                            </span>
+                          </Badge>
+                        )}
+                      </div>
+
+                      {editMode && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-7 px-2 text-xs border-slate-200 dark:border-slate-700"
+                          onClick={() => {
+                            alert(
+                              'Route editing is not available in this view'
+                            );
+                          }}
+                        >
+                          <Route className="h-3 w-3 mr-1" />
+                          Edit Route
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                )}
               {/* Checklist section - editable */}
               <div className="pt-2 group/checklist">
                 {editingField === 'checklist' ? (
