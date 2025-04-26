@@ -35,12 +35,23 @@ export const JournalForm: React.FC<JournalFormProps> = ({
   onSubmit,
   isLoading,
 }) => {
+  const [isInitialLoading, setIsInitialLoading] = useState(false);
+
   // Remove scroll lock when dialog closes
   useEffect(() => {
     if (!isOpen) {
       document.body.style.overflow = '';
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    // Set loading state when journal is null but expected (edit mode)
+    if (isOpen && !journal && isLoading) {
+      setIsInitialLoading(true);
+    } else {
+      setIsInitialLoading(false);
+    }
+  }, [isOpen, journal, isLoading]);
 
   const [formData, setFormData] = useState<JournalCreateRequest>({
     title: '',
@@ -273,104 +284,113 @@ export const JournalForm: React.FC<JournalFormProps> = ({
         </div>
 
         <div className="flex flex-col flex-1 h-full max-h-[calc(85vh-80px)] overflow-hidden">
-          <div className="flex-1 overflow-y-auto">
-            <form onSubmit={handleSubmit} className="px-8 py-6">
-              {/* Form header with decorative element */}
-              <div className="relative mb-6">
-                <div className="absolute left-0 top-1/2 w-1 h-6 bg-indigo-500 rounded-r-full transform -translate-y-1/2"></div>
-                <h3 className="text-lg font-medium pl-3 text-foreground">
-                  Journal Details
-                </h3>
+          {isInitialLoading ? (
+            <div className="flex-1 flex justify-center items-center p-10">
+              <div className="flex flex-col items-center space-y-3">
+                <Loader2 className="w-10 h-10 text-indigo-500 animate-spin" />
+                <p className="text-muted-foreground text-sm animate-pulse">Loading journal data...</p>
               </div>
-
-              {/* Journal Metadata Form */}
-              <div className="bg-muted/5 rounded-xl border border-muted/20 p-6 mb-8 shadow-sm">
-                <JournalMetadataForm
-                  formData={formData}
-                  onChange={handleChange}
-                  onLocationChange={handleLocationChange}
-                  onCoverImageUpload={handleCoverImageUpload}
-                />
-              </div>
-
-              {/* Sections header with decorative element */}
-              <div className="relative mb-6 flex justify-between items-center">
-                <div className="flex items-center">
-                  <div className="absolute left-0 top-1/2 w-1 h-6 bg-purple-500 rounded-r-full transform -translate-y-1/2"></div>
+            </div>
+          ) : (
+            <div className="flex-1 overflow-y-auto">
+              <form onSubmit={handleSubmit} className="px-8 py-6">
+                {/* Form header with decorative element */}
+                <div className="relative mb-6">
+                  <div className="absolute left-0 top-1/2 w-1 h-6 bg-indigo-500 rounded-r-full transform -translate-y-1/2"></div>
                   <h3 className="text-lg font-medium pl-3 text-foreground">
-                    Journal Sections
+                    Journal Details
                   </h3>
                 </div>
 
-                <Button
-                  type="button"
-                  onClick={() => setSubsectionFormVisible(true)}
-                  size="sm"
-                  className="bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white shadow-sm hover:shadow-md transition-all duration-200 gap-1.5"
-                >
-                  <PlusCircle className="w-4 h-4" />
-                  Add Section
-                </Button>
-              </div>
+                {/* Journal Metadata Form */}
+                <div className="bg-muted/5 rounded-xl border border-muted/20 p-6 mb-8 shadow-sm">
+                  <JournalMetadataForm
+                    formData={formData}
+                    onChange={handleChange}
+                    onLocationChange={handleLocationChange}
+                    onCoverImageUpload={handleCoverImageUpload}
+                  />
+                </div>
 
-              {/* Sections list with improved styling */}
-              <div className="bg-muted/5 rounded-xl border border-muted/20 p-2 shadow-sm mb-6 min-h-[150px]">
-                <SubsectionList
-                  subsections={formData.subsections}
-                  onRemoveSubsection={removeSubsection}
-                  onAddSubsectionClick={() => setSubsectionFormVisible(true)}
-                />
-              </div>
-            </form>
-          </div>
+                {/* Sections header with decorative element */}
+                <div className="relative mb-6 flex justify-between items-center">
+                  <div className="flex items-center">
+                    <div className="absolute left-0 top-1/2 w-1 h-6 bg-purple-500 rounded-r-full transform -translate-y-1/2"></div>
+                    <h3 className="text-lg font-medium pl-3 text-foreground">
+                      Journal Sections
+                    </h3>
+                  </div>
 
-          {/* Footer with action buttons */}
-          <div className="sticky z-[999] bottom-8 w-full bg-muted/10 backdrop-blur-sm border-t border-muted/20 p-6 flex justify-between items-center">
-            <Button
-              type="button"
-              onClick={onClose}
-              variant="outline"
-              className="min-w-[100px] border-muted/60 hover:bg-background gap-1.5"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Cancel
-            </Button>
-
-            <Button
-              type="submit"
-              onClick={handleSubmit}
-              disabled={isLoading}
-              className={cn(
-                'min-w-[180px] relative overflow-hidden gap-2',
-                'bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700',
-                'text-white shadow-md hover:shadow-lg transition-all duration-300'
-              )}
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Saving Journal...</span>
-                </>
-              ) : (
-                <>
-                  <Save className="w-4 h-4" />
-                  <span>Save Journal</span>
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: [0, 1, 0] }}
-                    transition={{
-                      repeat: Infinity,
-                      duration: 2,
-                      repeatDelay: 1,
-                    }}
-                    className="absolute -top-1 -right-1"
+                  <Button
+                    type="button"
+                    onClick={() => setSubsectionFormVisible(true)}
+                    size="sm"
+                    className="bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white shadow-sm hover:shadow-md transition-all duration-200 gap-1.5"
                   >
-                    <Sparkles className="w-4 h-4 text-white/80" />
-                  </motion.div>
-                </>
-              )}
-            </Button>
-          </div>
+                    <PlusCircle className="w-4 h-4" />
+                    Add Section
+                  </Button>
+                </div>
+
+                {/* Sections list with improved styling */}
+                <div className="bg-muted/5 rounded-xl border border-muted/20 p-2 shadow-sm mb-6 min-h-[150px]">
+                  <SubsectionList
+                    subsections={formData.subsections}
+                    onRemoveSubsection={removeSubsection}
+                    onAddSubsectionClick={() => setSubsectionFormVisible(true)}
+                  />
+                </div>
+              </form>
+            </div>
+          )}
+        </div>
+
+        {/* Footer with action buttons */}
+        <div className="sticky z-[999] bottom-8 w-full bg-muted/10 backdrop-blur-sm border-t border-muted/20 p-6 flex justify-between items-center">
+          <Button
+            type="button"
+            onClick={onClose}
+            variant="outline"
+            className="min-w-[100px] border-muted/60 hover:bg-background gap-1.5"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Cancel
+          </Button>
+
+          <Button
+            type="submit"
+            onClick={handleSubmit}
+            disabled={isLoading}
+            className={cn(
+              'min-w-[180px] relative overflow-hidden gap-2',
+              'bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700',
+              'text-white shadow-md hover:shadow-lg transition-all duration-300'
+            )}
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>Saving Journal...</span>
+              </>
+            ) : (
+              <>
+                <Save className="w-4 h-4" />
+                <span>Save Journal</span>
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: [0, 1, 0] }}
+                  transition={{
+                    repeat: Infinity,
+                    duration: 2,
+                    repeatDelay: 1,
+                  }}
+                  className="absolute -top-1 -right-1"
+                >
+                  <Sparkles className="w-4 h-4 text-white/80" />
+                </motion.div>
+              </>
+            )}
+          </Button>
         </div>
 
         {/* Journal Subsection Form Modal with enhanced styling */}

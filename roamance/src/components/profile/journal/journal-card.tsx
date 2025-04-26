@@ -450,16 +450,21 @@ export const JournalCard: React.FC<JournalCardProps> = ({
                     <MoreHorizontal className="h-4 w-4" />
                   </motion.button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuContent
+                  align="end"
+                  className="w-56 p-1.5 border border-slate-200/80 dark:border-slate-800/80 shadow-lg rounded-xl backdrop-blur-sm animate-in fade-in-80 data-[side=bottom]:slide-in-from-top-2 data-[side=top]:slide-in-from-bottom-2"
+                >
                   <DropdownMenuItem
                     onClick={(e) => {
                       e.stopPropagation();
                       onView(journal);
                     }}
-                    className="cursor-pointer flex items-center gap-2"
+                    className="cursor-pointer flex items-center gap-2.5 px-3 py-1.5 text-xs rounded-lg transition-colors duration-200 focus:bg-indigo-50 dark:focus:bg-indigo-900/20 focus:text-indigo-600 dark:focus:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 hover:text-indigo-600 dark:hover:text-indigo-400"
                   >
-                    <BookOpen className="h-4 w-4 text-indigo-500" />
-                    <span>Open Journal</span>
+                    <div className="h-7 w-7 rounded-full bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center">
+                      <BookOpen className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400" />
+                    </div>
+                    <span className="font-medium">Open Journal</span>
                   </DropdownMenuItem>
 
                   <DropdownMenuItem
@@ -467,30 +472,34 @@ export const JournalCard: React.FC<JournalCardProps> = ({
                       e.stopPropagation();
                       onEdit(journal);
                     }}
-                    className="cursor-pointer flex items-center gap-2"
+                    className="cursor-pointer flex items-center gap-2.5 px-3 py-1.5 text-xs rounded-lg transition-colors duration-200 focus:bg-blue-50 dark:focus:bg-blue-900/20 focus:text-blue-600 dark:focus:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400"
                   >
-                    <Edit className="h-4 w-4 text-blue-500" />
-                    <span>Edit Journal</span>
+                    <div className="h-7 w-7 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center">
+                      <Edit className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
+                    </div>
+                    <span className="font-medium">Edit Journal</span>
                   </DropdownMenuItem>
 
-                  <DropdownMenuSeparator />
+                  <DropdownMenuSeparator className="my-1.5 h-px bg-slate-200/70 dark:bg-slate-700/50" />
 
                   <DropdownMenuItem
                     onClick={(e) => {
                       e.stopPropagation();
                       onToggleFavorite(journal);
                     }}
-                    className="cursor-pointer flex items-center gap-2"
+                    className="cursor-pointer flex items-center gap-2.5 px-3 py-1.5 text-xs rounded-lg transition-colors duration-200 focus:bg-amber-50 dark:focus:bg-amber-900/20 focus:text-amber-600 dark:focus:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 hover:text-amber-600 dark:hover:text-amber-400"
                   >
-                    <Star
-                      className={cn(
-                        'h-4 w-4',
-                        journal.is_favorite
-                          ? 'text-amber-500 fill-amber-500'
-                          : 'text-slate-500'
-                      )}
-                    />
-                    <span>
+                    <div className="h-7 w-7 rounded-full bg-amber-50 dark:bg-amber-900/30 flex items-center justify-center">
+                      <Star
+                        className={cn(
+                          'h-3.5 w-3.5',
+                          journal.is_favorite
+                            ? 'text-amber-600 dark:text-amber-400 fill-amber-500 dark:fill-amber-400'
+                            : 'text-amber-600 dark:text-amber-400'
+                        )}
+                      />
+                    </div>
+                    <span className="font-medium">
                       {journal.is_favorite
                         ? 'Remove from Favorites'
                         : 'Add to Favorites'}
@@ -502,32 +511,43 @@ export const JournalCard: React.FC<JournalCardProps> = ({
                       e.stopPropagation();
                       onToggleArchive(journal);
                     }}
-                    className="cursor-pointer flex items-center gap-2"
-                  >
-                    {journal.is_archived ? (
-                      <>
-                        <ArchiveRestore className="h-4 w-4 text-indigo-500" />
-                        <span>Unarchive Journal</span>
-                      </>
-                    ) : (
-                      <>
-                        <Archive className="h-4 w-4 text-violet-500" />
-                        <span>Archive Journal</span>
-                      </>
+                    className={cn(
+                      "cursor-pointer flex items-center gap-2.5 px-3 py-1.5 text-xs rounded-lg transition-colors duration-200",
+                      journal.is_archived
+                        ? "focus:bg-teal-50 dark:focus:bg-teal-900/20 focus:text-teal-600 dark:focus:text-teal-400 hover:bg-teal-50 dark:hover:bg-teal-900/20 hover:text-teal-600 dark:hover:text-teal-400"
+                        : "focus:bg-violet-50 dark:focus:bg-violet-900/20 focus:text-violet-600 dark:focus:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-900/20 hover:text-violet-600 dark:hover:text-violet-400"
                     )}
+                  >
+                    <div className={cn(
+                      "h-7 w-7 rounded-full flex items-center justify-center",
+                      journal.is_archived
+                        ? "bg-teal-50 dark:bg-teal-900/30"
+                        : "bg-violet-50 dark:bg-violet-900/30"
+                    )}>
+                      {journal.is_archived ? (
+                        <ArchiveRestore className="h-3.5 w-3.5 text-teal-600 dark:text-teal-400" />
+                      ) : (
+                        <Archive className="h-3.5 w-3.5 text-violet-600 dark:text-violet-400" />
+                      )}
+                    </div>
+                    <span className="font-medium">
+                      {journal.is_archived ? 'Unarchive Journal' : 'Archive Journal'}
+                    </span>
                   </DropdownMenuItem>
 
-                  <DropdownMenuSeparator />
+                  <DropdownMenuSeparator className="my-1.5 h-px bg-slate-200/70 dark:bg-slate-700/50" />
 
                   <DropdownMenuItem
                     onClick={(e) => {
                       e.stopPropagation();
                       onDelete(journal);
                     }}
-                    className="cursor-pointer flex items-center gap-2 text-rose-500 focus:text-rose-500"
+                    className="cursor-pointer flex items-center gap-2.5 px-3 py-1.5 text-xs rounded-lg transition-colors duration-200 focus:bg-rose-50 dark:focus:bg-rose-900/20 focus:text-rose-600 dark:focus:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 hover:text-rose-600 dark:hover:text-rose-400"
                   >
-                    <Trash2 className="h-4 w-4" />
-                    <span>Delete Journal</span>
+                    <div className="h-7 w-7 rounded-full bg-rose-50 dark:bg-rose-900/30 flex items-center justify-center">
+                      <Trash2 className="h-3.5 w-3.5 text-rose-600 dark:text-rose-400" />
+                    </div>
+                    <span className="font-medium">Delete Journal</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>

@@ -413,7 +413,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
 
       <motion.p
         variants={itemVariants}
-        className="text-slate-600 dark:text-slate-300 max-w-md mb-8 leading-relaxed"
+        className="text-slate-600 text-[15px] dark:text-slate-300 max-w-md mb-8 leading-relaxed"
       >
         {displayDescription}
       </motion.p>

@@ -1,12 +1,7 @@
 import { LocationMap } from '@/components/maps/LocationViwer';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 import { CloudinaryUploadResult } from '@/service/cloudinary-service';
 import { journalService } from '@/service/journal-service';
@@ -39,6 +34,7 @@ import Image from 'next/image';
 import React, { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { ConfirmDialog } from '../../common/confirm-dialog';
+import { DialogXButton } from '../../common/button/dialog-x-button';
 import { JournalMetadataForm } from './journal-metadata-form';
 import { JourneyPathAnimation } from './journey-path-animation';
 import { SubsectionDetail } from './subsection-detail';
@@ -490,9 +486,7 @@ export const JournalDetailView: React.FC<JournalDetailViewProps> = ({
               />
 
               {/* Close button */}
-              <DialogClose className="absolute top-4 right-4 p-2 rounded-full bg-black/30 text-white hover:bg-black/50 z-20 transition-all duration-300 backdrop-blur-sm hover:rotate-90">
-                <X className="w-5 h-5" />
-              </DialogClose>
+              <DialogXButton />
 
               {/* Journal title and location */}
               <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8 z-20">
@@ -975,12 +969,10 @@ export const JournalDetailView: React.FC<JournalDetailViewProps> = ({
                       Document a specific part of your journey
                     </p>
                   </div>
-                  <DialogClose
+                  <DialogXButton
                     onClick={() => setSubsectionFormVisible(false)}
-                    className="ml-auto hover:bg-muted/80 transition-colors"
-                  >
-                    <X className="w-5 h-5 text-muted-foreground" />
-                  </DialogClose>
+                    className="ml-auto"
+                  />
                 </div>
               </div>
 
