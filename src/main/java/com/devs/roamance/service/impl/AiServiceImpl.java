@@ -6,9 +6,12 @@ import static dev.langchain4j.model.googleai.GeminiHarmCategory.*;
 
 import com.devs.roamance.constant.AiSystemInstruction;
 import com.devs.roamance.constant.ResponseMessage;
+import com.devs.roamance.dto.common.AiPoweredItineraryDto;
+import com.devs.roamance.dto.request.ai.AiPoweredItineraryCreateRequestDto;
 import com.devs.roamance.dto.request.ai.MultiModalAiRequestDto;
 import com.devs.roamance.dto.request.ai.MultiModalRagRequestDto;
 import com.devs.roamance.dto.request.ai.UniModalAiRequestDto;
+import com.devs.roamance.dto.response.ai.AiPoweredItineraryResponseDto;
 import com.devs.roamance.dto.response.ai.EmbeddingResponse;
 import com.devs.roamance.dto.response.ai.PostIdListRagSearchDto;
 import com.devs.roamance.dto.response.ai.TidbitsAndSafetyDto;
@@ -28,6 +31,8 @@ import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
 import dev.langchain4j.model.output.FinishReason;
 import dev.langchain4j.rag.RetrievalAugmentor;
 import dev.langchain4j.service.AiServices;
+import dev.langchain4j.service.V;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -70,6 +75,19 @@ public class AiServiceImpl implements AiService {
 
     @dev.langchain4j.service.SystemMessage(AiSystemInstruction.FOR_POST_IDS_RETRIEVAL)
     PostIdListRagSearchDto answer(String question);
+  }
+
+  private interface ItineraryAiService {
+
+    @dev.langchain4j.service.SystemMessage(AiSystemInstruction.FOR_ITINERARY_GENERATION)
+    @dev.langchain4j.service.UserMessage(
+        "Create a travel itinerary for {{location}} starting on {{startDate}} for {{numberOfDays}} days with a {{budgetLevel}} budget for {{numberOfPeople}} people.")
+    AiPoweredItineraryDto generateItinerary(
+        @V("location") String location,
+        @V("startDate") LocalDate startDate,
+        @V("numberOfDays") Integer numberOfDays,
+        @V("budgetLevel") String budgetLevel,
+        @V("numberOfPeople") Integer numberOfPeople);
   }
 
   @Override
@@ -274,6 +292,42 @@ public class AiServiceImpl implements AiService {
     PostIdListRagSearchDto postIdListRagSearchDto = ragAssistant.answer(query);
 
     return CompletableFuture.completedFuture(postIdListRagSearchDto);
+  }
+
+  @Override
+  @Async("asyncExecutor")
+  public CompletableFuture<AiPoweredItineraryResponseDto> getAiPoweredItinerary(
+      AiPoweredItineraryCreateRequestDto requestDto) {
+
+    ChatLanguageModel model;
+    try {
+      model =
+          geminiModelUtil.geminiModelBuilder(
+              geminiApiKey,
+              geminiModelName,
+              builder -> builder.responseFormat(ResponseFormat.JSON));
+
+    } catch (Exception e) {
+      log.error("Gemini model build failed :{}", e.getMessage(), e);
+
+      return CompletableFuture.failedFuture(
+          new AiGenerationFailedException(ResponseMessage.AI_MODEL_BUILD_FAILED));
+    }
+
+    ItineraryAiService itineraryAiService =
+        AiServices.builder(ItineraryAiService.class).chatLanguageModel(model).build();
+
+    AiPoweredItineraryDto aiPoweredItineraryDto =
+        itineraryAiService.generateItinerary(
+            requestDto.getLocation(),
+            requestDto.getStartDate(),
+            requestDto.getNumberOfDays(),
+            requestDto.getBudgetLevel(),
+            requestDto.getNumberOfPeople());
+
+    return CompletableFuture.completedFuture(
+        new AiPoweredItineraryResponseDto(
+            200, true, ResponseMessage.ITINERARY_GENERATION_SUCCESS, aiPoweredItineraryDto));
   }
 
   private ChatResponse generateResponse(

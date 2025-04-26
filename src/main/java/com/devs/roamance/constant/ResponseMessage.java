@@ -158,6 +158,7 @@ public final class ResponseMessage {
 
   // ========================== AI Related ==========================
 
+  public static final String ITINERARY_GENERATION_SUCCESS = "Itinerary generation successfully.";
   public static final String PROOFREAD_GENERATION_FAILED = "Proofread generation failed!";
   public static final String PROOFREAD_INPUT_NULL = "Proofread input is null!";
   public static final String AI_MODEL_BUILD_FAILED = "AI model build failed!";

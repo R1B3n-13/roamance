@@ -1,7 +1,9 @@
 package com.devs.roamance.controller;
 
+import com.devs.roamance.dto.request.ai.AiPoweredItineraryCreateRequestDto;
 import com.devs.roamance.dto.request.ai.MultiModalRagRequestDto;
 import com.devs.roamance.dto.request.ai.UniModalAiRequestDto;
+import com.devs.roamance.dto.response.ai.AiPoweredItineraryResponseDto;
 import com.devs.roamance.dto.response.social.PostListResponseDto;
 import com.devs.roamance.service.AiService;
 import com.devs.roamance.service.PostService;
@@ -62,10 +64,31 @@ public class AiController {
               } else {
                 int[] params = PaginationSortingUtil.validatePaginationParams(pageNumber, pageSize);
 
-                PostListResponseDto dto =
+                PostListResponseDto responseDto =
                     postService.getByIds(postIdsDto.getPostIds(), params[0], params[1]);
 
-                deferredResult.setResult(ResponseEntity.ok(dto));
+                deferredResult.setResult(ResponseEntity.ok(responseDto));
+              }
+            });
+
+    return deferredResult;
+  }
+
+  @PostMapping("/generate-itinerary")
+  public DeferredResult<ResponseEntity<AiPoweredItineraryResponseDto>> generateItinerary(
+      @Valid @RequestBody AiPoweredItineraryCreateRequestDto requestDto) {
+
+    DeferredResult<ResponseEntity<AiPoweredItineraryResponseDto>> deferredResult =
+        new DeferredResult<>();
+
+    aiService
+        .getAiPoweredItinerary(requestDto)
+        .whenComplete(
+            (responseDto, ex) -> {
+              if (ex != null) {
+                deferredResult.setErrorResult(ex);
+              } else {
+                deferredResult.setResult(ResponseEntity.ok(responseDto));
               }
             });
 
