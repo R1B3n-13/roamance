@@ -29,10 +29,4 @@ public class SubsectionDetailDto extends SubsectionBriefDto {
 
   // For Route Subsection
   private List<LocationResponseDto> waypoints = new ArrayList<>();
-
-  @JsonProperty("total_time")
-  private Integer totalTime;
-
-  @JsonProperty("total_distance")
-  private Double totalDistance;
 }

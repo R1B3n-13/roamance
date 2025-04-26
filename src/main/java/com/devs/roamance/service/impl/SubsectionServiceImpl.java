@@ -263,8 +263,7 @@ public class SubsectionServiceImpl implements SubsectionService {
       try {
         RouteSubsectionUpdateRequestDto routeDetails =
             modelMapper.map(updateRequestDto, RouteSubsectionUpdateRequestDto.class);
-        routeSubsection.setTotalTime(routeDetails.getTotalTime());
-        routeSubsection.setTotalDistance(routeDetails.getTotalDistance());
+
         if (routeDetails.getWaypoints() != null && !routeDetails.getWaypoints().isEmpty()) {
           List<Location> locations =
               routeDetails.getWaypoints().stream()

@@ -1,7 +1,6 @@
 package com.devs.roamance.model.travel.journal;
 
 import com.devs.roamance.model.common.Location;
-import jakarta.annotation.Nullable;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
@@ -17,8 +16,4 @@ import lombok.*;
 @AllArgsConstructor
 public class RouteSubsection extends Subsection {
   @ElementCollection @NonNull private List<Location> waypoints = new ArrayList<>();
-
-  @Nullable private Integer totalTime;
-
-  @Nullable private Double totalDistance;
 }
