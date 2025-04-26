@@ -1,6 +1,11 @@
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
 import { SubsectionRequest, SubsectionType } from '@/types/subsection';
+import { closestCenter, DndContext, DragEndEvent, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { restrictToParentElement, restrictToVerticalAxis } from '@dnd-kit/modifiers';
+import { SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   Activity,
@@ -13,15 +18,8 @@ import {
   Route,
   Trash2
 } from 'lucide-react';
-import React, { useState, useEffect, createContext } from 'react';
+import React, { createContext, useEffect, useState } from 'react';
 import { getSubsectionTypeColors } from './colorscheme';
-import { LocationMap } from '@/components/maps/LocationViwer';
-import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
-import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import { restrictToVerticalAxis, restrictToParentElement } from '@dnd-kit/modifiers';
-import { cn } from '@/lib/utils';
-import { Badge } from '@/components/ui/badge';
 
 // Create a context for subsection data
 interface SubsectionContextType {
@@ -66,7 +64,7 @@ const SortableSubsectionItem: React.FC<SortableSubsectionItemProps> = ({
   const { subsections, onReorderSubsections, onSelectSubsection, selectedSubsectionId, editMode } = React.useContext(SubsectionContext);
 
   // Check if this item is selected
-  const isSelected = id === selectedSubsectionId || subsection.id === selectedSubsectionId;
+  const isSelected = id === selectedSubsectionId;
 
   // Handle click on the item to select it
   const handleSelectSubsection = (e: React.MouseEvent) => {
@@ -77,7 +75,7 @@ const SortableSubsectionItem: React.FC<SortableSubsectionItemProps> = ({
     }
 
     if (onSelectSubsection && editMode) {
-      onSelectSubsection(subsection.id || id, index);
+      onSelectSubsection(id, index);
     }
   };
 
@@ -124,9 +122,9 @@ const SortableSubsectionItem: React.FC<SortableSubsectionItemProps> = ({
     >
       <div className={cn(
         "border rounded-lg p-3.5 bg-white dark:bg-slate-900/95 backdrop-blur-sm",
-        isSelected ? `border-${colors.borderColor} dark:border-${colors.borderColor}/70` : "border-slate-200 dark:border-slate-800",
+        isSelected ? colors.border : "border-slate-200 dark:border-slate-800",
         isDragging ? "opacity-90 border-dashed" : "opacity-100",
-        isSelected ? `bg-${colors.bgColor}/5 dark:bg-${colors.bgColor}/10` : ""
+        isSelected ? colors.bg : ""
       )}>
         <div className="flex items-center space-x-3">
           {/* Drag handle section */}
@@ -168,7 +166,7 @@ const SortableSubsectionItem: React.FC<SortableSubsectionItemProps> = ({
                 >
                   {subsection.type.charAt(0).toUpperCase() + subsection.type.slice(1).toLowerCase()}
                 </Badge>
-                {subsection.location && subsection.location.latitude !== 0 && (
+                { ( (subsection.type === SubsectionType.SIGHTSEEING || subsection.type === SubsectionType.ACTIVITY) && subsection.location.latitude !== 0 ) && (
                   <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1">
                     <MapPin className="h-3 w-3" />
                     <span>Has location</span>
@@ -203,7 +201,7 @@ const SortableSubsectionItem: React.FC<SortableSubsectionItemProps> = ({
                     className="h-8 w-8 rounded-full text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                     onClick={(e) => {
                       e.stopPropagation();
-                      index > 0 && onReorderSubsections(index, index - 1);
+                      if (index > 0 && onReorderSubsections) onReorderSubsections(index, index - 1);
                     }}
                     disabled={index === 0}
                     title="Move up"
@@ -217,7 +215,7 @@ const SortableSubsectionItem: React.FC<SortableSubsectionItemProps> = ({
                     className="h-8 w-8 rounded-full text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                     onClick={(e) => {
                       e.stopPropagation();
-                      index < subsections.length - 1 && onReorderSubsections(index, index + 1);
+                      if (index < subsections.length - 1 && onReorderSubsections) onReorderSubsections(index, index + 1);
                     }}
                     disabled={index === subsections.length - 1}
                     title="Move down"
@@ -234,7 +232,7 @@ const SortableSubsectionItem: React.FC<SortableSubsectionItemProps> = ({
                 onClick={(e) => {
                   e.stopPropagation();
                   if (onSelectSubsection) {
-                    onSelectSubsection(subsection.id || id, index);
+                    onSelectSubsection(id, index);
                   }
                 }}
                 title="View subsection"
@@ -264,7 +262,7 @@ export const SubsectionList: React.FC<SubsectionListProps> = ({
   // Update items when subsections change
   useEffect(() => {
     setItems(subsections.map((subsection, index) => ({
-      id: subsection.id || `subsection-${index}`,
+      id: `subsection-${index}`,
       subsection
     })));
   }, [subsections]);

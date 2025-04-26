@@ -1,10 +1,17 @@
 import { LocationPickerMap } from '@/components/maps/LocationPickerMap';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import { ActivityType } from '@/types';
 import { SubsectionRequest, SubsectionType } from '@/types/subsection';
-import { motion, AnimatePresence } from 'framer-motion';
+import { closestCenter, DndContext, DragEndEvent, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { restrictToParentElement, restrictToVerticalAxis } from '@dnd-kit/modifiers';
+import { SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import MDEditor from '@uiw/react-md-editor';
+import { AnimatePresence, motion } from 'framer-motion';
 import {
   Activity,
   AlertCircle,
@@ -21,17 +28,9 @@ import {
   StickyNote,
   X,
 } from 'lucide-react';
+import { useTheme } from 'next-themes';
 import React, { useEffect, useState } from 'react';
 import { getSubsectionTypeColors } from './colorscheme';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
-import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
-import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import { restrictToVerticalAxis, restrictToParentElement } from '@dnd-kit/modifiers';
-import MDEditor from '@uiw/react-md-editor';
-import { useTheme } from 'next-themes';
 
 interface SubsectionFormProps {
   isSubmitting: boolean;

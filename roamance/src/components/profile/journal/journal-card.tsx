@@ -1,6 +1,17 @@
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { JournalBrief } from '@/types/journal';
 import { formatRelativeTime } from '@/utils';
@@ -12,13 +23,9 @@ import {
   CalendarIcon,
   Clock,
   Edit,
-  ExternalLink,
-  GripVertical,
-  ImageIcon,
   Lock,
   MapPin,
   MoreHorizontal,
-  Route,
   Share2,
   Star,
   Trash2,
@@ -26,8 +33,10 @@ import {
 import Image from 'next/image';
 import React from 'react';
 import { getJournalColorScheme } from './colorscheme';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Card } from '@/components/ui/card';
+
+// Create a motion-enabled version of Card
+const MotionCard = motion(Card);
 
 interface JournalCardProps {
   journal: JournalBrief;
@@ -62,7 +71,8 @@ export const JournalCard: React.FC<JournalCardProps> = ({
   // Get CSS classes based on the color scheme
   const getCardStyles = () => {
     const baseGradient = 'bg-gradient-to-tr';
-    const basePattern = "bg-[url('/images/roamance-logo-no-text.png')] bg-repeat-space bg-contain mix-blend-overlay";
+    const basePattern =
+      "bg-[url('/images/roamance-logo-no-text.png')] bg-repeat-space bg-contain mix-blend-overlay";
     const baseBadge = 'text-white border shadow-sm';
 
     // Determine styles based on journal type and favorite status
@@ -156,26 +166,28 @@ export const JournalCard: React.FC<JournalCardProps> = ({
     hover: {
       y: -8,
       scale: 1.02,
-      boxShadow: "0 20px 40px -20px rgba(0, 0, 0, 0.15)",
-      transition: { type: "spring", stiffness: 300, damping: 15 }
-    }
+      boxShadow: '0 20px 40px -20px rgba(0, 0, 0, 0.15)',
+      transition: { type: 'spring', stiffness: 300, damping: 15 },
+    },
   };
 
   // Button animations
   const buttonVariants = {
     hover: {
       scale: 1.08,
-      transition: { type: "spring", stiffness: 400, damping: 15 }
+      transition: { type: 'spring', stiffness: 400, damping: 15 },
     },
     tap: {
-      scale: 0.92
-    }
+      scale: 0.92,
+    },
   };
 
   // Shimmer delay based on journal ID for staggered effect
   const getShimmerDelay = () => {
     // Create a hash from the journal id
-    const hash = journal.id.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
+    const hash = journal.id
+      .split('')
+      .reduce((sum, char) => sum + char.charCodeAt(0), 0);
     return `${hash % 5}s`; // 0-4 second delay
   };
 
@@ -188,9 +200,10 @@ export const JournalCard: React.FC<JournalCardProps> = ({
       transition={{ duration: 0.3 }}
       className="h-full"
     >
-      <Card
+      {/* Use MotionCard instead of Card to support motion variants */}
+      <MotionCard
         variants={cardVariants}
-        className="overflow-hidden group h-full flex flex-col border-slate-200/60 dark:border-slate-800/60 bg-white dark:bg-slate-900 backdrop-blur-sm shadow-sm hover:shadow-xl transition-all duration-300 rounded-xl"
+        className="overflow-hidden group h-full flex flex-col border-slate-200/60 dark:border-slate-800/60 bg-white dark:bg-slate-900 backdrop-blur-sm shadow-sm hover:shadow-xl transition-all duration-300 rounded-xl py-0"
         onClick={() => onView(journal)}
       >
         {/* Journal Header Image */}
@@ -207,22 +220,27 @@ export const JournalCard: React.FC<JournalCardProps> = ({
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent opacity-80 group-hover:opacity-70 transition-opacity duration-500"></div>
             </div>
           ) : (
-            <div className={cn('absolute inset-0 flex items-center justify-center', styles.gradient)}>
+            <div
+              className={cn(
+                'absolute inset-0 flex items-center justify-center',
+                styles.gradient
+              )}
+            >
               {/* Decorative pattern overlay */}
-              <div className={cn("absolute inset-0", styles.pattern)} />
+              <div className={cn('absolute inset-0', styles.pattern)} />
 
               {/* Enhanced shimmer effect */}
               <div className="absolute inset-0 overflow-hidden">
                 <motion.div
                   className={cn(
-                    "absolute -inset-x-full top-0 bottom-0 bg-gradient-to-r from-transparent",
+                    'absolute -inset-x-full top-0 bottom-0 bg-gradient-to-r from-transparent',
                     styles.shimmerColor,
-                    "to-transparent animate-[shimmer_3s_infinite]"
+                    'to-transparent animate-[shimmer_3s_infinite]'
                   )}
                   style={{
                     transform: 'translateX(-10%) skewX(-15deg)',
                     animationDelay: getShimmerDelay(),
-                    animationDuration: '3s'
+                    animationDuration: '3s',
                   }}
                 />
               </div>
@@ -308,12 +326,19 @@ export const JournalCard: React.FC<JournalCardProps> = ({
                     )}
                   >
                     <Star
-                      className={cn('h-4 w-4', journal.is_favorite ? 'fill-white' : '')}
+                      className={cn(
+                        'h-4 w-4',
+                        journal.is_favorite ? 'fill-white' : ''
+                      )}
                     />
                   </motion.button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>{journal.is_favorite ? 'Remove from favorites' : 'Add to favorites'}</p>
+                  <p>
+                    {journal.is_favorite
+                      ? 'Remove from favorites'
+                      : 'Add to favorites'}
+                  </p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -334,28 +359,26 @@ export const JournalCard: React.FC<JournalCardProps> = ({
 
         {/* Journal Content */}
         <div className="p-5 flex-1 flex flex-col">
-          {!journal.cover_image && (
-            <div>
-              <h3
-                className={cn(
-                  'font-semibold text-lg mb-1.5 transition-colors group-hover:text-indigo-600 dark:group-hover:text-indigo-400',
-                  styles.accentColor
-                )}
-              >
-                {journal.title}
-              </h3>
-              {journal.destination && (
-                <div className="flex items-center text-slate-500 dark:text-slate-400 text-sm gap-1.5">
-                  <MapPin className="h-3.5 w-3.5" />
-                  <span className="truncate max-w-[180px]">
-                    {journal.destination
-                      ? `${journal.destination.latitude.toFixed(2)}, ${journal.destination.longitude.toFixed(2)}`
-                      : 'No location'}
-                  </span>
-                </div>
+          <div>
+            <h3
+              className={cn(
+                'font-semibold text-lg mb-1.5 transition-colors group-hover:text-indigo-600 dark:group-hover:text-indigo-400',
+                styles.accentColor
               )}
-            </div>
-          )}
+            >
+              {journal.title}
+            </h3>
+            {journal.destination && (
+              <div className="flex items-center text-slate-500 dark:text-slate-400 text-sm gap-1.5">
+                <MapPin className="h-3.5 w-3.5" />
+                <span className="truncate max-w-[180px]">
+                  {journal.destination
+                    ? `${journal.destination.latitude.toFixed(2)}, ${journal.destination.longitude.toFixed(2)}`
+                    : 'No location'}
+                </span>
+              </div>
+            )}
+          </div>
 
           {/* Description with elegant empty state */}
           {journal.description ? (
@@ -391,8 +414,8 @@ export const JournalCard: React.FC<JournalCardProps> = ({
                   onView(journal);
                 }}
                 className={cn(
-                  "flex items-center justify-center h-8 w-8 rounded-full text-slate-500 dark:text-slate-400 transition-colors duration-200",
-                  "hover:bg-indigo-50 dark:hover:bg-indigo-900/10 hover:text-indigo-600 dark:hover:text-indigo-400"
+                  'flex items-center justify-center h-8 w-8 rounded-full text-slate-500 dark:text-slate-400 transition-colors duration-200',
+                  'hover:bg-indigo-50 dark:hover:bg-indigo-900/10 hover:text-indigo-600 dark:hover:text-indigo-400'
                 )}
               >
                 <BookOpen className="h-4 w-4" />
@@ -406,8 +429,8 @@ export const JournalCard: React.FC<JournalCardProps> = ({
                   onEdit(journal);
                 }}
                 className={cn(
-                  "flex items-center justify-center h-8 w-8 rounded-full text-slate-500 dark:text-slate-400 transition-colors duration-200",
-                  "hover:bg-blue-50 dark:hover:bg-blue-900/10 hover:text-blue-600 dark:hover:text-blue-400"
+                  'flex items-center justify-center h-8 w-8 rounded-full text-slate-500 dark:text-slate-400 transition-colors duration-200',
+                  'hover:bg-blue-50 dark:hover:bg-blue-900/10 hover:text-blue-600 dark:hover:text-blue-400'
                 )}
               >
                 <Edit className="h-4 w-4" />
@@ -420,8 +443,8 @@ export const JournalCard: React.FC<JournalCardProps> = ({
                     whileTap="tap"
                     onClick={(e) => e.stopPropagation()}
                     className={cn(
-                      "flex items-center justify-center h-8 w-8 rounded-full text-slate-500 dark:text-slate-400 transition-colors duration-200",
-                      "hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-300"
+                      'flex items-center justify-center h-8 w-8 rounded-full text-slate-500 dark:text-slate-400 transition-colors duration-200',
+                      'hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-300'
                     )}
                   >
                     <MoreHorizontal className="h-4 w-4" />
@@ -460,12 +483,17 @@ export const JournalCard: React.FC<JournalCardProps> = ({
                     className="cursor-pointer flex items-center gap-2"
                   >
                     <Star
-                      className={cn("h-4 w-4",
-                        journal.is_favorite ? "text-amber-500 fill-amber-500" : "text-slate-500"
+                      className={cn(
+                        'h-4 w-4',
+                        journal.is_favorite
+                          ? 'text-amber-500 fill-amber-500'
+                          : 'text-slate-500'
                       )}
                     />
                     <span>
-                      {journal.is_favorite ? "Remove from Favorites" : "Add to Favorites"}
+                      {journal.is_favorite
+                        ? 'Remove from Favorites'
+                        : 'Add to Favorites'}
                     </span>
                   </DropdownMenuItem>
 
@@ -505,27 +533,8 @@ export const JournalCard: React.FC<JournalCardProps> = ({
               </DropdownMenu>
             </div>
           </div>
-
-          {/* Stats indicator if needed */}
-          {(journal.total_subsections > 0 || journal.subsection_types?.length > 0) && (
-            <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800/50 flex gap-2 flex-wrap">
-              {journal.subsection_types?.map((type, index) => (
-                <Badge
-                  key={index}
-                  variant="outline"
-                  className="rounded-full px-2 py-0.5 text-xs bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 flex items-center gap-1"
-                >
-                  {type === 'LOCATION' && <MapPin className="h-3 w-3" />}
-                  {type === 'ACTIVITY' && <ImageIcon className="h-3 w-3" />}
-                  {type === 'ROUTE' && <Route className="h-3 w-3" />}
-                  {type === 'MAP' && <MapPin className="h-3 w-3" />}
-                  {type.charAt(0).toUpperCase() + type.slice(1).toLowerCase()}
-                </Badge>
-              ))}
-            </div>
-          )}
         </div>
-      </Card>
+      </MotionCard>
     </motion.div>
   );
 };

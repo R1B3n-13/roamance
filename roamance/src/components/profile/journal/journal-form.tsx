@@ -35,6 +35,13 @@ export const JournalForm: React.FC<JournalFormProps> = ({
   onSubmit,
   isLoading,
 }) => {
+  // Remove scroll lock when dialog closes
+  useEffect(() => {
+    if (!isOpen) {
+      document.body.style.overflow = '';
+    }
+  }, [isOpen]);
+
   const [formData, setFormData] = useState<JournalCreateRequest>({
     title: '',
     description: '',
@@ -221,7 +228,12 @@ export const JournalForm: React.FC<JournalFormProps> = ({
   if (!isOpen) return null;
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+    <Dialog open={isOpen} onOpenChange={(open) => {
+      if (!open) {
+        setSubsectionFormVisible(false);
+        onClose();
+      }
+    }}>
       <DialogContent className="w-full max-w-4xl sm:max-w-4xl max-h-[85vh] overflow-hidden p-0 rounded-xl border border-muted/30 shadow-xl">
         {/* Decorative header with gradient background */}
         <div className="relative">
@@ -313,7 +325,7 @@ export const JournalForm: React.FC<JournalFormProps> = ({
           </div>
 
           {/* Footer with action buttons */}
-          <div className="sticky bottom-8 w-full bg-muted/10 backdrop-blur-sm border-t border-muted/20 p-6 flex justify-between items-center">
+          <div className="sticky z-[999] bottom-8 w-full bg-muted/10 backdrop-blur-sm border-t border-muted/20 p-6 flex justify-between items-center">
             <Button
               type="button"
               onClick={onClose}

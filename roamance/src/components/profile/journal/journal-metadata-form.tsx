@@ -2,13 +2,6 @@ import { FileUploader } from '@/components/common/file-uploader';
 import { LocationPickerMap } from '@/components/maps/LocationPickerMap';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -17,12 +10,8 @@ import { JournalCreateRequest } from '@/types/journal';
 import {
   Archive,
   Calendar,
-  Camera,
-  Eye,
   Globe,
-  ImageIcon,
   Info,
-  Map,
   MapPin,
   Settings2,
   Share2,
@@ -30,7 +19,7 @@ import {
   X,
 } from 'lucide-react';
 import Image from 'next/image';
-import React, { useState } from 'react';
+import React from 'react';
 
 interface JournalMetadataFormProps {
   formData: JournalCreateRequest;
@@ -49,32 +38,32 @@ export const JournalMetadataForm: React.FC<JournalMetadataFormProps> = ({
   onLocationChange,
   onCoverImageUpload,
 }) => {
-  const [isLocationPickerOpen, setIsLocationPickerOpen] = useState(false);
-  const [isPreviewImageDialogOpen, setIsPreviewImageDialogOpen] = useState(false);
   const hasCoverImage = !!formData.cover_image;
 
-  const handleLocationSelected = (
-    latitude: number,
-    longitude: number
-  ) => {
-    const latEvent = {
-      target: {
-        name: 'latitude',
-        value: latitude.toString(),
-      },
-    } as React.ChangeEvent<HTMLInputElement>;
+  // Ensure destination exists with default values if it's undefined
+  const destination = formData.destination || { latitude: 0, longitude: 0 };
 
-    const lngEvent = {
-      target: {
-        name: 'longitude',
-        value: longitude.toString(),
-      },
-    } as React.ChangeEvent<HTMLInputElement>;
+  const handleLocationSelected = React.useCallback(
+    (latitude: number, longitude: number) => {
+      const latEvent = {
+        target: {
+          name: 'latitude',
+          value: latitude.toString(),
+        },
+      } as React.ChangeEvent<HTMLInputElement>;
 
-    onLocationChange(latEvent);
-    onLocationChange(lngEvent);
-    setIsLocationPickerOpen(false);
-  };
+      const lngEvent = {
+        target: {
+          name: 'longitude',
+          value: longitude.toString(),
+        },
+      } as React.ChangeEvent<HTMLInputElement>;
+
+      onLocationChange(latEvent);
+      onLocationChange(lngEvent);
+    },
+    [onLocationChange]
+  );
 
   return (
     <div className="space-y-8">
@@ -167,9 +156,6 @@ export const JournalMetadataForm: React.FC<JournalMetadataFormProps> = ({
       {/* Cover Image Section */}
       <div className="space-y-4">
         <div className="flex items-start gap-2">
-          <div className="bg-rose-100 dark:bg-rose-900/30 p-2 rounded-lg flex-shrink-0 mt-1">
-            <ImageIcon className="h-5 w-5 text-rose-600 dark:text-rose-400" />
-          </div>
           <div className="space-y-1 flex-1">
             <Label className="text-base font-medium text-slate-900 dark:text-slate-100">
               Cover Image
@@ -199,17 +185,6 @@ export const JournalMetadataForm: React.FC<JournalMetadataFormProps> = ({
                   size="sm"
                   variant="outline"
                   className="bg-white/90 dark:bg-slate-900/90 text-slate-800 dark:text-slate-100 backdrop-blur-sm hover:bg-white dark:hover:bg-slate-900 border-white/50 dark:border-slate-700/50 shadow-sm"
-                  onClick={() => setIsPreviewImageDialogOpen(true)}
-                >
-                  <Eye className="h-4 w-4 mr-1" />
-                  Preview
-                </Button>
-
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="outline"
-                  className="bg-white/90 dark:bg-slate-900/90 text-slate-800 dark:text-slate-100 backdrop-blur-sm hover:bg-white dark:hover:bg-slate-900 border-white/50 dark:border-slate-700/50 shadow-sm"
                   onClick={() => {
                     // Clear the cover image
                     const changeEvent = {
@@ -228,20 +203,14 @@ export const JournalMetadataForm: React.FC<JournalMetadataFormProps> = ({
             </div>
           ) : (
             <div className="p-8 flex flex-col items-center justify-center">
-              <div className="mb-4 w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-700/50 flex items-center justify-center">
-                <Camera className="h-8 w-8 text-slate-400 dark:text-slate-500" />
-              </div>
-
-              <p className="mb-4 text-center text-slate-500 dark:text-slate-400 text-sm">
-                No cover image selected yet. Upload an image to showcase your journey.
-              </p>
-
               <FileUploader
-                onUploadComplete={onCoverImageUpload}
-                accept="image/*"
-                maxSize={10 * 1024 * 1024} // 10MB
+                onUploadSuccess={(res) => {
+                  const result = Array.isArray(res) ? res[0] : res;
+                  onCoverImageUpload(result);
+                }}
+                acceptedFileTypes="image/*"
+                maxSizeMB={10}
                 className="w-full"
-                buttonClassName="bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white"
                 buttonText="Upload Cover Image"
               />
             </div>
@@ -279,7 +248,7 @@ export const JournalMetadataForm: React.FC<JournalMetadataFormProps> = ({
               name="latitude"
               type="number"
               step="0.000001"
-              value={formData.destination.latitude}
+              value={destination.latitude}
               onChange={onLocationChange}
               className="border-slate-300 dark:border-slate-700 focus-visible:ring-emerald-500"
               placeholder="e.g., 48.8566"
@@ -298,7 +267,7 @@ export const JournalMetadataForm: React.FC<JournalMetadataFormProps> = ({
               name="longitude"
               type="number"
               step="0.000001"
-              value={formData.destination.longitude}
+              value={destination.longitude}
               onChange={onLocationChange}
               className="border-slate-300 dark:border-slate-700 focus-visible:ring-emerald-500"
               placeholder="e.g., 2.3522"
@@ -306,29 +275,17 @@ export const JournalMetadataForm: React.FC<JournalMetadataFormProps> = ({
           </div>
         </div>
 
-        <Button
-          type="button"
-          variant="outline"
-          className="w-full mt-2 border-emerald-200 dark:border-emerald-800/40 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
-          onClick={() => setIsLocationPickerOpen(true)}
-        >
-          <Map className="h-4 w-4 mr-2" />
-          Pick Location on Map
-        </Button>
-
         {/* Show a mini-map preview if coordinates are set */}
-        {formData.destination.latitude !== 0 && formData.destination.longitude !== 0 && (
-          <div className="mt-4 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 h-40">
-            <LocationPickerMap
-              selectedLocation={{
-                latitude: formData.destination.latitude,
-                longitude: formData.destination.longitude,
-              }}
-              onLocationSelected={() => {}}
-              viewOnly={true}
-            />
-          </div>
-        )}
+        <div className="mt-4 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700">
+          <LocationPickerMap
+            initialLocation={{
+              latitude: destination.latitude,
+              longitude: destination.longitude,
+            }}
+            onLocationChangeAction={handleLocationSelected}
+            height="250px"
+          />
+        </div>
       </div>
 
       {/* Journal Options Section */}
@@ -423,69 +380,6 @@ export const JournalMetadataForm: React.FC<JournalMetadataFormProps> = ({
           </div>
         </div>
       </div>
-
-      {/* Location Picker Dialog */}
-      <Dialog open={isLocationPickerOpen} onOpenChange={setIsLocationPickerOpen}>
-        <DialogContent className="sm:max-w-3xl h-[80vh] flex flex-col p-0 overflow-hidden">
-          <DialogHeader className="p-6 pb-0">
-            <DialogTitle className="text-xl font-semibold">
-              Pick a Location
-            </DialogTitle>
-            <DialogDescription>
-              Click on the map to select your journal's main location
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="flex-1 min-h-0 p-6 pt-0">
-            <div className="h-full rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700">
-              <LocationPickerMap
-                selectedLocation={
-                  formData.destination.latitude !== 0 && formData.destination.longitude !== 0
-                    ? {
-                        latitude: formData.destination.latitude,
-                        longitude: formData.destination.longitude,
-                      }
-                    : undefined
-                }
-                onLocationSelected={handleLocationSelected}
-              />
-            </div>
-          </div>
-
-          <div className="p-4 border-t border-slate-200 dark:border-slate-700 flex justify-end">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setIsLocationPickerOpen(false)}
-            >
-              Cancel
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Image Preview Dialog */}
-      <Dialog open={isPreviewImageDialogOpen} onOpenChange={setIsPreviewImageDialogOpen}>
-        <DialogContent className="sm:max-w-3xl p-0 overflow-hidden bg-black/90 border-slate-800">
-          <div className="relative w-full h-[80vh]">
-            <Image
-              src={formData.cover_image}
-              alt="Cover Image Preview"
-              fill
-              className="object-contain"
-            />
-
-            <Button
-              type="button"
-              variant="ghost"
-              className="absolute top-2 right-2 text-white/80 hover:text-white hover:bg-white/10 rounded-full h-8 w-8 p-0"
-              onClick={() => setIsPreviewImageDialogOpen(false)}
-            >
-              <X className="h-5 w-5" />
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };

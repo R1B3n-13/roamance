@@ -1,8 +1,8 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Activity, Calendar, Clock, ImageIcon, ListChecks, MapPin, Route, StickyNote } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { motion } from 'framer-motion';
+import { Activity, Clock, ListChecks, MapPin, Route, StickyNote } from 'lucide-react';
+import React from 'react';
 
 interface SubsectionDetailSkeletonProps {
   className?: string;

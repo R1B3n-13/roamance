@@ -457,7 +457,7 @@ export const JournalManagement: React.FC = () => {
           {/* Empty State */}
           {journals.length === 0 ? (
             <motion.div variants={fadeInUp}>
-              <EmptyState onCreateNew={handleCreateJournal} />
+              <EmptyState onAction={handleCreateJournal} />
             </motion.div>
           ) : filteredJournals.length === 0 ? (
             <motion.div variants={fadeInUp}>

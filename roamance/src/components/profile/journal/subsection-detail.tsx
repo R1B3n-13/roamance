@@ -250,11 +250,11 @@ export const SubsectionDetail: React.FC<SubsectionDetailProps> = ({
   const getIcon = () => {
     switch (subsection.type) {
       case SubsectionType.ACTIVITY:
-        return <Activity className={cn("h-5 w-5", colors.icon)} />;
+        return <Activity className={cn('h-5 w-5', colors.icon)} />;
       case SubsectionType.ROUTE:
-        return <Route className={cn("h-5 w-5", colors.icon)} />;
+        return <Route className={cn('h-5 w-5', colors.icon)} />;
       default:
-        return <MapPin className={cn("h-5 w-5", colors.icon)} />;
+        return <MapPin className={cn('h-5 w-5', colors.icon)} />;
     }
   };
 
@@ -274,37 +274,40 @@ export const SubsectionDetail: React.FC<SubsectionDetailProps> = ({
   return (
     <div
       className={cn(
-        "rounded-xl border bg-white dark:bg-slate-900 backdrop-blur-sm shadow-sm overflow-hidden transition-all duration-300 group",
-        isActive ? "shadow-md" : "shadow-sm hover:shadow-md",
-        isActive ? colors.border : "border-slate-200 dark:border-slate-800",
-        "mb-4"
+        'rounded-xl border bg-white dark:bg-slate-900 backdrop-blur-sm shadow-sm overflow-hidden transition-all duration-300 group',
+        isActive ? 'shadow-md' : 'shadow-sm hover:shadow-md',
+        isActive ? colors.border : 'border-slate-200 dark:border-slate-800',
+        'mb-4'
       )}
     >
       {/* Header section - always visible */}
       <div
         className={cn(
-          "p-4 flex items-center justify-between cursor-pointer",
-          isActive && `bg-${colors.bgColor}/5 dark:bg-${colors.bgColor}/10`
+          'p-4 flex items-center justify-between cursor-pointer',
+          isActive && colors.bg
         )}
         onClick={toggleSubsection}
       >
         <div className="flex items-center space-x-3">
-          <div className={cn(
-            "flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center",
-            colors.bg
-          )}>
+          <div
+            className={cn(
+              'flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center',
+              colors.bg
+            )}
+          >
             {getIcon()}
           </div>
           <div>
             <h4 className="font-medium text-slate-900 dark:text-slate-100">
-              {subsection.title || "Untitled Section"}
+              {subsection.title || 'Untitled Section'}
             </h4>
             <div className="flex items-center gap-2 mt-1">
               <Badge
                 variant="outline"
-                className={cn("text-xs px-2 h-5", colors.badge)}
+                className={cn('text-xs px-2 h-5', colors.badge)}
               >
-                {subsection.type.charAt(0).toUpperCase() + subsection.type.slice(1).toLowerCase()}
+                {subsection.type.charAt(0).toUpperCase() +
+                  subsection.type.slice(1).toLowerCase()}
               </Badge>
               {subsection.audit?.created_at && (
                 <span className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1">
@@ -318,17 +321,15 @@ export const SubsectionDetail: React.FC<SubsectionDetailProps> = ({
         <div className="flex items-center">
           {saveStatus !== 'idle' && (
             <div className="mr-3">
-              <AnimatePresence>
-                {getSaveStatusIndicator()}
-              </AnimatePresence>
+              <AnimatePresence>{getSaveStatusIndicator()}</AnimatePresence>
             </div>
           )}
           <Button
             variant="ghost"
             size="icon"
             className={cn(
-              "rounded-full h-8 w-8 transition-transform duration-300",
-              isActive ? "rotate-180" : ""
+              'rounded-full h-8 w-8 transition-transform duration-300',
+              isActive ? 'rotate-180' : ''
             )}
           >
             <ChevronDown className="h-5 w-5 text-slate-500 dark:text-slate-400" />
@@ -343,7 +344,7 @@ export const SubsectionDetail: React.FC<SubsectionDetailProps> = ({
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
+            transition={{ duration: 0.3, ease: 'easeInOut' }}
             className="overflow-hidden"
           >
             <div className="border-t border-slate-200/50 dark:border-slate-800/50 px-4 py-5 space-y-6">
@@ -449,20 +450,21 @@ export const SubsectionDetail: React.FC<SubsectionDetailProps> = ({
                           </Button>
                         </div>
                       </div>
-                      <div data-color-mode={isDarkMode ? "dark" : "light"}>
+                      <div data-color-mode={isDarkMode ? 'dark' : 'light'}>
                         <MDEditor
                           value={editedNote}
                           onChange={(val) => setEditedNote(val || '')}
                           preview="edit"
                           height={200}
                           className={cn(
-                            "w-full border rounded-md overflow-hidden",
-                            isDarkMode ? "dark-md-editor" : ""
+                            'w-full border rounded-md overflow-hidden',
+                            isDarkMode ? 'dark-md-editor' : ''
                           )}
                         />
                       </div>
                       <p className="text-xs text-slate-500 dark:text-slate-400">
-                        Tip: Use markdown for formatting. *italic*, **bold**, # Heading, etc.
+                        Tip: Use markdown for formatting. *italic*, **bold**, #
+                        Heading, etc.
                       </p>
                     </div>
                   ) : (
@@ -487,13 +489,13 @@ export const SubsectionDetail: React.FC<SubsectionDetailProps> = ({
                         )}
                       </div>
                       <div className="bg-slate-50/70 dark:bg-slate-800/50 rounded-lg p-4 border border-slate-200/70 dark:border-slate-700/50">
-                        <div data-color-mode={isDarkMode ? "dark" : "light"}>
+                        <div data-color-mode={isDarkMode ? 'dark' : 'light'}>
                           <MDEditor.Markdown
                             source={subsection.note}
                             className={cn(
-                              "prose dark:prose-invert prose-sm max-w-none",
-                              "prose-headings:font-semibold prose-headings:text-slate-900 dark:prose-headings:text-slate-100",
-                              "prose-p:text-slate-700 dark:prose-p:text-slate-300 prose-p:m-0 prose-p:leading-relaxed"
+                              'prose dark:prose-invert prose-sm max-w-none',
+                              'prose-headings:font-semibold prose-headings:text-slate-900 dark:prose-headings:text-slate-100',
+                              'prose-p:text-slate-700 dark:prose-p:text-slate-300 prose-p:m-0 prose-p:leading-relaxed'
                             )}
                           />
                         </div>
@@ -504,7 +506,9 @@ export const SubsectionDetail: React.FC<SubsectionDetailProps> = ({
               ) : null}
 
               {/* Location map (if location is set) */}
-              {subsection.location &&
+              {(subsection.type === SubsectionType.ACTIVITY ||
+                subsection.type === SubsectionType.SIGHTSEEING) &&
+                subsection.location &&
                 subsection.location.latitude !== 0 &&
                 subsection.location.longitude !== 0 && (
                   <div className="pt-2">
@@ -522,9 +526,13 @@ export const SubsectionDetail: React.FC<SubsectionDetailProps> = ({
                     </div>
                     <div className="mt-2 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
                       <div>
-                        <span>Lat: {subsection.location.latitude.toFixed(6)}</span>
+                        <span>
+                          Lat: {subsection.location.latitude.toFixed(6)}
+                        </span>
                         <span className="mx-3">|</span>
-                        <span>Lng: {subsection.location.longitude.toFixed(6)}</span>
+                        <span>
+                          Lng: {subsection.location.longitude.toFixed(6)}
+                        </span>
                       </div>
                       {editMode && (
                         <Button
@@ -534,7 +542,9 @@ export const SubsectionDetail: React.FC<SubsectionDetailProps> = ({
                           onClick={() => {
                             // Ideally we would open a location picker here
                             // But for simplicity, let's just use alert to inform user
-                            alert('Location editing is not available in this view');
+                            alert(
+                              'Location editing is not available in this view'
+                            );
                           }}
                         >
                           <MapPin className="h-3 w-3 mr-1" />
@@ -604,10 +614,10 @@ export const SubsectionDetail: React.FC<SubsectionDetailProps> = ({
                                 />
                                 <div
                                   className={cn(
-                                    "flex-1 text-sm",
+                                    'flex-1 text-sm',
                                     item.completed
-                                      ? "line-through text-slate-500 dark:text-slate-400"
-                                      : "text-slate-900 dark:text-slate-100"
+                                      ? 'line-through text-slate-500 dark:text-slate-400'
+                                      : 'text-slate-900 dark:text-slate-100'
                                   )}
                                 >
                                   {item.title}
@@ -616,7 +626,9 @@ export const SubsectionDetail: React.FC<SubsectionDetailProps> = ({
                                   size="sm"
                                   variant="ghost"
                                   className="h-7 w-7 p-0 rounded-full text-slate-400 hover:text-rose-600 dark:hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 opacity-0 group-hover/item:opacity-100 transition-opacity"
-                                  onClick={() => handleRemoveChecklistItem(index)}
+                                  onClick={() =>
+                                    handleRemoveChecklistItem(index)
+                                  }
                                 >
                                   <Trash2 className="h-3.5 w-3.5" />
                                 </Button>
@@ -637,7 +649,9 @@ export const SubsectionDetail: React.FC<SubsectionDetailProps> = ({
                           <Input
                             placeholder="Add new item"
                             value={newChecklistItem}
-                            onChange={(e) => setNewChecklistItem(e.target.value)}
+                            onChange={(e) =>
+                              setNewChecklistItem(e.target.value)
+                            }
                             onKeyDown={(e) => {
                               if (e.key === 'Enter') {
                                 handleAddChecklistItem();
@@ -663,11 +677,20 @@ export const SubsectionDetail: React.FC<SubsectionDetailProps> = ({
                       <div className="flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400">
                         <ListChecks className="h-3.5 w-3.5" />
                         <span>Checklist</span>
-                        {subsection.checklists && subsection.checklists.length > 0 && (
-                          <Badge variant="outline" className="ml-1.5 h-5 px-1.5 text-xs font-normal bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700">
-                            {subsection.checklists.filter(item => item.completed).length} / {subsection.checklists.length}
-                          </Badge>
-                        )}
+                        {subsection.checklists &&
+                          subsection.checklists.length > 0 && (
+                            <Badge
+                              variant="outline"
+                              className="ml-1.5 h-5 px-1.5 text-xs font-normal bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700"
+                            >
+                              {
+                                subsection.checklists.filter(
+                                  (item) => item.completed
+                                ).length
+                              }{' '}
+                              / {subsection.checklists.length}
+                            </Badge>
+                          )}
                       </div>
                       {editMode && (
                         <Button
@@ -684,7 +707,8 @@ export const SubsectionDetail: React.FC<SubsectionDetailProps> = ({
                       )}
                     </div>
 
-                    {subsection.checklists && subsection.checklists.length > 0 ? (
+                    {subsection.checklists &&
+                    subsection.checklists.length > 0 ? (
                       <div className="space-y-2 bg-slate-50/70 dark:bg-slate-800/50 rounded-lg p-3 border border-slate-200/70 dark:border-slate-700/50">
                         {subsection.checklists.map((item, index) => (
                           <div
@@ -693,10 +717,10 @@ export const SubsectionDetail: React.FC<SubsectionDetailProps> = ({
                           >
                             <div
                               className={cn(
-                                "mt-0.5 flex-shrink-0 h-4.5 w-4.5 rounded border cursor-pointer transition-colors duration-200",
+                                'mt-0.5 flex-shrink-0 h-4.5 w-4.5 rounded border cursor-pointer transition-colors duration-200',
                                 item.completed
                                   ? `${colors.bgSolid} border-transparent`
-                                  : "border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800"
+                                  : 'border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800'
                               )}
                               onClick={() => handleToggleCheckItem(index)}
                             >
@@ -706,10 +730,10 @@ export const SubsectionDetail: React.FC<SubsectionDetailProps> = ({
                             </div>
                             <div
                               className={cn(
-                                "flex-1 text-sm transition-colors duration-200",
+                                'flex-1 text-sm transition-colors duration-200',
                                 item.completed
-                                  ? "line-through text-slate-500 dark:text-slate-400"
-                                  : "text-slate-900 dark:text-slate-100"
+                                  ? 'line-through text-slate-500 dark:text-slate-400'
+                                  : 'text-slate-900 dark:text-slate-100'
                               )}
                             >
                               {item.title}

@@ -36,7 +36,7 @@ import {
   X,
 } from 'lucide-react';
 import Image from 'next/image';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { ConfirmDialog } from '../../common/confirm-dialog';
 import { JournalMetadataForm } from './journal-metadata-form';
@@ -60,7 +60,6 @@ export const JournalDetailView: React.FC<JournalDetailViewProps> = ({
 }) => {
   const [activeSubsection, setActiveSubsection] = useState<string | null>(null);
   const [showMap, setShowMap] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [editError, setEditError] = useState<string | null>(null);
@@ -79,6 +78,41 @@ export const JournalDetailView: React.FC<JournalDetailViewProps> = ({
   const [isDeleteJournalDialogOpen, setIsDeleteJournalDialogOpen] =
     useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // Function to fetch subsection details
+  const fetchSubsectionDetails = useCallback(
+    async (subsectionId: string) => {
+      if (subsectionDetails[subsectionId]) {
+        // Already loaded
+        return;
+      }
+
+      // Set loading state for this subsection
+      setIsLoadingSubsection((prev) => ({ ...prev, [subsectionId]: true }));
+
+      try {
+        const response =
+          await subsectionService.getSubsectionById(subsectionId);
+        if (response && response.data) {
+          // Add the fetched subsection to our cache
+          setSubsectionDetails((prev) => ({
+            ...prev,
+            [subsectionId]: response.data,
+          }));
+        }
+      } catch (error) {
+        console.error(
+          `Failed to fetch subsection details for ID ${subsectionId}:`,
+          error
+        );
+        // Don't show error toast for background loading
+        // Only show errors when explicitly trying to view a subsection
+      } finally {
+        setIsLoadingSubsection((prev) => ({ ...prev, [subsectionId]: false }));
+      }
+    },
+    [subsectionDetails]
+  );
 
   // For editing the journal
   const [editableJournal, setEditableJournal] = useState<JournalCreateRequest>({
@@ -125,7 +159,7 @@ export const JournalDetailView: React.FC<JournalDetailViewProps> = ({
     } else {
       setActiveSubsection(null);
     }
-  }, [journal]);
+  }, [fetchSubsectionDetails, journal]);
 
   // Reset edit mode when the dialog is opened/closed
   useEffect(() => {
@@ -133,25 +167,6 @@ export const JournalDetailView: React.FC<JournalDetailViewProps> = ({
       setEditMode(false);
     }
   }, [isOpen]);
-
-  // Check if dark mode is enabled
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setIsDarkMode(document.documentElement.classList.contains('dark'));
-
-      // Listen for theme changes
-      const observer = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-          if (mutation.attributeName === 'class') {
-            setIsDarkMode(document.documentElement.classList.contains('dark'));
-          }
-        });
-      });
-
-      observer.observe(document.documentElement, { attributes: true });
-      return () => observer.disconnect();
-    }
-  }, []);
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -277,37 +292,6 @@ export const JournalDetailView: React.FC<JournalDetailViewProps> = ({
     setActiveSubsection((currentId) => (currentId === id ? null : id));
   };
 
-  // Function to fetch subsection details
-  const fetchSubsectionDetails = async (subsectionId: string) => {
-    if (subsectionDetails[subsectionId]) {
-      // Already loaded
-      return;
-    }
-
-    // Set loading state for this subsection
-    setIsLoadingSubsection((prev) => ({ ...prev, [subsectionId]: true }));
-
-    try {
-      const response = await subsectionService.getSubsectionById(subsectionId);
-      if (response && response.data) {
-        // Add the fetched subsection to our cache
-        setSubsectionDetails((prev) => ({
-          ...prev,
-          [subsectionId]: response.data,
-        }));
-      }
-    } catch (error) {
-      console.error(
-        `Failed to fetch subsection details for ID ${subsectionId}:`,
-        error
-      );
-      // Don't show error toast for background loading
-      // Only show errors when explicitly trying to view a subsection
-    } finally {
-      setIsLoadingSubsection((prev) => ({ ...prev, [subsectionId]: false }));
-    }
-  };
-
   if (!isOpen) return null;
 
   // Show loading UI while journal data is being fetched
@@ -326,7 +310,7 @@ export const JournalDetailView: React.FC<JournalDetailViewProps> = ({
               />
             </div>
 
-            <JourneyPathAnimation color="violet" size="lg" className="mb-4" />
+            <JourneyPathAnimation size="lg" className="mb-4" />
 
             <div className="text-center z-10">
               <div className="w-40 h-6 bg-white/20 rounded-full mb-3 mx-auto animate-pulse"></div>
@@ -564,11 +548,6 @@ export const JournalDetailView: React.FC<JournalDetailViewProps> = ({
               {/* Decorative elements */}
               <div className="absolute -left-20 -top-20 w-56 h-56 bg-indigo-500/10 rounded-full blur-3xl"></div>
               <div className="absolute -right-20 -bottom-10 w-56 h-56 bg-purple-500/10 rounded-full blur-3xl"></div>
-              <div className="absolute right-8 top-8">
-                <DialogClose className="p-2 rounded-full bg-white/10 text-white hover:bg-white/20 transition-all duration-300 backdrop-blur-sm hover:rotate-90">
-                  <X className="w-5 h-5" />
-                </DialogClose>
-              </div>
 
               <motion.div
                 initial={{ opacity: 0, y: 20 }}

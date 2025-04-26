@@ -1,15 +1,23 @@
-import React, { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { JournalBrief } from '@/types/journal';
-import { JournalCard } from './journal-card';
-import { EmptyState } from './empty-state';
-import { Button } from '@/components/ui/button';
-import { Archive, ArchiveX, Hourglass, Laptop, Plus, Search, Star, StarOff } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { cn } from '@/lib/utils';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { JournalBrief } from '@/types/journal';
+import { AnimatePresence, motion } from 'framer-motion';
+import {
+  Archive,
+  ArchiveX,
+  Hourglass,
+  Laptop,
+  Plus,
+  Search,
+  Star,
+  StarOff,
+} from 'lucide-react';
+import React, { useState } from 'react';
+import { EmptyState } from './empty-state';
+import { JournalCard } from './journal-card';
 
 interface JournalGridProps {
   journals: JournalBrief[];
@@ -35,34 +43,46 @@ export const JournalGrid: React.FC<JournalGridProps> = ({
   // States
   const [searchTerm, setSearchTerm] = useState('');
   const [currentView, setCurrentView] = useState<FilterView>('all');
-  const [currentSort, setCurrentSort] = useState<'recent' | 'oldest' | 'alphabetical'>('recent');
+  const [currentSort, setCurrentSort] = useState<
+    'recent' | 'oldest' | 'alphabetical'
+  >('recent');
 
   // Sort function for journals
   const sortJournals = (a: JournalBrief, b: JournalBrief) => {
     switch (currentSort) {
       case 'oldest':
-        return new Date(a.audit.created_at).getTime() - new Date(b.audit.created_at).getTime();
+        return (
+          new Date(a.audit.created_at).getTime() -
+          new Date(b.audit.created_at).getTime()
+        );
       case 'alphabetical':
         return a.title.localeCompare(b.title);
       default: // recent
-        return new Date(b.audit.created_at).getTime() - new Date(a.audit.created_at).getTime();
+        return (
+          new Date(b.audit.created_at).getTime() -
+          new Date(a.audit.created_at).getTime()
+        );
     }
   };
 
   // Filter function for journals
-  const filteredJournals = journals.filter((journal) => {
-    const matchesSearch = journal.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (journal.description?.toLowerCase().includes(searchTerm.toLowerCase()) || false);
+  const filteredJournals = journals
+    .filter((journal) => {
+      const matchesSearch =
+        journal.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        journal.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        false;
 
-    switch (currentView) {
-      case 'favorites':
-        return matchesSearch && journal.is_favorite;
-      case 'archived':
-        return matchesSearch && journal.is_archived;
-      default: // all
-        return matchesSearch && !journal.is_archived;
-    }
-  }).sort(sortJournals);
+      switch (currentView) {
+        case 'favorites':
+          return matchesSearch && journal.is_favorite;
+        case 'archived':
+          return matchesSearch && journal.is_archived;
+        default: // all
+          return matchesSearch && !journal.is_archived;
+      }
+    })
+    .sort(sortJournals);
 
   // Animation variants
   const containerVariants = {
@@ -70,9 +90,9 @@ export const JournalGrid: React.FC<JournalGridProps> = ({
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.1
-      }
-    }
+        staggerChildren: 0.1,
+      },
+    },
   };
 
   const itemVariants = {
@@ -80,20 +100,8 @@ export const JournalGrid: React.FC<JournalGridProps> = ({
     visible: {
       opacity: 1,
       y: 0,
-      transition: { type: "spring", stiffness: 300, damping: 24 }
-    }
-  };
-
-  // Get appropriate empty state type based on current view
-  const getEmptyStateType = (): 'journal' | 'archived' | 'favorite' => {
-    switch (currentView) {
-      case 'favorites':
-        return 'favorite';
-      case 'archived':
-        return 'archived';
-      default:
-        return 'journal';
-    }
+      transition: { type: 'spring', stiffness: 300, damping: 24 },
+    },
   };
 
   return (
@@ -123,29 +131,47 @@ export const JournalGrid: React.FC<JournalGridProps> = ({
               <TabsTrigger value="all" className="flex items-center gap-x-1.5">
                 <Laptop className="h-3.5 w-3.5" />
                 <span>All</span>
-                {currentView === 'all' && journals.filter(j => !j.is_archived).length > 0 && (
-                  <Badge variant="outline" className="ml-1 px-1.5 h-5 bg-slate-100 dark:bg-slate-800 border-none">
-                    {journals.filter(j => !j.is_archived).length}
-                  </Badge>
-                )}
+                {currentView === 'all' &&
+                  journals.filter((j) => !j.is_archived).length > 0 && (
+                    <Badge
+                      variant="outline"
+                      className="ml-1 px-1.5 h-5 bg-slate-100 dark:bg-slate-800 border-none"
+                    >
+                      {journals.filter((j) => !j.is_archived).length}
+                    </Badge>
+                  )}
               </TabsTrigger>
-              <TabsTrigger value="favorites" className="flex items-center gap-x-1.5">
+              <TabsTrigger
+                value="favorites"
+                className="flex items-center gap-x-1.5"
+              >
                 <Star className="h-3.5 w-3.5" />
                 <span>Favorites</span>
-                {currentView === 'favorites' && journals.filter(j => j.is_favorite).length > 0 && (
-                  <Badge variant="outline" className="ml-1 px-1.5 h-5 bg-slate-100 dark:bg-slate-800 border-none">
-                    {journals.filter(j => j.is_favorite).length}
-                  </Badge>
-                )}
+                {currentView === 'favorites' &&
+                  journals.filter((j) => j.is_favorite).length > 0 && (
+                    <Badge
+                      variant="outline"
+                      className="ml-1 px-1.5 h-5 bg-slate-100 dark:bg-slate-800 border-none"
+                    >
+                      {journals.filter((j) => j.is_favorite).length}
+                    </Badge>
+                  )}
               </TabsTrigger>
-              <TabsTrigger value="archived" className="flex items-center gap-x-1.5">
+              <TabsTrigger
+                value="archived"
+                className="flex items-center gap-x-1.5"
+              >
                 <Archive className="h-3.5 w-3.5" />
                 <span>Archived</span>
-                {currentView === 'archived' && journals.filter(j => j.is_archived).length > 0 && (
-                  <Badge variant="outline" className="ml-1 px-1.5 h-5 bg-slate-100 dark:bg-slate-800 border-none">
-                    {journals.filter(j => j.is_archived).length}
-                  </Badge>
-                )}
+                {currentView === 'archived' &&
+                  journals.filter((j) => j.is_archived).length > 0 && (
+                    <Badge
+                      variant="outline"
+                      className="ml-1 px-1.5 h-5 bg-slate-100 dark:bg-slate-800 border-none"
+                    >
+                      {journals.filter((j) => j.is_archived).length}
+                    </Badge>
+                  )}
               </TabsTrigger>
             </TabsList>
           </Tabs>
@@ -154,12 +180,30 @@ export const JournalGrid: React.FC<JournalGridProps> = ({
           <ToggleGroup
             type="single"
             value={currentSort}
-            onValueChange={(value) => value && setCurrentSort(value as 'recent' | 'oldest' | 'alphabetical')}
+            onValueChange={(value) =>
+              value &&
+              setCurrentSort(value as 'recent' | 'oldest' | 'alphabetical')
+            }
             className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-0.5"
           >
-            <ToggleGroupItem value="recent" className="text-xs px-2.5 py-1 h-8 data-[state=on]:bg-slate-100 dark:data-[state=on]:bg-slate-800 rounded">Recent</ToggleGroupItem>
-            <ToggleGroupItem value="oldest" className="text-xs px-2.5 py-1 h-8 data-[state=on]:bg-slate-100 dark:data-[state=on]:bg-slate-800 rounded">Oldest</ToggleGroupItem>
-            <ToggleGroupItem value="alphabetical" className="text-xs px-2.5 py-1 h-8 data-[state=on]:bg-slate-100 dark:data-[state=on]:bg-slate-800 rounded">A-Z</ToggleGroupItem>
+            <ToggleGroupItem
+              value="recent"
+              className="text-xs px-2.5 py-1 h-8 data-[state=on]:bg-slate-100 dark:data-[state=on]:bg-slate-800 rounded"
+            >
+              Recent
+            </ToggleGroupItem>
+            <ToggleGroupItem
+              value="oldest"
+              className="text-xs px-2.5 py-1 h-8 data-[state=on]:bg-slate-100 dark:data-[state=on]:bg-slate-800 rounded"
+            >
+              Oldest
+            </ToggleGroupItem>
+            <ToggleGroupItem
+              value="alphabetical"
+              className="text-xs px-2.5 py-1 h-8 data-[state=on]:bg-slate-100 dark:data-[state=on]:bg-slate-800 rounded"
+            >
+              A-Z
+            </ToggleGroupItem>
           </ToggleGroup>
 
           {/* Add New Button */}
@@ -178,7 +222,8 @@ export const JournalGrid: React.FC<JournalGridProps> = ({
       {filteredJournals.length > 0 && (
         <div className="flex items-center justify-between mb-4">
           <p className="text-sm text-slate-500 dark:text-slate-400">
-            Showing {filteredJournals.length} {filteredJournals.length === 1 ? 'journal' : 'journals'}
+            Showing {filteredJournals.length}{' '}
+            {filteredJournals.length === 1 ? 'journal' : 'journals'}
             {searchTerm && ` matching "${searchTerm}"`}
             {currentView !== 'all' && ` in ${currentView}`}
           </p>
@@ -190,7 +235,7 @@ export const JournalGrid: React.FC<JournalGridProps> = ({
               size="sm"
               className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300 flex items-center gap-1.5"
               onClick={() => {
-                filteredJournals.forEach(journal => {
+                filteredJournals.forEach((journal) => {
                   onToggleFavorite(journal);
                 });
               }}
@@ -206,7 +251,7 @@ export const JournalGrid: React.FC<JournalGridProps> = ({
               size="sm"
               className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300 flex items-center gap-1.5"
               onClick={() => {
-                filteredJournals.forEach(journal => {
+                filteredJournals.forEach((journal) => {
                   onToggleArchive(journal);
                 });
               }}
@@ -220,10 +265,7 @@ export const JournalGrid: React.FC<JournalGridProps> = ({
 
       {/* Journals Grid with Empty State */}
       {filteredJournals.length === 0 ? (
-        <EmptyState
-          onCreateNew={onCreateNew}
-          type={getEmptyStateType()}
-        />
+        <EmptyState onAction={onCreateNew} type={'journal'} />
       ) : (
         <motion.div
           variants={containerVariants}
@@ -261,9 +303,11 @@ export const JournalGrid: React.FC<JournalGridProps> = ({
       {filteredJournals.length === 0 && journals.length > 0 && searchTerm && (
         <div className="text-center py-10">
           <Hourglass className="w-10 h-10 mx-auto text-slate-300 dark:text-slate-700 mb-3" />
-          <h3 className="text-lg font-medium text-slate-700 dark:text-slate-300 mb-1">No journals found</h3>
+          <h3 className="text-lg font-medium text-slate-700 dark:text-slate-300 mb-1">
+            No journals found
+          </h3>
           <p className="text-slate-500 dark:text-slate-400 max-w-md mx-auto">
-            We couldn't find any journals matching "{searchTerm}". Try a different search term.
+            {`We couldn't find any journals matching "${searchTerm}". Try a different search term.`}
           </p>
         </div>
       )}
