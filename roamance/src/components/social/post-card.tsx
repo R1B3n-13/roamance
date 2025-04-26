@@ -53,12 +53,14 @@ export const PostCard = ({
   const [showMenu, setShowMenu] = useState(false);
   const [isLikeAnimating, setIsLikeAnimating] = useState(false);
   const [shareTooltip, setShareTooltip] = useState(false);
+  const [showUnsafeContent, setShowUnsafeContent] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const tooltipTimeout = useRef<NodeJS.Timeout | null>(null);
 
   const isLiked = post.liked_by?.some((user) => user.id === currentUser?.id);
   const isSaved = post.saved_by?.some((user) => user.id === currentUser?.id);
   const isOwnPost = post.user.id === currentUser?.id;
+  const isUnsafe = post.is_safe === false;
 
   const hasMedia = post.image_paths.length > 0 || post.video_paths.length > 0;
   const totalMedia = post.image_paths.length + post.video_paths.length;
@@ -161,8 +163,43 @@ export const PostCard = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
-      className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 border border-gray-100/80 dark:border-gray-700/30 flex flex-col md:flex-row"
+      className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 border border-gray-100/80 dark:border-gray-700/30 flex flex-col md:flex-row relative"
     >
+      {/* Safety Overlay */}
+      {isUnsafe && !showUnsafeContent && (
+        <div className="absolute inset-0 bg-gray-900/70 backdrop-blur-xl backdrop-filter z-50 flex flex-col items-center justify-center p-5 text-center">
+          <div className="bg-red-500/20 p-2 rounded-full mb-2">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 text-red-500"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+              />
+            </svg>
+          </div>
+          <h3 className="text-base font-bold text-white mb-1">Sensitive Content</h3>
+          <p className="text-xs text-gray-300 mb-3 max-w-sm">
+            This post has been flagged for potentially sensitive content.
+            It has been blurred for your protection.
+          </p>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setShowUnsafeContent(true)}
+            className="px-4 py-1.5 bg-white/10 hover:bg-white/20 text-white text-xs rounded-full backdrop-blur-sm border border-white/20 font-medium transition-all"
+          >
+            View Content Anyway
+          </motion.button>
+        </div>
+      )}
+
       {/* Post Media - Left Side (only shown if media exists) */}
       {hasMedia && (
         <div className="relative overflow-hidden bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-800/50 dark:to-gray-900/80 group md:w-2/5 flex-shrink-0">
