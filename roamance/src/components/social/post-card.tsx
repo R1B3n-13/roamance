@@ -9,6 +9,8 @@ import { cn } from '@/lib/utils';
 import { Post, User } from '@/types';
 import { motion } from 'framer-motion';
 import {
+  AlertTriangle,
+  Bookmark,
   Edit,
   Flag,
   Heart,
@@ -18,7 +20,6 @@ import {
   MoreHorizontal,
   Share2,
   Sparkles,
-  Star,
   Trash2,
   UserPlus,
   Video,
@@ -160,57 +161,51 @@ export const PostCard = ({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 border border-gray-100/80 dark:border-gray-700/30 flex flex-col md:flex-row relative"
+      exit={{ opacity: 0, y: -15 }}
+      transition={{ duration: 0.3, ease: 'easeOut' }}
+      className="min-h-48 md:min-h-64 bg-white/90 dark:bg-gray-800/90 backdrop-blur-md rounded-2xl overflow-hidden shadow-md hover:shadow-xl hover:shadow-gray-200/50 dark:hover:shadow-black/30 transition-all duration-300 flex flex-col md:flex-row relative border border-gray-100/30 dark:border-gray-700/20"
     >
-      {/* Safety Overlay */}
+      {/* Safety Overlay - Redesigned */}
       {isUnsafe && !showUnsafeContent && (
-        <div className="absolute inset-0 bg-gray-900/70 backdrop-blur-xl backdrop-filter z-50 flex flex-col items-center justify-center p-5 text-center">
-          <div className="bg-red-500/20 p-2 rounded-full mb-2">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6 text-red-500"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-              />
-            </svg>
+        <div className="absolute inset-0 bg-gray-900/80 backdrop-blur-md z-50 flex flex-col items-center justify-center p-6 text-center rounded-2xl">
+          <div className="bg-red-500/10 p-3 rounded-full mb-4 border border-red-500/20">
+            <AlertTriangle className="h-8 w-8 text-red-400" />
           </div>
-          <h3 className="text-base font-bold text-white mb-1">Sensitive Content</h3>
-          <p className="text-xs text-gray-300 mb-3 max-w-sm">
-            This post has been flagged for potentially sensitive content.
-            It has been blurred for your protection.
+          <h3 className="text-lg font-semibold text-white mb-2">
+            Sensitive Content
+          </h3>
+          <p className="text-sm text-gray-300 mb-5 max-w-xs">
+            This content may contain material that some users find sensitive.
           </p>
           <motion.button
-            whileHover={{ scale: 1.05 }}
+            whileHover={{ scale: 1.05, y: -2 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setShowUnsafeContent(true)}
-            className="px-4 py-1.5 bg-white/10 hover:bg-white/20 text-white text-xs rounded-full backdrop-blur-sm border border-white/20 font-medium transition-all"
+            className="px-5 py-2 bg-white/20 hover:bg-white/30 text-white text-sm rounded-full backdrop-blur-sm border border-white/30 font-medium transition-all"
           >
-            View Content Anyway
+            View Content
           </motion.button>
         </div>
       )}
 
-      {/* Post Media - Left Side (only shown if media exists) */}
+      {/* Post Media Section with Tidbits Button */}
       {hasMedia && (
-        <div className="relative overflow-hidden bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-800/50 dark:to-gray-900/80 group md:w-2/5 flex-shrink-0">
-          <div className="aspect-[16/10] md:aspect-square h-full">
+        <div
+          className={cn(
+            'relative overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800/50 dark:to-gray-900/80 group md:w-[45%] flex-shrink-0',
+            isUnsafe && !showUnsafeContent ? 'filter blur-xl' : ''
+          )}
+        >
+          <div className="aspect-[4/3] md:aspect-square h-full">
             {currentImageIndex < post.image_paths.length ? (
               <Image
                 src={post.image_paths[currentImageIndex]}
                 alt={`Post image ${currentImageIndex + 1}`}
                 layout="fill"
                 objectFit="cover"
-                className="transition-all duration-700 group-hover:scale-[1.03]"
+                className="transition-transform duration-500 ease-out group-hover:scale-105"
               />
             ) : (
               <video
@@ -222,21 +217,24 @@ export const PostCard = ({
                 preload="metadata"
               />
             )}
+
+            {/* Image overlay gradient - Enhanced to ensure button visibility */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-40 group-hover:opacity-70 transition-opacity duration-300"></div>
           </div>
 
-          {/* Image navigation - Redesigned */}
+          {/* Image navigation - Refined */}
           {totalMedia > 1 && (
             <div className="absolute inset-x-0 top-1/2 transform -translate-y-1/2 flex items-center justify-between px-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
               <motion.button
-                whileHover={{ scale: 1.1 }}
+                whileHover={{ scale: 1.1, x: -2 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={handlePrev}
-                className="h-10 w-10 rounded-full bg-black/30 backdrop-blur-xl flex items-center justify-center text-white border border-white/20 shadow-lg transform transition-transform"
+                className="h-9 w-9 rounded-full bg-black/25 backdrop-blur-sm flex items-center justify-center text-white/90 border border-white/10 shadow-lg transition-all"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  width="18"
-                  height="18"
+                  width="16"
+                  height="16"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -248,15 +246,15 @@ export const PostCard = ({
                 </svg>
               </motion.button>
               <motion.button
-                whileHover={{ scale: 1.1 }}
+                whileHover={{ scale: 1.1, x: 2 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={handleNext}
-                className="h-10 w-10 rounded-full bg-black/30 backdrop-blur-xl flex items-center justify-center text-white border border-white/20 shadow-lg transform transition-transform"
+                className="h-9 w-9 rounded-full bg-black/25 backdrop-blur-sm flex items-center justify-center text-white/90 border border-white/10 shadow-lg transition-all"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  width="18"
-                  height="18"
+                  width="16"
+                  height="16"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -270,59 +268,148 @@ export const PostCard = ({
             </div>
           )}
 
-          {/* Media indicators - Redesigned */}
+          {/* Media indicators - Subtle dots */}
           {totalMedia > 1 && (
-            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2 bg-black/40 backdrop-blur-xl rounded-full px-3 py-2 transition-opacity duration-300">
+            <div className="absolute bottom-3.5 left-1/2 transform -translate-x-1/2 flex space-x-1.5 bg-black/20 backdrop-blur-sm rounded-full px-2 py-1.5 transition-all duration-300">
               {Array.from({ length: totalMedia }).map((_, index) => (
-                <motion.button
+                <button
                   key={index}
-                  whileHover={{ scale: 1.2 }}
                   onClick={() => setCurrentImageIndex(index)}
                   className={cn(
-                    'rounded-full transition-all duration-300',
+                    'rounded-full transition-all duration-200',
                     currentImageIndex === index
-                      ? 'w-2.5 h-2.5 bg-white shadow-glow'
-                      : 'w-2 h-2 bg-white/50 hover:bg-white/80'
+                      ? 'w-2 h-2 bg-white scale-110'
+                      : 'w-1.5 h-1.5 bg-white/60 hover:bg-white/90'
                   )}
-                  aria-label={`Go to image ${index + 1}`}
+                  aria-label={`Go to media ${index + 1}`}
                 />
               ))}
             </div>
           )}
 
-          {/* Media type indicators - Redesigned */}
-          <div className="absolute top-4 right-4 flex space-x-2">
+          {/* Media type indicators - Minimalist style */}
+          <div className="absolute top-3 right-3 flex space-x-1.5">
             {post.image_paths.length > 0 && (
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                className="px-3 py-1.5 bg-black/40 backdrop-blur-xl rounded-lg text-white text-xs font-medium flex items-center shadow-lg"
-              >
-                <ImageIcon className="h-3.5 w-3.5 mr-1.5" />
-                <span>{post.image_paths.length}</span>
-              </motion.div>
+              <div className="p-1.5 bg-black/30 backdrop-blur-sm rounded-md text-white/90 flex items-center shadow-sm">
+                <ImageIcon className="h-3.5 w-3.5" />
+                {post.image_paths.length > 1 && (
+                  <span className="ml-1 text-xs">
+                    {post.image_paths.length}
+                  </span>
+                )}
+              </div>
             )}
             {post.video_paths.length > 0 && (
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                className="px-3 py-1.5 bg-black/40 backdrop-blur-xl rounded-lg text-white text-xs font-medium flex items-center shadow-lg"
-              >
-                <Video className="h-3.5 w-3.5 mr-1.5" />
-                <span>{post.video_paths.length}</span>
-              </motion.div>
+              <div className="p-1.5 bg-black/30 backdrop-blur-sm rounded-md text-white/90 flex items-center shadow-sm">
+                <Video className="h-3.5 w-3.5" />
+                {post.video_paths.length > 1 && (
+                  <span className="ml-1 text-xs">
+                    {post.video_paths.length}
+                  </span>
+                )}
+              </div>
             )}
           </div>
+
+          {/* Tidbits Button - Icon-only that expands on hover */}
+          {post.tidbits &&
+            post.tidbits.length > 0 &&
+            post.tidbits != EMPTY_TIDBITS && (
+              <Popover>
+                <PopoverTrigger asChild>
+                  <motion.div
+                    className="absolute left-3 bottom-3 z-10 group/tidbits"
+                    whileHover={{ scale: 1 }}
+                    whileTap={{ scale: 0.97 }}
+                  >
+                    <motion.button
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{
+                        type: "spring",
+                        stiffness: 300,
+                        damping: 20,
+                        delay: 0.2
+                      }}
+                      className="flex items-center gap-1.5 px-0 py-0 overflow-hidden group-hover/tidbits:pl-1.5 group-hover/tidbits:pr-2.5 group-hover/tidbits:py-1.5 rounded-full bg-black/30 backdrop-blur-sm hover:bg-black/40 text-white border border-white/20 text-xs font-medium shadow-lg transition-all duration-300"
+                    >
+                      <span className="relative flex h-8 w-8 items-center justify-center shrink-0">
+                        <span className="absolute inset-0 rounded-full bg-gradient-to-r from-violet-500 to-purple-500 opacity-85"></span>
+                        <Sparkles className="h-3.5 w-3.5 text-white z-10" />
+                        <motion.span
+                          className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500 to-violet-600"
+                          animate={{
+                            scale: [1, 1.2, 1],
+                            opacity: [0.7, 0.9, 0.7]
+                          }}
+                          transition={{
+                            duration: 2,
+                            repeat: Infinity,
+                            repeatType: "reverse"
+                          }}
+                        />
+                      </span>
+                      <span className="overflow-hidden whitespace-nowrap w-0 group-hover/tidbits:w-auto group-hover/tidbits:ml-0.5 transition-all duration-300 ease-out">
+                        Travel Tidbits
+                      </span>
+                    </motion.button>
+                  </motion.div>
+                </PopoverTrigger>
+                <PopoverContent className="w-80 p-4 bg-white/95 dark:bg-gray-800/95 backdrop-blur-md shadow-xl border border-purple-100/50 dark:border-purple-800/30 rounded-xl">
+                  <div className="mb-1 flex items-center justify-between">
+                    <h3 className="text-sm font-semibold text-gray-900 dark:text-white flex items-center">
+                      <Sparkles className="h-3.5 w-3.5 mr-2 text-violet-500 dark:text-violet-400" />
+                      Travel Tidbits
+                    </h3>
+                    <div className="bg-violet-100 dark:bg-violet-900/30 px-2 py-0.5 rounded-full text-[10px] text-violet-600 dark:text-violet-300 font-medium">
+                      Exclusive
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed whitespace-pre-wrap mt-2 max-h-[150px] overflow-y-auto pr-1 border-l-2 border-purple-100 dark:border-purple-800/40 pl-3 italic">
+                    {post.tidbits}
+                  </p>
+                  <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700/30 flex items-center justify-between">
+                    <div className="flex items-center text-[11px] text-gray-500 dark:text-gray-400">
+                      <Image
+                        src={
+                          post.user.profile_image ||
+                          '/images/roamance-logo-no-text.png'
+                        }
+                        alt={post.user.name || 'User'}
+                        width={18}
+                        height={18}
+                        className="rounded-full mr-1.5 border border-white dark:border-gray-800"
+                      />
+                      <span>
+                        Shared {formatTimestamp(post.audit.created_at)}
+                      </span>
+                    </div>
+                  </div>
+                </PopoverContent>
+              </Popover>
+            )}
         </div>
       )}
 
-      {/* Right Side Content Container - Full width when no media */}
-      <div className="flex flex-col flex-grow overflow-hidden">
-        {/* Post Header */}
-        <div className="flex items-center justify-between p-5">
-          <div className="flex items-center space-x-4">
+      {/* Content Container - Enhanced */}
+      <div
+        className={cn(
+          'flex flex-col flex-grow overflow-hidden',
+          isUnsafe && !showUnsafeContent
+            ? 'filter blur-sm pointer-events-none'
+            : ''
+        )}
+      >
+        {/* Post Header - Refined */}
+        <div className="flex items-start justify-between p-5 pb-3">
+          <div className="flex items-center space-x-3">
+            {/* User Avatar with animated border on hover */}
             <Link
               href={`/profile/${post.user.id}`}
-              className="relative h-12 w-12 rounded-full overflow-hidden ring-2 ring-purple-200 dark:ring-purple-700 ring-offset-2 ring-offset-white dark:ring-offset-gray-800 group"
+              className="relative h-10 w-10 rounded-full overflow-hidden group shrink-0"
             >
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-400 via-pink-500 to-blue-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full"></div>
+              <div className="absolute inset-[2px] bg-white dark:bg-gray-800 rounded-full z-0"></div>
               <Image
                 src={
                   post.user.profile_image || '/images/roamance-logo-no-text.png'
@@ -330,361 +417,307 @@ export const PostCard = ({
                 alt={post.user.name || 'User'}
                 layout="fill"
                 objectFit="cover"
-                className="rounded-full transition-transform duration-500 group-hover:scale-110"
+                className="rounded-full transition-transform duration-300 group-hover:scale-105 z-10 relative"
               />
-              <div className="absolute inset-0 bg-gradient-to-tr from-black/10 to-black/0 group-hover:from-purple-500/20 group-hover:to-blue-500/10 transition-colors duration-500 rounded-full"></div>
             </Link>
             <div>
               <Link
                 href={`/profile/${post.user.id}`}
-                className="text-lg font-semibold text-gray-900 dark:text-white hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
+                className="text-sm font-semibold text-gray-800 dark:text-gray-100 hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
               >
                 {post.user.name}
-                {/* {post.user.is_verified && (
-                  <span className="inline-flex ml-1.5 text-blue-500 dark:text-blue-400">
-                    <motion.div
-                      whileHover={{ rotate: 360 }}
-                      transition={{ duration: 0.7 }}
-                      className="bg-blue-100 dark:bg-blue-900/30 p-0.5 rounded-full"
-                    >
-                      <CheckCheck className="h-4 w-4" />
-                    </motion.div>
-                  </span>
-                )} */}
               </Link>
-              <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+              <div className="flex items-center text-xs text-gray-500 dark:text-gray-400 mt-0.5 space-x-2">
                 {post.location && (
-                  <motion.div
-                    whileHover={{ y: -2 }}
-                    className="flex items-center mr-3 hover:text-purple-500 dark:hover:text-purple-400 transition-colors"
-                  >
-                    <MapPin className="h-3.5 w-3.5 mr-1 text-pink-500 dark:text-pink-400" />
-                    <span className="truncate max-w-[150px]">
-                      {`${post.location.latitude.toFixed(2)}, ${post.location.longitude.toFixed(2)}`}
+                  <div className="flex items-center hover:text-pink-500 dark:hover:text-pink-400 transition-colors">
+                    <MapPin className="h-3 w-3 mr-1 text-pink-500/80 dark:text-pink-400/80" />
+                    <span className="truncate max-w-[120px]">
+                      {`${post.location.latitude.toFixed(1)}, ${post.location.longitude.toFixed(1)}`}
                     </span>
-                  </motion.div>
+                  </div>
                 )}
-                <span className="text-xs bg-gray-100 dark:bg-gray-700/50 px-2 py-0.5 rounded-full">
-                  {formatTimestamp(post.audit.created_at)}
-                </span>
+                <span className="text-gray-400 dark:text-gray-500">•</span>
+                <span>{formatTimestamp(post.audit.created_at)}</span>
               </div>
             </div>
           </div>
 
-          <div className="flex items-center space-x-3 relative">
+          <div className="flex items-center space-x-1 relative">
             {!isOwnPost && (
               <motion.button
-                whileHover={{ scale: 1.1 }}
+                whileHover={{
+                  scale: 1.08,
+                  backgroundColor: 'rgba(168, 85, 247, 0.1)',
+                }}
                 whileTap={{ scale: 0.95 }}
-                className="p-2 rounded-full hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-colors"
+                className="p-1.5 rounded-full text-purple-500 dark:text-purple-400 transition-colors"
+                aria-label="Follow user"
               >
-                <UserPlus className="h-5 w-5 text-purple-500 dark:text-purple-400" />
+                <UserPlus className="h-4 w-4" />
               </motion.button>
             )}
             <motion.button
-              whileHover={{ scale: 1.1 }}
+              whileHover={{
+                scale: 1.08,
+                backgroundColor: 'rgba(107, 114, 128, 0.1)',
+              }}
               whileTap={{ scale: 0.95 }}
               onClick={toggleMenu}
-              className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              className="p-1.5 rounded-full text-gray-500 dark:text-gray-400 transition-colors"
+              aria-label="More options"
             >
-              <MoreHorizontal className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+              <MoreHorizontal className="h-4 w-4" />
             </motion.button>
 
-            {/* Post Actions Menu - Redesigned */}
+            {/* Post Actions Menu - Enhanced */}
             {showMenu && (
-              <div
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: -5 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                transition={{ duration: 0.15 }}
                 ref={menuRef}
-                className="absolute right-0 top-12 z-10 bg-white/95 dark:bg-gray-800/95 backdrop-blur-lg shadow-xl rounded-xl overflow-hidden border border-gray-100 dark:border-gray-700 min-w-[180px] transform origin-top-right transition-all"
+                className="absolute right-0 top-8 z-20 bg-white/95 dark:bg-gray-800/95 backdrop-blur-md shadow-lg rounded-xl overflow-hidden border border-gray-200/50 dark:border-gray-700/50 min-w-[160px] transform origin-top-right"
               >
-                <div className="py-1.5">
+                <div className="py-1">
                   {isOwnPost && (
                     <>
-                      <motion.button
-                        whileHover={{ x: 5 }}
+                      <button
                         onClick={() => {
                           setShowMenu(false);
-                          // TODO: Implement edit functionality
                           console.log('Edit post:', post.id);
                         }}
-                        className="flex items-center w-full px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                        className="flex items-center w-full px-3.5 py-1.5 text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/40 transition-colors"
                       >
-                        <Edit className="h-4 w-4 mr-3" />
+                        <Edit className="h-3.5 w-3.5 mr-2.5" />
                         Edit post
-                      </motion.button>
-                      <motion.button
-                        whileHover={{ x: 5 }}
+                      </button>
+                      <button
                         onClick={() => {
                           setShowMenu(false);
                           onDelete(post.id);
                         }}
-                        className="flex items-center w-full px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+                        className="flex items-center w-full px-3.5 py-1.5 text-xs text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                       >
-                        <Trash2 className="h-4 w-4 mr-3" />
+                        <Trash2 className="h-3.5 w-3.5 mr-2.5" />
                         Delete post
-                      </motion.button>
-                      <div className="border-t border-gray-100 dark:border-gray-700/50 my-1.5"></div>
+                      </button>
+                      <div className="border-t border-gray-100 dark:border-gray-700/30 my-1"></div>
                     </>
                   )}
-                  <motion.button
-                    whileHover={{ x: 5 }}
+                  <button
                     onClick={() => {
                       setShowMenu(false);
                       handleShareClick();
                     }}
-                    className="flex items-center w-full px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                    className="flex items-center w-full px-3.5 py-1.5 text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/40 transition-colors"
                   >
-                    <Share2 className="h-4 w-4 mr-3" />
+                    <Share2 className="h-3.5 w-3.5 mr-2.5" />
                     Share post
-                  </motion.button>
+                  </button>
                   {!isOwnPost && (
-                    <motion.button
-                      whileHover={{ x: 5 }}
+                    <button
                       onClick={() => {
                         setShowMenu(false);
-                        // TODO: Implement report functionality
                         console.log('Report post:', post.id);
                       }}
-                      className="flex items-center w-full px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                      className="flex items-center w-full px-3.5 py-1.5 text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/40 transition-colors"
                     >
-                      <Flag className="h-4 w-4 mr-3" />
+                      <Flag className="h-3.5 w-3.5 mr-2.5" />
                       Report post
-                    </motion.button>
+                    </button>
                   )}
                 </div>
-              </div>
+              </motion.div>
             )}
           </div>
         </div>
 
-        {/* Post Content */}
-        <div className="px-5 py-3 flex-grow">
-          <p className="text-gray-800 dark:text-gray-200 leading-relaxed">
+        {/* Post Content - Without tidbits tab */}
+        <div className="px-5 py-2 flex-grow">
+          <p className="text-sm text-gray-700 dark:text-gray-200 leading-relaxed whitespace-pre-line">
             {showAll
               ? post.text
               : post.text.length > 150
-                ? `${post.text.substring(0, 150)}...`
+                ? `${post.text.substring(0, 150)}…`
                 : post.text}
             {post.text.length > 150 && !showAll && (
-              <motion.button
-                whileHover={{ x: 2 }}
+              <button
                 onClick={() => setShowAll(true)}
-                className="ml-1 text-purple-600 dark:text-purple-400 font-medium hover:underline"
+                className="ml-1 text-purple-600 dark:text-purple-400 text-xs font-medium hover:underline focus:outline-none"
               >
-                Read more
-              </motion.button>
+                more
+              </button>
             )}
           </p>
-
-          {/* Tidbits Preview */}
-          {post.tidbits &&
-            post.tidbits.length > 0 &&
-            post.tidbits != EMPTY_TIDBITS && (
-              <div className="mt-4">
-                <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2.5 flex items-center">
-                  <span className="relative mr-2">
-                    <motion.div
-                      animate={{
-                        scale: [1, 1.2, 1],
-                        rotate: [0, 5, 0],
-                      }}
-                      transition={{
-                        repeat: Infinity,
-                        repeatType: 'reverse',
-                        duration: 2,
-                      }}
-                      className="absolute -inset-1 bg-gradient-to-r from-violet-400/20 to-purple-500/20 rounded-full blur-sm"
-                    />
-                    <Sparkles className="h-3.5 w-3.5 text-violet-500 dark:text-violet-400 relative" />
-                  </span>
-                  Travel Tidbits
-                </h4>
-                <div className="flex flex-wrap gap-2">
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <motion.span
-                        whileHover={{
-                          y: -2,
-                          boxShadow: '0 4px 12px rgba(139, 92, 246, 0.15)',
-                        }}
-                        className="px-3.5 py-1.5 rounded-full bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20 text-violet-600 dark:text-violet-400 text-sm font-medium border border-violet-100 dark:border-violet-800/30 transition-all cursor-pointer"
-                      >
-                        {post.tidbits.length > 50
-                          ? `${post.tidbits.substring(0, 50)}...`
-                          : post.tidbits}
-                      </motion.span>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-full max-w-lg p-4 bg-white/95 dark:bg-gray-800/95 backdrop-blur-lg shadow-xl border border-purple-100 dark:border-purple-800/30">
-                      <div>
-                        <h3 className="text-base font-semibold text-gray-900 dark:text-white flex items-center mb-2">
-                          <Sparkles className="h-4 w-4 mr-2 text-violet-500 dark:text-violet-400 " />
-                          Travel Tidbits
-                        </h3>
-                        <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap text-sm">
-                          {post.tidbits}
-                        </p>
-                      </div>
-                      <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700/50">
-                        <div className="flex items-center">
-                          <Image
-                            src={
-                              post.user.profile_image ||
-                              '/images/roamance-logo-no-text.png'
-                            }
-                            alt={post.user.name || 'User'}
-                            width={24}
-                            height={24}
-                            className="rounded-full mr-2 border border-white dark:border-gray-800"
-                          />
-                          <span className="text-xs text-gray-500 dark:text-gray-400">
-                            {formatTimestamp(post.audit.created_at)}
-                          </span>
-                        </div>
-                      </div>
-                    </PopoverContent>
-                  </Popover>
-                </div>
-              </div>
-            )}
         </div>
 
-        {/* Post Actions */}
-        <div className="px-5 py-4 border-t border-gray-100/80 dark:border-gray-700/30 flex items-center justify-between mt-auto">
-          <div className="flex items-center space-x-8">
+        {/* Post Actions - Display mobile tidbits button only when there's no media */}
+        <div className="px-5 py-3 border-t border-gray-100/70 dark:border-gray-700/30 flex items-center justify-between mt-auto">
+          <div className="flex items-center space-x-6">
+            {/* Like button with refined animation */}
             <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              whileTap={{ scale: 0.9 }}
               onClick={handleLikeClick}
               className="group flex items-center relative"
+              aria-label={isLiked ? 'Unlike post' : 'Like post'}
             >
               <div className="relative">
                 <Heart
                   className={cn(
-                    'h-6 w-6 mr-2 transition-all duration-300',
+                    'h-5 w-5 mr-1.5 transition-all duration-200',
                     isLiked
                       ? 'fill-pink-500 text-pink-500 dark:fill-pink-400 dark:text-pink-400'
                       : 'text-gray-400 dark:text-gray-500 group-hover:text-pink-500 dark:group-hover:text-pink-400'
                   )}
+                  strokeWidth={isLiked ? 1.5 : 2}
                 />
                 {isLikeAnimating && (
                   <motion.div
-                    initial={{ scale: 0, opacity: 0 }}
-                    animate={{ scale: 1.8, opacity: [0, 1, 0] }}
-                    transition={{ duration: 0.8 }}
+                    initial={{ scale: 0.5, opacity: 0 }}
+                    animate={{
+                      scale: [1, 1.6, 1.2],
+                      opacity: [0.8, 1, 0],
+                    }}
+                    transition={{ duration: 0.5, ease: 'easeOut' }}
                     className="absolute inset-0 flex items-center justify-center"
                   >
-                    <Heart className="h-6 w-6 fill-pink-500 text-pink-500" />
+                    <Heart className="h-5 w-5 fill-pink-500 text-pink-500" />
                   </motion.div>
                 )}
               </div>
               <span
                 className={cn(
-                  'text-sm font-medium transition-colors',
+                  'text-xs font-medium transition-colors',
                   isLiked
                     ? 'text-pink-500 dark:text-pink-400'
                     : 'text-gray-500 dark:text-gray-400 group-hover:text-pink-500 dark:group-hover:text-pink-400'
                 )}
               >
-                {post.likes_count}
+                {post.likes_count || ''}
               </span>
             </motion.button>
 
+            {/* Comment button */}
             <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              whileTap={{ scale: 0.9 }}
               onClick={() => onComment(post.id)}
               className="group flex items-center text-gray-400 dark:text-gray-500 hover:text-blue-500 dark:hover:text-blue-400 transition-colors"
+              aria-label="Comment on post"
             >
-              <MessageCircle className="h-6 w-6 mr-2 transition-colors group-hover:text-blue-500 dark:group-hover:text-blue-400" />
-              <span className="text-sm font-medium transition-colors group-hover:text-blue-500 dark:group-hover:text-blue-400">
-                {post.comments_count}
+              <MessageCircle className="h-5 w-5 mr-1.5 transition-colors group-hover:text-blue-500 dark:group-hover:text-blue-400" />
+              <span className="text-xs font-medium transition-colors group-hover:text-blue-500 dark:group-hover:text-blue-400">
+                {post.comments_count || ''}
               </span>
             </motion.button>
-          </div>
 
-          <div className="flex items-center space-x-5">
-            {/* Save button */}
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={handleSaveClick}
-              className="group flex items-center relative"
-            >
-              <div className="relative">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill={isSaved ? 'currentColor' : 'none'}
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className={cn(
-                    'h-5 w-5 transition-all duration-300',
-                    isSaved
-                      ? 'text-purple-500 dark:text-purple-400'
-                      : 'text-gray-400 dark:text-gray-500 group-hover:text-purple-500 dark:group-hover:text-purple-400'
-                  )}
-                >
-                  <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z" />
-                </svg>
-              </div>
-            </motion.button>
-
-            {/* Share tooltip */}
-            {shareTooltip && (
-              <div className="absolute -top-12 right-0 bg-black/80 text-white text-xs px-3 py-1.5 rounded-lg backdrop-blur-sm animate-fade-in-out">
-                Link copied to clipboard!
-              </div>
-            )}
-
-            {/* Tidbits button with Popover */}
-            {post.tidbits && post.tidbits.length > 0 && (
-              <Popover>
-                <PopoverTrigger asChild>
-                  <motion.button
-                    whileHover={{ scale: 1.1, rotate: 5 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="p-2 rounded-full text-amber-500 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors"
-                    aria-label="View travel tidbits"
-                  >
-                    <Star className="h-5 w-5 transition-all" />
-                  </motion.button>
-                </PopoverTrigger>
-                <PopoverContent className="w-80 p-4 bg-white/95 dark:bg-gray-800/95 backdrop-blur-lg shadow-xl border border-purple-100 dark:border-purple-800/30">
-                  <div>
-                    <h3 className="text-base font-semibold text-gray-900 dark:text-white flex items-center mb-2">
-                      <Star
-                        className="h-4 w-4 mr-2 text-amber-500"
-                        fill="currentColor"
-                      />
-                      Travel Tidbits
-                    </h3>
-                    <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap text-sm">
+            {/* Mobile-only Tidbits button when there's no media - Icon-only that expands on hover */}
+            {!hasMedia && post.tidbits &&
+              post.tidbits.length > 0 &&
+              post.tidbits != EMPTY_TIDBITS && (
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <motion.div
+                      className="group/tidbits flex items-center relative"
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      <div className="relative flex items-center justify-center h-6 w-6 shrink-0">
+                        <motion.div
+                          animate={{ rotate: 360 }}
+                          transition={{
+                            duration: 8,
+                            repeat: Infinity,
+                            ease: 'linear',
+                          }}
+                          className="absolute inset-0 rounded-full bg-gradient-to-r from-violet-500 via-purple-500 to-violet-500 opacity-20 dark:opacity-30"
+                        />
+                        <Sparkles className="h-5 w-5 text-violet-500 dark:text-violet-400 relative z-10" />
+                      </div>
+                      <span className="overflow-hidden max-w-0 whitespace-nowrap group-hover/tidbits:max-w-xs group-hover/tidbits:ml-1.5 text-xs font-medium text-violet-500 dark:text-violet-400 transition-all duration-300 ease-out">
+                        Travel Tidbits
+                      </span>
+                    </motion.div>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-72 p-4 bg-white/95 dark:bg-gray-800/95 backdrop-blur-md shadow-xl border border-purple-100/50 dark:border-purple-800/30 rounded-xl">
+                    {/* Same content as main popup */}
+                    <div className="mb-1 flex items-center justify-between">
+                      <h3 className="text-sm font-semibold text-gray-900 dark:text-white flex items-center">
+                        <Sparkles className="h-3.5 w-3.5 mr-2 text-violet-500 dark:text-violet-400" />
+                        Travel Tidbits
+                      </h3>
+                      <div className="bg-violet-100 dark:bg-violet-900/30 px-2 py-0.5 rounded-full text-[10px] text-violet-600 dark:text-violet-300 font-medium">
+                        Exclusive
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed whitespace-pre-wrap mt-2 max-h-[150px] overflow-y-auto pr-1 border-l-2 border-purple-100 dark:border-purple-800/40 pl-3 italic">
                       {post.tidbits}
                     </p>
-                  </div>
-                  <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700/50">
-                    <div className="flex items-center">
-                      <Image
-                        src={
-                          post.user.profile_image ||
-                          '/images/roamance-logo-no-text.png'
-                        }
-                        alt={post.user.name || 'User'}
-                        width={24}
-                        height={24}
-                        className="rounded-full mr-2 border border-white dark:border-gray-800"
-                      />
-                      <span className="text-xs text-gray-500 dark:text-gray-400">
-                        {formatTimestamp(post.audit.created_at)}
-                      </span>
+                    <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700/30 flex items-center justify-between">
+                      <div className="flex items-center text-[11px] text-gray-500 dark:text-gray-400">
+                        <Image
+                          src={
+                            post.user.profile_image ||
+                            '/images/roamance-logo-no-text.png'
+                          }
+                          alt={post.user.name || 'User'}
+                          width={18}
+                          height={18}
+                          className="rounded-full mr-1.5 border border-white dark:border-gray-800"
+                        />
+                        <span>
+                          Shared {formatTimestamp(post.audit.created_at)}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                </PopoverContent>
-              </Popover>
-            )}
+                  </PopoverContent>
+                </Popover>
+              )}
+          </div>
+
+          <div className="flex items-center space-x-2">
+            {/* Save button using Bookmark */}
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              onClick={handleSaveClick}
+              className="group p-1.5 rounded-full hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors"
+              aria-label={isSaved ? 'Unsave post' : 'Save post'}
+            >
+              <Bookmark
+                className={cn(
+                  'h-4.5 w-4.5 transition-all duration-200',
+                  isSaved
+                    ? 'fill-purple-500 text-purple-500 dark:fill-purple-400 dark:text-purple-400'
+                    : 'text-gray-400 dark:text-gray-500 group-hover:text-purple-500 dark:group-hover:text-purple-400'
+                )}
+                strokeWidth={isSaved ? 1.5 : 2}
+              />
+            </motion.button>
+
+            {/* Share button with tooltip */}
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              onClick={handleShareClick}
+              className="group p-1.5 rounded-full hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors relative"
+              aria-label="Share post"
+            >
+              <Share2
+                className="h-4.5 w-4.5 text-gray-400 dark:text-gray-500 group-hover:text-green-500 dark:group-hover:text-green-400 transition-colors"
+                strokeWidth={2}
+              />
+
+              {/* Share tooltip */}
+              {shareTooltip && (
+                <motion.div
+                  initial={{ opacity: 0, y: 5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="absolute -top-8 right-0 bg-black/75 text-white text-[10px] px-2 py-1 rounded backdrop-blur-sm whitespace-nowrap"
+                >
+                  Copied to clipboard
+                </motion.div>
+              )}
+            </motion.button>
           </div>
         </div>
       </div>
