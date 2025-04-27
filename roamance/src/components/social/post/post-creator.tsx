@@ -11,7 +11,6 @@ import {
 } from '@/components/ui/dialog';
 import { useSocialContext } from '@/context/SocialContext';
 import { cn } from '@/lib/utils';
-import { PostService } from '@/service/social-service';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   ChevronDown,
@@ -26,21 +25,8 @@ import Image from 'next/image';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
-interface PostCreatorProps {
-  onSubmit: (postData: {
-    text: string;
-    image_paths: string[];
-    video_paths: string[];
-    location?: { latitude: number; longitude: number; name?: string };
-  }) => Promise<void>;
-  isSubmitting?: boolean;
-}
-
-export const PostCreator = ({
-  onSubmit,
-  isSubmitting = false,
-}: PostCreatorProps) => {
-  const { user, triggerRefresh } = useSocialContext();
+export const PostCreator = () => {
+  const { user, createPost, isCreatingPost } = useSocialContext();
   const [text, setText] = useState('');
   const [imagePaths, setImagePaths] = useState<string[]>([]);
   const [videoPaths, setVideoPaths] = useState<string[]>([]);
@@ -54,6 +40,9 @@ export const PostCreator = ({
   const [isExpanded, setIsExpanded] = useState(false);
   const [charCount, setCharCount] = useState(0);
   const MAX_CHARS = 500;
+
+  // Use either external isSubmitting or context's isCreatingPost
+  const isSubmitting = isCreatingPost;
 
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
@@ -154,37 +143,23 @@ export const PostCreator = ({
     if (isSubmitting || text.trim() === '') return;
 
     try {
-      // First call the parent component's onSubmit for immediate feedback
-      await onSubmit({
+      // Use the context's createPost function
+      const success = await createPost({
         text,
         image_paths: imagePaths,
         video_paths: videoPaths,
         location: location || undefined,
       });
 
-      // Now also try to submit to the actual API
-      try {
-        await PostService.createPost({
-          text,
-          image_paths: imagePaths,
-          video_paths: videoPaths,
-          location: location || { latitude: 0, longitude: 0 },
-        });
-      } catch (apiError) {
-        console.error('API error when creating post:', apiError);
+      if (success) {
+        // Reset form on success
+        setText('');
+        setCharCount(0);
+        setImagePaths([]);
+        setVideoPaths([]);
+        setLocation(null);
+        setIsExpanded(false);
       }
-
-      // Reset form
-      setText('');
-      setCharCount(0);
-      setImagePaths([]);
-      setVideoPaths([]);
-      setLocation(null);
-      setIsExpanded(false);
-
-      toast.success('Post shared successfully!');
-      // Trigger feed refresh
-      triggerRefresh();
     } catch (error) {
       console.error('Error creating post:', error);
       toast.error('Failed to create post. Please try again.');

@@ -1,11 +1,11 @@
 'use client';
 
 import { Navbar } from '@/components/navigation';
-import { PostCreator } from '@/components/social/post-creator';
-import { SocialFeed } from '@/components/social/social-feed';
+import { SocialFeed } from '@/components/social/feed/social-feed';
+import { PostCreator } from '@/components/social/post/post-creator';
 import { TrendingSection } from '@/components/social/trending-section';
 import { cn } from '@/lib/utils';
-import { Post, User } from '@/types';
+import { User } from '@/types';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   Bookmark,
@@ -17,10 +17,10 @@ import {
   Search,
   Sparkles,
   User as UserIcon,
-  X
+  X,
 } from 'lucide-react';
 import Image from 'next/image';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 const mockTrendingItems = [
   { id: '1', title: 'Paris', count: 1245, type: 'location' as const },
@@ -29,17 +29,6 @@ const mockTrendingItems = [
   { id: '4', title: 'Santorini', count: 612, type: 'location' as const },
   { id: '5', title: 'Budget Travel', count: 543, type: 'topic' as const },
 ];
-
-const mockCurrentUser: User = {
-  id: 'current-user',
-  name: 'Alex Traveler',
-  email: 'alex@example.com',
-  profile_image: '/images/roamance-logo-no-text.png',
-  audit: {
-    created_at: new Date().toISOString(),
-    last_modified_at: new Date().toISOString(),
-  },
-};
 
 const mockTrendingUsers: User[] = [
   {
@@ -134,71 +123,7 @@ const NavItem = ({ icon, label, isActive = false, onClick }: NavItemProps) => (
 
 export default function SocialPage() {
   const [activeTab, setActiveTab] = useState('home');
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSubmittingPost, setIsSubmittingPost] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  // In a real app, you would fetch posts from the API
-  useEffect(() => {
-    // Simulate API fetch with timeout
-    const timer = setTimeout(() => {
-      setPosts([]);
-      setIsLoading(false);
-    }, 1500);
-
-    return () => clearTimeout(timer);
-  }, []);
-
-  const handlePostSubmit = async (postData: {
-    text: string;
-    image_paths: string[];
-    video_paths: string[];
-    location?: { latitude: number; longitude: number; name?: string };
-  }) => {
-    try {
-      setIsSubmittingPost(true);
-      // In a real app, you would call the PostService.createPost method
-      // For now, we'll simulate an API call with a timeout
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // Create a mock post to add to the UI
-      const mockPost: Post = {
-        id: `temp-${Date.now()}`,
-        text: postData.text,
-        image_paths: postData.image_paths,
-        video_paths: postData.video_paths,
-        location: postData.location
-          ? {
-              latitude: postData.location.latitude,
-              longitude: postData.location.longitude,
-              ...(postData.location.name && { name: postData.location.name }),
-            }
-          : { latitude: 0, longitude: 0 },
-        is_safe: true,
-        tidbits: '',
-        likes_count: 0,
-        comments_count: 0,
-        user: mockCurrentUser,
-        liked_by: [],
-        saved_by: [],
-        comments: [],
-        audit: {
-          created_at: new Date().toISOString(),
-          last_modified_at: new Date().toISOString(),
-          created_by: mockCurrentUser.id,
-          last_modified_by: mockCurrentUser.id,
-        },
-      };
-
-      // Add the post to the state
-      setPosts((prev) => [mockPost, ...prev]);
-    } catch (error) {
-      console.error('Error creating post:', error);
-    } finally {
-      setIsSubmittingPost(false);
-    }
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-tr from-gray-50 via-purple-50/30 to-indigo-50/40 dark:from-gray-900 dark:via-purple-950/10 dark:to-indigo-950/10">
@@ -405,18 +330,11 @@ export default function SocialPage() {
 
                 {/* Post creation */}
                 <div className="mb-8">
-                  <PostCreator
-                    currentUser={mockCurrentUser}
-                    onSubmit={handlePostSubmit}
-                    isSubmitting={isSubmittingPost}
-                  />
+                  <PostCreator />
                 </div>
 
                 {/* Posts feed */}
-                <SocialFeed
-                  currentUser={mockCurrentUser}
-                  initialPosts={posts}
-                />
+                <SocialFeed />
               </div>
             </div>
 

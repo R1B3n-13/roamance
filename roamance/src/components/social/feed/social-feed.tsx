@@ -2,122 +2,62 @@
 
 import { useSocialContext } from '@/context/SocialContext';
 import { PostService } from '@/service/social-service';
-import { Post, User } from '@/types';
+import { Post } from '@/types';
 import { AnimatePresence, motion } from 'framer-motion';
-import {
-  ArrowUpDown,
-  Loader2,
-  RefreshCw,
-  Sparkles
-} from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { ArrowUpDown, Loader2, RefreshCw, Sparkles } from 'lucide-react';
+import { useState } from 'react';
 import { toast } from 'sonner';
+import { CommentDialog } from '../comment';
 import { PostCard } from '../post/post-card';
 import { EmptyFeed } from './empty-feed';
 import { FeedSkeleton } from './feed-skeleton';
 
-export interface SocialFeedProps {
-  currentUser?: User;
-  initialPosts?: Post[];
-}
+export const SocialFeed = () => {
+  const {
+    user,
+    posts,
+    setPosts,
+    fetchPosts,
+    refreshFeed,
+    isPostsLoading,
+    error,
+  } = useSocialContext();
 
-export const SocialFeed = ({
-  currentUser,
-  initialPosts = [],
-}: SocialFeedProps) => {
-  const { postCreated } = useSocialContext();
-  const [posts, setPosts] = useState<Post[]>(initialPosts);
-  const [isLoading, setIsLoading] = useState(!initialPosts.length);
-  const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [sortOption, setSortOption] = useState<'latest' | 'popular'>('latest');
 
-  useEffect(() => {
-    if (!initialPosts.length) {
-      fetchPosts();
-    }
-  }, [initialPosts]);
+  // State for comment dialog
+  const [commentDialogOpen, setCommentDialogOpen] = useState(false);
+  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
 
-  useEffect(() => {
-    if (postCreated) {
-      fetchPosts();
-    }
-  }, [postCreated]);
-
-  const fetchPosts = async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      const response = await PostService.getAllPosts();
-      if (response.success) {
-        // Transform PostResponseDto[] to Post[] by adding the missing properties
-        const transformedPosts: Post[] = response.data.map((post) => ({
-          ...post,
-          liked_by: [], // Initialize with empty arrays since they're not in the API response
-          saved_by: [],
-          comments: [],
-        }));
-        setPosts(transformedPosts);
-      } else {
-        setError('Failed to fetch posts');
-      }
-    } catch (err) {
-      console.error('Error fetching posts:', err);
-      setError('An error occurred while fetching posts');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const refreshFeed = async () => {
-    try {
-      setRefreshing(true);
-      const response = await PostService.getAllPosts();
-      if (response.success) {
-        // Transform PostResponseDto[] to Post[] by adding the missing properties
-        const transformedPosts: Post[] = response.data.map((post) => ({
-          ...post,
-          liked_by: [], // Initialize with empty arrays since they're not in the API response
-          saved_by: [],
-          comments: [],
-        }));
-        setPosts(transformedPosts);
-        toast.success('Feed refreshed!');
-      } else {
-        toast.error('Failed to refresh feed');
-      }
-    } catch (err) {
-      console.error('Error refreshing feed:', err);
-      toast.error('Failed to refresh feed');
-    } finally {
-      setRefreshing(false);
-    }
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await refreshFeed();
+    setRefreshing(false);
   };
 
   const handleLike = async (postId: string) => {
     try {
       // Check if user already liked the post
       const post = posts.find((p) => p.id === postId);
-      const isLiked = post?.liked_by?.some(
-        (user) => user.id === currentUser?.id
-      );
+      const isLiked = post?.liked_by?.some((u) => u.id === user?.id);
 
       await PostService.likePost(postId);
 
       // Optimistic update
       setPosts((prev) =>
-        prev.map((post) =>
-          post.id === postId
+        prev.map((p) =>
+          p.id === postId
             ? {
-                ...post,
+                ...p,
                 likes_count: isLiked
-                  ? post.likes_count - 1
-                  : post.likes_count + 1,
+                  ? (p.likes_count || 0) - 1
+                  : (p.likes_count || 0) + 1,
                 liked_by: isLiked
-                  ? post.liked_by.filter((user) => user.id !== currentUser?.id)
-                  : [...(post.liked_by || []), currentUser!],
+                  ? p.liked_by.filter((u) => u.id !== user?.id)
+                  : [...(p.liked_by || []), user!],
               }
-            : post
+            : p
         )
       );
 
@@ -132,9 +72,7 @@ export const SocialFeed = ({
     try {
       // Check if user already saved the post
       const post = posts.find((p) => p.id === postId);
-      const isSaved = post?.saved_by?.some(
-        (user) => user.id === currentUser?.id
-      );
+      const isSaved = post?.saved_by?.some((u) => u.id === user?.id);
 
       await PostService.savePost(postId);
 
@@ -145,8 +83,8 @@ export const SocialFeed = ({
             ? {
                 ...post,
                 saved_by: isSaved
-                  ? post.saved_by.filter((user) => user.id !== currentUser?.id)
-                  : [...(post.saved_by || []), currentUser!],
+                  ? post.saved_by.filter((u) => u.id !== user?.id)
+                  : [...(post.saved_by || []), user!],
               }
             : post
         )
@@ -185,34 +123,20 @@ export const SocialFeed = ({
     }
   };
 
-  const handleEdit = (postId: string) => {
-    // This would open an edit modal or navigate to edit page in a real app
-    console.log(`Editing post: ${postId}`);
-    toast.info('Edit functionality not implemented yet');
-  };
-
   const handleComment = (postId: string) => {
-    // In a real app, this would open a comment modal or scroll to comment form
-    console.log(`Commenting on post: ${postId}`);
-    toast.info('Comment functionality not fully implemented yet');
+    const post = posts.find((p) => p.id === postId);
+    if (post) {
+      setSelectedPost(post);
+      setCommentDialogOpen(true);
+    } else {
+      toast.error('Post not found');
+    }
   };
 
   const handleShare = (postId: string) => {
     // In a real app, this would open a share dialog
     navigator.clipboard.writeText(`${window.location.origin}/post/${postId}`);
     toast.success('Post link copied to clipboard!');
-  };
-
-  const handleFollow = (userId: string) => {
-    // This would follow a user in a real app
-    console.log(`Following user: ${userId}`);
-    toast.info('Follow functionality not implemented yet');
-  };
-
-  const handleReport = (postId: string) => {
-    // This would report a post in a real app
-    console.log(`Reporting post: ${postId}`);
-    toast.info('Report functionality not implemented yet');
   };
 
   const toggleSortOption = () => {
@@ -237,13 +161,36 @@ export const SocialFeed = ({
   return (
     <div className="w-full">
       {/* Feed header with refresh button and controls */}
-      <FeedHeader
-        onRefresh={refreshFeed}
-        isRefreshing={refreshing}
-        isLoading={isLoading}
-        sortOption={sortOption}
-        onToggleSort={toggleSortOption}
-      />
+      <div className="sticky top-0 z-10 backdrop-blur-md bg-white/70 dark:bg-gray-900/70 p-4 rounded-2xl mb-8 shadow-sm border border-gray-100 dark:border-gray-800/40">
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 bg-clip-text text-transparent inline-flex items-center">
+            <Sparkles className="mr-2 h-5 w-5 text-purple-500" />
+            Explore Moments
+          </h2>
+          <div className="flex items-center space-x-3">
+            <button
+              onClick={toggleSortOption}
+              disabled={isPostsLoading}
+              className="px-4 py-2 rounded-full bg-white dark:bg-gray-800 text-indigo-600 dark:text-indigo-400 text-sm font-medium shadow-sm hover:shadow-md transition-all flex items-center disabled:opacity-70 border border-gray-100 dark:border-gray-700"
+            >
+              <ArrowUpDown className="h-4 w-4 mr-2" />
+              {sortOption === 'latest' ? 'Latest' : 'Popular'}
+            </button>
+            <button
+              onClick={handleRefresh}
+              disabled={refreshing || isPostsLoading}
+              className="px-4 py-2 rounded-full bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/40 dark:to-purple-950/40 text-indigo-600 dark:text-indigo-400 text-sm font-medium hover:shadow-md transition-all flex items-center disabled:opacity-70 border border-indigo-100 dark:border-indigo-800/30"
+            >
+              {refreshing ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <RefreshCw className="h-4 w-4 mr-2" />
+              )}
+              Refresh
+            </button>
+          </div>
+        </div>
+      </div>
 
       {/* Error message */}
       {error && (
@@ -265,7 +212,7 @@ export const SocialFeed = ({
       )}
 
       {/* Loading state */}
-      {isLoading ? (
+      {isPostsLoading ? (
         <FeedSkeleton />
       ) : posts.length === 0 ? (
         <EmptyFeed />
@@ -289,68 +236,27 @@ export const SocialFeed = ({
               >
                 <PostCard
                   post={post}
-                  currentUser={currentUser}
                   onLike={handleLike}
                   onComment={handleComment}
                   onSave={handleSave}
                   onShare={handleShare}
                   onDelete={handleDeletePost}
-                  onEdit={handleEdit}
-                  onFollow={handleFollow}
-                  onReport={handleReport}
                 />
               </motion.div>
             ))}
           </AnimatePresence>
         </div>
       )}
+
+      {/* Comment Dialog */}
+      {selectedPost && (
+        <CommentDialog
+          post={selectedPost}
+          currentUser={user}
+          open={commentDialogOpen}
+          onOpenChange={setCommentDialogOpen}
+        />
+      )}
     </div>
   );
 };
-
-interface FeedHeaderProps {
-  onRefresh: () => void;
-  isRefreshing: boolean;
-  isLoading: boolean;
-  sortOption: 'latest' | 'popular';
-  onToggleSort: () => void;
-}
-
-const FeedHeader = ({
-  onRefresh,
-  isRefreshing,
-  isLoading,
-  sortOption,
-  onToggleSort,
-}: FeedHeaderProps) => (
-  <div className="sticky top-0 z-10 backdrop-blur-md bg-white/70 dark:bg-gray-900/70 p-4 rounded-2xl mb-8 shadow-sm border border-gray-100 dark:border-gray-800/40">
-    <div className="flex items-center justify-between">
-      <h2 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 bg-clip-text text-transparent inline-flex items-center">
-        <Sparkles className="mr-2 h-5 w-5 text-purple-500" />
-        Explore Moments
-      </h2>
-      <div className="flex items-center space-x-3">
-        <button
-          onClick={onToggleSort}
-          disabled={isLoading}
-          className="px-4 py-2 rounded-full bg-white dark:bg-gray-800 text-indigo-600 dark:text-indigo-400 text-sm font-medium shadow-sm hover:shadow-md transition-all flex items-center disabled:opacity-70 border border-gray-100 dark:border-gray-700"
-        >
-          <ArrowUpDown className="h-4 w-4 mr-2" />
-          {sortOption === 'latest' ? 'Latest' : 'Popular'}
-        </button>
-        <button
-          onClick={onRefresh}
-          disabled={isRefreshing || isLoading}
-          className="px-4 py-2 rounded-full bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/40 dark:to-purple-950/40 text-indigo-600 dark:text-indigo-400 text-sm font-medium hover:shadow-md transition-all flex items-center disabled:opacity-70 border border-indigo-100 dark:border-indigo-800/30"
-        >
-          {isRefreshing ? (
-            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-          ) : (
-            <RefreshCw className="h-4 w-4 mr-2" />
-          )}
-          Refresh
-        </button>
-      </div>
-    </div>
-  </div>
-);
