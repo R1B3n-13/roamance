@@ -1,5 +1,10 @@
 import { LocationPickerMap } from '@/components/maps/LocationPickerMap';
 import { Button } from '@/components/ui/button';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -11,10 +16,7 @@ import {
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import { ActivityType } from '@/types';
-import {
-  SubsectionRequest,
-  SubsectionType
-} from '@/types/subsection';
+import { SubsectionRequest, SubsectionType } from '@/types/subsection';
 import {
   closestCenter,
   DndContext,
@@ -41,7 +43,6 @@ import {
   Activity,
   AlertCircle,
   CheckCircle2,
-  Clock,
   Eye,
   GripVertical,
   ListChecks,
@@ -51,7 +52,7 @@ import {
   Route,
   Save,
   StickyNote,
-  X,
+  X
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import React, { useEffect, useState } from 'react';
@@ -283,8 +284,6 @@ export const SubsectionForm: React.FC<SubsectionFormProps> = ({
         }
       } else if (updatedSubsection.type === SubsectionType.ROUTE) {
         updatedSubsection.waypoints = [];
-        updatedSubsection.total_time = 0;
-        updatedSubsection.total_distance = 0;
       }
 
       setSubsection(updatedSubsection);
@@ -615,6 +614,10 @@ export const SubsectionForm: React.FC<SubsectionFormProps> = ({
     }
   };
 
+  // Map visibility states
+  const [isSightSeeingMapOpen, setIsSightSeeingMapOpen] = useState(true);
+  const [isRouteMapOpen, setIsRouteMapOpen] = useState(true);
+
   return (
     <div className="space-y-6 max-w-3xl mx-auto">
       {/* Error Banner */}
@@ -834,7 +837,8 @@ export const SubsectionForm: React.FC<SubsectionFormProps> = ({
 
         {/* Location Map */}
         {(subsection.type === SubsectionType.SIGHTSEEING ||
-          subsection.type === SubsectionType.ACTIVITY) && (() => {
+          subsection.type === SubsectionType.ACTIVITY) &&
+          (() => {
             // Narrow the type within this scope
             const currentSubsection = subsection;
             return (
@@ -858,8 +862,14 @@ export const SubsectionForm: React.FC<SubsectionFormProps> = ({
                       onChange={(e) => {
                         const val = parseFloat(e.target.value) || 0;
                         setSubsection((prev) => {
-                          if (prev.type === SubsectionType.SIGHTSEEING || prev.type === SubsectionType.ACTIVITY) {
-                            return { ...prev, location: { ...prev.location, latitude: val } };
+                          if (
+                            prev.type === SubsectionType.SIGHTSEEING ||
+                            prev.type === SubsectionType.ACTIVITY
+                          ) {
+                            return {
+                              ...prev,
+                              location: { ...prev.location, latitude: val },
+                            };
                           }
                           return prev;
                         });
@@ -886,8 +896,14 @@ export const SubsectionForm: React.FC<SubsectionFormProps> = ({
                       onChange={(e) => {
                         const val = parseFloat(e.target.value) || 0;
                         setSubsection((prev) => {
-                          if (prev.type === SubsectionType.SIGHTSEEING || prev.type === SubsectionType.ACTIVITY) {
-                            return { ...prev, location: { ...prev.location, longitude: val } };
+                          if (
+                            prev.type === SubsectionType.SIGHTSEEING ||
+                            prev.type === SubsectionType.ACTIVITY
+                          ) {
+                            return {
+                              ...prev,
+                              location: { ...prev.location, longitude: val },
+                            };
                           }
                           return prev;
                         });
@@ -900,103 +916,125 @@ export const SubsectionForm: React.FC<SubsectionFormProps> = ({
                 </div>
 
                 {/* Map picker */}
-                <div
-                  className={cn(
-                    'border rounded-lg overflow-hidden',
-                    hasFieldError('location')
-                      ? 'border-destructive'
-                      : 'border-slate-200 dark:border-slate-800'
-                  )}
+                <Collapsible
+                  open={isSightSeeingMapOpen}
+                  onOpenChange={setIsSightSeeingMapOpen}
+                  className="w-full"
                 >
-                  <LocationPickerMap
-                    initialLocation={currentSubsection.location} // Use narrowed variable
-                    onLocationChangeAction={(lat, lng) => {
-                      setSubsection((prev) => {
-                        if (prev.type === SubsectionType.SIGHTSEEING || prev.type === SubsectionType.ACTIVITY) {
-                          return { ...prev, location: { latitude: lat, longitude: lng } };
-                        }
-                        return prev;
-                      });
-                      clearFieldError('location');
-                    }}
-                    height="300px"
-                  />
-                  {hasFieldError('location') && (
-                    <div className="bg-destructive/5 px-3 py-2 text-sm text-destructive/90 border-t border-destructive/20">
-                      Please click on the map to select a location
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm text-slate-600 dark:text-slate-400">
+                      Location Map
+                    </span>
+                    <CollapsibleTrigger asChild />
+                  </div>
+                  <CollapsibleContent>
+                    <div
+                      className={cn(
+                        'border rounded-lg overflow-hidden',
+                        hasFieldError('location')
+                          ? 'border-destructive'
+                          : 'border-slate-200 dark:border-slate-800'
+                      )}
+                    >
+                      <LocationPickerMap
+                        initialLocation={currentSubsection.location} // Use narrowed variable
+                        onLocationChangeAction={(lat, lng) => {
+                          setSubsection((prev) => {
+                            if (
+                              prev.type === SubsectionType.SIGHTSEEING ||
+                              prev.type === SubsectionType.ACTIVITY
+                            ) {
+                              return {
+                                ...prev,
+                                location: { latitude: lat, longitude: lng },
+                              };
+                            }
+                            return prev;
+                          });
+                          clearFieldError('location');
+                        }}
+                        height="300px"
+                      />
+                      {hasFieldError('location') && (
+                        <div className="bg-destructive/5 px-3 py-2 text-sm text-destructive/90 border-t border-destructive/20">
+                          Please click on the map to select a location
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
+                  </CollapsibleContent>
+                </Collapsible>
               </div>
             );
           })()}
 
         {/* Activity Type (only for ACTIVITY type) */}
-        {subsection.type === SubsectionType.ACTIVITY && (() => {
-          // Narrow the type within this scope
-          const currentSubsection = subsection;
-          return (
-            <div className="mb-6">
-              <div className="flex items-center justify-between mb-2">
-                <Label
-                  htmlFor="activity_type"
-                  className={cn(
-                    'block text-sm font-medium',
-                    hasFieldError('activity_type')
-                      ? 'text-destructive'
-                      : 'text-foreground/80'
-                  )}
-                >
-                  Activity Type{' '}
+        {subsection.type === SubsectionType.ACTIVITY &&
+          (() => {
+            // Narrow the type within this scope
+            const currentSubsection = subsection;
+            return (
+              <div className="mb-6">
+                <div className="flex items-center justify-between mb-2">
+                  <Label
+                    htmlFor="activity_type"
+                    className={cn(
+                      'block text-sm font-medium',
+                      hasFieldError('activity_type')
+                        ? 'text-destructive'
+                        : 'text-foreground/80'
+                    )}
+                  >
+                    Activity Type{' '}
+                    {hasFieldError('activity_type') && (
+                      <span className="text-destructive">*</span>
+                    )}
+                  </Label>
                   {hasFieldError('activity_type') && (
-                    <span className="text-destructive">*</span>
+                    <span className="text-xs text-destructive">
+                      {getFieldErrorMessage('activity_type')}
+                    </span>
                   )}
-                </Label>
-                {hasFieldError('activity_type') && (
-                  <span className="text-xs text-destructive">
-                    {getFieldErrorMessage('activity_type')}
-                  </span>
-                )}
-              </div>
-              <Select
-                value={currentSubsection.activity_type} // Use narrowed variable
-                onValueChange={(value) => {
-                  handleSelectChange('activity_type', value);
-                  clearFieldError('activity_type');
-                }}
-              >
-                <SelectTrigger
-                  className={cn(
-                    'w-full',
-                    hasFieldError('activity_type')
-                      ? 'border-destructive ring-destructive/20'
-                      : 'border-slate-200 dark:border-slate-800'
-                  )}
+                </div>
+                <Select
+                  value={currentSubsection.activity_type} // Use narrowed variable
+                  onValueChange={(value) => {
+                    handleSelectChange('activity_type', value);
+                    clearFieldError('activity_type');
+                  }}
                 >
-                  <SelectValue placeholder="Select activity type" />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.values(ActivityType).map((type) => (
-                    <SelectItem key={type} value={type}>
-                      {type
-                        .replace('_', ' ')
-                        .split(' ')
-                        .map(
-                          (word) =>
-                            word.charAt(0).toUpperCase() +
-                            word.slice(1).toLowerCase()
-                        )
-                        .join(' ')}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          );
-        })()}
+                  <SelectTrigger
+                    className={cn(
+                      'w-full',
+                      hasFieldError('activity_type')
+                        ? 'border-destructive ring-destructive/20'
+                        : 'border-slate-200 dark:border-slate-800'
+                    )}
+                  >
+                    <SelectValue placeholder="Select activity type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.values(ActivityType).map((type) => (
+                      <SelectItem key={type} value={type}>
+                        {type
+                          .replace('_', ' ')
+                          .split(' ')
+                          .map(
+                            (word) =>
+                              word.charAt(0).toUpperCase() +
+                              word.slice(1).toLowerCase()
+                          )
+                          .join(' ')}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            );
+          })()}
 
         {/* Route Information (only for ROUTE type) */}
-        {subsection.type === SubsectionType.ROUTE && (() => {
+        {subsection.type === SubsectionType.ROUTE &&
+          (() => {
             // Narrow the type within this scope
             const currentSubsection = subsection;
             return (
@@ -1017,7 +1055,8 @@ export const SubsectionForm: React.FC<SubsectionFormProps> = ({
                         <span className="text-destructive">*</span>
                       )}
                     </Label>
-                    {(hasFieldError('waypoints') || hasFieldError('waypoint')) && (
+                    {(hasFieldError('waypoints') ||
+                      hasFieldError('waypoint')) && (
                       <span className="ml-2 text-xs text-destructive">
                         {getFieldErrorMessage('waypoints') ||
                           getFieldErrorMessage('waypoint')}
@@ -1046,127 +1085,155 @@ export const SubsectionForm: React.FC<SubsectionFormProps> = ({
                       : 'border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50'
                   )}
                 >
-                  {currentSubsection.waypoints && currentSubsection.waypoints.length > 0 ? ( // Use narrowed variable
+                  {currentSubsection.waypoints &&
+                  currentSubsection.waypoints.length > 0 ? ( // Use narrowed variable
                     <div className="space-y-5">
-                      {currentSubsection.waypoints.map((waypoint, index) => ( // Use narrowed variable
-                        <div
-                          key={index}
-                          className={cn(
-                            'p-4 rounded-lg bg-white dark:bg-slate-800 border shadow-sm',
-                            hasFieldError('waypoint') &&
-                              index ===
-                                parseInt(
-                                  getFieldErrorMessage('waypoint').split(' ')[1]
-                                ) -
-                                  1
-                              ? 'border-destructive/50'
-                              : 'border-slate-200 dark:border-slate-700'
-                          )}
-                        >
-                          <div className="flex items-center gap-2 mb-3">
-                            <div className="w-6 h-6 rounded-full bg-forest-100 dark:bg-forest-900/30 flex items-center justify-center text-xs text-forest-600 dark:text-forest-400 font-medium flex-shrink-0">
-                              {index + 1}
+                      {currentSubsection.waypoints.map(
+                        (
+                          waypoint,
+                          index // Use narrowed variable
+                        ) => (
+                          <div
+                            key={index}
+                            className={cn(
+                              'p-4 rounded-lg bg-white dark:bg-slate-800 border shadow-sm',
+                              hasFieldError('waypoint') &&
+                                index ===
+                                  parseInt(
+                                    getFieldErrorMessage('waypoint').split(
+                                      ' '
+                                    )[1]
+                                  ) -
+                                    1
+                                ? 'border-destructive/50'
+                                : 'border-slate-200 dark:border-slate-700'
+                            )}
+                          >
+                            <div className="flex items-center gap-2 mb-3">
+                              <div className="w-7 h-7 rounded-full bg-gradient-to-br from-forest-400 to-forest dark:from-forest-500 dark:to-forest-700 flex items-center justify-center text-xs text-white font-medium flex-shrink-0 shadow-sm">
+                                {index + 1}
+                              </div>
+                              <div className="flex-1 font-medium text-sm">
+                                Waypoint {index + 1}
+                              </div>
+                              <Button
+                                type="button"
+                                size="icon"
+                                variant="ghost"
+                                onClick={() => removeRouteLocation(index)}
+                                className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 flex-shrink-0"
+                              >
+                                <X className="w-4 h-4" />
+                              </Button>
                             </div>
-                            <div className="flex-1 font-medium text-sm">Waypoint {index + 1}</div>
-                            <Button
-                              type="button"
-                              size="icon"
-                              variant="ghost"
-                              onClick={() => removeRouteLocation(index)}
-                              className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 flex-shrink-0"
+
+                            <div className="grid grid-cols-2 gap-3 mb-3">
+                              <div>
+                                <Label
+                                  htmlFor={`waypoint-lat-${index}`}
+                                  className="text-xs text-muted-foreground mb-1 block"
+                                >
+                                  Latitude
+                                </Label>
+                                <Input
+                                  id={`waypoint-lat-${index}`}
+                                  type="number"
+                                  value={waypoint.latitude}
+                                  onChange={(e) => {
+                                    handleRouteLocationChange(
+                                      index,
+                                      'latitude',
+                                      e.target.value
+                                    );
+                                    clearFieldError('waypoint');
+                                  }}
+                                  className={cn(
+                                    'h-8',
+                                    hasFieldError('waypoint') &&
+                                      index ===
+                                        parseInt(
+                                          getFieldErrorMessage(
+                                            'waypoint'
+                                          ).split(' ')[1]
+                                        ) -
+                                          1
+                                      ? 'border-destructive/50'
+                                      : 'border-slate-200 dark:border-slate-700'
+                                  )}
+                                  step="0.000001"
+                                />
+                              </div>
+                              <div>
+                                <Label
+                                  htmlFor={`waypoint-lng-${index}`}
+                                  className="text-xs text-muted-foreground mb-1 block"
+                                >
+                                  Longitude
+                                </Label>
+                                <Input
+                                  id={`waypoint-lng-${index}`}
+                                  type="number"
+                                  value={waypoint.longitude}
+                                  onChange={(e) => {
+                                    handleRouteLocationChange(
+                                      index,
+                                      'longitude',
+                                      e.target.value
+                                    );
+                                    clearFieldError('waypoint');
+                                  }}
+                                  className={cn(
+                                    'h-8',
+                                    hasFieldError('waypoint') &&
+                                      index ===
+                                        parseInt(
+                                          getFieldErrorMessage(
+                                            'waypoint'
+                                          ).split(' ')[1]
+                                        ) -
+                                          1
+                                      ? 'border-destructive/50'
+                                      : 'border-slate-200 dark:border-slate-700'
+                                  )}
+                                  step="0.000001"
+                                />
+                              </div>
+                            </div>
+
+                            {/* Map picker for this waypoint */}
+                            <Collapsible
+                              open={isRouteMapOpen}
+                              onOpenChange={setIsRouteMapOpen}
+                              className="mt-2"
                             >
-                              <X className="w-4 h-4" />
-                            </Button>
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="text-xs text-slate-600 dark:text-slate-400">
+                                  Waypoint Map
+                                </span>
+                                <CollapsibleTrigger asChild />
+                              </div>
+                              <CollapsibleContent>
+                                <div className="border rounded-lg overflow-hidden">
+                                  <LocationPickerMap
+                                    initialLocation={{
+                                      latitude: waypoint.latitude,
+                                      longitude: waypoint.longitude,
+                                    }}
+                                    onLocationChangeAction={(lat, lng) => {
+                                      handleWaypointLocationSelected(
+                                        index,
+                                        lat,
+                                        lng
+                                      );
+                                    }}
+                                    height="200px"
+                                  />
+                                </div>
+                              </CollapsibleContent>
+                            </Collapsible>
                           </div>
-
-                          <div className="grid grid-cols-2 gap-3 mb-3">
-                            <div>
-                              <Label
-                                htmlFor={`waypoint-lat-${index}`}
-                                className="text-xs text-muted-foreground mb-1 block"
-                              >
-                                Latitude
-                              </Label>
-                              <Input
-                                id={`waypoint-lat-${index}`}
-                                type="number"
-                                value={waypoint.latitude}
-                                onChange={(e) => {
-                                  handleRouteLocationChange(
-                                    index,
-                                    'latitude',
-                                    e.target.value
-                                  );
-                                  clearFieldError('waypoint');
-                                }}
-                                className={cn(
-                                  'h-8',
-                                  hasFieldError('waypoint') &&
-                                    index ===
-                                      parseInt(
-                                        getFieldErrorMessage('waypoint').split(
-                                          ' '
-                                        )[1]
-                                      ) -
-                                        1
-                                    ? 'border-destructive/50'
-                                    : 'border-slate-200 dark:border-slate-700'
-                                )}
-                                step="0.000001"
-                              />
-                            </div>
-                            <div>
-                              <Label
-                                htmlFor={`waypoint-lng-${index}`}
-                                className="text-xs text-muted-foreground mb-1 block"
-                              >
-                                Longitude
-                              </Label>
-                              <Input
-                                id={`waypoint-lng-${index}`}
-                                type="number"
-                                value={waypoint.longitude}
-                                onChange={(e) => {
-                                  handleRouteLocationChange(
-                                    index,
-                                    'longitude',
-                                    e.target.value
-                                  );
-                                  clearFieldError('waypoint');
-                                }}
-                                className={cn(
-                                  'h-8',
-                                  hasFieldError('waypoint') &&
-                                    index ===
-                                      parseInt(
-                                        getFieldErrorMessage('waypoint').split(
-                                          ' '
-                                        )[1]
-                                      ) -
-                                        1
-                                    ? 'border-destructive/50'
-                                    : 'border-slate-200 dark:border-slate-700'
-                                )}
-                                step="0.000001"
-                              />
-                            </div>
-                          </div>
-
-                          {/* Map picker for this waypoint */}
-                          <div className="mt-2 border rounded-lg overflow-hidden">
-                            <LocationPickerMap
-                              initialLocation={{
-                                latitude: waypoint.latitude,
-                                longitude: waypoint.longitude
-                              }}
-                              onLocationChangeAction={(lat, lng) => {
-                                handleWaypointLocationSelected(index, lat, lng);
-                              }}
-                              height="200px"
-                            />
-                          </div>
-                        </div>
-                      ))}
+                        )
+                      )}
                     </div>
                   ) : (
                     <div className="border border-dashed border-slate-300 dark:border-slate-700 rounded-lg p-5 text-center bg-white/80 dark:bg-slate-800/80">
@@ -1192,50 +1259,10 @@ export const SubsectionForm: React.FC<SubsectionFormProps> = ({
 
                   {hasFieldError('waypoints') && (
                     <p className="mt-2 text-xs text-destructive bg-white/80 dark:bg-slate-900/80 p-2 rounded border border-destructive/20">
-                      {getFieldErrorMessage('waypoints')}. Routes need at least two
-                      connected points.
+                      {getFieldErrorMessage('waypoints')}. Routes need at least
+                      two connected points.
                     </p>
                   )}
-                </div>
-
-                <div className="grid grid-cols-2 gap-4 mt-3">
-                  <div>
-                    <Label
-                      htmlFor="total_time"
-                      className="block text-sm font-medium text-foreground/80 mb-2"
-                    >
-                      <Clock className="w-4 h-4 inline-block mr-1 opacity-70" />{' '}
-                      Total Time (minutes)
-                    </Label>
-                    <Input
-                      id="total_time"
-                      name="total_time"
-                      type="number"
-                      min="0"
-                      value={currentSubsection.total_time || 0} // Use narrowed variable
-                      onChange={handleSubsectionChange}
-                      className="w-full border-slate-200 dark:border-slate-800"
-                    />
-                  </div>
-                  <div>
-                    <Label
-                      htmlFor="total_distance"
-                      className="block text-sm font-medium text-foreground/80 mb-2"
-                    >
-                      <Route className="w-4 h-4 inline-block mr-1 opacity-70" />{' '}
-                      Total Distance (km)
-                    </Label>
-                    <Input
-                      id="total_distance"
-                      name="total_distance"
-                      type="number"
-                      min="0"
-                      step="0.1"
-                      value={currentSubsection.total_distance || 0} // Use narrowed variable
-                      onChange={handleSubsectionChange}
-                      className="w-full border-slate-200 dark:border-slate-800"
-                    />
-                  </div>
                 </div>
               </div>
             );

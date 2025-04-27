@@ -2,6 +2,11 @@ import { FileUploader } from '@/components/common/file-uploader';
 import { LocationPickerMap } from '@/components/maps/LocationPickerMap';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger
+} from '@/components/ui/collapsible';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -16,10 +21,10 @@ import {
   Settings2,
   Share2,
   Star,
-  X,
+  X
 } from 'lucide-react';
 import Image from 'next/image';
-import React from 'react';
+import React, { useState } from 'react';
 
 interface JournalMetadataFormProps {
   formData: JournalCreateRequest;
@@ -64,6 +69,7 @@ export const JournalMetadataForm: React.FC<JournalMetadataFormProps> = ({
     },
     [onLocationChange]
   );
+  const [isMapOpen, setIsMapOpen] = useState(true);
 
   return (
     <div className="space-y-8">
@@ -276,16 +282,27 @@ export const JournalMetadataForm: React.FC<JournalMetadataFormProps> = ({
         </div>
 
         {/* Show a mini-map preview if coordinates are set */}
-        <div className="mt-4 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700">
-          <LocationPickerMap
-            initialLocation={{
-              latitude: destination.latitude,
-              longitude: destination.longitude,
-            }}
-            onLocationChangeAction={handleLocationSelected}
-            height="250px"
-          />
-        </div>
+        <Collapsible open={isMapOpen} onOpenChange={setIsMapOpen} className="mt-4">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm text-slate-600 dark:text-slate-400">
+              Map Preview
+            </span>
+            <CollapsibleTrigger asChild/>
+
+          </div>
+          <CollapsibleContent>
+            <div className="rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700">
+              <LocationPickerMap
+                initialLocation={{
+                  latitude: destination.latitude,
+                  longitude: destination.longitude,
+                }}
+                onLocationChangeAction={handleLocationSelected}
+                height="250px"
+              />
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
       </div>
 
       {/* Journal Options Section */}

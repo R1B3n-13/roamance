@@ -28,7 +28,6 @@ import {
   Edit,
   ListChecks,
   Loader2,
-  Map,
   MapPin,
   MoreHorizontal,
   Pencil,
@@ -573,12 +572,7 @@ export const SubsectionDetail: React.FC<SubsectionDetailProps> = ({
                         autoFit={true}
                         showDistance={true}
                         showTravelTime={true}
-                        travelMode={
-                          subsection.total_time && subsection.total_distance
-                            ? subsection.total_distance /
-                              (subsection.total_time / 3600) // Calculate speed in km/h if both values exist
-                            : 'driving'
-                        }
+                        travelMode={'driving'}
                         highlightEndpoints={true}
                         routeStyle={{
                           color: isDarkMode ? '#10b981' : '#059669',
@@ -596,30 +590,6 @@ export const SubsectionDetail: React.FC<SubsectionDetailProps> = ({
                           <MapPin className="h-3 w-3 text-slate-500 dark:text-slate-400" />
                           <span>{subsection.waypoints.length} waypoints</span>
                         </Badge>
-                        {subsection.total_distance && (
-                          <Badge
-                            variant="outline"
-                            className="px-2 py-0.5 bg-slate-50 dark:bg-slate-800 flex items-center gap-1.5 border-slate-200 dark:border-slate-700"
-                          >
-                            <Map className="h-3 w-3 text-emerald-500 dark:text-emerald-400" />
-                            <span>
-                              {(subsection.total_distance / 1000).toFixed(2)} km
-                            </span>
-                          </Badge>
-                        )}
-                        {subsection.total_time && (
-                          <Badge
-                            variant="outline"
-                            className="px-2 py-0.5 bg-slate-50 dark:bg-slate-800 flex items-center gap-1.5 border-slate-200 dark:border-slate-700"
-                          >
-                            <Clock className="h-3 w-3 text-amber-500 dark:text-amber-400" />
-                            <span>
-                              {Math.floor(subsection.total_time / 3600) > 0
-                                ? `${Math.floor(subsection.total_time / 3600)}h ${Math.floor((subsection.total_time % 3600) / 60)}m`
-                                : `${Math.floor(subsection.total_time / 60)}m`}
-                            </span>
-                          </Badge>
-                        )}
                       </div>
 
                       {editMode && (

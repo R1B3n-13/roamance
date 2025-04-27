@@ -34,8 +34,6 @@ export interface ActivitySubsection extends Subsection {
 export interface RouteSubsection extends Subsection {
   type: SubsectionType.ROUTE;
   waypoints: Location[];
-  total_time: number;
-  total_distance: number;
 }
 
 /* --------------------------------- Create --------------------------------- */
@@ -61,8 +59,6 @@ export interface ActivitySubsectionRequest extends SubsectionRequestDto {
 export interface RouteSubsectionRequest extends SubsectionRequestDto {
   type: SubsectionType.ROUTE;
   waypoints: Location[];
-  total_time: number;
-  total_distance: number;
 }
 
 export type SubsectionRequest =
@@ -99,8 +95,6 @@ export interface ActivitySubsectionDto extends SubsectionDetailDto {
 export interface RouteSubsectionDto extends SubsectionDetailDto {
   type: SubsectionType.ROUTE;
   waypoints: Location[];
-  total_time: number;
-  total_distance: number;
 }
 
 export type SubsectionDetailResponseDto =

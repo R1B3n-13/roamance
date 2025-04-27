@@ -427,7 +427,7 @@ export const JournalForm: React.FC<JournalFormProps> = ({
                   </div>
                 </div>
 
-                <div className="max-h-[calc(70vh-140px)] overflow-y-auto">
+                <div className="max-h-full overflow-y-auto">
                   <div className="p-6">
                     <SubsectionForm
                       isSubmitting={isSubmittingSubsection}
