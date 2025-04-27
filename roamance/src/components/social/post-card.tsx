@@ -5,8 +5,9 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import { useSocialContext } from '@/context/SocialContext';
 import { cn } from '@/lib/utils';
-import { Post, User } from '@/types';
+import { Post } from '@/types';
 import { motion } from 'framer-motion';
 import {
   AlertTriangle,
@@ -32,7 +33,6 @@ const EMPTY_TIDBITS = 'Nothing to show';
 
 interface PostCardProps {
   post: Post;
-  currentUser?: User;
   onLike: (postId: string) => void;
   onComment: (postId: string) => void;
   onSave: (postId: string) => void;
@@ -42,13 +42,13 @@ interface PostCardProps {
 
 export const PostCard = ({
   post,
-  currentUser,
   onLike,
   onComment,
   onSave,
   onShare,
   onDelete,
 }: PostCardProps) => {
+  const { user } = useSocialContext();
   const [showAll, setShowAll] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showMenu, setShowMenu] = useState(false);
@@ -58,12 +58,10 @@ export const PostCard = ({
   const menuRef = useRef<HTMLDivElement>(null);
   const tooltipTimeout = useRef<NodeJS.Timeout | null>(null);
 
-  const isLiked = post.liked_by?.some((user) => user.id === currentUser?.id);
-  const isSaved = post.saved_by?.some((user) => user.id === currentUser?.id);
-  const isOwnPost = post.user.id === currentUser?.id;
+  const isLiked = post.liked_by?.some((liker) => liker.id === user?.id);
+  const isSaved = post.saved_by?.some((saver) => saver.id === user?.id);
+  const isOwnPost = post.user.id === user?.id;
   const isUnsafe = post.is_safe === false;
-
-  console.log(currentUser)
 
   const hasMedia = post.image_paths.length > 0 || post.video_paths.length > 0;
   const totalMedia = post.image_paths.length + post.video_paths.length;
@@ -211,9 +209,7 @@ export const PostCard = ({
               />
             ) : (
               <video
-                src={
-                  post.video_paths[currentImageIndex - post.image_paths.length]
-                }
+                src={post.video_paths[currentImageIndex - post.image_paths.length]}
                 className="w-full h-full object-cover"
                 controls
                 preload="metadata"

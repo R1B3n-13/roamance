@@ -1,9 +1,17 @@
 'use client';
 
 import FileUploader from '@/components/common/file-uploader';
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { useSocialContext } from '@/context/SocialContext';
 import { cn } from '@/lib/utils';
 import { PostService } from '@/service/social-service';
-import { User } from '@/types';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   ChevronDown,
@@ -17,11 +25,8 @@ import {
 import Image from 'next/image';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from '@/components/ui/dialog'
-import { useFeedContext } from '@/context/FeedContext';
 
 interface PostCreatorProps {
-  currentUser?: User;
   onSubmit: (postData: {
     text: string;
     image_paths: string[];
@@ -31,8 +36,11 @@ interface PostCreatorProps {
   isSubmitting?: boolean;
 }
 
-export const PostCreator = ({ currentUser, onSubmit, isSubmitting = false }: PostCreatorProps) => {
-  const { triggerRefresh } = useFeedContext();
+export const PostCreator = ({
+  onSubmit,
+  isSubmitting = false,
+}: PostCreatorProps) => {
+  const { user, triggerRefresh } = useSocialContext();
   const [text, setText] = useState('');
   const [imagePaths, setImagePaths] = useState<string[]>([]);
   const [videoPaths, setVideoPaths] = useState<string[]>([]);
@@ -44,7 +52,6 @@ export const PostCreator = ({ currentUser, onSubmit, isSubmitting = false }: Pos
     name?: string;
   } | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [uploadingMedia, setUploadingMedia] = useState(false);
   const [charCount, setCharCount] = useState(0);
   const MAX_CHARS = 500;
 
@@ -144,7 +151,7 @@ export const PostCreator = ({ currentUser, onSubmit, isSubmitting = false }: Pos
   };
 
   const handleSubmit = async () => {
-    if (isSubmitting || uploadingMedia || text.trim() === '') return;
+    if (isSubmitting || text.trim() === '') return;
 
     try {
       // First call the parent component's onSubmit for immediate feedback
@@ -190,11 +197,8 @@ export const PostCreator = ({ currentUser, onSubmit, isSubmitting = false }: Pos
         <div className="flex gap-3">
           <div className="relative h-10 w-10 rounded-full overflow-hidden flex-shrink-0 border-2 border-purple-200 dark:border-purple-700">
             <Image
-              src={
-                currentUser?.profile_image ||
-                '/images/roamance-logo-no-text.png'
-              }
-              alt={currentUser?.name || 'User'}
+              src={user?.profile_image || '/images/roamance-logo-no-text.png'}
+              alt={user?.name || 'User'}
               fill
               style={{ objectFit: 'cover' }}
               className="rounded-full"
@@ -281,14 +285,6 @@ export const PostCreator = ({ currentUser, onSubmit, isSubmitting = false }: Pos
                     </div>
                   )}
 
-                  {/* Upload Status */}
-                  {uploadingMedia && (
-                    <div className="mt-3 flex items-center text-sm text-gray-500 dark:text-gray-400 animate-pulse">
-                      <Loader2 className="mr-2 h-4 w-4 text-purple-500 dark:text-purple-400 animate-spin" />
-                      Uploading media...
-                    </div>
-                  )}
-
                   {/* Location Display */}
                   {location && (
                     <div className="mt-3 flex items-center bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 text-sm text-gray-700 dark:text-gray-300 rounded-full py-1.5 px-3 w-fit group border border-gray-100 dark:border-gray-700/50">
@@ -330,11 +326,11 @@ export const PostCreator = ({ currentUser, onSubmit, isSubmitting = false }: Pos
                   }}
                   className={cn(
                     'flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-full transition-all',
-                    uploadingMedia || isSubmitting
+                    isSubmitting
                       ? 'bg-gray-100 dark:bg-gray-700/50 text-gray-400 dark:text-gray-500 cursor-not-allowed'
                       : 'bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 text-purple-600 dark:text-purple-400 border border-purple-100 dark:border-purple-800/30 hover:shadow-sm'
                   )}
-                  disabled={uploadingMedia || isSubmitting}
+                  disabled={isSubmitting}
                 >
                   <ImageIcon className="h-4 w-4" />
                   <span>Photo</span>
@@ -346,11 +342,11 @@ export const PostCreator = ({ currentUser, onSubmit, isSubmitting = false }: Pos
                   }}
                   className={cn(
                     'flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-full transition-all',
-                    uploadingMedia || isSubmitting
+                    isSubmitting
                       ? 'bg-gray-100 dark:bg-gray-700/50 text-gray-400 dark:text-gray-500 cursor-not-allowed'
                       : 'bg-gradient-to-r from-teal-50 to-green-50 dark:from-teal-900/20 dark:to-green-900/20 text-teal-600 dark:text-teal-400 border border-teal-100 dark:border-teal-800/30 hover:shadow-sm'
                   )}
-                  disabled={uploadingMedia || isSubmitting}
+                  disabled={isSubmitting}
                 >
                   <Video className="h-4 w-4" />
                   <span>Video</span>
@@ -360,11 +356,11 @@ export const PostCreator = ({ currentUser, onSubmit, isSubmitting = false }: Pos
                   onClick={handleLocationAdd}
                   className={cn(
                     'flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-full transition-all',
-                    uploadingMedia || isSubmitting
+                    isSubmitting
                       ? 'bg-gray-100 dark:bg-gray-700/50 text-gray-400 dark:text-gray-500 cursor-not-allowed'
                       : 'bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-800/30 hover:shadow-sm'
                   )}
-                  disabled={uploadingMedia || isSubmitting}
+                  disabled={isSubmitting}
                 >
                   <MapPin className="h-4 w-4" />
                   <span>Location</span>
@@ -373,11 +369,11 @@ export const PostCreator = ({ currentUser, onSubmit, isSubmitting = false }: Pos
                 <button
                   className={cn(
                     'flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-full transition-all',
-                    uploadingMedia || isSubmitting
+                    isSubmitting
                       ? 'bg-gray-100 dark:bg-gray-700/50 text-gray-400 dark:text-gray-500 cursor-not-allowed'
                       : 'bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20 text-yellow-600 dark:text-yellow-400 border border-yellow-100 dark:border-yellow-800/30 hover:shadow-sm'
                   )}
-                  disabled={uploadingMedia || isSubmitting}
+                  disabled={isSubmitting}
                 >
                   <Smile className="h-4 w-4" />
                   <span>Mood</span>
@@ -386,10 +382,10 @@ export const PostCreator = ({ currentUser, onSubmit, isSubmitting = false }: Pos
 
               <button
                 onClick={handleSubmit}
-                disabled={isSubmitting || uploadingMedia || text.trim() === ''}
+                disabled={isSubmitting || text.trim() === ''}
                 className={cn(
                   'px-5 py-2 rounded-full text-sm font-medium transition-all',
-                  text.trim() !== '' && !uploadingMedia && !isSubmitting
+                  text.trim() !== '' && !isSubmitting
                     ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-sm hover:shadow hover:from-purple-500 hover:to-indigo-500 hover:-translate-y-0.5 active:translate-y-0'
                     : 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
                 )}
@@ -398,11 +394,6 @@ export const PostCreator = ({ currentUser, onSubmit, isSubmitting = false }: Pos
                   <span className="flex items-center">
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                     Posting...
-                  </span>
-                ) : uploadingMedia ? (
-                  <span className="flex items-center">
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Uploading...
                   </span>
                 ) : (
                   <span className="flex items-center">
@@ -425,9 +416,7 @@ export const PostCreator = ({ currentUser, onSubmit, isSubmitting = false }: Pos
             </DialogTitle>
           </DialogHeader>
           <FileUploader
-            acceptedFileTypes={
-              uploaderType === 'image' ? 'image/*' : 'video/*'
-            }
+            acceptedFileTypes={uploaderType === 'image' ? 'image/*' : 'video/*'}
             multiple
             showPreview={false}
             onUploadSuccess={(result) => {
@@ -448,9 +437,7 @@ export const PostCreator = ({ currentUser, onSubmit, isSubmitting = false }: Pos
           />
           <DialogFooter>
             <DialogClose asChild>
-              <button
-                className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-sm rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600"
-              >
+              <button className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-sm rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600">
                 Close
               </button>
             </DialogClose>

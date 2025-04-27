@@ -1,6 +1,6 @@
 'use client';
 
-import { useFeedContext } from '@/context/FeedContext';
+import { useSocialContext } from '@/context/SocialContext';
 import { PostService } from '@/service/social-service';
 import { Post, User } from '@/types';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -25,7 +25,7 @@ export const SocialFeed = ({
   currentUser,
   initialPosts = [],
 }: SocialFeedProps) => {
-  const { postCreated } = useFeedContext();
+  const { postCreated } = useSocialContext();
   const [posts, setPosts] = useState<Post[]>(initialPosts);
   const [isLoading, setIsLoading] = useState(!initialPosts.length);
   const [error, setError] = useState<string | null>(null);
