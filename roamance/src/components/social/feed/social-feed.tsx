@@ -8,9 +8,9 @@ import { ArrowUpDown, Loader2, RefreshCw, Sparkles } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { CommentDialog } from '../comment';
-import { PostCard } from '../post/post-card';
 import { EmptyFeed } from './empty-feed';
 import { FeedSkeleton } from './feed-skeleton';
+import { PostCard } from '../post/post-card';
 
 export const SocialFeed = () => {
   const {

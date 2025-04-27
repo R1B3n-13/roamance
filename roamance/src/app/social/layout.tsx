@@ -3,7 +3,7 @@
 import { Navbar } from '@/components/navigation';
 import { SocialProvider } from '@/context/SocialContext';
 import React, { useState } from 'react';
-import { DesktopSideNavigation, MobileSideNavigation } from '@/components/navigation/SideNavigation';
+import { DesktopSideNavigation, MobileSideNavigation } from '@/components/social/SideNavigation';
 import { Menu } from 'lucide-react';
 
 const SocialLayout = ({
