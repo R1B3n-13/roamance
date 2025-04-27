@@ -234,7 +234,7 @@ public class GlobalExceptionHandler {
         new BaseResponseDto(400, false, ex.getMessage()), HttpStatus.BAD_REQUEST);
   }
 
-  // ==================== Itinerary related Exceptions ====================
+  // ==================== DateTime related Exceptions ====================
 
   @ExceptionHandler(DateOutOfRangeException.class)
   public ResponseEntity<BaseResponseDto> handleDateOutOfRangeException(DateOutOfRangeException ex) {
@@ -263,6 +263,18 @@ public class GlobalExceptionHandler {
 
     return new ResponseEntity<>(
         new BaseResponseDto(400, false, ex.getMessage()), HttpStatus.BAD_REQUEST);
+  }
+
+  // ==================== AI Related Exceptions ====================
+
+  @ExceptionHandler(AiGenerationFailedException.class)
+  public ResponseEntity<BaseResponseDto> handleAiGenerationFailedException(
+      AiGenerationFailedException ex) {
+
+    log.error("AiGenerationFailedException: {}", ex.getMessage(), ex);
+
+    return new ResponseEntity<>(
+        new BaseResponseDto(500, false, ex.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
   }
 
   // ==================== General Exceptions ====================

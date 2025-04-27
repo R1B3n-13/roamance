@@ -1,4 +1,4 @@
-package com.devs.roamance.dto.request.travel.itinerary;
+package com.devs.roamance.dto.common;
 
 import com.devs.roamance.dto.request.travel.LocationCreateRequestDto;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -8,7 +8,6 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.time.LocalTime;
-import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,13 +17,13 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ActivityCreateRequestDto {
+public class AiPoweredActivityDto {
 
-  @JsonProperty("day_plan_id")
-  @NotNull(message = "Day plan id is required")
-  private UUID dayPlanId;
-
+  @NotNull(message = "Location is required")
   private LocationCreateRequestDto location;
+
+  @NotBlank(message = "Activity type is required")
+  private String type;
 
   @JsonProperty("start_time")
   @NotNull(message = "Start time is required")
@@ -33,9 +32,6 @@ public class ActivityCreateRequestDto {
   @JsonProperty("end_time")
   @NotNull(message = "End time is required")
   private LocalTime endTime;
-
-  @NotBlank(message = "Activity type is required")
-  private String type;
 
   @Size(max = 10_000, message = "Note can not contain more than 10000 character")
   private String note;

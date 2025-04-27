@@ -1,5 +1,6 @@
 package com.devs.roamance.controller;
 
+import com.devs.roamance.dto.common.AiPoweredItineraryDto;
 import com.devs.roamance.dto.request.travel.itinerary.ItineraryCreateRequestDto;
 import com.devs.roamance.dto.request.travel.itinerary.ItineraryUpdateRequestDto;
 import com.devs.roamance.dto.response.BaseResponseDto;
@@ -30,6 +31,15 @@ public class ItineraryController {
       @Valid @RequestBody ItineraryCreateRequestDto requestDto) {
 
     ItineraryResponseDto responseDto = itineraryService.create(requestDto);
+
+    return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
+  }
+
+  @PostMapping("/with-details")
+  public ResponseEntity<ItineraryResponseDto> createItineraryWithDetails(
+      @Valid @RequestBody AiPoweredItineraryDto requestDto) {
+
+    ItineraryResponseDto responseDto = itineraryService.createWithDetails(requestDto);
 
     return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
   }

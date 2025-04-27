@@ -29,6 +29,11 @@ public class PostDto {
 
   private LocationResponseDto location;
 
+  @JsonProperty("is_safe")
+  private Boolean isSafe = true;
+
+  private String tidbits;
+
   @JsonProperty("likes_count")
   private int likesCount;
 
