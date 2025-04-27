@@ -48,6 +48,10 @@ export const PostActions = ({
     setTimeout(() => setSavedTooltip(false), 2000);
   };
 
+  const handleCommentClick = () => {
+    onComment();
+  };
+
   return (
     <div className="px-4 py-3 border-t border-gray-100/50 dark:border-gray-700/30 flex items-center justify-between mt-auto">
       <div className="flex items-center space-x-6">
@@ -100,7 +104,7 @@ export const PostActions = ({
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          onClick={onComment}
+          onClick={handleCommentClick}
           className="group flex items-center"
         >
           <MessageCircle className={cn(

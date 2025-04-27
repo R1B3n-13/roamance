@@ -147,7 +147,7 @@ export const PostService = {
     }
   },
 
-  getLikedByUsers: async (postId: string): Promise<BaseResponse<User[]>> => {
+  getLikedByPost: async (postId: string): Promise<BaseResponse<User[]>> => {
     try {
       const response = await api.get<BaseResponse<User[]>>(
         POSTS_ENDPOINTS.LIKED_BY(postId)

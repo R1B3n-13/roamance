@@ -218,21 +218,8 @@ export const ActionButton = ({
     green: 'text-green-500 dark:text-green-400 fill-green-500 dark:fill-green-400',
   };
 
-  const hoverColor = {
-    pink: 'group-hover:text-pink-500 dark:group-hover:text-pink-400',
-    blue: 'group-hover:text-blue-500 dark:group-hover:text-blue-400',
-    purple: 'group-hover:text-purple-500 dark:group-hover:text-purple-400',
-    amber: 'group-hover:text-amber-500 dark:group-hover:text-amber-400',
-    green: 'group-hover:text-green-500 dark:group-hover:text-green-400',
-  };
-
-  const bgColor = {
-    pink: 'bg-pink-50 dark:bg-pink-900/10',
-    blue: 'bg-blue-50 dark:bg-blue-900/10',
-    purple: 'bg-purple-50 dark:bg-purple-900/10',
-    amber: 'bg-amber-50 dark:bg-amber-900/10',
-    green: 'bg-green-50 dark:bg-green-900/10',
-  };
+  const activeClasses = colorClasses[activeColor as keyof typeof colorClasses];
+  const inactiveClasses = 'text-gray-500 dark:text-gray-400';
 
   return (
     <motion.button
@@ -240,56 +227,29 @@ export const ActionButton = ({
       whileTap={{ scale: 0.95 }}
       onClick={onClick}
       className={cn(
-        "group flex items-center relative rounded-full transition-all",
-        showBg && (active ? bgColor[activeColor as keyof typeof bgColor] : "hover:bg-gray-100 dark:hover:bg-gray-800/70"),
-        showBg && "px-3 py-1.5"
+        'group flex items-center',
+        showBg && 'px-3 py-1.5 rounded-full',
+        showBg && active && `bg-${activeColor}-50 dark:bg-${activeColor}-900/20`,
+        showBg && !active && 'hover:bg-gray-100 dark:hover:bg-gray-800/60'
       )}
     >
-      <div
-        className={cn(
-          'relative transition-all duration-300',
-          active
-            ? colorClasses[activeColor as keyof typeof colorClasses]
-            : 'text-gray-400 dark:text-gray-500',
-          !active && hoverColor[activeColor as keyof typeof hoverColor]
-        )}
-      >
-        {icon}
+      <div className="relative">
+        <div className={cn(
+          'transition-colors',
+          active ? activeClasses : inactiveClasses,
+          'group-hover:' + activeClasses
+        )}>
+          {icon}
+        </div>
       </div>
-
-      {count !== undefined && (
-        <span
-          className={cn(
-            'text-sm font-medium ml-2 transition-colors',
-            active
-              ? colorClasses[activeColor as keyof typeof colorClasses]
-              : 'text-gray-500 dark:text-gray-400',
-            !active && hoverColor[activeColor as keyof typeof hoverColor]
-          )}
-        >
-          {count > 0 ? count.toLocaleString() : ''}
+      {(label || count !== undefined) && (
+        <span className={cn(
+          'ml-1.5 text-sm font-medium transition-colors',
+          active ? activeClasses : inactiveClasses,
+          'group-hover:' + activeClasses
+        )}>
+          {count !== undefined ? count > 0 ? count : label || '' : label}
         </span>
-      )}
-
-      {label && (
-        <span
-          className={cn(
-            'text-sm font-medium ml-2 transition-colors',
-            active
-              ? colorClasses[activeColor as keyof typeof colorClasses]
-              : 'text-gray-500 dark:text-gray-400',
-            !active && hoverColor[activeColor as keyof typeof hoverColor]
-          )}
-        >
-          {label}
-        </span>
-      )}
-
-      {active && showBg && (
-        <motion.span
-          layoutId={`active-pill-${activeColor}`}
-          className="absolute inset-0 rounded-full opacity-10"
-        />
       )}
     </motion.button>
   );

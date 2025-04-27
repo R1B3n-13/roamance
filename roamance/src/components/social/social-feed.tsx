@@ -1,12 +1,15 @@
 'use client';
 
 import { PostCard } from './post-card';
-import { useState, useEffect } from 'react';
-import { Post, User } from '@/types';
+import { useState, useEffect, useCallback } from 'react';
+import { Comment, Post, User } from '@/types';
 import { AnimatePresence, motion } from 'framer-motion';
-import { PostService } from '@/service/social-service';
+import { CommentService, PostService } from '@/service/social-service';
 import { toast } from 'sonner';
-import { Sparkles, Loader2, RefreshCw } from 'lucide-react';
+import { Sparkles, Loader2, RefreshCw, ArrowUpDown } from 'lucide-react';
+import { CommentDialog } from './comment/';
+import { FeedSkeleton } from './feed/feed-skeleton';
+import { EmptyFeed } from './feed/empty-feed';
 
 interface SocialFeedProps {
   currentUser?: User;
@@ -21,26 +24,36 @@ export const SocialFeed = ({
   const [isLoading, setIsLoading] = useState(!initialPosts.length);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [sortOption, setSortOption] = useState<'latest' | 'popular'>('latest');
 
-  useEffect(() => {
-    if (!initialPosts.length) {
-      fetchPosts();
-    }
-  }, [initialPosts]);
+  // State for comment dialog
+  const [commentDialogOpen, setCommentDialogOpen] = useState(false);
+  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
 
-  const fetchPosts = async () => {
+  const fetchPosts = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
-      const response = await PostService.getAllPosts();
-      if (response.success) {
+      const postListResponse = await PostService.getAllPosts();
+
+      if (postListResponse.success) {
         setPosts(
-          response.data.map((dto) => ({
-            ...dto,
-            liked_by: [],
-            saved_by: [],
-            comments: []
-          }))
+          await Promise.all(
+            postListResponse.data.map(async (dto) => ({
+              ...dto,
+              liked_by: await PostService.getLikedByPost(dto?.id || '').then(
+                (res) => res.data
+              ),
+              comments: await CommentService.getCommentsByPostId(
+                dto?.id || ''
+              ).then((res) =>
+                res.data.map(
+                  (comment) => ({ ...comment, post: dto }) as Comment
+                )
+              ),
+              saved_by: [],
+            }))
+          )
         );
       } else {
         setError('Failed to fetch posts');
@@ -51,21 +64,39 @@ export const SocialFeed = ({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  const refreshFeed = async () => {
+  useEffect(() => {
+    if (!initialPosts.length) {
+      fetchPosts();
+    }
+  }, [fetchPosts, initialPosts]);
+
+  const refreshFeed = useCallback(async () => {
     try {
       setRefreshing(true);
-      const response = await PostService.getAllPosts();
-      if (response.success) {
+      const postListResponse = await PostService.getAllPosts();
+
+      if (postListResponse.success) {
         setPosts(
-          response.data.map((dto) => ({
-            ...dto,
-            liked_by: [],
-            saved_by: [],
-            comments: []
-          }))
+          await Promise.all(
+            postListResponse.data.map(async (dto) => ({
+              ...dto,
+              liked_by: await PostService.getLikedByPost(dto?.id || '').then(
+                (data) => data.data
+              ),
+              comments: await CommentService.getCommentsByPostId(
+                dto?.id || ''
+              ).then((data) =>
+                data.data.map(
+                  (comment) => ({ ...comment, post: dto }) as Comment
+                )
+              ),
+              saved_by: [],
+            }))
+          )
         );
+
         toast.success('Feed refreshed!');
       } else {
         toast.error('Failed to refresh feed');
@@ -76,41 +107,42 @@ export const SocialFeed = ({
     } finally {
       setRefreshing(false);
     }
-  };
+  }, []);
 
-  const handleLike = async (postId: string) => {
-    try {
-      // Check if user already liked the post
-      const post = posts.find((p) => p.id === postId);
-      const isLiked = post?.liked_by?.some(
-        (user) => user.id === currentUser?.id
-      );
+  const handleLike = useCallback(
+    async (postId: string) => {
+      try {
+        // Check if user already liked the post
+        const post = posts.find((p) => p.id === postId);
+        const isLiked = post?.liked_by?.some((u) => u.id === currentUser?.id);
 
-      await PostService.likePost(postId);
+        await PostService.likePost(postId);
 
-      // Optimistic update
-      setPosts((prev) =>
-        prev.map((post) =>
-          post.id === postId
-            ? {
-                ...post,
-                likes_count: isLiked
-                  ? post.likes_count - 1
-                  : post.likes_count + 1,
-                liked_by: isLiked
-                  ? post.liked_by.filter((user) => user.id !== currentUser?.id)
-                  : [...(post.liked_by || []), currentUser!],
-              }
-            : post
-        )
-      );
+        // Optimistic update
+        setPosts((prev) =>
+          prev.map((p) =>
+            p.id === postId
+              ? {
+                  ...p,
+                  likes_count: isLiked
+                    ? (p.likes_count || 0) - 1
+                    : (p.likes_count || 0) + 1,
+                  liked_by: isLiked
+                    ? p.liked_by.filter((u) => u.id !== currentUser?.id)
+                    : [...(p.liked_by || []), currentUser!],
+                }
+              : p
+          )
+        );
 
-      toast.success(isLiked ? 'Post unliked!' : 'Post liked!');
-    } catch (err) {
-      console.error('Error liking post:', err);
-      toast.error('Failed to like post. Please try again.');
-    }
-  };
+        toast.success(isLiked ? 'Post unliked!' : 'Post liked!');
+      } catch (err) {
+        console.error('Error liking post:', err);
+        toast.error('Failed to like post. Please try again.');
+      }
+    },
+    [posts, currentUser]
+  );
 
   const handleSave = async (postId: string) => {
     try {
@@ -170,8 +202,13 @@ export const SocialFeed = ({
   };
 
   const handleComment = (postId: string) => {
-    // In a real app, this would open a comment modal or scroll to comment form
-    console.log('Open comment for post:', postId);
+    const post = posts.find((p) => p.id === postId);
+    if (post) {
+      setSelectedPost(post);
+      setCommentDialogOpen(true);
+    } else {
+      toast.error('Post not found');
+    }
   };
 
   const handleShare = (postId: string) => {
@@ -180,31 +217,66 @@ export const SocialFeed = ({
     toast.success('Post link copied to clipboard!');
   };
 
+  const toggleSortOption = () => {
+    setSortOption((prev) => (prev === 'latest' ? 'popular' : 'latest'));
+    // For demo purposes, we're just changing the state but not actually sorting
+    toast.success(
+      `Sorted by ${sortOption === 'latest' ? 'popularity' : 'latest posts'}`
+    );
+  };
+
+  const sortedPosts = [...posts].sort((a, b) => {
+    if (sortOption === 'popular') {
+      return (b.likes_count || 0) - (a.likes_count || 0);
+    }
+    // Sort by created_at for latest (default sorting)
+    return (
+      new Date(b.audit.created_at).getTime() -
+      new Date(a.audit.created_at).getTime()
+    );
+  });
+
   return (
     <div className="w-full">
-      {/* Feed header with refresh button */}
-      <div className="flex items-center justify-between mb-8">
-        <h2 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 bg-clip-text text-transparent inline-flex items-center">
-          <Sparkles className="mr-2 h-5 w-5 text-purple-500" />
-          Explore Moments
-        </h2>
-        <button
-          onClick={refreshFeed}
-          disabled={refreshing || isLoading}
-          className="px-4 py-2 rounded-full bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/40 dark:to-purple-950/40 text-indigo-600 dark:text-indigo-400 text-sm font-medium hover:shadow-md transition-all flex items-center disabled:opacity-70"
-        >
-          {refreshing ? (
-            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-          ) : (
-            <RefreshCw className="h-4 w-4 mr-2" />
-          )}
-          Refresh
-        </button>
+      {/* Feed header with refresh button and controls */}
+      <div className="sticky top-0 z-10 backdrop-blur-md bg-white/70 dark:bg-gray-900/70 p-4 rounded-2xl mb-8 shadow-sm border border-gray-100 dark:border-gray-800/40">
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 bg-clip-text text-transparent inline-flex items-center">
+            <Sparkles className="mr-2 h-5 w-5 text-purple-500" />
+            Explore Moments
+          </h2>
+          <div className="flex items-center space-x-3">
+            <button
+              onClick={toggleSortOption}
+              disabled={isLoading}
+              className="px-4 py-2 rounded-full bg-white dark:bg-gray-800 text-indigo-600 dark:text-indigo-400 text-sm font-medium shadow-sm hover:shadow-md transition-all flex items-center disabled:opacity-70 border border-gray-100 dark:border-gray-700"
+            >
+              <ArrowUpDown className="h-4 w-4 mr-2" />
+              {sortOption === 'latest' ? 'Latest' : 'Popular'}
+            </button>
+            <button
+              onClick={refreshFeed}
+              disabled={refreshing || isLoading}
+              className="px-4 py-2 rounded-full bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/40 dark:to-purple-950/40 text-indigo-600 dark:text-indigo-400 text-sm font-medium hover:shadow-md transition-all flex items-center disabled:opacity-70 border border-indigo-100 dark:border-indigo-800/30"
+            >
+              {refreshing ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <RefreshCw className="h-4 w-4 mr-2" />
+              )}
+              Refresh
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Error message */}
       {error && (
-        <div className="p-6 mb-8 rounded-2xl bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-950/20 dark:to-pink-950/20 border border-red-100 dark:border-red-800/30 text-center">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="p-6 mb-8 rounded-2xl bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-950/20 dark:to-pink-950/20 border border-red-100 dark:border-red-800/30 text-center backdrop-blur-sm shadow-sm"
+        >
           <p className="text-red-600 dark:text-red-400 mb-2 font-medium">
             {error}
           </p>
@@ -214,59 +286,31 @@ export const SocialFeed = ({
           >
             Try Again
           </button>
-        </div>
+        </motion.div>
       )}
 
       {/* Loading state */}
       {isLoading ? (
-        <div className="space-y-6 max-w-2xl mx-auto">
-          {[...Array(3)].map((_, i) => (
-            <div key={i} className="animate-pulse space-y-4">
-              <div className="flex items-center space-x-3">
-                <div className="h-10 w-10 rounded-full bg-gray-200 dark:bg-gray-700"></div>
-                <div className="flex-1 space-y-2">
-                  <div className="h-4 w-1/4 bg-gray-200 dark:bg-gray-700 rounded"></div>
-                  <div className="h-3 w-1/6 bg-gray-200 dark:bg-gray-700 rounded"></div>
-                </div>
-              </div>
-              <div className="h-64 w-full bg-gray-200 dark:bg-gray-700 rounded-2xl"></div>
-              <div className="flex justify-between">
-                <div className="h-5 w-1/5 bg-gray-200 dark:bg-gray-700 rounded"></div>
-                <div className="h-5 w-1/5 bg-gray-200 dark:bg-gray-700 rounded"></div>
-              </div>
-            </div>
-          ))}
-        </div>
+        <FeedSkeleton />
       ) : posts.length === 0 ? (
-        <div className="text-center py-20 px-6 rounded-3xl bg-gradient-to-r from-purple-50 via-indigo-50 to-blue-50 dark:from-purple-950/30 dark:via-indigo-950/30 dark:to-blue-950/30 border border-purple-100 dark:border-purple-800/30 shadow-sm">
-          <div className="inline-flex justify-center items-center w-20 h-20 rounded-full bg-white dark:bg-gray-800 shadow-md mb-6">
-            <Sparkles className="h-10 w-10 text-purple-500 dark:text-purple-400" />
-          </div>
-          <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-3">
-            Share Your Journey
-          </h3>
-          <p className="text-gray-600 dark:text-gray-400 max-w-md mx-auto mb-6">
-            Be the first to share your travel moments and inspire fellow
-            adventurers around the world.
-          </p>
-          <button className="px-6 py-3 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-medium shadow-md hover:shadow-lg transition-all">
-            Create Your First Post
-          </button>
-        </div>
+        <EmptyFeed />
       ) : (
-        <div className="max-w-2xl mx-auto space-y-10">
-          <AnimatePresence>
-            {posts.map((post, index) => (
+        <div className="max-w-2xl mx-auto space-y-8">
+          <AnimatePresence mode="popLayout">
+            {sortedPosts.map((post, index) => (
               <motion.div
                 key={post.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
+                layout
                 transition={{
-                  duration: 0.5,
-                  ease: [0.23, 1, 0.32, 1],
-                  delay: index * 0.1,
+                  type: 'spring',
+                  stiffness: 300,
+                  damping: 30,
+                  delay: Math.min(index * 0.08, 0.4), // Cap the delay at 0.4s
                 }}
+                className="backdrop-blur-sm"
               >
                 <PostCard
                   post={post}
@@ -281,6 +325,16 @@ export const SocialFeed = ({
             ))}
           </AnimatePresence>
         </div>
+      )}
+
+      {/* Comment Dialog */}
+      {selectedPost && (
+        <CommentDialog
+          post={selectedPost}
+          currentUser={currentUser}
+          open={commentDialogOpen}
+          onOpenChange={setCommentDialogOpen}
+        />
       )}
     </div>
   );

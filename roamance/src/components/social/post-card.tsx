@@ -63,6 +63,8 @@ export const PostCard = ({
   const isOwnPost = post.user.id === currentUser?.id;
   const isUnsafe = post.is_safe === false;
 
+  console.log(currentUser)
+
   const hasMedia = post.image_paths.length > 0 || post.video_paths.length > 0;
   const totalMedia = post.image_paths.length + post.video_paths.length;
 
@@ -326,10 +328,10 @@ export const PostCard = ({
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{
-                        type: "spring",
+                        type: 'spring',
                         stiffness: 300,
                         damping: 20,
-                        delay: 0.2
+                        delay: 0.2,
                       }}
                       className="flex items-center gap-1.5 px-0 py-0 overflow-hidden group-hover/tidbits:pl-1.5 group-hover/tidbits:pr-2.5 group-hover/tidbits:py-1.5 rounded-full bg-black/30 backdrop-blur-sm hover:bg-black/40 text-white border border-white/20 text-xs font-medium shadow-lg transition-all duration-300"
                     >
@@ -340,12 +342,12 @@ export const PostCard = ({
                           className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500 to-violet-600"
                           animate={{
                             scale: [1, 1.2, 1],
-                            opacity: [0.7, 0.9, 0.7]
+                            opacity: [0.7, 0.9, 0.7],
                           }}
                           transition={{
                             duration: 2,
                             repeat: Infinity,
-                            repeatType: "reverse"
+                            repeatType: 'reverse',
                           }}
                         />
                       </span>
@@ -611,7 +613,8 @@ export const PostCard = ({
             </motion.button>
 
             {/* Mobile-only Tidbits button when there's no media - Icon-only that expands on hover */}
-            {!hasMedia && post.tidbits &&
+            {!hasMedia &&
+              post.tidbits &&
               post.tidbits.length > 0 &&
               post.tidbits != EMPTY_TIDBITS && (
                 <Popover>
