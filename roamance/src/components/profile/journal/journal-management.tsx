@@ -32,6 +32,7 @@ import { JournalCardSkeleton } from './journal-card-skeleton';
 import { JournalDetailView } from './journal-detail-view';
 import { JournalForm } from './journal-form';
 import { JournalSkeleton } from './journal-skeleton';
+import { NoResultsState } from './no-results-state';
 
 export const JournalManagement: React.FC = () => {
   const [journals, setJournals] = useState<JournalBrief[]>([]);
@@ -520,9 +521,9 @@ export const JournalManagement: React.FC = () => {
         </motion.div>
       ) : filteredJournals.length === 0 ? (
         <motion.div variants={itemVariants}>
-          <JournalEmptyState
+          <NoResultsState
             searchTerm={searchQuery}
-            activeFilter={activeFilter}
+            hasFilters={activeFilter !== null}
             onClear={clearAllFilters}
           />
         </motion.div>
@@ -626,58 +627,3 @@ export const JournalManagement: React.FC = () => {
     </motion.div>
   );
 };
-
-function JournalEmptyState({
-  searchTerm,
-  activeFilter,
-  onClear,
-}: {
-  searchTerm: string;
-  activeFilter: string | null;
-  onClear: () => void;
-}) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.4 }}
-      className="flex flex-col items-center justify-center py-20 border rounded-xl border-dashed border-muted/50 text-center px-4 bg-muted/5 backdrop-blur-sm"
-    >
-      <div className="w-16 h-16 rounded-full bg-indigo-500/10 flex items-center justify-center mb-4">
-        <BookOpen className="h-8 w-8 text-indigo-500 text-opacity-60" />
-      </div>
-
-      <h3 className="text-xl font-medium mb-2">No journals found</h3>
-      <p className="text-muted-foreground max-w-sm mb-8">
-        {searchTerm || activeFilter
-          ? `No journals match your current search "${searchTerm}" or the selected filter.`
-          : `You haven't created any journals yet. Start documenting your adventures!`}
-      </p>
-
-      {(searchTerm || activeFilter) && (
-        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }}>
-          <Button
-            onClick={onClear}
-            variant="outline"
-            className="flex items-center gap-2 border-indigo-500/30 text-indigo-500 hover:bg-indigo-500/10 transition-all duration-300"
-          >
-            <X className="h-4 w-4" />
-            Clear filters
-          </Button>
-        </motion.div>
-      )}
-
-      {!searchTerm && !activeFilter && (
-        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }}>
-          <Button
-            variant="default"
-            className="flex items-center gap-2 bg-gradient-to-r from-indigo-500 to-purple-600 hover:opacity-90 transition-all duration-300 text-white shadow-md"
-          >
-            <PlusCircle className="h-4 w-4" />
-            Create your first journal
-          </Button>
-        </motion.div>
-      )}
-    </motion.div>
-  );
-}
