@@ -11,6 +11,7 @@ import { CommentDialog } from '../comment';
 import { EmptyFeed } from './empty-feed';
 import { FeedSkeleton } from './feed-skeleton';
 import { PostCard } from '../post/post-card';
+import { SaveNotification } from '../saved-posts/save-notification';
 
 export const SocialFeed = () => {
   const {
@@ -29,6 +30,10 @@ export const SocialFeed = () => {
   // State for comment dialog
   const [commentDialogOpen, setCommentDialogOpen] = useState(false);
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
+
+  // State for save notification
+  const [showSaveNotification, setShowSaveNotification] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -72,9 +77,13 @@ export const SocialFeed = () => {
     try {
       // Check if user already saved the post
       const post = posts.find((p) => p.id === postId);
-      const isSaved = post?.saved_by?.some((u) => u.id === user?.id);
+      const postIsSaved = post?.saved_by?.some((u) => u.id === user?.id);
 
       await PostService.savePost(postId);
+
+      // Show notification instead of toast
+      setIsSaved(!postIsSaved);
+      setShowSaveNotification(true);
 
       // Optimistic update
       setPosts((prev) =>
@@ -82,15 +91,13 @@ export const SocialFeed = () => {
           post.id === postId
             ? {
                 ...post,
-                saved_by: isSaved
+                saved_by: postIsSaved
                   ? post.saved_by.filter((u) => u.id !== user?.id)
                   : [...(post.saved_by || []), user!],
               }
             : post
         )
       );
-
-      toast.success(isSaved ? 'Post removed from saved!' : 'Post saved!');
     } catch (err) {
       console.error('Error saving post:', err);
       toast.error('Failed to save post. Please try again.');
@@ -257,6 +264,13 @@ export const SocialFeed = () => {
           onOpenChange={setCommentDialogOpen}
         />
       )}
+
+      {/* Save Notification */}
+      <SaveNotification
+        show={showSaveNotification}
+        isSaved={isSaved}
+        onHide={() => setShowSaveNotification(false)}
+      />
     </div>
   );
 };

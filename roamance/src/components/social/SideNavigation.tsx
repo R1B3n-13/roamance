@@ -1,5 +1,16 @@
 import { cn } from '@/lib/utils';
-import { Bookmark, Compass, Globe, Hash, Home, MessageCircle, Search, Sparkles, User, X } from 'lucide-react';
+import {
+  Bookmark,
+  Compass,
+  Globe,
+  Hash,
+  Home,
+  MessageCircle,
+  Search,
+  Sparkles,
+  User,
+  X,
+} from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -13,7 +24,13 @@ interface NavItemProps {
   onClick?: () => void;
 }
 
-const NavItem = ({ icon, label, href, isActive = false, onClick }: NavItemProps) => (
+const NavItem = ({
+  icon,
+  label,
+  href,
+  isActive = false,
+  onClick,
+}: NavItemProps) => (
   <Link
     href={href}
     onClick={onClick}
@@ -24,10 +41,14 @@ const NavItem = ({ icon, label, href, isActive = false, onClick }: NavItemProps)
         : 'hover:bg-gray-100/80 dark:hover:bg-gray-800/50 text-gray-700 dark:text-gray-300 hover:scale-[1.02] hover:shadow-sm'
     )}
   >
-    <div className={cn(
-      "relative z-10 transition-transform duration-200 group-hover:scale-110",
-      isActive ? "text-purple-600 dark:text-purple-400" : "text-gray-500 dark:text-gray-400"
-    )}>
+    <div
+      className={cn(
+        'relative z-10 transition-transform duration-200 group-hover:scale-110',
+        isActive
+          ? 'text-purple-600 dark:text-purple-400'
+          : 'text-gray-500 dark:text-gray-400'
+      )}
+    >
       {icon}
     </div>
     <span className="relative z-10 font-medium">{label}</span>
@@ -49,7 +70,10 @@ interface SideNavigationProps {
   setActiveTab: (tab: string) => void;
 }
 
-export function DesktopSideNavigation({ activeTab, setActiveTab }: SideNavigationProps) {
+export function DesktopSideNavigation({
+  activeTab,
+  setActiveTab,
+}: SideNavigationProps) {
   return (
     <aside className="hidden md:block w-72 flex-shrink-0 relative">
       <div className="absolute top-8 left-4 w-16 h-16 bg-gradient-to-br from-purple-200/20 to-indigo-300/20 dark:from-purple-800/10 dark:to-indigo-700/10 rounded-full blur-xl z-0"></div>
@@ -58,59 +82,59 @@ export function DesktopSideNavigation({ activeTab, setActiveTab }: SideNavigatio
       <div className="sticky top-24 p-4 rounded-3xl bg-white/60 dark:bg-gray-900/40 backdrop-blur-sm shadow-xl shadow-purple-200/5 dark:shadow-purple-900/5 border border-gray-100/80 dark:border-gray-800/30 space-y-2 z-10">
         <NavItem
           icon={<Home className="h-5 w-5" />}
-          label={routes.home.title}
-          href={routes.home.href}
-          isActive={activeTab === 'home'}
-          onClick={() => setActiveTab('home')}
+          label={routes.feeds.title}
+          href={routes.feeds.href}
+          isActive={activeTab === routes.feeds.href}
+          onClick={() => setActiveTab(routes.feeds.href)}
         />
         <NavItem
           icon={<Compass className="h-5 w-5" />}
           label={routes.explore.title}
           href={routes.explore.href}
-          isActive={activeTab === 'explore'}
-          onClick={() => setActiveTab('explore')}
+          isActive={activeTab === routes.explore.href}
+          onClick={() => setActiveTab(routes.explore.href)}
         />
         <NavItem
           icon={<Globe className="h-5 w-5" />}
           label={routes.destinations.title}
           href={routes.destinations.href}
-          isActive={activeTab === 'destinations'}
-          onClick={() => setActiveTab('destinations')}
+          isActive={activeTab === routes.destinations.href}
+          onClick={() => setActiveTab(routes.destinations.href)}
         />
         <NavItem
           icon={<Hash className="h-5 w-5" />}
           label={routes.hashtags.title}
           href={routes.hashtags.href}
-          isActive={activeTab === 'hashtags'}
-          onClick={() => setActiveTab('hashtags')}
+          isActive={activeTab === routes.hashtags.href}
+          onClick={() => setActiveTab(routes.hashtags.href)}
         />
         <NavItem
           icon={<Sparkles className="h-5 w-5" />}
           label={routes.discover.title}
           href={routes.discover.href}
-          isActive={activeTab === 'discover'}
-          onClick={() => setActiveTab('discover')}
+          isActive={activeTab === routes.discover.href}
+          onClick={() => setActiveTab(routes.discover.href)}
         />
         <NavItem
           icon={<User className="h-5 w-5" />}
           label={routes.profile.title}
           href={routes.profile.href}
-          isActive={activeTab === 'profile'}
-          onClick={() => setActiveTab('profile')}
+          isActive={activeTab === routes.profile.href}
+          onClick={() => setActiveTab(routes.profile.href)}
         />
         <NavItem
           icon={<MessageCircle className="h-5 w-5" />}
           label={routes.messages.title}
           href={routes.messages.href}
-          isActive={activeTab === 'messages'}
-          onClick={() => setActiveTab('messages')}
+          isActive={activeTab === routes.messages.href}
+          onClick={() => setActiveTab(routes.messages.href)}
         />
         <NavItem
           icon={<Bookmark className="h-5 w-5" />}
           label={routes.saved.title}
           href={routes.saved.href}
-          isActive={activeTab === 'saved'}
-          onClick={() => setActiveTab('saved')}
+          isActive={activeTab === routes.saved.href}
+          onClick={() => setActiveTab(routes.saved.href)}
         />
       </div>
     </aside>
@@ -122,7 +146,12 @@ interface MobileSideNavigationProps extends SideNavigationProps {
   onClose: () => void;
 }
 
-export function MobileSideNavigation({ activeTab, setActiveTab, isOpen, onClose }: MobileSideNavigationProps) {
+export function MobileSideNavigation({
+  activeTab,
+  setActiveTab,
+  isOpen,
+  onClose,
+}: MobileSideNavigationProps) {
   return (
     <AnimatePresence>
       {isOpen && (
@@ -179,11 +208,11 @@ export function MobileSideNavigation({ activeTab, setActiveTab, isOpen, onClose 
               <div className="pt-2 space-y-2">
                 <NavItem
                   icon={<Home className="h-5 w-5" />}
-                  label={routes.home.title}
-                  href={routes.home.href}
-                  isActive={activeTab === 'home'}
+                  label={routes.social.title}
+                  href={routes.social.href}
+                  isActive={activeTab === routes.social.href}
                   onClick={() => {
-                    setActiveTab('home');
+                    setActiveTab(routes.social.href);
                     onClose();
                   }}
                 />
@@ -191,9 +220,9 @@ export function MobileSideNavigation({ activeTab, setActiveTab, isOpen, onClose 
                   icon={<Compass className="h-5 w-5" />}
                   label={routes.explore.title}
                   href={routes.explore.href}
-                  isActive={activeTab === 'explore'}
+                  isActive={activeTab === routes.explore.href}
                   onClick={() => {
-                    setActiveTab('explore');
+                    setActiveTab(routes.explore.href);
                     onClose();
                   }}
                 />
@@ -201,9 +230,9 @@ export function MobileSideNavigation({ activeTab, setActiveTab, isOpen, onClose 
                   icon={<Globe className="h-5 w-5" />}
                   label={routes.destinations.title}
                   href={routes.destinations.href}
-                  isActive={activeTab === 'destinations'}
+                  isActive={activeTab === routes.destinations.href}
                   onClick={() => {
-                    setActiveTab('destinations');
+                    setActiveTab(routes.destinations.href);
                     onClose();
                   }}
                 />
@@ -211,9 +240,9 @@ export function MobileSideNavigation({ activeTab, setActiveTab, isOpen, onClose 
                   icon={<Hash className="h-5 w-5" />}
                   label={routes.hashtags.title}
                   href={routes.hashtags.href}
-                  isActive={activeTab === 'hashtags'}
+                  isActive={activeTab === routes.hashtags.href}
                   onClick={() => {
-                    setActiveTab('hashtags');
+                    setActiveTab(routes.hashtags.href);
                     onClose();
                   }}
                 />
@@ -221,9 +250,9 @@ export function MobileSideNavigation({ activeTab, setActiveTab, isOpen, onClose 
                   icon={<Sparkles className="h-5 w-5" />}
                   label={routes.discover.title}
                   href={routes.discover.href}
-                  isActive={activeTab === 'discover'}
+                  isActive={activeTab === routes.discover.href}
                   onClick={() => {
-                    setActiveTab('discover');
+                    setActiveTab(routes.discover.href);
                     onClose();
                   }}
                 />
@@ -231,9 +260,9 @@ export function MobileSideNavigation({ activeTab, setActiveTab, isOpen, onClose 
                   icon={<User className="h-5 w-5" />}
                   label={routes.profile.title}
                   href={routes.profile.href}
-                  isActive={activeTab === 'profile'}
+                  isActive={activeTab === routes.profile.href}
                   onClick={() => {
-                    setActiveTab('profile');
+                    setActiveTab(routes.profile.href);
                     onClose();
                   }}
                 />
@@ -241,9 +270,9 @@ export function MobileSideNavigation({ activeTab, setActiveTab, isOpen, onClose 
                   icon={<MessageCircle className="h-5 w-5" />}
                   label={routes.messages.title}
                   href={routes.messages.href}
-                  isActive={activeTab === 'messages'}
+                  isActive={activeTab === routes.messages.href}
                   onClick={() => {
-                    setActiveTab('messages');
+                    setActiveTab(routes.messages.href);
                     onClose();
                   }}
                 />
@@ -251,9 +280,9 @@ export function MobileSideNavigation({ activeTab, setActiveTab, isOpen, onClose 
                   icon={<Bookmark className="h-5 w-5" />}
                   label={routes.saved.title}
                   href={routes.saved.href}
-                  isActive={activeTab === 'saved'}
+                  isActive={activeTab === routes.saved.href}
                   onClick={() => {
-                    setActiveTab('saved');
+                    setActiveTab(routes.saved.href);
                     onClose();
                   }}
                 />

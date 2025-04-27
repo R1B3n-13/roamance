@@ -1,21 +1,11 @@
 'use client';
 
-import { Bookmark } from 'lucide-react';
+import { SavedPostsSection } from '@/components/social/saved-posts/saved-posts-section';
 
-export default function SavedPage() {
+export default function SavedPostsPage() {
   return (
-    <div className="flex-1">
-      <div className="max-w-3xl mx-auto">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
-          <Bookmark className="h-6 w-6 mr-2 text-purple-500 dark:text-purple-400" />
-          Saved
-        </h1>
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
-          <p className="text-gray-600 dark:text-gray-300">
-            Here you can find your saved travel experiences and recommendations.
-          </p>
-        </div>
-      </div>
+    <div className="container max-w-6xl px-4">
+      <SavedPostsSection />
     </div>
   );
 }

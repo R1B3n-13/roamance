@@ -2,14 +2,20 @@
 
 import { Navbar } from '@/components/navigation';
 import { SocialProvider } from '@/context/SocialContext';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { DesktopSideNavigation, MobileSideNavigation } from '@/components/social/SideNavigation';
+import { routes } from '@/constants/routes';
 import { Menu } from 'lucide-react';
+import { usePathname } from 'next/navigation';
 
 const SocialLayout = ({
   children,
 }: Readonly<{ children: React.ReactNode }>) => {
-  const [activeTab, setActiveTab] = useState('home');
+  const rawPath = usePathname();
+  const [activeTab, setActiveTab] = useState<string>(rawPath ?? routes.social.href);
+  useEffect(() => {
+    setActiveTab(rawPath ?? routes.social.href);
+  }, [rawPath]);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (

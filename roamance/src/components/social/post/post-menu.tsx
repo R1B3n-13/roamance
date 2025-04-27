@@ -1,26 +1,30 @@
 'use client';
 
-import { Edit, Flag, MoreHorizontal, Share2, Trash2, UserPlus } from 'lucide-react';
+import { Edit, Flag, MoreHorizontal, Share2, Trash2, UserPlus, Bookmark } from 'lucide-react';
 import { useRef, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
 export interface PostMenuProps {
   isOwnPost: boolean;
+  isSaved?: boolean;
   onEdit?: () => void;
   onDelete?: () => void;
   onShare?: () => void;
   onReport?: () => void;
   onFollow?: () => void;
+  onSave?: () => void;
 }
 
 export const PostMenu = ({
   isOwnPost,
+  isSaved = false,
   onEdit,
   onDelete,
   onShare,
   onReport,
-  onFollow
+  onFollow,
+  onSave
 }: PostMenuProps) => {
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -51,6 +55,23 @@ export const PostMenu = ({
 
   return (
     <div className="flex items-center space-x-3 relative">
+      {/* Save button (visible for all posts regardless of ownership) */}
+      {onSave && (
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={onSave}
+          className="p-2 rounded-full hover:bg-indigo-100 dark:hover:bg-indigo-900/30 transition-colors focus:outline-none"
+        >
+          <Bookmark className={cn(
+            "h-5 w-5",
+            isSaved
+              ? "fill-indigo-500 text-indigo-500 dark:fill-indigo-400 dark:text-indigo-400"
+              : "text-gray-500 dark:text-gray-400"
+          )} />
+        </motion.button>
+      )}
+
       {/* Follow button (only shown for other users' posts) */}
       {!isOwnPost && onFollow && (
         <motion.button
@@ -123,6 +144,21 @@ export const PostMenu = ({
                   onClick={() => {
                     setShowMenu(false);
                     onShare();
+                  }}
+                />
+              )}
+
+              {/* Save action in dropdown menu too */}
+              {onSave && (
+                <MenuItem
+                  icon={<Bookmark className={cn(
+                    "h-4 w-4 mr-3",
+                    isSaved && "fill-indigo-500 text-indigo-500 dark:fill-indigo-400 dark:text-indigo-400"
+                  )} />}
+                  label={isSaved ? "Remove from saved" : "Save post"}
+                  onClick={() => {
+                    setShowMenu(false);
+                    onSave();
                   }}
                 />
               )}

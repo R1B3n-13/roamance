@@ -22,6 +22,7 @@ export const paths = {
   cookies: 'cookies',
 
   social: 'social',
+  feeds: 'feeds',
   messages: 'messages',
   discover: 'discover',
   explore: 'explore',
@@ -50,6 +51,7 @@ export const pathTitles = {
   cookies: 'Cookies Policy',
 
   social: 'Social',
+  feeds: 'Feeds',
   messages: 'Messages',
   discover: 'Discover',
   explore: 'Explore',
@@ -122,8 +124,14 @@ export const routes: Record<string, RouteItem> = {
     href: `/${paths.cookies}`,
   },
 
+  /* --------------------------------- Social --------------------------------- */
+
   social: {
     title: pathTitles.social,
+    href: `/${paths.social}`,
+  },
+  feeds: {
+    title: pathTitles.feeds,
     href: `/${paths.social}`,
   },
   messages: {
