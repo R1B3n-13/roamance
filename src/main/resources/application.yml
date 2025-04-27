@@ -27,6 +27,16 @@ application:
       secret: ${JWT_SECRET}
       access-token-expiration: 86400000
       refresh-token-expiration: 604800000
+  gemini:
+    api-key: ${GEMINI_API_KEY}
+  nomic:
+    api-key: ${NOMIC_API_KEY}
+  pgvector:
+    host: ${PGVECTOR_HOST}
+    port: ${PGVECTOR_PORT}
+    db: ${PGVECTOR_DB}
+    user: ${PGVECTOR_USER}
+    password: ${PGVECTOR_PASSWORD}
 
 server:
   servlet:
