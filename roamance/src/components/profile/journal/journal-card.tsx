@@ -1,4 +1,6 @@
+import { getImagePath } from '@/components';
 import { Badge } from '@/components/ui/badge';
+import { Card } from '@/components/ui/card';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,10 +35,9 @@ import {
 import Image from 'next/image';
 import React from 'react';
 import { getJournalColorScheme } from './colorscheme';
-import { Card } from '@/components/ui/card';
 
 // Create a motion-enabled version of Card
-const MotionCard = motion(Card);
+const MotionCard = motion.create(Card);
 
 interface JournalCardProps {
   journal: JournalBrief;
@@ -71,8 +72,7 @@ export const JournalCard: React.FC<JournalCardProps> = ({
   // Get CSS classes based on the color scheme
   const getCardStyles = () => {
     const baseGradient = 'bg-gradient-to-tr';
-    const basePattern =
-      "bg-[url('/images/roamance-logo-no-text.png')] bg-repeat-space bg-contain mix-blend-overlay";
+    const basePattern = `bg-repeat-space bg-contain mix-blend-overlay`;
     const baseBadge = 'text-white border shadow-sm';
 
     // Determine styles based on journal type and favorite status
@@ -227,7 +227,12 @@ export const JournalCard: React.FC<JournalCardProps> = ({
               )}
             >
               {/* Decorative pattern overlay */}
-              <div className={cn('absolute inset-0', styles.pattern)} />
+              <div
+                className={cn('absolute inset-0', styles.pattern)}
+                style={{
+                  backgroundImage: `url('${getImagePath('roamance-logo-no-text.png')}')`,
+                }}
+              />
 
               {/* Enhanced shimmer effect */}
               <div className="absolute inset-0 overflow-hidden">
@@ -512,18 +517,20 @@ export const JournalCard: React.FC<JournalCardProps> = ({
                       onToggleArchive(journal);
                     }}
                     className={cn(
-                      "cursor-pointer flex items-center gap-2.5 px-3 py-1.5 text-xs rounded-lg transition-colors duration-200",
+                      'cursor-pointer flex items-center gap-2.5 px-3 py-1.5 text-xs rounded-lg transition-colors duration-200',
                       journal.is_archived
-                        ? "focus:bg-teal-50 dark:focus:bg-teal-900/20 focus:text-teal-600 dark:focus:text-teal-400 hover:bg-teal-50 dark:hover:bg-teal-900/20 hover:text-teal-600 dark:hover:text-teal-400"
-                        : "focus:bg-violet-50 dark:focus:bg-violet-900/20 focus:text-violet-600 dark:focus:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-900/20 hover:text-violet-600 dark:hover:text-violet-400"
+                        ? 'focus:bg-teal-50 dark:focus:bg-teal-900/20 focus:text-teal-600 dark:focus:text-teal-400 hover:bg-teal-50 dark:hover:bg-teal-900/20 hover:text-teal-600 dark:hover:text-teal-400'
+                        : 'focus:bg-violet-50 dark:focus:bg-violet-900/20 focus:text-violet-600 dark:focus:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-900/20 hover:text-violet-600 dark:hover:text-violet-400'
                     )}
                   >
-                    <div className={cn(
-                      "h-7 w-7 rounded-full flex items-center justify-center",
-                      journal.is_archived
-                        ? "bg-teal-50 dark:bg-teal-900/30"
-                        : "bg-violet-50 dark:bg-violet-900/30"
-                    )}>
+                    <div
+                      className={cn(
+                        'h-7 w-7 rounded-full flex items-center justify-center',
+                        journal.is_archived
+                          ? 'bg-teal-50 dark:bg-teal-900/30'
+                          : 'bg-violet-50 dark:bg-violet-900/30'
+                      )}
+                    >
                       {journal.is_archived ? (
                         <ArchiveRestore className="h-3.5 w-3.5 text-teal-600 dark:text-teal-400" />
                       ) : (
@@ -531,7 +538,9 @@ export const JournalCard: React.FC<JournalCardProps> = ({
                       )}
                     </div>
                     <span className="font-medium">
-                      {journal.is_archived ? 'Unarchive Journal' : 'Archive Journal'}
+                      {journal.is_archived
+                        ? 'Unarchive Journal'
+                        : 'Archive Journal'}
                     </span>
                   </DropdownMenuItem>
 

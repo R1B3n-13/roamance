@@ -39,6 +39,7 @@ import { JournalSkeleton } from './journal-skeleton';
 import { SubsectionDetail } from './subsection-detail';
 import { SubsectionForm } from './subsection-form';
 import { SubsectionList } from './subsection-list';
+import { getImagePath } from '@/components';
 
 interface JournalDetailViewProps {
   journal: JournalDetail | null; // Made optional to handle loading state
@@ -381,7 +382,7 @@ export const JournalDetailView: React.FC<JournalDetailViewProps> = ({
               className="relative h-32 md:h-40 lg:h-52 overflow-hidden bg-center bg-cover"
               style={{
                 backgroundImage: `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url(${
-                  coverImage || '/images/roamance-logo-bg.png'
+                  coverImage || `${getImagePath('roamance-logo-no-text.png')}`
                 })`,
               }}
             >

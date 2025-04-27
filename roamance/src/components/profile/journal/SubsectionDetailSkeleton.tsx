@@ -1,3 +1,4 @@
+import { getImagePath } from '@/components';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export const SubsectionDetailSkeleton = () => {
@@ -29,7 +30,12 @@ export const SubsectionDetailSkeleton = () => {
         {/* Main content area skeleton */}
         <div className="relative overflow-hidden">
           <Skeleton className="h-32 w-full rounded-lg bg-gradient-to-r from-violet-light/30 to-lavender-light/20 dark:from-violet-dark/40 dark:to-lavender-dark/30" />
-          <div className="absolute inset-0 bg-[url('/images/roamance-logo-no-text.png')] bg-no-repeat bg-center bg-contain opacity-5"></div>
+          <div
+            className="absolute inset-0 bg-no-repeat bg-center bg-contain opacity-5"
+            style={{
+              backgroundImage: `url('${getImagePath('roamance-logo-no-text.png')}')`,
+            }}
+          ></div>
         </div>
 
         {/* Checklist items skeleton */}
