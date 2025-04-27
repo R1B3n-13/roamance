@@ -1,24 +1,12 @@
 'use client';
 
 import { Navbar } from '@/components/navigation';
+import { DesktopSideNavigation, MobileSideNavigation } from '@/components/navigation/SideNavigation';
 import { SocialFeed } from '@/components/social/feed/social-feed';
 import { PostCreator } from '@/components/social/post/post-creator';
 import { TrendingSection } from '@/components/social/trending-section';
-import { cn } from '@/lib/utils';
 import { User } from '@/types';
-import { AnimatePresence, motion } from 'framer-motion';
-import {
-  Bookmark,
-  Compass,
-  Globe,
-  Hash,
-  Home,
-  MessageCircle,
-  Search,
-  Sparkles,
-  User as UserIcon,
-  X,
-} from 'lucide-react';
+import { Menu, Sparkles } from 'lucide-react';
 import Image from 'next/image';
 import { useState } from 'react';
 
@@ -99,28 +87,6 @@ const mockTrendingUsers: User[] = [
   },
 ];
 
-interface NavItemProps {
-  icon: React.ReactNode;
-  label: string;
-  isActive?: boolean;
-  onClick: () => void;
-}
-
-const NavItem = ({ icon, label, isActive = false, onClick }: NavItemProps) => (
-  <button
-    onClick={onClick}
-    className={cn(
-      'flex items-center gap-3 p-3 rounded-xl transition-all whitespace-nowrap',
-      isActive
-        ? 'bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 text-purple-700 dark:text-purple-400 font-medium border border-purple-100 dark:border-purple-800/30 shadow-sm'
-        : 'hover:bg-gray-100 dark:hover:bg-gray-800/70 text-gray-700 dark:text-gray-300'
-    )}
-  >
-    <div>{icon}</div>
-    <span>{label}</span>
-  </button>
-);
-
 export default function SocialPage() {
   const [activeTab, setActiveTab] = useState('home');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -133,192 +99,28 @@ export default function SocialPage() {
       {/* Content starts after the navbar */}
       <div className="pt-20">
         <main className="container mx-auto px-4 py-6">
+          {/* Mobile menu button - visible only on mobile */}
+          <button
+            onClick={() => setIsMobileMenuOpen(true)}
+            className="md:hidden mb-4 p-2 rounded-lg bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700"
+          >
+            <Menu className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+          </button>
+
           <div className="flex flex-col md:flex-row gap-6">
-            {/* Side navigation (hidden on mobile) */}
-            <aside className="hidden md:block w-60 flex-shrink-0">
-              <div className="sticky top-24 space-y-1">
-                <NavItem
-                  icon={<Home className="h-5 w-5" />}
-                  label="Home"
-                  isActive={activeTab === 'home'}
-                  onClick={() => setActiveTab('home')}
-                />
-                <NavItem
-                  icon={<Compass className="h-5 w-5" />}
-                  label="Explore"
-                  isActive={activeTab === 'explore'}
-                  onClick={() => setActiveTab('explore')}
-                />
-                <NavItem
-                  icon={<Globe className="h-5 w-5" />}
-                  label="Destinations"
-                  isActive={activeTab === 'destinations'}
-                  onClick={() => setActiveTab('destinations')}
-                />
-                <NavItem
-                  icon={<Hash className="h-5 w-5" />}
-                  label="Hashtags"
-                  isActive={activeTab === 'hashtags'}
-                  onClick={() => setActiveTab('hashtags')}
-                />
-                <NavItem
-                  icon={<Sparkles className="h-5 w-5" />}
-                  label="Discover"
-                  isActive={activeTab === 'discover'}
-                  onClick={() => setActiveTab('discover')}
-                />
-                <NavItem
-                  icon={<UserIcon className="h-5 w-5" />}
-                  label="Profile"
-                  isActive={activeTab === 'profile'}
-                  onClick={() => setActiveTab('profile')}
-                />
-                <NavItem
-                  icon={<MessageCircle className="h-5 w-5" />}
-                  label="Messages"
-                  isActive={activeTab === 'messages'}
-                  onClick={() => setActiveTab('messages')}
-                />
-                <NavItem
-                  icon={<Bookmark className="h-5 w-5" />}
-                  label="Saved"
-                  isActive={activeTab === 'saved'}
-                  onClick={() => setActiveTab('saved')}
-                />
-              </div>
-            </aside>
+            {/* Desktop Side Navigation */}
+            <DesktopSideNavigation
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+            />
 
-            {/* Mobile menu (slide-in from left) */}
-            <AnimatePresence>
-              {isMobileMenuOpen && (
-                <>
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="fixed inset-0 bg-black/50 backdrop-blur-sm z-30 md:hidden"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  />
-
-                  <motion.div
-                    initial={{ x: '-100%' }}
-                    animate={{ x: 0 }}
-                    exit={{ x: '-100%' }}
-                    transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                    className="fixed left-0 top-0 h-full w-3/4 max-w-xs bg-white dark:bg-gray-900 z-40 md:hidden overflow-y-auto"
-                  >
-                    <div className="p-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className="relative h-8 w-8">
-                          <Image
-                            src="/images/roamance-logo-no-text.png"
-                            alt="Roamance"
-                            layout="fill"
-                            objectFit="contain"
-                          />
-                        </div>
-                        <h1 className="text-lg font-semibold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
-                          RoamSocial
-                        </h1>
-                      </div>
-
-                      <button
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
-                      >
-                        <X className="h-5 w-5 text-gray-700 dark:text-gray-300" />
-                      </button>
-                    </div>
-
-                    <div className="p-4 space-y-3">
-                      <div className="relative flex items-center bg-gray-100 dark:bg-gray-800 rounded-full px-4 py-2">
-                        <Search className="h-4 w-4 text-gray-400 dark:text-gray-500 mr-2" />
-                        <input
-                          type="text"
-                          placeholder="Search..."
-                          className="bg-transparent text-sm text-gray-800 dark:text-gray-200 outline-none w-full"
-                        />
-                      </div>
-
-                      <div className="pt-2 space-y-1">
-                        <NavItem
-                          icon={<Home className="h-5 w-5" />}
-                          label="Home"
-                          isActive={activeTab === 'home'}
-                          onClick={() => {
-                            setActiveTab('home');
-                            setIsMobileMenuOpen(false);
-                          }}
-                        />
-                        <NavItem
-                          icon={<Compass className="h-5 w-5" />}
-                          label="Explore"
-                          isActive={activeTab === 'explore'}
-                          onClick={() => {
-                            setActiveTab('explore');
-                            setIsMobileMenuOpen(false);
-                          }}
-                        />
-                        <NavItem
-                          icon={<Globe className="h-5 w-5" />}
-                          label="Destinations"
-                          isActive={activeTab === 'destinations'}
-                          onClick={() => {
-                            setActiveTab('destinations');
-                            setIsMobileMenuOpen(false);
-                          }}
-                        />
-                        <NavItem
-                          icon={<Hash className="h-5 w-5" />}
-                          label="Hashtags"
-                          isActive={activeTab === 'hashtags'}
-                          onClick={() => {
-                            setActiveTab('hashtags');
-                            setIsMobileMenuOpen(false);
-                          }}
-                        />
-                        <NavItem
-                          icon={<Sparkles className="h-5 w-5" />}
-                          label="Discover"
-                          isActive={activeTab === 'discover'}
-                          onClick={() => {
-                            setActiveTab('discover');
-                            setIsMobileMenuOpen(false);
-                          }}
-                        />
-                        <NavItem
-                          icon={<UserIcon className="h-5 w-5" />}
-                          label="Profile"
-                          isActive={activeTab === 'profile'}
-                          onClick={() => {
-                            setActiveTab('profile');
-                            setIsMobileMenuOpen(false);
-                          }}
-                        />
-                        <NavItem
-                          icon={<MessageCircle className="h-5 w-5" />}
-                          label="Messages"
-                          isActive={activeTab === 'messages'}
-                          onClick={() => {
-                            setActiveTab('messages');
-                            setIsMobileMenuOpen(false);
-                          }}
-                        />
-                        <NavItem
-                          icon={<Bookmark className="h-5 w-5" />}
-                          label="Saved"
-                          isActive={activeTab === 'saved'}
-                          onClick={() => {
-                            setActiveTab('saved');
-                            setIsMobileMenuOpen(false);
-                          }}
-                        />
-                      </div>
-                    </div>
-                  </motion.div>
-                </>
-              )}
-            </AnimatePresence>
+            {/* Mobile Navigation */}
+            <MobileSideNavigation
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+              isOpen={isMobileMenuOpen}
+              onClose={() => setIsMobileMenuOpen(false)}
+            />
 
             {/* Main content - Feed */}
             <div className="flex-1">

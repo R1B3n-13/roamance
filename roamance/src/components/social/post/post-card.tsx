@@ -725,7 +725,7 @@ export const PostCard = ({
 
       {/* Decorative wave line pattern - bottom right */}
       {post?.image_paths.length === 0 && post?.video_paths.length === 0 && (
-        <div className="absolute -bottom-8 -right-24 -z-1 pointer-events-none">
+        <div className="absolute -bottom-20 -right-24 -z-1 pointer-events-none">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}

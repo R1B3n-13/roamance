@@ -20,6 +20,13 @@ export const paths = {
   terms: 'terms',
   privacy: 'privacy',
   cookies: 'cookies',
+
+  social: 'social',
+  messages: 'messages',
+  discover: 'discover',
+  explore: 'explore',
+  hashtags: 'hashtags',
+  saved: 'saved',
 };
 
 export const pathTitles = {
@@ -41,6 +48,13 @@ export const pathTitles = {
   terms: 'Terms of Service',
   privacy: 'Privacy Policy',
   cookies: 'Cookies Policy',
+
+  social: 'Social',
+  messages: 'Messages',
+  discover: 'Discover',
+  explore: 'Explore',
+  hashtags: 'Hashtags',
+  saved: 'Saved',
 };
 
 export const routes: Record<string, RouteItem> = {
@@ -107,6 +121,39 @@ export const routes: Record<string, RouteItem> = {
     title: pathTitles.cookies,
     href: `/${paths.cookies}`,
   },
+
+  social: {
+    title: pathTitles.social,
+    href: `/${paths.social}`,
+  },
+  messages: {
+    title: pathTitles.messages,
+    href: `/${paths.social}/${paths.messages}`,
+  },
+  discover: {
+    title: pathTitles.discover,
+    href: `/${paths.social}/${paths.discover}`,
+  },
+  explore: {
+    title: pathTitles.explore,
+    href: `/${paths.social}/${paths.explore}`,
+  },
+  hashtags: {
+    title: pathTitles.hashtags,
+    href: `/${paths.social}/${paths.hashtags}`,
+  },
+  saved: {
+    title: pathTitles.saved,
+    href: `/${paths.social}/${paths.saved}`,
+  },
 };
 
-export const secureRoutes = [routes.profile.href];
+export const secureRoutes = [
+  routes.profile.href,
+  routes.social.href,
+  routes.messages.href,
+  routes.discover.href,
+  routes.explore.href,
+  routes.hashtags.href,
+  routes.saved.href,
+];
