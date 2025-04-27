@@ -13,6 +13,7 @@ import { ProfileTrips } from './profile-trips';
 import { JournalManagement } from './journal/journal-management';
 import { User, UserInfo } from '@/types';
 import { userService } from '@/service/user-service';
+import { getImagePath } from '@/components';
 import { paths, routes } from '@/constants/routes';
 
 export function ProfilePage() {
@@ -162,7 +163,12 @@ export function ProfilePage() {
       <div className="fixed bottom-1/3 left-0 md:left-1/4 w-48 sm:w-60 md:w-72 h-48 sm:h-60 md:h-72 bg-gradient-radial from-sand/8 to-transparent rounded-full blur-3xl -z-10 opacity-80" />
 
       {/* Extra subtle patterns for visual texture */}
-      <div className="fixed inset-0 bg-[url('/images/roamance-logo-no-text.png')] bg-repeat opacity-[0.015] mix-blend-overlay pointer-events-none" />
+      <div
+        className="fixed inset-0 bg-repeat opacity-[0.015] mix-blend-overlay pointer-events-none"
+        style={{
+          backgroundImage: `url('${getImagePath('roamance-logo-no-text.png')}')`,
+        }}
+      />
 
       <motion.div
         variants={containerVariants}

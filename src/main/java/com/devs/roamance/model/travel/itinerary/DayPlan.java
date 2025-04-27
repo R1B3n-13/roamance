@@ -80,15 +80,15 @@ public class DayPlan {
     if (currentActivity.getStartTime() == null || currentActivity.getEndTime() == null) return;
 
     // need to fetch activities EAGERLY with DayPlan using entity graph to avoid n+1
-    // problem
     for (Activity otherActivity : activities) {
 
-      if (currentActivity.getId().equals(otherActivity.getId())
-          || otherActivity.getStartTime() == null
-          || otherActivity.getEndTime() == null) continue;
+      if (currentActivity.getId() != null
+          && (currentActivity.getId().equals(otherActivity.getId())
+              || otherActivity.getStartTime() == null
+              || otherActivity.getEndTime() == null)) continue;
 
-      boolean startsBeforeEnd = !currentActivity.getStartTime().isAfter(otherActivity.getEndTime());
-      boolean endsAfterStart = !currentActivity.getEndTime().isBefore(otherActivity.getStartTime());
+      boolean startsBeforeEnd = currentActivity.getStartTime().isBefore(otherActivity.getEndTime());
+      boolean endsAfterStart = currentActivity.getEndTime().isAfter(otherActivity.getStartTime());
 
       if (startsBeforeEnd && endsAfterStart) {
 

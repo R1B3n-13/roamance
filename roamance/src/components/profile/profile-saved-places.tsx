@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { getImagePath } from '@/components';
 
 interface ProfileSavedPlacesProps {
   user: User | null;
@@ -387,7 +388,12 @@ function SavedPlaceCard({ place }: SavedPlaceCardProps) {
             )}
           >
             {/* Decorative pattern overlay */}
-            <div className="absolute inset-0 bg-[url('/images/roamance-logo-no-text.png')] bg-repeat-space bg-contain opacity-10 mix-blend-overlay" />
+            <div
+              className="absolute inset-0 bg-repeat-space bg-contain opacity-10 mix-blend-overlay"
+              style={{
+                backgroundImage: `url('${getImagePath('roamance-logo-no-text.png')}')`,
+              }}
+            />
 
             <div className="relative z-10 text-center px-4">
               <p className="text-white text-xl font-bold drop-shadow-md">

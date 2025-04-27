@@ -7,8 +7,8 @@ import {
 } from '@/components/ui/carousel';
 import { cn } from '@/lib/utils';
 import { ImageOff } from 'lucide-react';
-import Image from 'next/image';
 import { useEffect, useState } from 'react';
+import { ImageWrapper } from '@/components';
 
 interface PlaceImagesCarouselProps {
   images: string[];
@@ -78,7 +78,7 @@ export const PlaceImagesCarousel = ({
         {images.map((image, index) => (
           <CarouselItem key={`image-${index}`} className="h-full">
             <div className="relative w-full h-full">
-              <Image
+              <ImageWrapper
                 src={image}
                 alt={`${alt} - image ${index + 1}`}
                 className="object-cover rounded-t-xl w-full"
