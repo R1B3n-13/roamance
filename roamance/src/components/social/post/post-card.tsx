@@ -48,7 +48,7 @@ export const PostCard = ({
   onShare,
   onDelete,
 }: PostCardProps) => {
-  const { user } = useSocialContext();
+  const { user, savedPosts, fetchSavedPosts } = useSocialContext();
   const [showAll, setShowAll] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showMenu, setShowMenu] = useState(false);
@@ -58,8 +58,14 @@ export const PostCard = ({
   const menuRef = useRef<HTMLDivElement>(null);
   const tooltipTimeout = useRef<NodeJS.Timeout | null>(null);
 
+  // Ensure savedPosts are loaded
+  useEffect(() => {
+    fetchSavedPosts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const isLiked = post.liked_by?.some((liker) => liker.id === user?.id);
-  const isSaved = post.saved_by?.some((saver) => saver.id === user?.id);
+  const isSaved = savedPosts?.some(savedPost => savedPost.id === post.id);
   const isOwnPost = post.user.id === user?.id;
   const isUnsafe = post.is_safe === false;
 
@@ -680,7 +686,12 @@ export const PostCard = ({
             <motion.button
               whileTap={{ scale: 0.9 }}
               onClick={handleSaveClick}
-              className="group p-1.5 rounded-full hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors"
+              className={cn(
+                "group p-1.5 rounded-full transition-colors",
+                isSaved
+                  ? "bg-purple-100 dark:bg-purple-900/30"
+                  : "hover:bg-purple-50 dark:hover:bg-purple-900/20"
+              )}
               aria-label={isSaved ? 'Unsave post' : 'Save post'}
             >
               <Bookmark
