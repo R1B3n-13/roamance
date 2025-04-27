@@ -34,7 +34,7 @@ public class ItineraryUtil {
       for (Activity activity : dayPlan.getActivities()) {
 
         dayPlan.validateNoTimeCollisions(activity);
-        activity.setId(null); // unset before persisting
+        activity.setId(null); // clear before persisting
       }
     }
   }
@@ -69,7 +69,9 @@ public class ItineraryUtil {
 
         Activity activity = modelMapper.map(activityDto, Activity.class);
 
-        activity.setId(UUID.randomUUID()); // this is temporarily set for validation
+        // A temporary UUID is assigned to enable validation checks that require a non-null ID.
+        // This ID will be cleared before persistence in validateDayPlansAndActivities method.
+        activity.setId(UUID.randomUUID());
         activity.setDayPlan(dayPlan);
         activity.setUser(user);
         activityUtil.setActivityType(activity, activityDto.getType());

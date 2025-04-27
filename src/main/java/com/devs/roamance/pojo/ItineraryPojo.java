@@ -18,6 +18,7 @@ public class ItineraryPojo {
   private Set<LocationPojo> locations = new HashSet<>();
 
   @Description("Title of the itinerary. Must be less than 100 characters.")
+  @JsonProperty(required = true)
   private String title;
 
   @Description("Detailed description of the itinerary.")

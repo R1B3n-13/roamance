@@ -320,23 +320,30 @@ public class AiServiceImpl implements AiService {
           new AiGenerationFailedException(ResponseMessage.AI_MODEL_BUILD_FAILED));
     }
 
-    ItineraryAiService itineraryAiService =
-        AiServices.builder(ItineraryAiService.class).chatLanguageModel(model).build();
+    try {
+      ItineraryAiService itineraryAiService =
+          AiServices.builder(ItineraryAiService.class).chatLanguageModel(model).build();
 
-    ItineraryPojo itineraryPojo =
-        itineraryAiService.generateItinerary(
-            requestDto.getLocation(),
-            requestDto.getStartDate(),
-            requestDto.getNumberOfDays(),
-            requestDto.getBudgetLevel(),
-            requestDto.getNumberOfPeople());
+      ItineraryPojo itineraryPojo =
+          itineraryAiService.generateItinerary(
+              requestDto.getLocation(),
+              requestDto.getStartDate(),
+              requestDto.getNumberOfDays(),
+              requestDto.getBudgetLevel(),
+              requestDto.getNumberOfPeople());
 
-    AiPoweredItineraryDto aiPoweredItineraryDto =
-        modelMapper.map(itineraryPojo, AiPoweredItineraryDto.class);
+      AiPoweredItineraryDto aiPoweredItineraryDto =
+          modelMapper.map(itineraryPojo, AiPoweredItineraryDto.class);
 
-    return CompletableFuture.completedFuture(
-        new AiPoweredItineraryResponseDto(
-            200, true, ResponseMessage.ITINERARY_GENERATION_SUCCESS, aiPoweredItineraryDto));
+      return CompletableFuture.completedFuture(
+          new AiPoweredItineraryResponseDto(
+              200, true, ResponseMessage.ITINERARY_GENERATION_SUCCESS, aiPoweredItineraryDto));
+
+    } catch (Exception e) {
+      log.error("AI powered itinerary generation failed: {}", e.getMessage(), e);
+      return CompletableFuture.failedFuture(
+          new AiGenerationFailedException(ResponseMessage.ITINERARY_GENERATION_FAILED));
+    }
   }
 
   private ChatResponse generateResponse(

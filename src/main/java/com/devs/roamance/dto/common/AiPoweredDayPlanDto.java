@@ -25,6 +25,10 @@ public class AiPoweredDayPlanDto {
   @JsonProperty("route_plan")
   private RoutePlanRequestDto routePlan;
 
+  @Size(
+      max = 20,
+      message =
+          "Maximum 20 activities allowed per day when batch creating after generating from AI.")
   private List<AiPoweredActivityDto> activities = new ArrayList<>();
 
   @Size(max = 10, message = "Maximum 10 notes allowed")

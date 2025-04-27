@@ -2,6 +2,7 @@ package com.devs.roamance.dto.request.travel.itinerary;
 
 import com.devs.roamance.dto.request.travel.LocationCreateRequestDto;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -39,5 +40,6 @@ public class ActivityCreateRequestDto {
   @Size(max = 10_000, message = "Note can not contain more than 10000 character")
   private String note;
 
+  @DecimalMin(value = "0.0", message = "Cost cannot be negative")
   private BigDecimal cost;
 }
