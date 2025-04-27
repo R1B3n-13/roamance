@@ -10,11 +10,11 @@ interface CustomStartPointMarkerProps {
   isDarkMode: boolean;
 }
 
-export function CustomStartPointMarker({
+export const CustomStartPointMarker = ({
   position,
   name,
   isDarkMode,
-}: CustomStartPointMarkerProps) {
+}: CustomStartPointMarkerProps) => {
   return (
     <Marker
       position={[position.lat, position.lng]}
@@ -28,23 +28,48 @@ export function CustomStartPointMarker({
         })
       }
     >
-      <Popup className={cn('rounded-lg shadow-lg', isDarkMode ? 'dark-popup' : '')}>
-        <div className={cn('p-4 rounded-lg backdrop-blur-sm border border-opacity-20',
-          isDarkMode ? 'bg-card/95 text-foreground border-white/10' : 'bg-white/95 border-black/10')}>
+      <Popup
+        className={cn('rounded-lg shadow-lg', isDarkMode ? 'dark-popup' : '')}
+      >
+        <div
+          className={cn(
+            'p-4 rounded-lg backdrop-blur-sm border border-opacity-20',
+            isDarkMode
+              ? 'bg-card/95 text-foreground border-white/10'
+              : 'bg-white/95 border-black/10'
+          )}
+        >
           <div className="space-y-1 mb-3">
             <div className="flex items-center gap-1.5">
-              <div className={cn('w-2.5 h-2.5 rounded-full',
-                isDarkMode ? 'bg-emerald-400' : 'bg-emerald-500')}></div>
-              <h3 className={cn('font-bold text-lg',
-                isDarkMode ? 'text-foreground' : 'text-gray-900')}>
+              <div
+                className={cn(
+                  'w-2.5 h-2.5 rounded-full',
+                  isDarkMode ? 'bg-emerald-400' : 'bg-emerald-500'
+                )}
+              ></div>
+              <h3
+                className={cn(
+                  'font-bold text-lg',
+                  isDarkMode ? 'text-foreground' : 'text-gray-900'
+                )}
+              >
                 Starting Point
               </h3>
             </div>
-            <p className={cn('text-sm font-medium',
-              isDarkMode ? 'text-muted-foreground' : 'text-gray-700')}>
+            <p
+              className={cn(
+                'text-sm font-medium',
+                isDarkMode ? 'text-muted-foreground' : 'text-gray-700'
+              )}
+            >
               {name}
             </p>
-            <p className={cn('text-xs', isDarkMode ? 'text-muted-foreground' : 'text-gray-600')}>
+            <p
+              className={cn(
+                'text-xs',
+                isDarkMode ? 'text-muted-foreground' : 'text-gray-600'
+              )}
+            >
               {position.lat.toFixed(4)}, {position.lng.toFixed(4)}
             </p>
           </div>
@@ -52,4 +77,4 @@ export function CustomStartPointMarker({
       </Popup>
     </Marker>
   );
-}
+};
