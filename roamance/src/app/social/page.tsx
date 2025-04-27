@@ -1,14 +1,11 @@
 'use client';
 
-import { Navbar } from '@/components/navigation';
-import { DesktopSideNavigation, MobileSideNavigation } from '@/components/navigation/SideNavigation';
 import { SocialFeed } from '@/components/social/feed/social-feed';
 import { PostCreator } from '@/components/social/post/post-creator';
 import { TrendingSection } from '@/components/social/trending-section';
 import { User } from '@/types';
-import { Menu, Sparkles } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 import Image from 'next/image';
-import { useState } from 'react';
 
 const mockTrendingItems = [
   { id: '1', title: 'Paris', count: 1245, type: 'location' as const },
@@ -88,95 +85,60 @@ const mockTrendingUsers: User[] = [
 ];
 
 export default function SocialPage() {
-  const [activeTab, setActiveTab] = useState('home');
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
   return (
-    <div className="min-h-screen bg-gradient-to-tr from-gray-50 via-purple-50/30 to-indigo-50/40 dark:from-gray-900 dark:via-purple-950/10 dark:to-indigo-950/10">
-      {/* Using the Navbar component with title */}
-      <Navbar title="RoamSocial" />
+    <>
+      {/* Main content - Feed */}
+      <div className="flex-1">
+        <div className="max-w-2xl mx-auto">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
+            <Sparkles className="h-6 w-6 mr-2 text-purple-500 dark:text-purple-400" />
+            Travel Feed
+          </h2>
 
-      {/* Content starts after the navbar */}
-      <div className="pt-20">
-        <main className="container mx-auto px-4 py-6">
-          {/* Mobile menu button - visible only on mobile */}
-          <button
-            onClick={() => setIsMobileMenuOpen(true)}
-            className="md:hidden mb-4 p-2 rounded-lg bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700"
-          >
-            <Menu className="h-5 w-5 text-gray-700 dark:text-gray-300" />
-          </button>
+          {/* Post creation */}
+          <div className="mb-8">
+            <PostCreator />
+          </div>
 
-          <div className="flex flex-col md:flex-row gap-6">
-            {/* Desktop Side Navigation */}
-            <DesktopSideNavigation
-              activeTab={activeTab}
-              setActiveTab={setActiveTab}
-            />
+          {/* Posts feed */}
+          <SocialFeed />
+        </div>
+      </div>
 
-            {/* Mobile Navigation */}
-            <MobileSideNavigation
-              activeTab={activeTab}
-              setActiveTab={setActiveTab}
-              isOpen={isMobileMenuOpen}
-              onClose={() => setIsMobileMenuOpen(false)}
-            />
+      {/* Right sidebar - Trending */}
+      <aside className="hidden lg:block w-72 flex-shrink-0">
+        <div className="sticky top-24 space-y-6">
+          <TrendingSection
+            trendingItems={mockTrendingItems}
+            trendingUsers={mockTrendingUsers}
+          />
 
-            {/* Main content - Feed */}
-            <div className="flex-1">
-              <div className="max-w-2xl mx-auto">
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
-                  <Sparkles className="h-6 w-6 mr-2 text-purple-500 dark:text-purple-400" />
-                  Travel Feed
-                </h2>
-
-                {/* Post creation */}
-                <div className="mb-8">
-                  <PostCreator />
+          <div className="bg-white dark:bg-gray-800/90 backdrop-blur-md rounded-2xl overflow-hidden shadow-md border border-gray-100 dark:border-gray-700/50 p-4">
+            <h3 className="font-semibold text-base text-gray-900 dark:text-white mb-4">
+              Discover Your Next Adventure
+            </h3>
+            <div className="relative h-40 w-full rounded-xl overflow-hidden">
+              <Image
+                src="https://images.unsplash.com/photo-1503220317375-aaad61436b1b?ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTF8fHRyYXZlbHxlbnwwfHwwfHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60"
+                alt="Travel destination"
+                layout="fill"
+                objectFit="cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end p-4">
+                <div className="text-white">
+                  <h4 className="font-medium text-sm">Bali, Indonesia</h4>
+                  <p className="text-xs text-white/80">
+                    Explore paradise islands
+                  </p>
                 </div>
-
-                {/* Posts feed */}
-                <SocialFeed />
               </div>
             </div>
-
-            {/* Right sidebar - Trending */}
-            <aside className="hidden lg:block w-72 flex-shrink-0">
-              <div className="sticky top-24 space-y-6">
-                <TrendingSection
-                  trendingItems={mockTrendingItems}
-                  trendingUsers={mockTrendingUsers}
-                />
-
-                <div className="bg-white dark:bg-gray-800/90 backdrop-blur-md rounded-2xl overflow-hidden shadow-md border border-gray-100 dark:border-gray-700/50 p-4">
-                  <h3 className="font-semibold text-base text-gray-900 dark:text-white mb-4">
-                    Discover Your Next Adventure
-                  </h3>
-                  <div className="relative h-40 w-full rounded-xl overflow-hidden">
-                    <Image
-                      src="https://images.unsplash.com/photo-1503220317375-aaad61436b1b?ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTF8fHRyYXZlbHxlbnwwfHwwfHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60"
-                      alt="Travel destination"
-                      layout="fill"
-                      objectFit="cover"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end p-4">
-                      <div className="text-white">
-                        <h4 className="font-medium text-sm">Bali, Indonesia</h4>
-                        <p className="text-xs text-white/80">
-                          Explore paradise islands
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  <button className="w-full mt-3 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-medium text-sm hover:shadow-md transition-shadow">
-                    Plan Your Trip
-                  </button>
-                </div>
-              </div>
-            </aside>
+            <button className="w-full mt-3 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-medium text-sm hover:shadow-md transition-shadow">
+              Plan Your Trip
+            </button>
           </div>
-        </main>
-      </div>
-    </div>
+        </div>
+      </aside>
+    </>
   );
 }

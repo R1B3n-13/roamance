@@ -18,6 +18,7 @@ interface CreatePostParams {
   image_paths: string[];
   video_paths: string[];
   location?: { latitude: number; longitude: number; name?: string };
+  saved: Post[];
 }
 
 interface SocialContextValue {
@@ -25,13 +26,17 @@ interface SocialContextValue {
   setUser: React.Dispatch<React.SetStateAction<User>>;
   posts: Post[];
   setPosts: React.Dispatch<React.SetStateAction<Post[]>>;
+  savedPosts: Post[];
+  setSavedPosts: React.Dispatch<React.SetStateAction<Post[]>>;
   postCreated: boolean;
   triggerRefresh: () => void;
   fetchPosts: () => Promise<void>;
+  fetchSavedPosts: () => Promise<void>;
   refreshFeed: () => Promise<void>;
   createPost: (postData: CreatePostParams) => Promise<boolean>;
   isLoading: boolean;
   isPostsLoading: boolean;
+  isSavedPostsLoading: boolean;
   isCreatingPost: boolean;
   error: string | null;
 }
@@ -41,13 +46,17 @@ const SocialContext = createContext<SocialContextValue>({
   setUser: () => {},
   posts: [],
   setPosts: () => {},
+  savedPosts: [],
+  setSavedPosts: () => {},
   postCreated: false,
   triggerRefresh: () => {},
   fetchPosts: async () => {},
+  fetchSavedPosts: async () => {},
   refreshFeed: async () => {},
   createPost: async () => false,
   isLoading: false,
   isPostsLoading: false,
+  isSavedPostsLoading: false,
   isCreatingPost: false,
   error: null,
 });
@@ -63,9 +72,11 @@ export const SocialProvider = ({
 }: SocialProviderProps) => {
   const [user, setUser] = useState<User>({} as User);
   const [posts, setPosts] = useState<Post[]>(initialPosts);
+  const [savedPosts, setSavedPosts] = useState<Post[]>([]);
   const [postCreated, setPostCreated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isPostsLoading, setIsPostsLoading] = useState(!initialPosts.length);
+  const [isSavedPostsLoading, setIsSavedPostsLoading] = useState(false);
   const [isCreatingPost, setIsCreatingPost] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -190,6 +201,42 @@ export const SocialProvider = ({
     []
   );
 
+  const fetchSavedPosts = useCallback(async () => {
+    try {
+      setIsSavedPostsLoading(true);
+      setError(null);
+      const postListResponse = await PostService.getSavedPosts();
+
+      if (postListResponse.success) {
+        setSavedPosts(
+          await Promise.all(
+            postListResponse.data.map(async (dto) => ({
+              ...dto,
+              liked_by: await PostService.getLikedByPost(dto?.id || '').then(
+                (res) => res.data
+              ),
+              comments: await CommentService.getCommentsByPostId(
+                dto?.id || ''
+              ).then((res) =>
+                res.data.map(
+                  (comment) => ({ ...comment, post: dto }) as Comment
+                )
+              ),
+              saved_by: [],
+            }))
+          )
+        );
+      } else {
+        setError('Failed to fetch saved posts');
+      }
+    } catch (err) {
+      console.error('Error fetching saved posts:', err);
+      setError('An error occurred while fetching saved posts');
+    } finally {
+      setIsSavedPostsLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
@@ -228,13 +275,17 @@ export const SocialProvider = ({
         setUser,
         posts,
         setPosts,
+        savedPosts,
+        setSavedPosts,
         postCreated,
         triggerRefresh,
         fetchPosts,
+        fetchSavedPosts,
         refreshFeed,
         createPost,
         isLoading,
         isPostsLoading,
+        isSavedPostsLoading,
         isCreatingPost,
         error,
       }}
