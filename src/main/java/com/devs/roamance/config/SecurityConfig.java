@@ -54,7 +54,9 @@ public class SecurityConfig {
             })
         .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
         .addFilterBefore(authTokenFilter, UsernamePasswordAuthenticationFilter.class)
-        .csrf(AbstractHttpConfigurer::disable)
+        .csrf(
+            AbstractHttpConfigurer
+                ::disable) // NOSONAR - CSRF protection not needed as we use JWT in Auth header
         .cors(cors -> cors.configurationSource(corsConfigurationSource()))
         .build();
   }
