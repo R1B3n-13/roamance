@@ -2,20 +2,26 @@
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-routing-machine/dist/leaflet-routing-machine.css';
 
-import L from 'leaflet';
-import 'leaflet-routing-machine';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useMap } from 'react-leaflet';
 import { MapControllerProps, RouteData } from '@/types/map';
+import { Control } from 'leaflet';
+
 
 // Helper function to check if coordinates have changed
-const areCoordinatesEqual = (coord1: {lat: number, lng: number} | undefined, coord2: {lat: number, lng: number} | undefined) => {
+const areCoordinatesEqual = (
+  coord1: { lat: number; lng: number } | undefined,
+  coord2: { lat: number; lng: number } | undefined
+) => {
   if (!coord1 || !coord2) return coord1 === coord2;
   return coord1.lat === coord2.lat && coord1.lng === coord2.lng;
 };
 
 // Helper to check if waypoints array has changed
-const areWaypointsEqual = (wp1: {lat: number, lng: number}[] | undefined, wp2: {lat: number, lng: number}[] | undefined) => {
+const areWaypointsEqual = (
+  wp1: { lat: number; lng: number }[] | undefined,
+  wp2: { lat: number; lng: number }[] | undefined
+) => {
   if (!wp1 || !wp2) return wp1 === wp2;
   if (wp1.length !== wp2.length) return false;
   return wp1.every((wp, i) => areCoordinatesEqual(wp, wp2[i]));
@@ -31,12 +37,30 @@ export function MapController({
   onRouteCalculated,
 }: MapControllerProps) {
   const map = useMap();
-  const routingControlRef = useRef<L.Routing.Control | null>(null);
+  const [leaflet, setLeaflet] = useState<typeof import('leaflet')>();
+  const [isLeafletLoaded, setIsLeafletLoaded] = useState(false);
+  const routingControlRef = useRef<Control>(null);
   const prevRouteParamsRef = useRef<{
-    userLocation?: {lat: number, lng: number},
-    destination?: {lat: number, lng: number},
-    waypoints?: {lat: number, lng: number}[]
+    userLocation?: { lat: number; lng: number };
+    destination?: { lat: number; lng: number };
+    waypoints?: { lat: number; lng: number }[];
   }>({});
+
+  // Dynamically import Leaflet
+  useEffect(() => {
+    const loadLeaflet = async () => {
+      try {
+        const L = await import('leaflet');
+        await import('leaflet-routing-machine');
+        setLeaflet(L);
+        setIsLeafletLoaded(true);
+      } catch (error) {
+        console.error('Failed to load Leaflet:', error);
+      }
+    };
+
+    loadLeaflet();
+  }, []);
 
   useEffect(() => {
     const style = document.createElement('style');
@@ -62,6 +86,11 @@ export function MapController({
 
   // Calculate route using Leaflet Routing Machine
   useEffect(() => {
+    // Only proceed if Leaflet is loaded
+    if (!isLeafletLoaded || !leaflet) return;
+
+    const L = leaflet;
+
     // Only calculate route if we have directions enabled, a destination, and a user location
     if (!directions || !destination || !userLocation) {
       if (routingControlRef.current) {
@@ -73,8 +102,14 @@ export function MapController({
 
     // Check if any route parameters have changed
     const routeParamsChanged =
-      !areCoordinatesEqual(prevRouteParamsRef.current.userLocation, userLocation) ||
-      !areCoordinatesEqual(prevRouteParamsRef.current.destination, destination) ||
+      !areCoordinatesEqual(
+        prevRouteParamsRef.current.userLocation,
+        userLocation
+      ) ||
+      !areCoordinatesEqual(
+        prevRouteParamsRef.current.destination,
+        destination
+      ) ||
       !areWaypointsEqual(prevRouteParamsRef.current.waypoints, waypoints);
 
     // If nothing changed, don't recreate the routing control
@@ -86,7 +121,7 @@ export function MapController({
     prevRouteParamsRef.current = {
       userLocation,
       destination,
-      waypoints: waypoints ? [...waypoints] : undefined
+      waypoints: waypoints ? [...waypoints] : undefined,
     };
 
     // Remove existing routing control if it exists
@@ -95,7 +130,7 @@ export function MapController({
       routingControlRef.current = null;
     }
 
-    const routeWaypoints: L.Routing.Waypoint[] = [];
+    const routeWaypoints: Array<ReturnType<typeof L.Routing.waypoint>> = [];
 
     // Start with user location
     routeWaypoints.push(
@@ -109,10 +144,7 @@ export function MapController({
     if (waypoints && waypoints.length > 0) {
       waypoints.forEach((wp, index) => {
         routeWaypoints.push(
-          L.Routing.waypoint(
-            L.latLng(wp.lat, wp.lng),
-            `Waypoint ${index + 1}`
-          )
+          L.Routing.waypoint(L.latLng(wp.lat, wp.lng), `Waypoint ${index + 1}`)
         );
       });
     }
@@ -184,6 +216,8 @@ export function MapController({
     map,
     waypoints,
     onRouteCalculated,
+    isLeafletLoaded,
+    leaflet,
   ]);
 
   // Return null to make this a valid React component

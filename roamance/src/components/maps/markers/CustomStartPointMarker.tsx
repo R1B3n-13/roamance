@@ -1,8 +1,18 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import L from 'leaflet';
-import { Marker, Popup } from 'react-leaflet';
+import { Icon } from 'leaflet';
+import dynamic from 'next/dynamic';
+import { useEffect, useState } from 'react';
+
+const Marker = dynamic(
+  () => import('react-leaflet').then((mod) => mod.Marker),
+  { ssr: false }
+);
+
+const Popup = dynamic(() => import('react-leaflet').then((mod) => mod.Popup), {
+  ssr: false,
+});
 
 interface CustomStartPointMarkerProps {
   position: { lat: number; lng: number };
@@ -15,19 +25,27 @@ export const CustomStartPointMarker = ({
   name,
   isDarkMode,
 }: CustomStartPointMarkerProps) => {
+  const [icon, setIcon] = useState<Icon | null>(null);
+
+  useEffect(() => {
+    // Dynamically import Leaflet
+    import('leaflet').then((L) => {
+      const customIcon = new L.Icon({
+        iconUrl:
+          'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAiIGhlaWdodD0iNDUiIHZpZXdCb3g9IjAgMCAzMCA0NSIgZmlsbD0ibm9uZSIgeG1zbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTE1IDQ0LjVDMTUgNDQuNSAzMCAyOS42NTQgMzAgMTVDMzAgNi43MTU3MyAyMy4yODQzIDAgMTUgMEM2LjcxNTczIDAgMCA2LjcxNTczIDAgMTVDMCAyOS42NTQgMTUgNDQuNSAxNSA0NC41WiIgZmlsbD0iIzEwQjk4MSIvPgo8Y2lyY2xlIGN4PSIxNSIgY3k9IjE1IiByPSI3LjUiIGZpbGw9IndoaXRlIi8+Cjwvc3ZnPg==',
+        iconSize: [30, 45],
+        iconAnchor: [15, 45],
+        popupAnchor: [0, -45],
+      });
+      setIcon(customIcon);
+    });
+  }, []);
+
+  // Return null or a placeholder if the icon is not loaded yet
+  if (!icon) return null;
+
   return (
-    <Marker
-      position={[position.lat, position.lng]}
-      icon={
-        new L.Icon({
-          iconUrl:
-            'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAiIGhlaWdodD0iNDUiIHZpZXdCb3g9IjAgMCAzMCA0NSIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTE1IDQ0LjVDMTUgNDQuNSAzMCAyOS42NTQgMzAgMTVDMzAgNi43MTU3MyAyMy4yODQzIDAgMTUgMEM2LjcxNTczIDAgMCA2LjcxNTczIDAgMTVDMCAyOS42NTQgMTUgNDQuNSAxNSA0NC41WiIgZmlsbD0iIzEwQjk4MSIvPgo8Y2lyY2xlIGN4PSIxNSIgY3k9IjE1IiByPSI3LjUiIGZpbGw9IndoaXRlIi8+Cjwvc3ZnPg==',
-          iconSize: [30, 45],
-          iconAnchor: [15, 45],
-          popupAnchor: [0, -45],
-        })
-      }
-    >
+    <Marker position={[position.lat, position.lng]} icon={icon}>
       <Popup
         className={cn('rounded-lg shadow-lg', isDarkMode ? 'dark-popup' : '')}
       >

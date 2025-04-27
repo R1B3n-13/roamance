@@ -2,15 +2,33 @@
 
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import L from 'leaflet';
-import { GeoSearchControl, OpenStreetMapProvider } from 'leaflet-geosearch';
 import 'leaflet-geosearch/dist/geosearch.css';
 import 'leaflet/dist/leaflet.css';
 import { LocateFixed, MapPin } from 'lucide-react';
 import { useTheme } from 'next-themes';
-import { useEffect, useRef, useState, useCallback } from 'react';
-import { MapContainer, TileLayer, useMap } from 'react-leaflet';
+import dynamic from 'next/dynamic';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import type * as LeafletType from 'leaflet';
+import { useMap } from 'react-leaflet';
 import { createIcons, UserLocationMarker } from './markers/UserLocationMarker';
+
+// Define types for the dynamically imported modules
+type GeoSearchControlType = typeof import('leaflet-geosearch').GeoSearchControl;
+type OpenStreetMapProviderType =
+  typeof import('leaflet-geosearch').OpenStreetMapProvider;
+// Define type for an instance of the provider
+type OpenStreetMapProviderInstanceType =
+  import('leaflet-geosearch').OpenStreetMapProvider;
+
+const MapContainer = dynamic(
+  () => import('react-leaflet').then((mod) => mod.MapContainer),
+  { ssr: false }
+);
+
+const TileLayer = dynamic(
+  () => import('react-leaflet').then((mod) => mod.TileLayer),
+  { ssr: false }
+);
 
 // Map styles - similar to the main map component
 const mapStyles = {
@@ -32,17 +50,26 @@ interface LocationPickerMapProps {
 // Helper component to add search control to the map
 function SearchControl({
   onLocationChange,
+  Leaflet, // Receive Leaflet object as prop
+  GeoSearchControl, // Receive dynamically imported GeoSearchControl
+  OpenStreetMapProvider, // Receive dynamically imported OpenStreetMapProvider
 }: {
   onLocationChange: (lat: number, lng: number) => void;
+  Leaflet: typeof LeafletType; // Add type annotation
+  GeoSearchControl: GeoSearchControlType | null; // Add type annotation
+  OpenStreetMapProvider: OpenStreetMapProviderType | null; // Add type annotation
 }) {
   const map = useMap();
 
   useEffect(() => {
+    // Ensure Leaflet and geosearch modules are loaded
+    if (!Leaflet || !GeoSearchControl || !OpenStreetMapProvider) return;
+
     const provider = new OpenStreetMapProvider();
 
-    // Create proper type for GeoSearchControl constructor
+    // Use the passed Leaflet object and dynamically imported controls
     const searchControl = new (GeoSearchControl as unknown as new (options: {
-      provider: OpenStreetMapProvider;
+      provider: OpenStreetMapProviderInstanceType; // Use the instance type
       style: string;
       showMarker: boolean;
       showPopup: boolean;
@@ -51,10 +78,10 @@ function SearchControl({
       animateZoom: boolean;
       keepResult: boolean;
       searchLabel: string;
-    }) => L.Control)({
+    }) => LeafletType.Control)({
       provider,
       style: 'bar',
-      showMarker: false, // We'll handle the marker ourselves
+      showMarker: false,
       showPopup: false,
       autoClose: true,
       retainZoomLevel: false,
@@ -65,21 +92,23 @@ function SearchControl({
 
     map.addControl(searchControl);
 
-    // Handle the search result
-    map.on('geosearch/showlocation', (e: L.LeafletEvent) => {
-      // Cast the event to access the location property
+    map.on('geosearch/showlocation', (e: LeafletType.LeafletEvent) => {
       const result = e as unknown as {
         location: { x: number; y: number; label: string };
       };
       const { x, y } = result.location;
-      onLocationChange(y, x); // y is lat, x is lng in the result
+      onLocationChange(y, x);
       map.setView([y, x], 13);
     });
 
     return () => {
-      map.removeControl(searchControl);
+      // Check if map and searchControl exist before removing
+      if (map && map.removeControl) {
+         map.removeControl(searchControl);
+      }
     };
-  }, [map, onLocationChange]);
+    // Add Leaflet, GeoSearchControl, OpenStreetMapProvider to dependency array
+  }, [map, onLocationChange, Leaflet, GeoSearchControl, OpenStreetMapProvider]);
 
   return null;
 }
@@ -89,17 +118,22 @@ function MapInteractionHandler({
   initialLocation,
   onLocationChangeAction,
   userLocation,
+  Leaflet, // Receive Leaflet object as prop
 }: {
   initialLocation: { latitude: number; longitude: number };
   onLocationChangeAction: (lat: number, lng: number) => void;
   userLocation: { lat: number; lng: number } | null;
+  Leaflet: typeof LeafletType; // Add type annotation
 }) {
   const map = useMap();
-  const markerRef = useRef<L.Marker | null>(null);
+  const markerRef = useRef<LeafletType.Marker | null>(null);
   const hasSetInitialLocation = useRef(false);
 
   // Initialize marker position with user location or initialLocation
   useEffect(() => {
+    // Ensure Leaflet is loaded
+    if (!Leaflet) return;
+
     // If we have user location and haven't set an initial location yet, use it
     if (
       userLocation &&
@@ -110,7 +144,7 @@ function MapInteractionHandler({
       // Update the form state with user's location
       onLocationChangeAction(userLocation.lat, userLocation.lng);
 
-      const position = L.latLng(userLocation.lat, userLocation.lng);
+      const position = Leaflet.latLng(userLocation.lat, userLocation.lng);
       map.setView(position, 13);
 
       if (markerRef.current) {
@@ -124,7 +158,7 @@ function MapInteractionHandler({
       (initialLocation.latitude !== 0 || initialLocation.longitude !== 0) &&
       !hasSetInitialLocation.current
     ) {
-      const position = L.latLng(
+      const position = Leaflet.latLng(
         initialLocation.latitude,
         initialLocation.longitude
       );
@@ -136,11 +170,14 @@ function MapInteractionHandler({
 
       hasSetInitialLocation.current = true;
     }
-  }, [initialLocation, map, userLocation, onLocationChangeAction]);
+  }, [initialLocation, map, userLocation, onLocationChangeAction, Leaflet]); // Add Leaflet
 
   // Handle map click events
   useEffect(() => {
-    const handleMapClick = (e: L.LeafletMouseEvent) => {
+    // Ensure Leaflet is loaded
+    if (!Leaflet) return;
+
+    const handleMapClick = (e: LeafletType.LeafletMouseEvent) => {
       const { lat, lng } = e.latlng;
       onLocationChangeAction(lat, lng);
 
@@ -154,71 +191,91 @@ function MapInteractionHandler({
     return () => {
       map.off('click', handleMapClick);
     };
-  }, [map, onLocationChangeAction]);
+  }, [map, onLocationChangeAction, Leaflet]); // Add Leaflet
 
   // Initialize marker when component mounts
   useEffect(() => {
-    if (!markerRef.current) {
-      // Determine the best initial position: userLocation > initialLocation > map center
-      let initialPosition: L.LatLngExpression;
+    // Ensure Leaflet is loaded
+    if (!Leaflet) return;
 
-      if (
-        userLocation &&
-        initialLocation.latitude === 0 &&
-        initialLocation.longitude === 0
-      ) {
-        initialPosition = [userLocation.lat, userLocation.lng] as [
-          number,
-          number,
-        ];
-      } else if (
-        initialLocation.latitude !== 0 ||
-        initialLocation.longitude !== 0
-      ) {
-        initialPosition = [
-          initialLocation.latitude,
-          initialLocation.longitude,
-        ] as [number, number];
-      } else {
-        initialPosition = map.getCenter();
-      }
+    const initializeMarker = async () => {
+      if (!markerRef.current) {
+        // Determine the best initial position: userLocation > initialLocation > map center
+        let initialPosition: LeafletType.LatLngExpression;
 
-      // Get a fresh instance of the icon
-      const { placeLocationIcon } = createIcons();
-
-      markerRef.current = L.marker(initialPosition, {
-        draggable: true,
-        icon: placeLocationIcon,
-      }).addTo(map);
-
-      // Handle marker drag end
-      markerRef.current.on('dragend', () => {
-        const position = markerRef.current?.getLatLng();
-        if (position) {
-          onLocationChangeAction(position.lat, position.lng);
+        if (
+          userLocation &&
+          initialLocation.latitude === 0 &&
+          initialLocation.longitude === 0
+        ) {
+          initialPosition = [userLocation.lat, userLocation.lng] as [
+            number,
+            number,
+          ];
+        } else if (
+          initialLocation.latitude !== 0 ||
+          initialLocation.longitude !== 0
+        ) {
+          initialPosition = [
+            initialLocation.latitude,
+            initialLocation.longitude,
+          ] as [number, number];
+        } else {
+          initialPosition = map.getCenter();
         }
-      });
-    }
+
+        // Get a fresh instance of the icon - await the Promise
+        const icons = await createIcons();
+        const { placeLocationIcon } = icons;
+
+        markerRef.current = Leaflet.marker(initialPosition, {
+          draggable: true,
+          icon: placeLocationIcon,
+        }).addTo(map);
+
+        // Handle marker drag end
+        markerRef.current.on('dragend', () => {
+          const position = markerRef.current?.getLatLng();
+          if (position) {
+            onLocationChangeAction(position.lat, position.lng);
+          }
+        });
+      }
+    };
+
+    initializeMarker();
 
     return () => {
       if (markerRef.current) {
-        map.removeLayer(markerRef.current);
+        // Check if map exists before removing layer
+        if (map && map.hasLayer(markerRef.current)) {
+           map.removeLayer(markerRef.current);
+        }
         markerRef.current = null;
       }
     };
-  }, [map, initialLocation, onLocationChangeAction, userLocation]);
+    // Add Leaflet to dependency array
+  }, [map, initialLocation, onLocationChangeAction, userLocation, Leaflet]);
 
   return null;
 }
 
 // Add this new component to handle map events and references
-function MapController({ onMapReady }: { onMapReady: (map: L.Map) => void }) {
+function MapController({
+  onMapReady,
+  Leaflet, // Receive Leaflet object as prop
+}: {
+  onMapReady: (map: LeafletType.Map) => void; // Use LeafletType
+  Leaflet: typeof LeafletType; // Add type annotation
+}) {
   const map = useMap();
 
   // Use effect to ensure the map is ready and properly stored in the ref
   useEffect(() => {
-    onMapReady(map);
-  }, [map, onMapReady]);
+    // Ensure Leaflet is loaded
+    if (!Leaflet) return;
+    onMapReady(map as unknown as LeafletType.Map); // Use LeafletType
+  }, [map, onMapReady, Leaflet]); // Add Leaflet
 
   return null;
 }
@@ -230,13 +287,27 @@ export function LocationPickerMap({
 }: LocationPickerMapProps) {
   const { theme } = useTheme();
   const isDarkMode = theme === 'dark';
-  const mapRef = useRef<L.Map | null>(null);
+  const mapRef = useRef<LeafletType.Map | null>(null);
+  // State to hold the dynamically imported Leaflet module
+  const [Leaflet, setLeaflet] = useState<typeof LeafletType | null>(null);
+  // State to hold dynamically imported geosearch modules
+  const [GeoSearchControl, setGeoSearchControl] =
+    useState<GeoSearchControlType | null>(null);
+  const [OpenStreetMapProvider, setOpenStreetMapProvider] =
+    useState<OpenStreetMapProviderType | null>(null);
 
   // State for user's current location
   const [userLocation, setUserLocation] = useState<{
     lat: number;
     lng: number;
   } | null>(null);
+
+  // Dynamically import Leaflet on mount
+  useEffect(() => {
+    import('leaflet').then((L) => {
+      setLeaflet(L);
+    });
+  }, []);
 
   // Fetch user location on mount
   useEffect(() => {
@@ -251,6 +322,16 @@ export function LocationPickerMap({
       { enableHighAccuracy: true }
     );
   }, []);
+
+  // Dynamically import leaflet-geosearch when Leaflet is ready
+  useEffect(() => {
+    if (Leaflet) {
+      import('leaflet-geosearch').then((module) => {
+        setGeoSearchControl(() => module.GeoSearchControl); // Use function form for state update
+        setOpenStreetMapProvider(() => module.OpenStreetMapProvider); // Use function form for state update
+      });
+    }
+  }, [Leaflet]); // Depend on Leaflet state
 
   // Add dark mode styles
   useEffect(() => {
@@ -312,15 +393,28 @@ export function LocationPickerMap({
 
   // Function to center the map on user location
   const handleCenterOnUser = useCallback(() => {
-    if (userLocation && mapRef.current) {
+    // Ensure Leaflet is loaded
+    if (userLocation && mapRef.current && Leaflet) {
       mapRef.current.setView([userLocation.lat, userLocation.lng], 15);
     }
-  }, [userLocation]);
+  }, [userLocation, Leaflet]); // Add Leaflet
 
   // Callback to store map reference
-  const handleMapReady = useCallback((map: L.Map) => {
+  const handleMapReady = useCallback((map: LeafletType.Map) => {
     mapRef.current = map;
   }, []);
+
+  // Render loading or placeholder if Leaflet or geosearch modules are not yet loaded
+  if (!Leaflet || !GeoSearchControl || !OpenStreetMapProvider) {
+    return (
+      <div
+        style={{ height }}
+        className="flex items-center justify-center rounded-lg border bg-muted/30 text-muted-foreground"
+      >
+        Loading Map...
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-2">
@@ -363,6 +457,7 @@ export function LocationPickerMap({
             <LocateFixed className="h-full w-full" />
           </Button>
         )}
+        {/* Conditionally render MapContainer only when Leaflet is loaded */}
         <MapContainer
           center={center}
           zoom={13}
@@ -370,24 +465,32 @@ export function LocationPickerMap({
           zoomControl={true}
           className={cn({ 'dark-map-picker': isDarkMode })}
         >
-          <MapController onMapReady={handleMapReady} />
+          <MapController onMapReady={handleMapReady} Leaflet={Leaflet} />
           <TileLayer
             attribution={mapAttribution}
             url={
               isDarkMode ? mapStyles.standard.dark : mapStyles.standard.light
             }
           />
-          <SearchControl onLocationChange={onLocationChangeAction} />
+          <SearchControl
+            onLocationChange={onLocationChangeAction}
+            Leaflet={Leaflet}
+            GeoSearchControl={GeoSearchControl} // Pass dynamically loaded module
+            OpenStreetMapProvider={OpenStreetMapProvider} // Pass dynamically loaded module
+          />
           <MapInteractionHandler
             initialLocation={initialLocation}
             onLocationChangeAction={onLocationChangeAction}
             userLocation={userLocation}
+            Leaflet={Leaflet}
           />
           {/* Render UserLocationMarker if location is available */}
           {userLocation && (
             <UserLocationMarker
               position={userLocation}
               isDarkMode={isDarkMode}
+              // Pass Leaflet if UserLocationMarker needs it, otherwise remove
+              // Leaflet={Leaflet}
             />
           )}
         </MapContainer>

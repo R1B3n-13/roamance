@@ -7,7 +7,6 @@ import com.devs.roamance.dto.response.BaseResponseDto;
 import com.devs.roamance.dto.response.travel.itinerary.*;
 import com.devs.roamance.exception.ResourceNotFoundException;
 import com.devs.roamance.exception.UnauthorizedActionException;
-import com.devs.roamance.model.common.ActivityType;
 import com.devs.roamance.model.common.Location;
 import com.devs.roamance.model.travel.itinerary.Activity;
 import com.devs.roamance.model.travel.itinerary.DayPlan;

@@ -2,14 +2,36 @@
 
 import { cn } from '@/lib/utils';
 import { Location } from '@/types/location';
-import L from 'leaflet';
-import 'leaflet-routing-machine';
+import { Control } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useTheme } from 'next-themes';
 import { useEffect, useRef, useState } from 'react';
-import { MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet';
+import { useMap } from 'react-leaflet';
 import { formatDistance } from './MeasurementControl';
 import { createIcons } from './markers/UserLocationMarker';
+import dynamic from 'next/dynamic';
+
+const MapContainer = dynamic(
+  () => import('react-leaflet').then((mod) => mod.MapContainer),
+  { ssr: false }
+);
+
+const TileLayer = dynamic(
+  () => import('react-leaflet').then((mod) => mod.TileLayer),
+  { ssr: false }
+);
+
+const Marker = dynamic(
+  () => import('react-leaflet').then((mod) => mod.Marker),
+  { ssr: false }
+);
+
+const Popup = dynamic(() => import('react-leaflet').then((mod) => mod.Popup), {
+  ssr: false,
+});
+
+// Type definitions for dynamically imported modules
+type LeafletType = typeof import('leaflet');
 
 interface RouteVisualizationProps {
   /**
@@ -106,17 +128,23 @@ const TRAVEL_SPEEDS = {
 /**
  * A component that automatically fits the map view to show all route points
  */
-function FitBoundsToRoute({ locations }: { locations: Location[] }) {
+function FitBoundsToRoute({
+  locations,
+  L,
+}: {
+  locations: Location[];
+  L: LeafletType;
+}) {
   const map = useMap();
 
   useEffect(() => {
     if (locations.length > 0) {
       const bounds = new L.LatLngBounds(
-        locations.map(loc => [loc.latitude, loc.longitude])
+        locations.map((loc) => [loc.latitude, loc.longitude])
       );
       map.fitBounds(bounds, { padding: [30, 30] });
     }
-  }, [locations, map]);
+  }, [locations, map, L]);
 
   return null;
 }
@@ -126,7 +154,8 @@ function FitBoundsToRoute({ locations }: { locations: Location[] }) {
  * @param timeInHours Time in hours (can be decimal)
  */
 function formatTime(timeInHours: number): string {
-  if (timeInHours < 0.016) { // Less than 1 minute
+  if (timeInHours < 0.016) {
+    // Less than 1 minute
     return 'Less than a minute';
   }
 
@@ -148,18 +177,20 @@ function formatTime(timeInHours: number): string {
 function RoutingMachineLayer({
   locations,
   routeStyle,
-  onRouteFound
+  onRouteFound,
+  L,
 }: {
-  locations: Location[],
+  locations: Location[];
   routeStyle?: {
     color?: string;
     weight?: number;
     opacity?: number;
-  },
-  onRouteFound?: (distance: number, time: number) => void
+  };
+  onRouteFound?: (distance: number, time: number) => void;
+  L: LeafletType;
 }) {
   const map = useMap();
-  const routingControlRef = useRef<L.Routing.Control | null>(null);
+  const routingControlRef = useRef<Control | null>(null);
 
   useEffect(() => {
     if (locations.length < 2) return;
@@ -170,7 +201,7 @@ function RoutingMachineLayer({
     }
 
     // Create waypoints from locations
-    const waypoints = locations.map(loc =>
+    const waypoints = locations.map((loc) =>
       L.latLng(loc.latitude, loc.longitude)
     );
 
@@ -181,16 +212,20 @@ function RoutingMachineLayer({
       addWaypoints: false, // Disable adding new waypoints by clicking
       routeWhileDragging: false,
       lineOptions: {
-        styles: [{
-          color: routeStyle?.color || '#4f46e5',
-          weight: routeStyle?.weight || 4,
-          opacity: routeStyle?.opacity || 0.8
-        }],
+        styles: [
+          {
+            color: routeStyle?.color || '#4f46e5',
+            weight: routeStyle?.weight || 4,
+            opacity: routeStyle?.opacity || 0.8,
+          },
+        ],
         extendToWaypoints: true,
-        missingRouteTolerance: 0
+        missingRouteTolerance: 0,
       },
       //@ts-expect-error handling the makers separately
-      createMarker: () => { return null; } // Don't create markers (we handle them separately)
+      createMarker: () => {
+        return null;
+      }, // Don't create markers (we handle them separately)
     }).addTo(map);
 
     // Listen for the 'routesfound' event to get actual route data
@@ -226,11 +261,13 @@ function RoutingMachineLayer({
 function RouteInfoControl({
   distance,
   time,
-  hasActualRoute
+  hasActualRoute,
+  L,
 }: {
-  distance: number,
-  time: number,
-  hasActualRoute: boolean
+  distance: number;
+  time: number;
+  hasActualRoute: boolean;
+  L: LeafletType;
 }) {
   const map = useMap();
   const isDarkMode = useTheme().resolvedTheme === 'dark';
@@ -244,19 +281,26 @@ function RouteInfoControl({
     // Create a custom control for the route info
     const RouteInfoControl = L.Control.extend({
       options: {
-        position: 'topright'
+        position: 'topright',
       },
-      onAdd: function() {
-        const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control route-info-control');
+      onAdd: function () {
+        const container = L.DomUtil.create(
+          'div',
+          'leaflet-bar leaflet-control route-info-control'
+        );
         container.style.padding = '8px 12px';
-        container.style.background = isDarkMode ? 'rgba(30, 30, 30, 0.85)' : 'rgba(255, 255, 255, 0.9)';
+        container.style.background = isDarkMode
+          ? 'rgba(30, 30, 30, 0.85)'
+          : 'rgba(255, 255, 255, 0.9)';
         container.style.borderRadius = '8px';
         container.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.15)';
         container.style.margin = '10px';
         container.style.fontSize = '14px';
         container.style.color = isDarkMode ? '#e5e5e5' : '#333';
         container.style.backdropFilter = 'blur(4px)';
-        container.style.border = isDarkMode ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(0, 0, 0, 0.1)';
+        container.style.border = isDarkMode
+          ? '1px solid rgba(255, 255, 255, 0.1)'
+          : '1px solid rgba(0, 0, 0, 0.1)';
 
         // Distance info
         const distanceDiv = L.DomUtil.create('div', '', container);
@@ -276,7 +320,7 @@ function RouteInfoControl({
 
         L.DomEvent.disableClickPropagation(container);
         return container;
-      }
+      },
     });
 
     // Add the control to the map
@@ -314,8 +358,27 @@ export function RouteVisualization({
   const isDarkMode = resolvedTheme === 'dark';
   const [totalDistance, setTotalDistance] = useState<number>(0);
   const [totalTime, setTotalTime] = useState<number>(0);
-  // Track if we have actual route measurements
   const [hasActualRoute, setHasActualRoute] = useState<boolean>(false);
+
+  // State for dynamically loaded Leaflet
+  const [leafletModule, setLeafletModule] = useState<LeafletType | null>(null);
+  const [isLeafletLoaded, setIsLeafletLoaded] = useState(false);
+
+  // Load Leaflet dynamically
+  useEffect(() => {
+    async function loadLeaflet() {
+      try {
+        const { default: L } = await import('leaflet');
+        await import('leaflet-routing-machine');
+        setLeafletModule(L);
+        setIsLeafletLoaded(true);
+      } catch (error) {
+        console.error('Failed to load Leaflet:', error);
+      }
+    }
+
+    loadLeaflet();
+  }, []);
 
   // Default route style with dark mode awareness
   const defaultRouteStyle = {
@@ -329,30 +392,35 @@ export function RouteVisualization({
 
   // Calculate initial distance and time when locations change (as fallback)
   useEffect(() => {
-    if (locations.length > 1) {
-      // Use this as fallback until we get the actual route data
-      let distance = 0;
-      for (let i = 1; i < locations.length; i++) {
-        const prev = locations[i-1];
-        const curr = locations[i];
-        const prevLatLng = new L.LatLng(prev.latitude, prev.longitude);
-        const currLatLng = new L.LatLng(curr.latitude, curr.longitude);
-        distance += prevLatLng.distanceTo(currLatLng);
-      }
+    if (!leafletModule || locations.length <= 1) return;
 
-      if (!hasActualRoute) {
-        setTotalDistance(distance);
-
-        // Calculate estimated travel time based on mode and distance
-        const distanceInKm = distance / 1000;
-        const speed = typeof travelMode === 'number'
-          ? travelMode
-          : TRAVEL_SPEEDS[travelMode];
-        const timeInHours = distanceInKm / speed;
-        setTotalTime(timeInHours);
-      }
+    // Use this as fallback until we get the actual route data
+    let distance = 0;
+    for (let i = 1; i < locations.length; i++) {
+      const prev = locations[i - 1];
+      const curr = locations[i];
+      const prevLatLng = new leafletModule.LatLng(
+        prev.latitude,
+        prev.longitude
+      );
+      const currLatLng = new leafletModule.LatLng(
+        curr.latitude,
+        curr.longitude
+      );
+      distance += prevLatLng.distanceTo(currLatLng);
     }
-  }, [locations, travelMode, hasActualRoute]);
+
+    if (!hasActualRoute) {
+      setTotalDistance(distance);
+
+      // Calculate estimated travel time based on mode and distance
+      const distanceInKm = distance / 1000;
+      const speed =
+        typeof travelMode === 'number' ? travelMode : TRAVEL_SPEEDS[travelMode];
+      const timeInHours = distanceInKm / speed;
+      setTotalTime(timeInHours);
+    }
+  }, [locations, travelMode, hasActualRoute, leafletModule]);
 
   // Callback for when the actual route data is found
   const handleRouteFound = (distance: number, timeInMinutes: number) => {
@@ -361,18 +429,42 @@ export function RouteVisualization({
     setHasActualRoute(true);
   };
 
+  const [icons, setIcons] = useState<{
+    userLocationIcon: L.Icon;
+    placeLocationIcon: L.Icon;
+  } | null>(null);
+
+  useEffect(() => {
+    if (isLeafletLoaded) {
+      createIcons().then((loaded) => setIcons(loaded));
+    }
+  }, [isLeafletLoaded]);
+
+  // Show loading state while Leaflet or icons are loading
+  if (!isLeafletLoaded || !leafletModule || !icons) {
+    return (
+      <div
+        className={cn('flex items-center justify-center', className)}
+        style={{ height, width }}
+      >
+        <div className="text-muted-foreground">Loading map...</div>
+      </div>
+    );
+  }
+
   // Don't render if there are no locations
   if (!locations || locations.length === 0) {
     return null;
   }
 
   // Get center from the first location or middle of route
-  const center = locations.length > 0
-    ? [locations[0].latitude, locations[0].longitude]
-    : [0, 0];
+  const center =
+    locations.length > 0
+      ? [locations[0].latitude, locations[0].longitude]
+      : [0, 0];
 
-  // Initialize the icons for markers
-  const { userLocationIcon, placeLocationIcon } = createIcons();
+  const { userLocationIcon, placeLocationIcon } = icons;
+  const L = leafletModule;
 
   return (
     <div
@@ -406,12 +498,14 @@ export function RouteVisualization({
             icon={userLocationIcon}
           >
             <Popup className={cn('rounded-lg', isDarkMode ? 'dark-popup' : '')}>
-              <div className={cn(
-                'p-2 rounded-lg',
-                isDarkMode
-                  ? 'bg-card/95 text-foreground'
-                  : 'bg-white/95 text-gray-900'
-              )}>
+              <div
+                className={cn(
+                  'p-2 rounded-lg',
+                  isDarkMode
+                    ? 'bg-card/95 text-foreground'
+                    : 'bg-white/95 text-gray-900'
+                )}
+              >
                 <p>Your Location</p>
               </div>
             </Popup>
@@ -448,13 +542,17 @@ export function RouteVisualization({
               position={[location.latitude, location.longitude]}
               icon={icon}
             >
-              <Popup className={cn('rounded-lg', isDarkMode ? 'dark-popup' : '')}>
-                <div className={cn(
-                  'p-3 rounded-lg',
-                  isDarkMode
-                    ? 'bg-card/95 text-foreground'
-                    : 'bg-white/95 text-gray-900'
-                )}>
+              <Popup
+                className={cn('rounded-lg', isDarkMode ? 'dark-popup' : '')}
+              >
+                <div
+                  className={cn(
+                    'p-3 rounded-lg',
+                    isDarkMode
+                      ? 'bg-card/95 text-foreground'
+                      : 'bg-white/95 text-gray-900'
+                  )}
+                >
                   <div className="font-medium mb-1">
                     {locationNames && locationNames[index]
                       ? locationNames[index]
@@ -462,20 +560,26 @@ export function RouteVisualization({
                         ? 'Start Point'
                         : index === locations.length - 1
                           ? 'Destination'
-                          : `Waypoint ${index}`
-                    }
+                          : `Waypoint ${index}`}
                   </div>
                   <div className="text-xs text-muted-foreground">
-                    {location.latitude.toFixed(5)}, {location.longitude.toFixed(5)}
+                    {location.latitude.toFixed(5)},{' '}
+                    {location.longitude.toFixed(5)}
                   </div>
 
                   {/* Show segment distance information - this will be an estimate */}
                   {showDistance && index > 0 && (
                     <div className="text-xs mt-2 pt-2 border-t border-muted/20">
-                      <span className="text-muted-foreground">Segment distance: </span>
+                      <span className="text-muted-foreground">
+                        Segment distance:{' '}
+                      </span>
                       {formatDistance(
-                        new L.LatLng(locations[index-1].latitude, locations[index-1].longitude)
-                          .distanceTo(new L.LatLng(location.latitude, location.longitude))
+                        new L.LatLng(
+                          locations[index - 1].latitude,
+                          locations[index - 1].longitude
+                        ).distanceTo(
+                          new L.LatLng(location.latitude, location.longitude)
+                        )
                       )}
                     </div>
                   )}
@@ -491,11 +595,14 @@ export function RouteVisualization({
             locations={locations}
             routeStyle={finalRouteStyle}
             onRouteFound={handleRouteFound}
+            L={L}
           />
         )}
 
         {/* Auto-fit the map to show all route points if enabled */}
-        {autoFit && locations.length > 1 && <FitBoundsToRoute locations={locations} />}
+        {autoFit && locations.length > 1 && (
+          <FitBoundsToRoute locations={locations} L={L} />
+        )}
 
         {/* Add route info control in the top right corner */}
         {(showDistance || showTravelTime) && locations.length >= 2 && (
@@ -503,6 +610,7 @@ export function RouteVisualization({
             distance={totalDistance}
             time={totalTime}
             hasActualRoute={hasActualRoute}
+            L={L}
           />
         )}
       </MapContainer>

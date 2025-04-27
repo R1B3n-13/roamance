@@ -3,7 +3,7 @@ package com.devs.roamance.util;
 import com.devs.roamance.dto.common.AiPoweredActivityDto;
 import com.devs.roamance.dto.common.AiPoweredDayPlanDto;
 import com.devs.roamance.dto.common.AiPoweredItineraryDto;
-import com.devs.roamance.model.travel.Location;
+import com.devs.roamance.model.common.Location;
 import com.devs.roamance.model.travel.itinerary.Activity;
 import com.devs.roamance.model.travel.itinerary.DayPlan;
 import com.devs.roamance.model.travel.itinerary.Itinerary;

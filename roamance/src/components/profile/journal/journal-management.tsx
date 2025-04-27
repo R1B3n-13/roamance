@@ -294,6 +294,11 @@ export const JournalManagement: React.FC = () => {
         journal.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         journal.description.toLowerCase().includes(searchQuery.toLowerCase());
 
+      // Hide archived journals by default, but show them when 'All Journals' filter is selected
+      if (journal.is_archived && activeFilter !== 'archived' && activeFilter !== 'all') {
+        return false;
+      }
+
       // Apply filter based on activeFilter
       if (!activeFilter || activeFilter === 'all') {
         return matchesSearch;

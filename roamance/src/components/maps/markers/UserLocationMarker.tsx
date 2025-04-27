@@ -1,9 +1,18 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import L from 'leaflet';
-import { useEffect } from 'react';
-import { Marker, Popup } from 'react-leaflet';
+import dynamic from 'next/dynamic';
+import type { Icon } from 'leaflet';
+import { useState, useEffect } from 'react';
+
+// Dynamically import react-leaflet components to avoid SSR issues
+const Marker = dynamic(
+  () => import('react-leaflet').then((mod) => mod.Marker),
+  { ssr: false }
+);
+const Popup = dynamic(() => import('react-leaflet').then((mod) => mod.Popup), {
+  ssr: false,
+});
 
 interface UserLocationMarkerProps {
   position: { lat: number; lng: number };
@@ -16,48 +25,56 @@ const USER_ICON_URL =
 const PLACE_ICON_URL =
   'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iNDIiIHZpZXdCb3g9IjAgMCAzMiA0MiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICAgIDxkZWZzPgogICAgICA8cmFkaWFsR3JhZGllbnQgaWQ9ImdyYWQiIGN4PSIwLjUiIGN5PSIwLjMiIHI9IjAuNyI+CiAgICAgICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iI0EyNzhGRiIgLz4KICAgICAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiM3QzNBRUQiIC8+CiAgICAgIDwvcmFkaWFsR3JhZGllbnQ+CiAgICAgIDxmaWx0ZXIgaWQ9InNoYWRvdyIgeD0iLTIwJSIgeT0iMCUiIHdpZHRoPSIxNDAlIiBoZWlnaHQ9IjEzMCUiPgogICAgICAgIDxmZUdhdXNzaWFuQmx1ciBpbj0iU291cmNlQWxwaGEiIHN0ZERldmlhdGlvbj0iMiIgLz4KICAgICAgICA8ZmVPZmZzZXQgZHg9IjAiIGR5PSIzIiByZXN1bHQ9Im9mZk91dCIgLz4KICAgICAgICA8ZmVDb21wb3NpdGUgaW49IlNvdXJjZUdyYXBoaWMiIGluMj0ib2ZmT3V0IiBvcGVyYXRvcj0ib3ZlciIgLz4KICAgICAgPC9maWx0ZXI+CiAgICA8L2RlZnM+CiAgICA8cGF0aCBkPSJNMTYgMkM5LjM3MjU4IDIgNCA3LjM3MjU4IDQgMTRDNCAxOS45IDEyLjgwNCAzMi4yMTg0IDE1LjI3NSAzNS4zNzUyQzE1LjQzMDggMzUuNTY5OCAxNS42NDg2IDM1LjY4IDE1Ljg3NzQgMzUuNjhIMTYuMTQwNkMxNi4zNjk0IDM1LjY4IDE2LjU4NzIgMzUuNTY5OCAxNi43NDMgMzUuMzc1MkMxOS4yMTQgMzIuMjE4NCAyOCAxOS45IDI4IDE0QzI4IDcuMzcyNTggMjIuNjI3NCAyIDE2IDJaIiBmaWxsPSJ1cmwoI2dyYWQpIiBzdHJva2U9IiM2RDI4RDkiIHN0cm9rZS13aWR0aD0iMiIgZmlsdGVyPSJ1cmwoI3NoYWRvdykiLz4KICAgIDxjaXJjbGUgY3g9IjE2IiBjeT0iMTQiIHI9IjUiIGZpbGw9IndoaXRlIiAvPgo8L3N2Zz4K';
 
-// Don't forget to update the icon anchor point for the new pin shape
-export const createIcons = () => {
+// Modify createIcons to be async and dynamically import Leaflet
+export const createIcons = async () => {
+  // Only create icons in the browser to avoid SSR issues
+  if (typeof window === 'undefined') {
+    return {
+      userLocationIcon: null as unknown as Icon,
+      placeLocationIcon: null as unknown as Icon,
+    };
+  }
+
+  // Dynamically import Leaflet
+  const Leaflet = (await import('leaflet')).default;
+
   return {
-    userLocationIcon: new L.Icon({
+    userLocationIcon: new Leaflet.Icon({
       iconUrl: USER_ICON_URL,
       iconSize: [32, 32],
       iconAnchor: [16, 16],
       popupAnchor: [0, -8],
     }),
-    placeLocationIcon: new L.Icon({
+    placeLocationIcon: new Leaflet.Icon({
       iconUrl: PLACE_ICON_URL,
-      iconSize: [32, 42], // Height increased for pin shape
-      iconAnchor: [16, 42], // Bottom center of the pin
-      popupAnchor: [0, -42], // Popup appears above the pin
+      iconSize: [32, 42],
+      iconAnchor: [16, 42],
+      popupAnchor: [0, -42],
     }),
   };
 };
 
-// Export these for convenience, but they should only be used after component mounting
-export let userLocationIcon: L.Icon;
-export let placeLocationIcon: L.Icon;
-
-// Initialize icons client-side only
-if (typeof window !== 'undefined') {
-  const icons = createIcons();
-  userLocationIcon = icons.userLocationIcon;
-  placeLocationIcon = icons.placeLocationIcon;
-}
+// Remove global icon initialization and instead create them on demand
+// This ensures they're only created in the browser context
 
 export function UserLocationMarker({
   position,
   isDarkMode,
 }: UserLocationMarkerProps) {
-  // Re-create icons on component mount to ensure they're available
-  useEffect(() => {
-    const icons = createIcons();
-    userLocationIcon = icons.userLocationIcon;
-    placeLocationIcon = icons.placeLocationIcon;
-  }, []);
+  // Use state to manage the icon
+  const [icon, setIcon] = useState<Icon | null>(null);
 
-  // Use createIcons() directly in the component to guarantee icon availability
-  const { userLocationIcon: icon } = createIcons();
+  useEffect(() => {
+    // Call createIcons and set the state when the promise resolves
+    createIcons().then(({ userLocationIcon }) => {
+      setIcon(userLocationIcon);
+    });
+  }, []); // Empty dependency array ensures this runs once on mount
+
+  // Render nothing until the icon is loaded
+  if (!icon) {
+    return null;
+  }
 
   return (
     <Marker position={[position.lat, position.lng]} icon={icon}>
@@ -115,8 +132,20 @@ export function PlaceLocationMarker({
   name,
   description,
 }: PlaceLocationMarkerProps) {
-  // Use createIcons() directly in the component to guarantee icon availability
-  const { placeLocationIcon: icon } = createIcons();
+  // Use state to manage the icon
+  const [icon, setIcon] = useState<Icon | null>(null);
+
+  useEffect(() => {
+    // Call createIcons and set the state when the promise resolves
+    createIcons().then(({ placeLocationIcon }) => {
+      setIcon(placeLocationIcon);
+    });
+  }, []); // Empty dependency array ensures this runs once on mount
+
+  // Render nothing until the icon is loaded
+  if (!icon) {
+    return null;
+  }
 
   return (
     <Marker position={[position.lat, position.lng]} icon={icon}>

@@ -2,12 +2,11 @@
 
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
-import L from 'leaflet';
+import type * as Leaflet from 'leaflet';
 import 'leaflet-draw/dist/leaflet.draw.css';
 import 'leaflet-routing-machine/dist/leaflet-routing-machine.css';
 import 'leaflet/dist/leaflet.css';
-import { useEffect, useRef } from 'react';
-import { MapContainer, TileLayer } from 'react-leaflet';
+import { useEffect, useRef, useState } from 'react';
 
 // Import refactored components
 import { MapControlButtons } from './MapControlButtons';
@@ -20,13 +19,25 @@ import { MapSearchHandler } from './MapSearchHandler';
 import { WaypointsPanel } from './WaypointsPanel';
 
 // Import custom hooks
+import { RouteData } from '@/types';
 import { useMapFeatures } from '../../hooks/useMapFeatures';
 import { useMapSearch } from '../../hooks/useMapSearch';
-import { RouteData } from '@/types';
+import dynamic from 'next/dynamic';
+
+const MapContainer = dynamic(
+  () => import('react-leaflet').then((mod) => mod.MapContainer),
+  { ssr: false }
+);
+
+const TileLayer = dynamic(
+  () => import('react-leaflet').then((mod) => mod.TileLayer),
+  { ssr: false }
+);
 
 // Initialize Leaflet icons - moved to useEffect to avoid SSR issues
-const initLeafletIcons = () => {
-  delete (L.Icon.Default.prototype as { _getIconUrl?: () => string })._getIconUrl;
+const initLeafletIcons = (L: typeof Leaflet) => {
+  delete (L.Icon.Default.prototype as { _getIconUrl?: () => string })
+    ._getIconUrl;
   L.Icon.Default.mergeOptions({
     iconRetinaUrl: '/marker-icon-2x.png',
     iconUrl: '/marker-icon.png',
@@ -87,7 +98,7 @@ interface LeafletMapProps {
   userLocation: { lat: number; lng: number; name?: string } | null;
   searchQuery: string;
   directions: boolean;
-  onMapLoaded: () => void;
+  onMapLoadedAction: () => void;
   isDarkMode: boolean;
   centerOnUser?: boolean;
   onRouteCalculated?: (routeData: RouteData) => void;
@@ -102,19 +113,27 @@ export default function LeafletMap({
   userLocation,
   searchQuery,
   directions,
-  onMapLoaded,
+  onMapLoadedAction: onMapLoaded,
   isDarkMode,
   centerOnUser,
   onRouteCalculated,
   isCustomStartPoint = false,
   onSearchResultSelect,
 }: LeafletMapProps) {
+  const [leafletModule, setLeafletModule] = useState<typeof Leaflet | null>(
+    null
+  );
+
   // Initialize client-side only code
   useEffect(() => {
-    // Initialize Leaflet icons
-    initLeafletIcons();
-    // Add dark mode styles
-    addDarkModeStyles();
+    // Dynamically import Leaflet
+    import('leaflet').then((L) => {
+      setLeafletModule(L);
+      // Initialize Leaflet icons once the module is loaded
+      initLeafletIcons(L);
+      // Add dark mode styles
+      addDarkModeStyles();
+    });
   }, []);
 
   // Use custom hooks for map features and search
@@ -148,6 +167,15 @@ export default function LeafletMap({
   const routeCalculatedHandler = (routeData: RouteData) => {
     handleRouteCalculated(routeData, onRouteCalculated);
   };
+
+  // Don't render the map until Leaflet is loaded
+  if (!leafletModule) {
+    return (
+      <div className="h-full w-full flex items-center justify-center">
+        Loading map...
+      </div>
+    );
+  }
 
   return (
     <TooltipProvider delayDuration={300}>
