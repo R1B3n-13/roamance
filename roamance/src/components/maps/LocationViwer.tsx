@@ -4,7 +4,8 @@ import { cn } from '@/lib/utils';
 import { Location } from '@/types';
 import { useTheme } from 'next-themes';
 import dynamic from 'next/dynamic';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import type { Icon, LatLngExpression } from 'leaflet';
 import { createIcons } from './markers/UserLocationMarker';
 
 // Dynamically import map components to avoid SSR issues
@@ -107,6 +108,12 @@ export function LocationMap({
   const { resolvedTheme } = useTheme();
   const isDarkMode = resolvedTheme === 'dark';
 
+  // Load icons asynchronously once on mount
+  const [icons, setIcons] = useState<{ userLocationIcon: Icon; placeLocationIcon: Icon } | null>(null);
+  useEffect(() => {
+    createIcons().then(setIcons);
+  }, []);
+
   // Determine map type if set to auto
   if (type === 'auto') {
     if (waypoints && waypoints.length >= 2) {
@@ -135,7 +142,8 @@ export function LocationMap({
   const zoomLevel = zoom || defaultZoom;
 
   // Convert waypoints to the format needed by Polyline
-  const polylinePositions = waypoints.map((wp) => [wp.latitude, wp.longitude]);
+  const polylinePositions: LatLngExpression[] =
+    waypoints.map((wp) => [wp.latitude, wp.longitude]);
 
   return (
     <div
@@ -170,37 +178,29 @@ export function LocationMap({
               }
             />
 
-            {/* Show marker for single location type */}
-            {(type === 'single' || !waypoints || waypoints.length === 0) &&
-              location && (
-                <Marker
-                  position={[location.latitude, location.longitude]}
-                  icon={createIcons().placeLocationIcon}
-                />
-              )}
+            {/* Show marker for single location type when icons loaded */}
+            {icons && (type === 'single' || !waypoints || waypoints.length === 0) && location && (
+              <Marker
+                position={[location.latitude, location.longitude]}
+                icon={icons.placeLocationIcon}
+              />
+            )}
 
-            {/* Show markers and polyline for route */}
-            {type === 'route' && waypoints && waypoints.length >= 2 && (
+            {/* Show markers and polyline for route when icons loaded */}
+            {icons && type === 'route' && waypoints && waypoints.length >= 2 && (
               <>
                 {/* Show marker for each waypoint */}
-                {waypoints.map((wp, i) => {
-                  const icons = createIcons();
-                  return (
-                    <Marker
-                      key={i}
-                      position={[wp.latitude, wp.longitude]}
-                      icon={
-                        i === 0
-                          ? icons.userLocationIcon
-                          : icons.placeLocationIcon
-                      }
-                    />
-                  );
-                })}
+                {waypoints.map((wp, i) => (
+                  <Marker
+                    key={i}
+                    position={[wp.latitude, wp.longitude]}
+                    icon={i === 0 ? icons.userLocationIcon : icons.placeLocationIcon}
+                  />
+                ))}
 
                 {/* Connect the waypoints with a line */}
                 <Polyline
-                  positions={polylinePositions as any}
+                  positions={polylinePositions}
                   color={isDarkMode ? '#6366f1' : '#4f46e5'}
                   weight={4}
                   opacity={0.8}

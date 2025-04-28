@@ -293,10 +293,7 @@ export const JournalMetadataForm: React.FC<JournalMetadataFormProps> = ({
           <CollapsibleContent>
             <div className="rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700">
               <LocationPickerMap
-                initialLocation={{
-                  latitude: destination.latitude,
-                  longitude: destination.longitude,
-                }}
+                initialLocation={destination}
                 onLocationChangeAction={handleLocationSelected}
                 height="250px"
               />

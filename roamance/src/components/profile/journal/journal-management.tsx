@@ -295,7 +295,11 @@ export const JournalManagement: React.FC = () => {
         journal.description.toLowerCase().includes(searchQuery.toLowerCase());
 
       // Hide archived journals by default, but show them when 'All Journals' filter is selected
-      if (journal.is_archived && activeFilter !== 'archived' && activeFilter !== 'all') {
+      if (
+        journal.is_archived &&
+        activeFilter !== 'archived' &&
+        activeFilter !== 'all'
+      ) {
         return false;
       }
 
@@ -372,7 +376,7 @@ export const JournalManagement: React.FC = () => {
         <Card className="border-muted/40 bg-gradient-to-b from-background to-background/95 backdrop-blur-sm shadow-md overflow-hidden py-0">
           <div className="relative px-6 py-6">
             {/* Decorative accent line */}
-            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-violet-light via-violet to-lavender opacity-80" />
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-violet via-sunset to-forest opacity-80" />
 
             <div className="flex flex-col md:flex-row gap-4 items-stretch mb-4">
               <div className="relative flex-grow">
