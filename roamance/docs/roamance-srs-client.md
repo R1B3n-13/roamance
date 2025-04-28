@@ -105,6 +105,12 @@
 - Interact with posts (like, comment, share)
 - Bookmark posts for future reference
 
+### 1.15 Authentication Pages
+
+- Sign‑In page (`/auth/sign-in`)
+- Sign‑Up page (`/auth/sign-up`)
+- Client‑side form validation and error handling
+
 ### 2. AI-Powered Frontend Features
 
 #### 2.1 AI Itinerary Generator
@@ -184,3 +190,35 @@
 - Advanced visualization tools
 - Enhanced offline capabilities
 - Improved accessibility features
+
+## Frontend Routes
+
+Okay, based on the features listed in your roamance-srs-client.md, here's a suggested frontend route structure using Next.js App Router conventions:
+
+- **`/`**: Home / News Feed (Feature 1.12)
+- **`/map`**: Interactive Map (Feature 1.1)
+- **`/search`**: Full Text Search results page (Feature 1.11). Could potentially integrate RAG (2.2) and Visual Search (2.3) triggers here.
+- **`/country/[countryId]`**: Dynamic route for specific Country Pages (Feature 1.2)
+- **`/destinations`**: Browse/search destinations (Feature 1.3)
+- **`/destinations/[destinationId]`**: Dynamic route for specific Destination details (Feature 1.3)
+- **`/activities`**: Browse/search activities (Feature 1.4)
+- **`/activities/[activityId]`**: Dynamic route for specific Activity details (Feature 1.4)
+- **`/restaurants`**: Browse/search restaurants (Feature 1.5)
+- **`/restaurants/[restaurantId]`**: Dynamic route for specific Restaurant details (Feature 1.5)
+- **`/accommodations`**: Browse/search hotels/resorts (Feature 1.6)
+- **`/accommodations/[accommodationId]`**: Dynamic route for specific Accommodation details (Feature 1.6)
+- **`/transportation`**: Search flights/transport (Feature 1.7)
+- **`/travel-plans`**: View user's or public travel plans (Feature 1.8)
+- **`/travel-plans/new`**: Create a new travel plan (Feature 1.8). Could integrate Cost Estimation (1.9) and AI Itinerary Generator (2.1) here.
+- **`/travel-plans/[planId]`**: Dynamic route for viewing/editing a specific travel plan (Feature 1.8)
+- **`/profile`**: Current logged-in user's profile (Feature 1.13)
+- **`/profile/[userId]`**: Dynamic route for viewing other users' profiles (Feature 1.13)
+- **`/posts/[postId]`**: Dynamic route for viewing a single post's details (Feature 1.14). AI Insights (2.5) would apply here.
+- **`/auth/sign-in`**: Sign In page (Feature 1.15)
+- **`/auth/sign-up`**: Sign Up page (Feature 1.15)
+
+**Notes:**
+
+- Features like Reviews (1.10), Post Creation (1.14), Caption Generation (2.4), and Cost Estimation (1.9) might be components or modals within other routes rather than dedicated pages.
+- AI features (Section 2) are generally integrated into the relevant feature routes (e.g., AI Itinerary Generator within `/travel-plans/new`, RAG within `/search`).
+- You already have `/`, `/map`, `/profile`, `/auth/sign-in`, and `/auth/sign-up` implemented.

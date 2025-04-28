@@ -13,12 +13,6 @@ export {
   mapLayers,
   mapLayerAttribution,
 } from './MapLayerControl';
-export {
-  DestinationMarker,
-  UserLocationMarker,
-  WaypointMarker,
-  POIMarker,
-} from './MapMarkers';
 export { MapControls } from './MapControls';
 export { MeasurementControl } from './MeasurementControl';
 export { SearchBar } from './SearchBar';
@@ -28,3 +22,5 @@ export { StreetViewButton } from './StreetViewButton';
 export { TrafficControl } from './TrafficControl';
 export { WaypointsPanel } from './WaypointsPanel';
 export { MapFeaturesInfo } from './MapFeaturesInfo';
+export * from './markers';
+export * from './directions';

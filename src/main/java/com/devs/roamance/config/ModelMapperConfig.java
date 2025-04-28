@@ -1,6 +1,7 @@
 package com.devs.roamance.config;
 
 import com.devs.roamance.dto.request.travel.journal.JournalCreateRequestDto;
+import com.devs.roamance.dto.request.travel.journal.JournalUpdateRequestDto;
 import com.devs.roamance.model.travel.journal.Journal;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
@@ -18,6 +19,10 @@ public class ModelMapperConfig {
 
     modelMapper
         .typeMap(JournalCreateRequestDto.class, Journal.class)
+        .addMappings(mapper -> mapper.skip(Journal::setSubsections));
+
+    modelMapper
+        .typeMap(JournalUpdateRequestDto.class, Journal.class)
         .addMappings(mapper -> mapper.skip(Journal::setSubsections));
 
     return modelMapper;

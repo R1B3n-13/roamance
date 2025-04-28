@@ -7,13 +7,23 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
-import L from 'leaflet';
-import 'leaflet-draw';
-import 'leaflet-draw/dist/leaflet.draw.css';
 import { Ruler } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import { FeatureGroup, useMap } from 'react-leaflet';
-import { EditControl } from 'react-leaflet-draw';
+import { useMap } from 'react-leaflet';
+
+import type L from 'leaflet';
+import 'leaflet-draw/dist/leaflet.draw.css';
+import dynamic from 'next/dynamic';
+
+const FeatureGroup = dynamic(
+  () => import('react-leaflet').then((mod) => mod.FeatureGroup),
+  { ssr: false }
+);
+
+const EditControl = dynamic(
+  () => import('react-leaflet-draw').then((mod) => mod.EditControl),
+  { ssr: false }
+);
 
 interface MeasurementControlProps {
   isDarkMode: boolean;
@@ -67,10 +77,20 @@ export function MeasurementControl({
 export function MeasurementTools() {
   const map = useMap();
   const featureGroupRef = useRef<L.FeatureGroup | null>(null);
+  const [leaflet, setLeaflet] = useState<typeof L | null>(null);
 
   useEffect(() => {
-    if (map) {
-      const DrawControl = L.Control.Draw;
+    if (map && !leaflet) {
+      // Dynamically import Leaflet and its dependencies
+      Promise.all([import('leaflet'), import('leaflet-draw')]).then(([L]) => {
+        setLeaflet(L.default);
+      });
+    }
+  }, [map, leaflet]);
+
+  useEffect(() => {
+    if (map && leaflet && featureGroupRef.current) {
+      const DrawControl = leaflet.Control.Draw;
 
       const drawControl = new DrawControl({
         draw: {
@@ -89,7 +109,7 @@ export function MeasurementTools() {
           },
         },
         edit: {
-          featureGroup: featureGroupRef.current as L.FeatureGroup,
+          featureGroup: featureGroupRef.current,
           edit: false,
           remove: true,
         },
@@ -101,7 +121,11 @@ export function MeasurementTools() {
         map.removeControl(drawControl);
       };
     }
-  }, [map]);
+  }, [map, leaflet]);
+
+  if (!leaflet) {
+    return null;
+  }
 
   return (
     <FeatureGroup
@@ -112,11 +136,13 @@ export function MeasurementTools() {
       <EditControl
         position="topright"
         onCreated={(e) => {
+          if (!leaflet) return;
+
           const layer = e.layer;
           if (
-            layer instanceof L.Polyline &&
-            !(layer instanceof L.Polygon) &&
-            !(layer instanceof L.Rectangle)
+            layer instanceof leaflet.Polyline &&
+            !(layer instanceof leaflet.Polygon) &&
+            !(layer instanceof leaflet.Rectangle)
           ) {
             const distanceInMeters = calculatePolylineDistance(layer);
             layer

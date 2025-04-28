@@ -1,5 +1,4 @@
-import { AuditTime } from './audit';
-import { BaseResponse } from './response';
+import { ActivityType, AuditTime, BaseResponse } from '@/types';
 
 export interface User {
   id: string;
@@ -40,14 +39,6 @@ export enum AccommodationType {
   APARTMENTS = 'APARTMENTS',
   HOSTELS = 'HOSTELS',
   CAMPING = 'CAMPING',
-}
-
-export enum ActivityType {
-  SIGHTSEEING = 'SIGHTSEEING',
-  NATURE_AND_OUTDOORS = 'NATURE_AND_OUTDOORS',
-  CULTURAL_EXPERIENCE = 'CULTURAL_EXPERIENCE',
-  FOOD_AND_DINING = 'FOOD_AND_DINING',
-  ENTERTAINMENT = 'ENTERTAINMENT',
 }
 
 export enum CuisineType {

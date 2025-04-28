@@ -1,6 +1,6 @@
 package com.devs.roamance.model.user;
 
-import com.devs.roamance.model.AuditTime;
+import com.devs.roamance.model.audit.AuditTime;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.CascadeType;

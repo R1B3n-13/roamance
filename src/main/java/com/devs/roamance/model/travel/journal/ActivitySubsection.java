@@ -1,6 +1,7 @@
 package com.devs.roamance.model.travel.journal;
 
-import com.devs.roamance.model.travel.Location;
+import com.devs.roamance.model.common.ActivityType;
+import com.devs.roamance.model.common.Location;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -15,5 +16,5 @@ import lombok.*;
 public class ActivitySubsection extends Subsection {
   @Embedded private Location location;
 
-  private String activityName;
+  private ActivityType activityType;
 }

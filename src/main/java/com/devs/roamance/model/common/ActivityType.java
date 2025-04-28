@@ -1,4 +1,4 @@
-package com.devs.roamance.model.travel.itinerary;
+package com.devs.roamance.model.common;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -7,7 +7,10 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum ActivityType {
   SIGHTSEEING("Sightseeing"),
-  DINE_OUT("Dine Out"),
+  NATURE_AND_OUTDOORS("Nature and Outdoors"),
+  CULTURAL_EXPERIENCE("Cultural Experience"),
+  FOOD_AND_DINING("Food & Dining"),
+  ENTERTAINMENT("Entertainment"),
   OTHER("Other");
 
   private final String name;
