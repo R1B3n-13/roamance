@@ -6,7 +6,14 @@ import { useEffect, useRef, useState } from 'react';
 import { useMap } from 'react-leaflet';
 import { MapControllerProps, RouteData } from '@/types/map';
 import { Control } from 'leaflet';
+import type * as Leaflet from 'leaflet';
 
+// Extend global Window interface for Leaflet plugin
+declare global {
+  interface Window {
+    L: typeof import('leaflet');
+  }
+}
 
 // Helper function to check if coordinates have changed
 const areCoordinatesEqual = (
@@ -37,7 +44,7 @@ export function MapController({
   onRouteCalculated,
 }: MapControllerProps) {
   const map = useMap();
-  const [leaflet, setLeaflet] = useState<typeof import('leaflet')>();
+  const [leaflet, setLeaflet] = useState<typeof Leaflet | null>(null);
   const [isLeafletLoaded, setIsLeafletLoaded] = useState(false);
   const routingControlRef = useRef<Control>(null);
   const prevRouteParamsRef = useRef<{
@@ -50,7 +57,15 @@ export function MapController({
   useEffect(() => {
     const loadLeaflet = async () => {
       try {
-        const L = await import('leaflet');
+        // Dynamically import Leaflet with proper typing
+        const leafletModule = await import('leaflet') as typeof import('leaflet') & { default?: typeof import('leaflet') };
+        // Use default export if available and clone into a mutable object
+        const proto = leafletModule.default ?? leafletModule;
+        const L = Object.assign({}, proto) as typeof Leaflet;
+        Object.setPrototypeOf(L, Object.getPrototypeOf(proto));
+        // Expose the extensible Leaflet copy globally for plugins
+        window.L = L;
+        // Load routing-machine plugin now that L is extensible
         await import('leaflet-routing-machine');
         setLeaflet(L);
         setIsLeafletLoaded(true);
@@ -89,7 +104,7 @@ export function MapController({
     // Only proceed if Leaflet is loaded
     if (!isLeafletLoaded || !leaflet) return;
 
-    const L = leaflet;
+    const L = window.L;
 
     // Only calculate route if we have directions enabled, a destination, and a user location
     if (!directions || !destination || !userLocation) {

@@ -93,6 +93,13 @@ export const routes: {
   journals: RouteItem;
   journalDetail: DynamicRouteItem;
   places: RouteItem;
+  social: RouteItem;
+  feeds: RouteItem;
+  messages: RouteItem;
+  discover: RouteItem;
+  explore: RouteItem;
+  hashtags: RouteItem;
+  saved: RouteItem;
 } = {
   home: {
     title: pathTitles.home,
