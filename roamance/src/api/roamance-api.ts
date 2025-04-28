@@ -29,7 +29,7 @@ class Api {
       headers: {
         'Content-Type': 'application/json',
       },
-      timeout: 15000, // 15 seconds
+      // Removed timeout to allow requests to complete regardless of duration
     });
 
     this.setupInterceptors();

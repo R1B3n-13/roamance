@@ -2,10 +2,10 @@
 
 import React from 'react';
 import {
-  CustomStartPointMarker,
   DestinationMarker,
-  UserLocationMarker
-} from './MapMarkers';
+  UserLocationMarker,
+  CustomStartPointMarker,
+} from './markers';
 
 interface MapMarkersContainerProps {
   destination: { lat: number; lng: number } | null;
@@ -22,7 +22,7 @@ export function MapMarkersContainer({
   userLocation,
   isDarkMode,
   isCustomStartPoint,
-  directions
+  directions,
 }: MapMarkersContainerProps) {
   return (
     <>
@@ -39,10 +39,7 @@ export function MapMarkersContainer({
 
       {/* Show user location marker only if not using custom starting point */}
       {userLocation && !isCustomStartPoint && (
-        <UserLocationMarker
-          position={userLocation}
-          isDarkMode={isDarkMode}
-        />
+        <UserLocationMarker position={userLocation} isDarkMode={isDarkMode} />
       )}
 
       {/* Show custom start point marker if applicable */}

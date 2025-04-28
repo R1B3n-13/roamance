@@ -1,7 +1,7 @@
 package com.devs.roamance.util;
 
+import com.devs.roamance.model.common.ActivityType;
 import com.devs.roamance.model.travel.itinerary.Activity;
-import com.devs.roamance.model.travel.itinerary.ActivityType;
 import org.springframework.stereotype.Component;
 
 @Component

@@ -1,6 +1,6 @@
 package com.devs.roamance.model.social;
 
-import com.devs.roamance.model.Audit;
+import com.devs.roamance.model.audit.Audit;
 import com.devs.roamance.model.user.User;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;

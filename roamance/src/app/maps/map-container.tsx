@@ -275,7 +275,7 @@ export function MapContainer({
         userLocation={userLocation}
         searchQuery={searchQuery}
         directions={directions}
-        onMapLoaded={() => setMapLoaded(true)}
+        onMapLoadedAction={() => setMapLoaded(true)}
         isDarkMode={isDarkMode}
         centerOnUser={centerOnUser}
         onRouteCalculated={onRouteCalculated}
