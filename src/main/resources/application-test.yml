@@ -27,3 +27,11 @@ application:
       refresh-token-expiration: 86400000
   gemini:
     api-key: sdlkfnsdlk
+  nomic:
+    api-key: asdfasdsdf
+  pgvector:
+    host: asdas
+    port: 2313
+    db: sdfdfgv
+    user: as3ds
+    password: ""

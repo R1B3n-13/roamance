@@ -3,11 +3,11 @@ package com.devs.roamance.util;
 import com.devs.roamance.constant.ResponseMessage;
 import com.devs.roamance.dto.request.ai.MultiModalAiRequestDto;
 import com.devs.roamance.dto.request.social.PostRequestDto;
-import com.devs.roamance.dto.response.ai.TidbitsAndSafetyResponseDto;
+import com.devs.roamance.dto.response.ai.TidbitsAndSafetyDto;
 import com.devs.roamance.exception.ResourceNotFoundException;
 import com.devs.roamance.model.social.Post;
 import com.devs.roamance.repository.PostRepository;
-import com.devs.roamance.service.GeminiAiService;
+import com.devs.roamance.service.AiService;
 import dev.langchain4j.model.output.FinishReason;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
@@ -18,23 +18,21 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class PostUtil {
 
-  private final GeminiAiService geminiAiService;
+  private final AiService aiService;
   private final PostRepository postRepository;
 
-  public PostUtil(GeminiAiService geminiAiService, PostRepository postRepository) {
-    this.geminiAiService = geminiAiService;
+  public PostUtil(AiService aiService, PostRepository postRepository) {
+    this.aiService = aiService;
     this.postRepository = postRepository;
   }
 
-  @Async
+  @Async("asyncExecutor")
   public void backgroundAiAnalysis(UUID postId, PostRequestDto createRequestDto) {
     try {
       MultiModalAiRequestDto aiRequestDto = new MultiModalAiRequestDto();
-
       setFields(aiRequestDto, createRequestDto);
 
-      TidbitsAndSafetyResponseDto responseDto =
-          geminiAiService.getTidbitsAndSafety(aiRequestDto).join();
+      TidbitsAndSafetyDto responseDto = aiService.getTidbitsAndSafety(aiRequestDto).join();
 
       Post post =
           postRepository
@@ -53,6 +51,16 @@ public class PostUtil {
     }
   }
 
+  public void addToVectorDb(UUID postId, PostRequestDto requestDto) {
+
+    requestDto.setVideoPaths(null);
+
+    MultiModalAiRequestDto aiRequestDto = new MultiModalAiRequestDto();
+    setFields(aiRequestDto, requestDto);
+
+    aiService.addContentToVectorDb(aiRequestDto, postId);
+  }
+
   private void setFields(MultiModalAiRequestDto aiRequestDto, PostRequestDto createRequestDto) {
 
     if (createRequestDto.getText() != null && !createRequestDto.getText().isEmpty()) {
@@ -66,7 +74,7 @@ public class PostUtil {
     }
   }
 
-  private void updatePostWithAnalysis(TidbitsAndSafetyResponseDto responseDto, Post post) {
+  private void updatePostWithAnalysis(TidbitsAndSafetyDto responseDto, Post post) {
 
     if (responseDto.getFinishReason() == FinishReason.CONTENT_FILTER) {
       post.setIsSafe(false);

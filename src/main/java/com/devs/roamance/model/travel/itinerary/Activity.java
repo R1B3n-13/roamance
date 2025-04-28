@@ -1,8 +1,9 @@
 package com.devs.roamance.model.travel.itinerary;
 
 import com.devs.roamance.exception.InvalidDateTimeException;
-import com.devs.roamance.model.Audit;
-import com.devs.roamance.model.travel.Location;
+import com.devs.roamance.model.audit.Audit;
+import com.devs.roamance.model.common.ActivityType;
+import com.devs.roamance.model.common.Location;
 import com.devs.roamance.model.user.User;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;

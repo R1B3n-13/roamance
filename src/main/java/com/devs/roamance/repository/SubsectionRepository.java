@@ -15,11 +15,11 @@ import org.springframework.stereotype.Repository;
 public interface SubsectionRepository extends JpaRepository<Subsection, UUID> {
 
   @Override
-  @EntityGraph(attributePaths = {"journal", "notes", "checklists"})
+  @EntityGraph(attributePaths = {"journal", "checklists"})
   @NonNull
   Optional<Subsection> findById(@NonNull UUID id);
 
-  @EntityGraph(attributePaths = {"journal", "notes", "checklists"})
+  @EntityGraph(attributePaths = {"journal", "checklists"})
   List<Subsection> findByJournalId(@NonNull UUID journalId);
 
   @EntityGraph(attributePaths = {"journal"})

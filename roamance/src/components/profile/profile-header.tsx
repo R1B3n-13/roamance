@@ -25,6 +25,7 @@ import { FileUploader } from '@/components/common/file-uploader';
 import { userService } from '@/service/user-service';
 import { CloudinaryUploadResult } from '@/service/cloudinary-service';
 import { authService } from '@/service/auth-service';
+import { getImagePath } from '../common/image-wrapper';
 
 interface ProfileHeaderProps {
   user: User | null;
@@ -266,7 +267,12 @@ export function ProfileHeader({
             ) : (
               <>
                 <div className="absolute inset-0 bg-gradient-to-r from-ocean/80 via-sunset/70 to-forest/80 opacity-90" />
-                <div className="absolute inset-0 opacity-20 bg-[url('/images/roamance-logo-no-text.png')] bg-repeat-space bg-contain mix-blend-overlay animate-pulse-slow" />
+                <div
+                  className="absolute inset-0 opacity-20 bg-repeat-space bg-contain mix-blend-overlay animate-pulse-slow"
+                  style={{
+                    backgroundImage: `url('${getImagePath('roamance-logo-no-text.png')}')`,
+                  }}
+                />
               </>
             )}
 
@@ -303,14 +309,16 @@ export function ProfileHeader({
                       {/* Adjusted spinner size */}
                       <span className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 rounded-full border-2 border-white border-t-transparent animate-spin" />
                       <span className="hidden sm:inline">Updating...</span>
-                      <span className="inline sm:hidden">...</span> {/* Shorter text for mobile */}
+                      <span className="inline sm:hidden">...</span>{' '}
+                      {/* Shorter text for mobile */}
                     </>
                   ) : (
                     <>
                       {/* Adjusted icon size */}
                       <Camera className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-1.5" />
                       <span className="hidden sm:inline">Change Cover</span>
-                      <span className="inline sm:hidden">Cover</span> {/* Shorter text for mobile */}
+                      <span className="inline sm:hidden">Cover</span>{' '}
+                      {/* Shorter text for mobile */}
                     </>
                   )}
                 </Button>
@@ -319,7 +327,9 @@ export function ProfileHeader({
           </div>
 
           {/* Header controls with improved glass effect and responsive sizing */}
-          <div className="absolute top-2 right-2 sm:top-4 sm:right-4 flex items-center gap-1 sm:gap-2 z-10"> {/* Adjusted gap */}
+          <div className="absolute top-2 right-2 sm:top-4 sm:right-4 flex items-center gap-1 sm:gap-2 z-10">
+            {' '}
+            {/* Adjusted gap */}
             <motion.div
               whileHover={{ scale: 1.05 }}
               transition={{ type: 'spring', stiffness: 400, damping: 10 }}
@@ -328,7 +338,6 @@ export function ProfileHeader({
             >
               <ThemeToggle className="h-full w-full text-white bg-transparent hover:bg-transparent border-none shadow-none" />
             </motion.div>
-
             <motion.div
               whileHover={{ scale: 1.05 }}
               transition={{ type: 'spring', stiffness: 400, damping: 10 }}
@@ -345,7 +354,6 @@ export function ProfileHeader({
                 <ArrowLeft className="h-3 w-3 sm:h-4 sm:w-4" />
               </Button>
             </motion.div>
-
             <motion.div
               whileHover={{ scale: 1.05 }}
               transition={{ type: 'spring', stiffness: 400, damping: 10 }}
@@ -362,7 +370,6 @@ export function ProfileHeader({
                 <Home className="h-3 w-3 sm:h-4 sm:w-4" />
               </Button>
             </motion.div>
-
             {/* Add Logout Button */}
             <motion.div
               whileHover={{ scale: 1.05 }}

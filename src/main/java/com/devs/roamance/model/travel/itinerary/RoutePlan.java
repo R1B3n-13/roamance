@@ -1,6 +1,6 @@
 package com.devs.roamance.model.travel.itinerary;
 
-import com.devs.roamance.model.travel.Location;
+import com.devs.roamance.model.common.Location;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.FetchType;

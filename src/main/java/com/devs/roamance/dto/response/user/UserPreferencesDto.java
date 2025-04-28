@@ -1,8 +1,8 @@
 package com.devs.roamance.dto.response.user;
 
 import com.devs.roamance.dto.response.AuditTimeDto;
+import com.devs.roamance.model.common.ActivityType;
 import com.devs.roamance.model.user.preference.AccommodationType;
-import com.devs.roamance.model.user.preference.ActivityType;
 import com.devs.roamance.model.user.preference.BudgetLevel;
 import com.devs.roamance.model.user.preference.ClimatePreference;
 import com.devs.roamance.model.user.preference.CuisineType;

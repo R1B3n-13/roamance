@@ -1,6 +1,7 @@
 package com.devs.roamance.service.impl;
 
 import com.devs.roamance.constant.ResponseMessage;
+import com.devs.roamance.dto.common.AiPoweredItineraryDto;
 import com.devs.roamance.dto.request.travel.itinerary.ItineraryCreateRequestDto;
 import com.devs.roamance.dto.request.travel.itinerary.ItineraryUpdateRequestDto;
 import com.devs.roamance.dto.response.BaseResponseDto;
@@ -10,11 +11,12 @@ import com.devs.roamance.dto.response.travel.itinerary.ItineraryListResponseDto;
 import com.devs.roamance.dto.response.travel.itinerary.ItineraryResponseDto;
 import com.devs.roamance.exception.ResourceNotFoundException;
 import com.devs.roamance.exception.UnauthorizedActionException;
-import com.devs.roamance.model.travel.Location;
+import com.devs.roamance.model.common.Location;
 import com.devs.roamance.model.travel.itinerary.Itinerary;
 import com.devs.roamance.model.user.User;
 import com.devs.roamance.repository.ItineraryRepository;
 import com.devs.roamance.service.ItineraryService;
+import com.devs.roamance.util.ItineraryUtil;
 import com.devs.roamance.util.PaginationSortingUtil;
 import com.devs.roamance.util.UserUtil;
 import java.util.HashSet;
@@ -32,13 +34,18 @@ import org.springframework.transaction.annotation.Transactional;
 public class ItineraryServiceImpl implements ItineraryService {
 
   private final ItineraryRepository itineraryRepository;
+  private final ItineraryUtil itineraryUtil;
   private final ModelMapper modelMapper;
   private final UserUtil userUtil;
 
   public ItineraryServiceImpl(
-      ItineraryRepository itineraryRepository, ModelMapper modelMapper, UserUtil userUtil) {
+      ItineraryRepository itineraryRepository,
+      ItineraryUtil itineraryUtil,
+      ModelMapper modelMapper,
+      UserUtil userUtil) {
 
     this.itineraryRepository = itineraryRepository;
+    this.itineraryUtil = itineraryUtil;
     this.modelMapper = modelMapper;
     this.userUtil = userUtil;
   }
@@ -52,6 +59,25 @@ public class ItineraryServiceImpl implements ItineraryService {
     Itinerary itinerary = modelMapper.map(createRequestDto, Itinerary.class);
 
     itinerary.setUser(user);
+
+    Itinerary savedItinerary = itineraryRepository.save(itinerary);
+    itineraryRepository.flush();
+
+    ItineraryDetailDto dto = modelMapper.map(savedItinerary, ItineraryDetailDto.class);
+
+    return new ItineraryResponseDto(201, true, ResponseMessage.ITINERARY_CREATE_SUCCESS, dto);
+  }
+
+  @Override
+  @Transactional
+  public ItineraryResponseDto createWithDetails(AiPoweredItineraryDto createRequestDto) {
+
+    User user = userUtil.getAuthenticatedUser();
+
+    Itinerary itinerary = new Itinerary();
+
+    itineraryUtil.mapToDayPlansAndActivities(itinerary, createRequestDto, user);
+    itineraryUtil.validateDayPlansAndActivities(itinerary);
 
     Itinerary savedItinerary = itineraryRepository.save(itinerary);
     itineraryRepository.flush();

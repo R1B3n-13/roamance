@@ -20,7 +20,7 @@ public enum TravelStyle {
     return value;
   }
 
-  public static TravelStyle fromValue(String value) {
+  public static TravelStyle fromString(String value) {
     if (value == null) {
       return BALANCED;
     }

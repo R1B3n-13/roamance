@@ -1,10 +1,12 @@
 import type { NextConfig } from 'next';
 
+const basePath = process.env.GITHUB_ACTIONS ? '/devs' : '';
+
 const nextConfig: NextConfig = {
-  /* config options here */
-  // output: 'export',
-  // basePath: '/devs',
+  output: 'export',
+  basePath: basePath,
   images: {
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: 'https',
@@ -31,6 +33,9 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
     ],
+  },
+  env: {
+    NEXT_PUBLIC_BASE_PATH: basePath,
   },
 };
 

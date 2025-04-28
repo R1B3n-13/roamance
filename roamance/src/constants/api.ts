@@ -76,3 +76,22 @@ export const MESSAGES_ENDPOINTS = {
   CREATE: (chatId: string) => `${MESSAGES}/create/chat/${chatId}`,
   GET_BY_CHAT_ID: (chatId: string) => `${MESSAGES}/chat/${chatId}`,
 };
+
+const TRAVEL = `${API_BASE_URL}/travel`;
+const JOURNALS = `${TRAVEL}/journals`;
+export const JOURNAL_ENDPOINTS = {
+  ROOT: JOURNALS,
+  CREATE: `${JOURNALS}`,
+  GET_BY_ID: (id: string) => `${JOURNALS}/${id}`,
+  UPDATE: (id: string) => `${JOURNALS}/${id}`,
+  DELETE: (id: string) => `${JOURNALS}/${id}`,
+} as const;
+
+const SUBSECTIONS = `${TRAVEL}/subsections`;
+export const SUBSECTION_ENDPOINTS = {
+  ROOT: SUBSECTIONS,
+  CREATE: `${SUBSECTIONS}`,
+  GET_BY_ID: (id: string) => `${SUBSECTIONS}/${id}`,
+  UPDATE: (id: string) => `${SUBSECTIONS}/${id}`,
+  DELETE: (id: string) => `${SUBSECTIONS}/${id}`,
+} as const;

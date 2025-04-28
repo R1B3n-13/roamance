@@ -1,6 +1,7 @@
 package com.devs.roamance.model.user.preference;
 
-import com.devs.roamance.model.AuditTime;
+import com.devs.roamance.model.audit.AuditTime;
+import com.devs.roamance.model.common.ActivityType;
 import com.devs.roamance.model.user.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.CollectionTable;

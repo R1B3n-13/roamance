@@ -2,11 +2,15 @@ package com.devs.roamance.service.impl;
 
 import com.devs.roamance.constant.ResponseMessage;
 import com.devs.roamance.dto.request.travel.journal.ActivitySubsectionCreateRequestDto;
+import com.devs.roamance.dto.request.travel.journal.ActivitySubsectionUpdateRequestDto;
 import com.devs.roamance.dto.request.travel.journal.JournalCreateRequestDto;
 import com.devs.roamance.dto.request.travel.journal.JournalUpdateRequestDto;
 import com.devs.roamance.dto.request.travel.journal.RouteSubsectionCreateRequestDto;
+import com.devs.roamance.dto.request.travel.journal.RouteSubsectionUpdateRequestDto;
 import com.devs.roamance.dto.request.travel.journal.SightseeingSubsectionCreateRequestDto;
+import com.devs.roamance.dto.request.travel.journal.SightseeingSubsectionUpdateRequestDto;
 import com.devs.roamance.dto.request.travel.journal.SubsectionCreateRequestDto;
+import com.devs.roamance.dto.request.travel.journal.SubsectionUpdateRequestDto;
 import com.devs.roamance.dto.response.BaseResponseDto;
 import com.devs.roamance.dto.response.travel.journal.JournalBriefDto;
 import com.devs.roamance.dto.response.travel.journal.JournalDetailDto;
@@ -15,7 +19,7 @@ import com.devs.roamance.dto.response.travel.journal.JournalResponseDto;
 import com.devs.roamance.exception.ResourceAlreadyExistException;
 import com.devs.roamance.exception.ResourceNotFoundException;
 import com.devs.roamance.exception.UnauthorizedAccessException;
-import com.devs.roamance.model.travel.Location;
+import com.devs.roamance.model.common.Location;
 import com.devs.roamance.model.travel.journal.ActivitySubsection;
 import com.devs.roamance.model.travel.journal.Journal;
 import com.devs.roamance.model.travel.journal.RouteSubsection;
@@ -123,6 +127,7 @@ public class JournalServiceImpl implements JournalService {
   }
 
   @Override
+  @Transactional(readOnly = true)
   public JournalListResponseDto getAll(
       int pageNumber, int pageSize, String sortBy, String sortDir) {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -170,6 +175,7 @@ public class JournalServiceImpl implements JournalService {
   }
 
   @Override
+  @Transactional(readOnly = true)
   public JournalResponseDto get(UUID id) {
     log.info("Fetching journal with id: {} using JOIN FETCH for subsections", id);
     Journal journal = findJournalByAccess(id);
@@ -191,9 +197,37 @@ public class JournalServiceImpl implements JournalService {
 
     journal.setTitle(updateRequestDto.getTitle());
     journal.setDescription(updateRequestDto.getDescription());
+    journal.setCoverImage(updateRequestDto.getCoverImage());
+    journal.setIsFavorite(updateRequestDto.getIsFavorite());
+    journal.setIsArchived(updateRequestDto.getIsArchived());
+    journal.setIsShared(updateRequestDto.getIsShared());
+    journal.setDate(updateRequestDto.getDate());
+    journal.setDestination(modelMapper.map(updateRequestDto.getDestination(), Location.class));
 
-    if (updateRequestDto.getDestination() != null) {
-      journal.setDestination(modelMapper.map(updateRequestDto.getDestination(), Location.class));
+    journal.getSubsections().clear();
+
+    if (updateRequestDto.getSubsections() != null && !updateRequestDto.getSubsections().isEmpty()) {
+      for (SubsectionUpdateRequestDto subsectionDto : updateRequestDto.getSubsections()) {
+        Subsection subsection;
+
+        if (subsectionDto instanceof SightseeingSubsectionUpdateRequestDto) {
+          subsection = modelMapper.map(subsectionDto, SightseeingSubsection.class);
+        } else if (subsectionDto instanceof ActivitySubsectionUpdateRequestDto) {
+          subsection = modelMapper.map(subsectionDto, ActivitySubsection.class);
+        } else if (subsectionDto instanceof RouteSubsectionUpdateRequestDto) {
+          subsection = modelMapper.map(subsectionDto, RouteSubsection.class);
+        } else {
+          throw new IllegalArgumentException(
+              "Unknown subsection type: " + subsectionDto.getClass().getName());
+        }
+
+        journal.addSubsection(subsection);
+      }
+
+      log.info(
+          "Updated journal '{}' with {} subsections",
+          journal.getTitle(),
+          journal.getSubsections().size());
     }
 
     Journal savedJournal = journalRepository.save(journal);

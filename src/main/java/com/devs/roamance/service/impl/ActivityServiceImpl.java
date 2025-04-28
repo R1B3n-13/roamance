@@ -7,14 +7,14 @@ import com.devs.roamance.dto.response.BaseResponseDto;
 import com.devs.roamance.dto.response.travel.itinerary.*;
 import com.devs.roamance.exception.ResourceNotFoundException;
 import com.devs.roamance.exception.UnauthorizedActionException;
-import com.devs.roamance.model.travel.Location;
+import com.devs.roamance.model.common.Location;
 import com.devs.roamance.model.travel.itinerary.Activity;
-import com.devs.roamance.model.travel.itinerary.ActivityType;
 import com.devs.roamance.model.travel.itinerary.DayPlan;
 import com.devs.roamance.model.user.User;
 import com.devs.roamance.repository.ActivityRepository;
 import com.devs.roamance.repository.DayPlanRepository;
 import com.devs.roamance.service.ActivityService;
+import com.devs.roamance.util.ActivityUtil;
 import com.devs.roamance.util.PaginationSortingUtil;
 import com.devs.roamance.util.UserUtil;
 import java.util.List;
@@ -32,17 +32,20 @@ public class ActivityServiceImpl implements ActivityService {
 
   private final ActivityRepository activityRepository;
   private final DayPlanRepository dayPlanRepository;
+  private final ActivityUtil activityUtil;
   private final UserUtil userUtil;
   private final ModelMapper modelMapper;
 
   public ActivityServiceImpl(
       ActivityRepository activityRepository,
       DayPlanRepository dayPlanRepository,
+      ActivityUtil activityUtil,
       UserUtil userUtil,
       ModelMapper modelMapper) {
 
     this.activityRepository = activityRepository;
     this.dayPlanRepository = dayPlanRepository;
+    this.activityUtil = activityUtil;
     this.userUtil = userUtil;
     this.modelMapper = modelMapper;
   }
@@ -70,7 +73,7 @@ public class ActivityServiceImpl implements ActivityService {
     activity.setDayPlan(dayPlan);
     activity.setUser(user);
 
-    setActivityType(activity, createRequestDto.getType());
+    activityUtil.setActivityType(activity, createRequestDto.getType());
 
     Activity savedActivity = activityRepository.save(activity);
     activityRepository.flush();
@@ -134,7 +137,7 @@ public class ActivityServiceImpl implements ActivityService {
       existingActivity.setLocation(modelMapper.map(updateRequestDto.getLocation(), Location.class));
     }
     if (updateRequestDto.getType() != null) {
-      setActivityType(existingActivity, updateRequestDto.getType());
+      activityUtil.setActivityType(existingActivity, updateRequestDto.getType());
     }
     if (updateRequestDto.getNote() != null && !updateRequestDto.getNote().isEmpty()) {
       existingActivity.setNote(updateRequestDto.getNote());
@@ -194,18 +197,5 @@ public class ActivityServiceImpl implements ActivityService {
     activityRepository.delete(activity);
 
     return new BaseResponseDto(200, true, ResponseMessage.ACTIVITY_DELETE_SUCCESS);
-  }
-
-  private void setActivityType(Activity activity, String inputType) {
-
-    // Manually set ActivityType
-    ActivityType activityType = ActivityType.fromString(inputType);
-    activity.setType(activityType);
-
-    // Set otherTypeName only for custom OTHER types
-    String otherTypeName =
-        (activityType == ActivityType.OTHER && inputType != null) ? inputType : null;
-
-    activity.setOtherTypeName(otherTypeName);
   }
 }

@@ -2,6 +2,7 @@
 export * from './ui/button';
 
 // Common Components
+export * from './common/image-wrapper';
 export * from './common/error-banner';
 export * from './common/gradient-badge';
 export * from './common/loading-button';

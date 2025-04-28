@@ -8,8 +8,18 @@ import {
 } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { TrafficCone } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
-import { Circle, Popup, useMap } from 'react-leaflet';
+import { useMap } from 'react-leaflet';
+
+const Circle = dynamic(
+  () => import('react-leaflet').then((mod) => mod.Circle),
+  { ssr: false }
+);
+
+const Popup = dynamic(() => import('react-leaflet').then((mod) => mod.Popup), {
+  ssr: false,
+});
 
 interface TrafficControlProps {
   isDarkMode: boolean;
