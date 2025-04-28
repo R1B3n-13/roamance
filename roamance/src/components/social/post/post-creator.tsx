@@ -6,7 +6,7 @@ import {
   Dialog,
   DialogContent,
   DialogHeader,
-  DialogTitle,
+  DialogTitle
 } from '@/components/ui/dialog';
 import { useSocialContext } from '@/context/SocialContext';
 import { cn } from '@/lib/utils';
@@ -17,7 +17,7 @@ import {
   Loader2,
   MapPin,
   Video,
-  X
+  X,
 } from 'lucide-react';
 import Image from 'next/image';
 import { useState } from 'react';
@@ -370,7 +370,12 @@ export const PostCreator = () => {
 
       {/* Location Picker Dialog */}
       <Dialog open={showLocationDialog} onOpenChange={setShowLocationDialog}>
-        <DialogContent className="w-11/12 max-w-lg p-0 overflow-hidden rounded-xl">
+        <DialogContent
+          className="w-11/12 max-w-lg p-0 overflow-hidden rounded-xl"
+          closeButtonProps={{
+            variant: 'white',
+          }}
+        >
           <div className="bg-gradient-to-r from-purple-600 to-indigo-600 p-4">
             <DialogHeader className="p-0 m-0">
               <div className="flex items-center gap-2 text-white">
