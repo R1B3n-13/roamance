@@ -13,7 +13,6 @@ import {
   AlertTriangle,
   Bookmark,
   Edit,
-  Flag,
   Heart,
   ImageIcon,
   MapPin,
@@ -27,28 +26,22 @@ import {
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { toast } from 'sonner';
 
 const EMPTY_TIDBITS = 'Nothing to show';
 
 interface PostCardProps {
   post: Post;
-  onLike: (postId: string) => void;
-  onComment: (postId: string) => void;
-  onSave: (postId: string) => void;
-  onShare: (postId: string) => void;
-  onDelete: (postId: string) => void;
+  onCommentAction: (postId: string) => void;
 }
 
 export const PostCard = ({
   post,
-  onLike,
-  onComment,
-  onSave,
-  onShare,
-  onDelete,
+  onCommentAction: onComment,
 }: PostCardProps) => {
-  const { user, savedPosts, fetchSavedPosts } = useSocialContext();
+  const { user, savedPosts, toggleLikePost, toggleSavePost, deletePost } =
+    useSocialContext();
   const [showAll, setShowAll] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showMenu, setShowMenu] = useState(false);
@@ -59,13 +52,9 @@ export const PostCard = ({
   const tooltipTimeout = useRef<NodeJS.Timeout | null>(null);
 
   // Ensure savedPosts are loaded
-  useEffect(() => {
-    fetchSavedPosts();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const isLiked = post.liked_by?.some((liker) => liker.id === user?.id);
-  const isSaved = savedPosts?.some(savedPost => savedPost.id === post.id);
+  const isSaved = savedPosts?.some((savedPost) => savedPost.id === post.id);
   const isOwnPost = post.user.id === user?.id;
   const isUnsafe = post.is_safe === false;
 
@@ -122,16 +111,18 @@ export const PostCard = ({
 
   const handleLikeClick = () => {
     setIsLikeAnimating(true);
-    onLike(post.id);
+    toggleLikePost(post.id);
     setTimeout(() => setIsLikeAnimating(false), 1000);
   };
 
-  const handleSaveClick = () => {
-    onSave(post.id);
-  };
+  const handleSaveClick = useCallback(() => {
+    toggleSavePost(post);
+  }, [post, toggleSavePost]);
 
-  const handleShareClick = () => {
-    onShare(post.id);
+  const handleShareClick = useCallback(() => {
+    navigator.clipboard.writeText(`${window.location.origin}/post/${post.id}`);
+    toast.success('Post link copied to clipboard!');
+
     setShareTooltip(true);
 
     if (tooltipTimeout.current) {
@@ -141,7 +132,7 @@ export const PostCard = ({
     tooltipTimeout.current = setTimeout(() => {
       setShareTooltip(false);
     }, 2000);
-  };
+  }, [post.id]);
 
   const formatTimestamp = (timestamp: string) => {
     const date = new Date(timestamp);
@@ -490,7 +481,6 @@ export const PostCard = ({
                       <button
                         onClick={() => {
                           setShowMenu(false);
-                          console.log('Edit post:', post.id);
                         }}
                         className="flex items-center w-full px-3.5 py-1.5 text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/40 transition-colors"
                       >
@@ -500,7 +490,7 @@ export const PostCard = ({
                       <button
                         onClick={() => {
                           setShowMenu(false);
-                          onDelete(post.id);
+                          deletePost(post.id);
                         }}
                         className="flex items-center w-full px-3.5 py-1.5 text-xs text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                       >
@@ -520,18 +510,17 @@ export const PostCard = ({
                     <Share2 className="h-3.5 w-3.5 mr-2.5" />
                     Share post
                   </button>
-                  {!isOwnPost && (
+                  {/* {!isOwnPost && (
                     <button
                       onClick={() => {
                         setShowMenu(false);
-                        console.log('Report post:', post.id);
                       }}
                       className="flex items-center w-full px-3.5 py-1.5 text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/40 transition-colors"
                     >
                       <Flag className="h-3.5 w-3.5 mr-2.5" />
                       Report post
                     </button>
-                  )}
+                  )} */}
                 </div>
               </motion.div>
             )}
@@ -687,10 +676,10 @@ export const PostCard = ({
               whileTap={{ scale: 0.9 }}
               onClick={handleSaveClick}
               className={cn(
-                "group p-1.5 rounded-full transition-colors",
+                'group p-1.5 rounded-full transition-colors',
                 isSaved
-                  ? "bg-purple-100 dark:bg-purple-900/30"
-                  : "hover:bg-purple-50 dark:hover:bg-purple-900/20"
+                  ? 'bg-purple-100 dark:bg-purple-900/30'
+                  : 'hover:bg-purple-50 dark:hover:bg-purple-900/20'
               )}
               aria-label={isSaved ? 'Unsave post' : 'Save post'}
             >

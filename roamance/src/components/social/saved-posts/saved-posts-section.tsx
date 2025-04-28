@@ -1,31 +1,32 @@
 'use client';
 
 import { useSocialContext } from '@/context/SocialContext';
-import { PostCard } from '../post/post-card';
-import { useEffect, useState, useMemo } from 'react';
+import { Post } from '@/types';
+import { AnimatePresence, motion } from 'framer-motion';
 import {
   Bookmark,
-  Loader2,
-  SearchX,
-  RefreshCcw,
   FolderHeart,
+  Loader2,
+  RefreshCcw,
   Search,
+  SearchX,
   X,
 } from 'lucide-react';
-import { AnimatePresence, motion } from 'framer-motion';
-import { PostService } from '@/service/social-service';
-import { Post } from '@/types';
+import { useCallback, useMemo, useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { CommentDialog } from '../comment';
+import { PostCard } from '../post/post-card';
 
 export const SavedPostsSection = () => {
-  const {
-    user,
-    savedPosts,
-    setSavedPosts,
-    fetchSavedPosts,
-    isSavedPostsLoading,
-  } = useSocialContext();
+  const { user, savedPosts, fetchSavedPosts, isSavedPostsLoading, isLoading } =
+    useSocialContext();
+
+  // Fetch saved posts once after user profile loads
+  useEffect(() => {
+    if (!isLoading) {
+      fetchSavedPosts();
+    }
+  }, [isLoading, fetchSavedPosts]);
 
   const [refreshing, setRefreshing] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -33,10 +34,6 @@ export const SavedPostsSection = () => {
   // State for comment dialog
   const [commentDialogOpen, setCommentDialogOpen] = useState(false);
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
-
-  useEffect(() => {
-    fetchSavedPosts();
-  }, [fetchSavedPosts]);
 
   // Filter posts based on search term
   const filteredPosts = useMemo(() => {
@@ -51,97 +48,29 @@ export const SavedPostsSection = () => {
   }, [savedPosts, searchTerm]);
 
   // Clear search term
-  const handleClearSearch = () => {
+  const handleClearSearch = useCallback(() => {
     setSearchTerm('');
-  };
+  }, [setSearchTerm]);
 
   // Rest of handlers
-  const handleRefresh = async () => {
+  const handleRefresh = useCallback(async () => {
     setRefreshing(true);
     await fetchSavedPosts();
     setRefreshing(false);
-  };
+  }, [fetchSavedPosts, setRefreshing]);
 
-  const handleUnsave = async (postId: string) => {
-    try {
-      await PostService.savePost(postId);
-
-      // Optimistic update to remove from UI immediately
-      setSavedPosts((prev) => prev.filter((post) => post.id !== postId));
-
-      toast.success('Post removed from your collection');
-    } catch (err) {
-      console.error('Error removing saved post:', err);
-      toast.error('Failed to remove from saved posts. Please try again.');
-    }
-  };
-
-  const handleLike = async (postId: string) => {
-    try {
-      // Check if user already liked the post
+  const handleComment = useCallback(
+    (postId: string) => {
       const post = savedPosts.find((p) => p.id === postId);
-      const isLiked = post?.liked_by?.some((u) => u.id === user?.id);
-
-      await PostService.likePost(postId);
-
-      // Optimistic update
-      setSavedPosts((prev) =>
-        prev.map((p) =>
-          p.id === postId
-            ? {
-                ...p,
-                likes_count: isLiked
-                  ? (p.likes_count || 0) - 1
-                  : (p.likes_count || 0) + 1,
-                liked_by: isLiked
-                  ? p.liked_by.filter((u) => u.id !== user?.id)
-                  : [...(p.liked_by || []), user!],
-              }
-            : p
-        )
-      );
-
-      toast.success(isLiked ? 'Post unliked!' : 'Post liked!');
-    } catch (err) {
-      console.error('Error liking post:', err);
-      toast.error('Failed to like post. Please try again.');
-    }
-  };
-
-  const handleComment = (postId: string) => {
-    const post = savedPosts.find((p) => p.id === postId);
-    if (post) {
-      setSelectedPost(post);
-      setCommentDialogOpen(true);
-    } else {
-      toast.error('Post not found');
-    }
-  };
-
-  const handleShare = (postId: string) => {
-    navigator.clipboard.writeText(`${window.location.origin}/post/${postId}`);
-    toast.success('Post link copied to clipboard!');
-  };
-
-  const handleDeletePost = async (postId: string) => {
-    try {
-      if (!confirm('Are you sure you want to delete this post?')) {
-        return;
-      }
-
-      const response = await PostService.deletePost(postId);
-
-      if (response.success) {
-        setSavedPosts((prev) => prev.filter((post) => post.id !== postId));
-        toast.success('Post deleted successfully!');
+      if (post) {
+        setSelectedPost(post);
+        setCommentDialogOpen(true);
       } else {
-        toast.error('Failed to delete post. Please try again.');
+        toast.error('Post not found');
       }
-    } catch (err) {
-      console.error('Error deleting post:', err);
-      toast.error('Failed to delete post. Please try again.');
-    }
-  };
+    },
+    [savedPosts, setSelectedPost, setCommentDialogOpen]
+  );
 
   return (
     <div className="w-full">
@@ -290,14 +219,7 @@ export const SavedPostsSection = () => {
                       transition: { duration: 0.2 },
                     }}
                   >
-                    <PostCard
-                      post={post}
-                      onLike={handleLike}
-                      onComment={handleComment}
-                      onSave={handleUnsave}
-                      onShare={handleShare}
-                      onDelete={handleDeletePost}
-                    />
+                    <PostCard post={post} onCommentAction={handleComment} />
                   </motion.div>
                 ))
               ) : (

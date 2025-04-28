@@ -1,5 +1,7 @@
 'use client';
 
+import { CommentService, PostService } from '@/service/social-service';
+import { userService } from '@/service/user-service';
 import {
   Comment,
   Post,
@@ -10,14 +12,12 @@ import {
 } from '@/types';
 import React, {
   createContext,
-  useContext,
-  useState,
   ReactNode,
-  useEffect,
   useCallback,
+  useContext,
+  useEffect,
+  useState,
 } from 'react';
-import { userService } from '@/service/user-service';
-import { CommentService, PostService } from '@/service/social-service';
 import { toast } from 'sonner';
 
 interface SocialContextValue {
@@ -27,12 +27,12 @@ interface SocialContextValue {
   setPosts: React.Dispatch<React.SetStateAction<Post[]>>;
   savedPosts: Post[];
   setSavedPosts: React.Dispatch<React.SetStateAction<Post[]>>;
-  postCreated: boolean;
-  triggerRefresh: () => void;
   fetchPosts: () => Promise<void>;
   fetchSavedPosts: () => Promise<void>;
-  refreshFeed: () => Promise<void>;
   createPost: (postData: PostRequestDto) => Promise<PostResponse>;
+  toggleLikePost: (postId: string) => Promise<void>;
+  toggleSavePost: (post: Post) => Promise<void>;
+  deletePost: (postId: string) => Promise<void>;
   isLoading: boolean;
   isPostsLoading: boolean;
   isSavedPostsLoading: boolean;
@@ -47,11 +47,8 @@ const SocialContext = createContext<SocialContextValue>({
   setPosts: () => {},
   savedPosts: [],
   setSavedPosts: () => {},
-  postCreated: false,
-  triggerRefresh: () => {},
   fetchPosts: async () => {},
   fetchSavedPosts: async () => {},
-  refreshFeed: async () => {},
   createPost: async (postData: PostRequestDto) => {
     return {
       success: true,
@@ -60,6 +57,9 @@ const SocialContext = createContext<SocialContextValue>({
       status: 200,
     };
   },
+  toggleLikePost: async () => {},
+  toggleSavePost: async () => {},
+  deletePost: async () => {},
   isLoading: false,
   isPostsLoading: false,
   isSavedPostsLoading: false,
@@ -79,16 +79,23 @@ export const SocialProvider = ({
   const [user, setUser] = useState<User>({} as User);
   const [posts, setPosts] = useState<Post[]>(initialPosts);
   const [savedPosts, setSavedPosts] = useState<Post[]>([]);
-  const [postCreated, setPostCreated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isUserLoading, setIsUserLoading] = useState(true);
   const [isPostsLoading, setIsPostsLoading] = useState(!initialPosts.length);
   const [isSavedPostsLoading, setIsSavedPostsLoading] = useState(false);
   const [isCreatingPost, setIsCreatingPost] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const triggerRefresh = () => {
-    setPostCreated((prev) => !prev);
-  };
+  const fetchUserProfile = useCallback(async () => {
+    try {
+      setIsUserLoading(true);
+      const userData = await userService.getUserProfile();
+      setUser(userData);
+    } catch (error) {
+      console.error('Failed to fetch user profile:', error);
+    } finally {
+      setIsUserLoading(false);
+    }
+  }, []);
 
   const fetchPosts = useCallback(async () => {
     try {
@@ -126,43 +133,6 @@ export const SocialProvider = ({
     }
   }, []);
 
-  const refreshFeed = useCallback(async () => {
-    try {
-      setIsPostsLoading(true);
-      const postListResponse = await PostService.getAllPosts();
-
-      if (postListResponse.success) {
-        setPosts(
-          await Promise.all(
-            postListResponse.data.map(async (dto) => ({
-              ...dto,
-              liked_by: await PostService.getLikedByPost(dto?.id || '').then(
-                (data) => data.data
-              ),
-              comments: await CommentService.getCommentsByPostId(
-                dto?.id || ''
-              ).then((data) =>
-                data.data.map(
-                  (comment) => ({ ...comment, post: dto }) as Comment
-                )
-              ),
-              saved_by: [],
-            }))
-          )
-        );
-
-        toast.success('Feed refreshed!');
-      } else {
-        toast.error('Failed to refresh feed');
-      }
-    } catch (err) {
-      console.error('Error refreshing feed:', err);
-      toast.error('Failed to refresh feed');
-    } finally {
-      setIsPostsLoading(false);
-    }
-  }, []);
-
   const createPost = useCallback(
     async (postData: PostRequestDto): Promise<PostResponse> => {
       try {
@@ -188,9 +158,8 @@ export const SocialProvider = ({
             setPosts((prevPosts) => [newPost, ...prevPosts]);
           }
 
-          // Trigger a refresh to get the latest data from the server
-          setPostCreated((prev) => !prev);
           toast.success('Post shared successfully!');
+          fetchPosts(); // Refresh posts after creating a new one
           return response;
         } else {
           toast.error('Failed to create post');
@@ -214,7 +183,7 @@ export const SocialProvider = ({
         setIsCreatingPost(false);
       }
     },
-    []
+    [fetchPosts]
   );
 
   const fetchSavedPosts = useCallback(async () => {
@@ -238,7 +207,7 @@ export const SocialProvider = ({
                   (comment) => ({ ...comment, post: dto }) as Comment
                 )
               ),
-              saved_by: [],
+              saved_by: [user],
             }))
           )
         );
@@ -251,38 +220,98 @@ export const SocialProvider = ({
     } finally {
       setIsSavedPostsLoading(false);
     }
-  }, []);
+  }, [user]);
 
-  useEffect(() => {
-    const fetchUserProfile = async () => {
+  const toggleLikePost = useCallback(
+    async (postId: string) => {
+      const post = posts.find((p) => p.id === postId);
+      const isLiked = post?.liked_by?.some((u) => u.id === user.id);
       try {
-        setIsLoading(true);
-        const userData = await userService.getUserProfile();
-        setUser(userData);
-      } catch (error) {
-        console.error('Failed to fetch user profile:', error);
-      } finally {
-        setIsLoading(false);
+        const response = await PostService.likePost(postId);
+        if (response.success && post) {
+          // Optimistically update like state
+          setPosts((prev) =>
+            prev.map((p) =>
+              p.id === postId
+                ? {
+                    ...p,
+                    likes_count: isLiked
+                      ? Math.max((p.likes_count || 0) - 1, 0)
+                      : (p.likes_count || 0) + 1,
+                    liked_by: isLiked
+                      ? p.liked_by.filter((u) => u.id !== user.id)
+                      : [...p.liked_by, user!],
+                  }
+                : p
+            )
+          );
+          setSavedPosts((prev) =>
+            prev.map((p) =>
+              p.id === postId
+                ? {
+                    ...p,
+                    likes_count: isLiked
+                      ? Math.max((p.likes_count || 0) - 1, 0)
+                      : (p.likes_count || 0) + 1,
+                    liked_by: isLiked
+                      ? p.liked_by.filter((u) => u.id !== user.id)
+                      : [...p.liked_by, user!],
+                  }
+                : p
+            )
+          );
+          toast.success(isLiked ? 'Post unliked!' : 'Post liked!');
+        }
+      } catch (err) {
+        console.error('Error liking post:', err);
+        toast.error('Failed to like post. Please try again.');
       }
-    };
+    },
+    [posts, user]
+  );
 
+  const toggleSavePost = useCallback(
+    async (post: Post) => {
+      const savedPost = savedPosts.find((p) => p.id === post.id);
+
+      console.log('toggleSavePost', savedPosts, post);
+
+      try {
+        const response = await PostService.savePost(post.id);
+        if (response.success) {
+          setSavedPosts((prev) =>
+            savedPost ? prev.filter((p) => p.id !== post.id) : [post, ...prev]
+          );
+          toast.success(savedPost ? 'Post unsaved!' : 'Post saved!');
+        }
+      } catch (err) {
+        console.error('Error saving post:', err);
+        toast.error('Failed to save post. Please try again.');
+      }
+    },
+    [savedPosts]
+  );
+
+  const deletePost = useCallback(async (postId: string) => {
+    try {
+      if (!confirm('Are you sure you want to delete this post?')) return;
+      const response = await PostService.deletePost(postId);
+      if (response.success) {
+        setPosts((prev) => prev.filter((p) => p.id !== postId));
+        setSavedPosts((prev) => prev.filter((p) => p.id !== postId));
+        toast.success('Post deleted successfully!');
+      } else {
+        toast.error('Failed to delete post. Please try again.');
+      }
+    } catch (err) {
+      console.error('Error deleting post:', err);
+      toast.error('Failed to delete post. Please try again.');
+    }
+  }, []);
+
+  useEffect(() => {
     fetchUserProfile();
-  }, []);
-
-  // Fetch posts immediately on mount if no initial posts were provided
-  useEffect(() => {
-    if (!initialPosts.length) {
-      fetchPosts();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Fetch new posts when a post is created
-  useEffect(() => {
-    if (postCreated) {
-      fetchPosts();
-    }
-  }, [postCreated, fetchPosts]);
+  }, [fetchUserProfile]);
 
   return (
     <SocialContext.Provider
@@ -293,13 +322,13 @@ export const SocialProvider = ({
         setPosts,
         savedPosts,
         setSavedPosts,
-        postCreated,
-        triggerRefresh,
         fetchPosts,
         fetchSavedPosts,
-        refreshFeed,
         createPost,
-        isLoading,
+        toggleLikePost,
+        toggleSavePost,
+        deletePost,
+        isLoading: isUserLoading,
         isPostsLoading,
         isSavedPostsLoading,
         isCreatingPost,

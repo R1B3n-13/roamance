@@ -22,6 +22,7 @@ interface NavItemProps {
   href: string;
   isActive?: boolean;
   onClick?: () => void;
+  isDisabled?: boolean; // Add isDisabled prop
 }
 
 const NavItem = ({
@@ -30,21 +31,34 @@ const NavItem = ({
   href,
   isActive = false,
   onClick,
+  isDisabled = false, // Destructure and default isDisabled
 }: NavItemProps) => (
   <Link
-    href={href}
-    onClick={onClick}
+    href={isDisabled ? '#' : href} // Prevent navigation if disabled
+    onClick={(e) => {
+      if (isDisabled) {
+        e.preventDefault(); // Prevent default link behavior
+        return;
+      }
+      onClick?.(); // Call onClick only if not disabled
+    }}
     className={cn(
       'flex items-center gap-4 px-4 py-3 rounded-2xl transition-all duration-200 whitespace-nowrap group relative overflow-hidden',
-      isActive
+      isActive && !isDisabled
         ? 'bg-gradient-to-r from-purple-100/80 to-indigo-100/80 dark:from-purple-900/30 dark:to-indigo-900/30 text-purple-700 dark:text-purple-300 font-medium shadow-md shadow-purple-200/20 dark:shadow-purple-900/10'
-        : 'hover:bg-gray-100/80 dark:hover:bg-gray-800/50 text-gray-700 dark:text-gray-300 hover:scale-[1.02] hover:shadow-sm'
+        : !isDisabled
+          ? 'hover:bg-gray-100/80 dark:hover:bg-gray-800/50 text-gray-700 dark:text-gray-300 hover:scale-[1.02] hover:shadow-sm'
+          : '', // Remove hover styles if disabled
+      isDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer' // Add disabled styles
     )}
+    aria-disabled={isDisabled} // Add aria-disabled for accessibility
+    tabIndex={isDisabled ? -1 : undefined} // Remove from tab order if disabled
   >
     <div
       className={cn(
-        'relative z-10 transition-transform duration-200 group-hover:scale-110',
-        isActive
+        'relative z-10 transition-transform duration-200',
+        !isDisabled && 'group-hover:scale-110', // Only scale on hover if not disabled
+        isActive && !isDisabled
           ? 'text-purple-600 dark:text-purple-400'
           : 'text-gray-500 dark:text-gray-400'
       )}
@@ -52,16 +66,17 @@ const NavItem = ({
       {icon}
     </div>
     <span className="relative z-10 font-medium">{label}</span>
-    {isActive && (
-      <motion.div
-        layoutId="nav-indicator"
-        className="absolute inset-0 bg-gradient-to-r from-purple-100/80 to-indigo-100/80 dark:from-purple-900/30 dark:to-indigo-900/30 border-l-4 border-purple-500 dark:border-purple-600 z-0"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.2 }}
-      />
-    )}
+    {isActive &&
+      !isDisabled && ( // Only show indicator if active and not disabled
+        <motion.div
+          layoutId="nav-indicator"
+          className="absolute inset-0 bg-gradient-to-r from-purple-100/80 to-indigo-100/80 dark:from-purple-900/30 dark:to-indigo-900/30 border-l-4 border-purple-500 dark:border-purple-600 z-0"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+        />
+      )}
   </Link>
 );
 
@@ -93,6 +108,7 @@ export function DesktopSideNavigation({
           href={routes.explore.href}
           isActive={activeTab === routes.explore.href}
           onClick={() => setActiveTab(routes.explore.href)}
+          isDisabled
         />
         <NavItem
           icon={<Globe className="h-5 w-5" />}
@@ -100,6 +116,7 @@ export function DesktopSideNavigation({
           href={routes.destinations.href}
           isActive={activeTab === routes.destinations.href}
           onClick={() => setActiveTab(routes.destinations.href)}
+          isDisabled
         />
         <NavItem
           icon={<Hash className="h-5 w-5" />}
@@ -107,6 +124,7 @@ export function DesktopSideNavigation({
           href={routes.hashtags.href}
           isActive={activeTab === routes.hashtags.href}
           onClick={() => setActiveTab(routes.hashtags.href)}
+          isDisabled
         />
         <NavItem
           icon={<Sparkles className="h-5 w-5" />}
@@ -114,6 +132,7 @@ export function DesktopSideNavigation({
           href={routes.discover.href}
           isActive={activeTab === routes.discover.href}
           onClick={() => setActiveTab(routes.discover.href)}
+          isDisabled
         />
         <NavItem
           icon={<User className="h-5 w-5" />}
@@ -121,6 +140,7 @@ export function DesktopSideNavigation({
           href={routes.profile.href}
           isActive={activeTab === routes.profile.href}
           onClick={() => setActiveTab(routes.profile.href)}
+          isDisabled
         />
         <NavItem
           icon={<MessageCircle className="h-5 w-5" />}
@@ -128,6 +148,7 @@ export function DesktopSideNavigation({
           href={routes.messages.href}
           isActive={activeTab === routes.messages.href}
           onClick={() => setActiveTab(routes.messages.href)}
+          isDisabled
         />
         <NavItem
           icon={<Bookmark className="h-5 w-5" />}
