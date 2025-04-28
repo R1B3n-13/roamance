@@ -25,6 +25,8 @@ public class RestUtil {
   private final RestTemplate restTemplate = new RestTemplate();
   private final RestUtil self;
 
+  private static final List<String> ALLOWED_DOMAINS = List.of("res.cloudinary.com");
+
   public RestUtil(@Lazy RestUtil self) {
     this.self = self;
   }
@@ -60,8 +62,10 @@ public class RestUtil {
   @Async("asyncExecutor")
   public CompletableFuture<Media> downloadMediaWithMime(String url) {
 
-    if (url == null || url.isBlank()) {
-      return CompletableFuture.failedFuture(new IllegalArgumentException("Invalid media URL"));
+    if (url == null || url.isBlank() || !isValidUrl(url)) {
+
+      return CompletableFuture.failedFuture(
+          new IllegalArgumentException("Invalid or unauthorized media URL"));
     }
 
     try {
@@ -134,6 +138,19 @@ public class RestUtil {
     } catch (IOException e) {
       log.warn("MIME sniff failed: {}", e.getMessage());
       return DEFAULT_MIME;
+    }
+  }
+
+  /** Check if the URL is from trusted domain to avoid SSRF attacks */
+  private boolean isValidUrl(String url) {
+    try {
+      URI uri = URI.create(url);
+      String host = uri.getHost();
+      return host != null && ALLOWED_DOMAINS.stream().anyMatch(host::endsWith);
+
+    } catch (Exception e) {
+      log.error("Invalid URL: {}", url, e);
+      return false;
     }
   }
 }
