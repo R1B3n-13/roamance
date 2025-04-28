@@ -1,9 +1,7 @@
-import { cn } from '@/lib/utils';
 import { CommentResponseDto, User } from '@/types';
 import { motion } from 'framer-motion';
-import { MessageCircle, MoreHorizontal, ThumbsUp } from 'lucide-react';
+import { MoreHorizontal } from 'lucide-react';
 import Image from 'next/image';
-import { useState } from 'react';
 
 interface CommentCardProps {
   comment: CommentResponseDto;
@@ -12,25 +10,7 @@ interface CommentCardProps {
   onReply?: (commentId: string) => void;
 }
 
-export const CommentCard = ({
-  comment,
-  currentUser,
-  onLike,
-  onReply,
-}: CommentCardProps) => {
-  const [isLiked, setIsLiked] = useState(false);
-  const [showReplyInput, setShowReplyInput] = useState(false);
-
-  const handleLike = () => {
-    setIsLiked(!isLiked);
-    if (onLike) onLike(comment.id);
-  };
-
-  const handleReply = () => {
-    setShowReplyInput(!showReplyInput);
-    if (onReply) onReply(comment.id);
-  };
-
+export const CommentCard = ({ comment }: CommentCardProps) => {
   return (
     <motion.div
       initial={{ opacity: 0, y: 5 }}
@@ -125,7 +105,7 @@ export const CommentCard = ({
         </div>
 
         <div className="flex items-center gap-5 px-3 mt-2 text-xs">
-          <motion.button
+          {/* <motion.button
             whileHover={{ scale: 1.15 }}
             whileTap={{ scale: 0.9 }}
             transition={{ type: 'spring', stiffness: 400, damping: 15 }}
@@ -160,7 +140,7 @@ export const CommentCard = ({
           >
             <MessageCircle className="h-3.5 w-3.5" />
             <span>Reply</span>
-          </motion.button>
+          </motion.button> */}
 
           <span className="text-gray-400 dark:text-gray-500">
             {new Date(comment.audit.created_at).toLocaleDateString(undefined, {
@@ -171,48 +151,6 @@ export const CommentCard = ({
             })}
           </span>
         </div>
-
-        {/* Reply input (consistent with CommentForm) */}
-        {showReplyInput && (
-          <motion.div
-            initial={{ opacity: 0, height: 0, y: -5 }}
-            animate={{ opacity: 1, height: 'auto', y: 0 }}
-            exit={{ opacity: 0, height: 0, y: -5 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-            className="mt-3"
-          >
-            <div className="glass-card border-gradient border-gradient-light dark:border-gradient-dark rounded-xl overflow-hidden shadow-sm p-2.5">
-              <div className="flex gap-2.5">
-                <div className="relative h-7 w-7 rounded-full overflow-hidden flex-shrink-0 border-2 border-ocean-light dark:border-ocean shadow-sm">
-                  <Image
-                    src={
-                      currentUser?.profile_image ||
-                      '/images/roamance-logo-no-text.png'
-                    }
-                    alt={currentUser?.name || 'User'}
-                    fill
-                    style={{ objectFit: 'cover' }}
-                    className="rounded-full"
-                  />
-                </div>
-                <div className="flex-1 relative">
-                  <input
-                    type="text"
-                    placeholder="Write a reply..."
-                    className="w-full p-2 rounded-xl bg-white/80 dark:bg-gray-800/50 backdrop-blur-sm border border-gray-100/80 dark:border-gray-700/50 text-xs focus:outline-none focus:ring-2 focus:ring-ocean/40 text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 transition-all duration-200"
-                  />
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 bg-ocean hover:bg-ocean-dark dark:bg-ocean dark:hover:bg-ocean-dark text-white transition-colors text-xs font-medium rounded-lg px-3 py-1 shadow-sm"
-                  >
-                    Reply
-                  </motion.button>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        )}
       </div>
     </motion.div>
   );
