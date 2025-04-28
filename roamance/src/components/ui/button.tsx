@@ -18,6 +18,7 @@ const buttonVariants = cva(
         secondary:
           'bg-secondary text-secondary-foreground hover:bg-secondary/80',
         ghost: 'hover:bg-accent hover:text-accent-foreground',
+        subtle: 'bg-accent text-accent-foreground hover:bg-accent/90',
         link: 'text-primary underline-offset-4 hover:underline',
         // Travel themed buttons - removed "discover" variant to ensure consistency
         adventure: 'bg-sunset-dark text-white hover:bg-sunset transition-all',

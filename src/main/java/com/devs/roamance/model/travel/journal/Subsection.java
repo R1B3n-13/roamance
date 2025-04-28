@@ -1,12 +1,13 @@
 package com.devs.roamance.model.travel.journal;
 
-import com.devs.roamance.model.Audit;
+import com.devs.roamance.model.audit.Audit;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorColumn;
 import jakarta.persistence.DiscriminatorType;
 import jakarta.persistence.DiscriminatorValue;
@@ -21,6 +22,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
@@ -57,9 +59,11 @@ public abstract class Subsection {
 
   @NonNull private String title;
 
-  @ElementCollection private List<String> notes = new ArrayList<>();
+  @Lob
+  @Column(columnDefinition = "TEXT")
+  private String note;
 
-  @ElementCollection private List<String> checklists = new ArrayList<>();
+  @ElementCollection private List<ChecklistItem> checklists = new ArrayList<>();
 
   @JsonIgnore
   @ManyToOne(

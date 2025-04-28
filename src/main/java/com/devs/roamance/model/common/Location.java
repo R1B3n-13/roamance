@@ -1,4 +1,4 @@
-package com.devs.roamance.model.travel;
+package com.devs.roamance.model.common;
 
 import jakarta.persistence.Embeddable;
 import lombok.*;

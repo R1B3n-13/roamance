@@ -1,4 +1,4 @@
-package com.devs.roamance.model;
+package com.devs.roamance.model.audit;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;

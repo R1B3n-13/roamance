@@ -16,7 +16,7 @@ import com.devs.roamance.dto.response.travel.journal.SubsectionListResponseDto;
 import com.devs.roamance.dto.response.travel.journal.SubsectionResponseDto;
 import com.devs.roamance.exception.ResourceNotFoundException;
 import com.devs.roamance.exception.UnauthorizedAccessException;
-import com.devs.roamance.model.travel.Location;
+import com.devs.roamance.model.common.Location;
 import com.devs.roamance.model.travel.journal.ActivitySubsection;
 import com.devs.roamance.model.travel.journal.Journal;
 import com.devs.roamance.model.travel.journal.RouteSubsection;
@@ -38,6 +38,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -60,6 +61,7 @@ public class SubsectionServiceImpl implements SubsectionService {
   }
 
   @Override
+  @Transactional
   public SubsectionResponseDto create(SubsectionCreateRequestDto requestDto) {
     log.info(
         "Creating subsection with title: '{}' for journal with ID: {}",
@@ -94,6 +96,7 @@ public class SubsectionServiceImpl implements SubsectionService {
   }
 
   @Override
+  @Transactional(readOnly = true)
   public SubsectionListResponseDto getAll(
       int pageNumber, int pageSize, String sortBy, String sortDir) {
     log.info(
@@ -132,6 +135,7 @@ public class SubsectionServiceImpl implements SubsectionService {
   }
 
   @Override
+  @Transactional(readOnly = true)
   public SubsectionResponseDto get(UUID id) {
     log.info("Fetching subsection with id: {}", id);
     Subsection subsection =
@@ -154,6 +158,7 @@ public class SubsectionServiceImpl implements SubsectionService {
   }
 
   @Override
+  @Transactional
   public SubsectionResponseDto update(SubsectionUpdateRequestDto updateRequestDto, UUID id) {
     log.info("Updating subsection with id: {}", id);
 
@@ -182,6 +187,7 @@ public class SubsectionServiceImpl implements SubsectionService {
   }
 
   @Override
+  @Transactional
   public BaseResponseDto delete(UUID id) {
     log.info("Deleting subsection with id: {}", id);
 
@@ -239,7 +245,7 @@ public class SubsectionServiceImpl implements SubsectionService {
     if (subsection instanceof ActivitySubsection activitySubsection
         && updateRequestDto instanceof ActivitySubsectionUpdateRequestDto activityDetails) {
 
-      activitySubsection.setActivityName(activityDetails.getActivityName());
+      activitySubsection.setActivityType(activityDetails.getActivityType());
       if (activityDetails.getLocation() != null) {
         activitySubsection.setLocation(
             modelMapper.map(activityDetails.getLocation(), Location.class));
@@ -257,14 +263,13 @@ public class SubsectionServiceImpl implements SubsectionService {
       try {
         RouteSubsectionUpdateRequestDto routeDetails =
             modelMapper.map(updateRequestDto, RouteSubsectionUpdateRequestDto.class);
-        routeSubsection.setTotalTime(routeDetails.getTotalTime());
-        routeSubsection.setTotalDistance(routeDetails.getTotalDistance());
-        if (routeDetails.getLocations() != null && !routeDetails.getLocations().isEmpty()) {
+
+        if (routeDetails.getWaypoints() != null && !routeDetails.getWaypoints().isEmpty()) {
           List<Location> locations =
-              routeDetails.getLocations().stream()
+              routeDetails.getWaypoints().stream()
                   .map(loc -> modelMapper.map(loc, Location.class))
                   .toList();
-          routeSubsection.setLocations(locations);
+          routeSubsection.setWaypoints(locations);
         }
       } catch (Exception e) {
         log.error("Error mapping subsection details to RouteSubsectionUpdateRequestDto", e);

@@ -34,7 +34,7 @@ export default function MapComponent({
       userLocation={userLocation}
       searchQuery={searchQuery}
       directions={directions}
-      onMapLoaded={onMapLoaded}
+      onMapLoadedAction={onMapLoaded}
       isDarkMode={isDarkMode}
       centerOnUser={centerOnUser}
     />

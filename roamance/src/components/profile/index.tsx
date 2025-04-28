@@ -3,21 +3,45 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useState, useCallback } from 'react';
 import { toast } from 'sonner';
+import { useRouter, usePathname } from 'next/navigation';
 import { ProfileHeader } from './profile-header';
 import { ProfileInfo } from './profile-info';
 import { ProfilePreferences } from './preferences';
 import { ProfileSavedPlaces } from './profile-saved-places';
 import { ProfileTabs } from './profile-tabs';
 import { ProfileTrips } from './profile-trips';
+import { JournalManagement } from './journal/journal-management';
 import { User, UserInfo } from '@/types';
 import { userService } from '@/service/user-service';
 import { getImagePath } from '@/components';
+import { paths, routes } from '@/constants/routes';
 
 export function ProfilePage() {
-  const [activeTab, setActiveTab] = useState('info');
+  const router = useRouter();
+  const pathname = usePathname();
   const [user, setUser] = useState<User | null>(null);
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Determine active tab from URL
+  const getActiveTabFromPath = (path: string) => {
+    if (path === routes.profile.href || path === routes.info.href)
+      return paths.info;
+    if (path === routes.preferences.href) return paths.preferences;
+    if (path === routes.trips.href) return paths.trips;
+    if (path === routes.journals.href) return paths.journals;
+    if (path === routes.places.href) return paths.places;
+    return routes.info.href; // Default to info
+  };
+
+  const activeTab = getActiveTabFromPath(pathname || '');
+
+  // If we're at /profile, redirect to /profile/info
+  useEffect(() => {
+    if (pathname === routes.profile.href) {
+      router.push(routes.info.href);
+    }
+  }, [pathname, router]);
 
   const fetchUserProfile = useCallback(async () => {
     try {
@@ -40,7 +64,7 @@ export function ProfilePage() {
   // Render tab content based on active tab
   const renderTabContent = () => {
     switch (activeTab) {
-      case 'info':
+      case paths.info:
         return (
           <ProfileInfo
             user={user}
@@ -49,7 +73,7 @@ export function ProfilePage() {
             onProfileUpdate={fetchUserProfile}
           />
         );
-      case 'preferences':
+      case paths.preferences:
         return (
           <ProfilePreferences
             user={user}
@@ -57,11 +81,13 @@ export function ProfilePage() {
             loading={loading}
           />
         );
-      case 'trips':
+      case paths.trips:
         return (
           <ProfileTrips user={user} userInfo={userInfo} loading={loading} />
         );
-      case 'saved':
+      case paths.journals:
+        return <JournalManagement />;
+      case paths.places:
         return (
           <ProfileSavedPlaces
             user={user}
@@ -161,7 +187,7 @@ export function ProfilePage() {
         </motion.div>
 
         <motion.div variants={itemVariants}>
-          <ProfileTabs activeTab={activeTab} setActiveTab={setActiveTab} />
+          <ProfileTabs activeTab={activeTab} />
         </motion.div>
 
         <AnimatePresence mode="wait">
@@ -179,16 +205,19 @@ export function ProfilePage() {
             className="mt-6 sm:mt-8 md:mt-12 relative backdrop-blur-sm px-1 sm:px-2 md:px-3"
           >
             {/* Subtle tab-specific background gradients */}
-            {activeTab === 'info' && (
+            {activeTab === paths.info && (
               <div className="absolute inset-0 bg-gradient-to-tr from-ocean/5 to-transparent rounded-xl -z-10" />
             )}
-            {activeTab === 'preferences' && (
+            {activeTab === paths.preferences && (
               <div className="absolute inset-0 bg-gradient-to-tr from-sunset/5 to-transparent rounded-xl -z-10" />
             )}
-            {activeTab === 'trips' && (
+            {activeTab === paths.trips && (
               <div className="absolute inset-0 bg-gradient-to-tr from-forest/5 to-transparent rounded-xl -z-10" />
             )}
-            {activeTab === 'saved' && (
+            {activeTab === paths.journals && (
+              <div className="absolute inset-0 bg-gradient-to-tr from-purple-500/5 to-transparent rounded-xl -z-10" />
+            )}
+            {activeTab === paths.places && (
               <div className="absolute inset-0 bg-gradient-to-tr from-sand/5 to-transparent rounded-xl -z-10" />
             )}
 

@@ -1,6 +1,6 @@
 package com.devs.roamance.dto.request.travel.itinerary;
 
-import com.devs.roamance.model.travel.Location;
+import com.devs.roamance.model.common.Location;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
