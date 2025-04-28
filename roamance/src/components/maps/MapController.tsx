@@ -57,20 +57,18 @@ export function MapController({
   useEffect(() => {
     const loadLeaflet = async () => {
       try {
-        // Dynamically import Leaflet with proper typing
-        const leafletModule = await import('leaflet') as typeof import('leaflet') & { default?: typeof import('leaflet') };
-        // Use default export if available and clone into a mutable object
-        const proto = leafletModule.default ?? leafletModule;
-        const L = Object.assign({}, proto) as typeof Leaflet;
-        Object.setPrototypeOf(L, Object.getPrototypeOf(proto));
-        // Expose the extensible Leaflet copy globally for plugins
+        // Dynamically import Leaflet
+        const leafletModule = await import('leaflet');
+        // Use the single L instance for plugins
+        const L = (leafletModule.default ?? leafletModule) as typeof import('leaflet');
+        // Expose it globally so Routing Machine augments this instance
         window.L = L;
-        // Load routing-machine plugin now that L is extensible
+        // Load Routing Machine plugin (side-effects attach to L)
         await import('leaflet-routing-machine');
         setLeaflet(L);
         setIsLeafletLoaded(true);
       } catch (error) {
-        console.error('Failed to load Leaflet:', error);
+        console.error('Failed to load Leaflet or plugin:', error);
       }
     };
 
