@@ -1,20 +1,18 @@
 'use client';
 
+import FileUploader from '@/components/common/file-uploader';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle
+} from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 import { User } from '@/types';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ImageIcon, Loader2, SendHorizontal, Video, X } from 'lucide-react';
 import Image from 'next/image';
 import { useState } from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-  DialogClose,
-} from '@/components/ui/dialog';
-import FileUploader from '@/components/common/file-uploader';
 import { toast } from 'sonner';
 
 interface CommentFormProps {
@@ -84,7 +82,7 @@ export const CommentForm = ({
 
   return (
     <div className="glass-card border-gradient border-gradient-light dark:border-gradient-dark rounded-xl overflow-hidden shadow-glass dark:shadow-glass-dark backdrop-blur-md">
-      <div className="p-3.5">
+      <div className="px-3.5">
         <div className="flex gap-3">
           <motion.div
             whileHover={{ scale: 1.05 }}
@@ -302,17 +300,6 @@ export const CommentForm = ({
             onClose={() => setShowUploaderDialog(false)}
             className=""
           />
-          <DialogFooter>
-            <DialogClose asChild>
-              <motion.button
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.97 }}
-                className="px-4 py-2 bg-gray-200/80 dark:bg-gray-700/80 text-sm rounded-lg hover:bg-gray-300/90 dark:hover:bg-gray-600/90 transition-all duration-200 font-medium backdrop-blur-sm shadow-sm"
-              >
-                Close
-              </motion.button>
-            </DialogClose>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

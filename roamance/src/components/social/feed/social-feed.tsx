@@ -4,7 +4,7 @@ import { useSocialContext } from '@/context/SocialContext';
 import { Post } from '@/types';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowUpDown, Loader2, RefreshCw, Sparkles } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { CommentDialog } from '../comment';
 import { PostCard } from '../post/post-card';
@@ -12,17 +12,8 @@ import { EmptyFeed } from './empty-feed';
 import { FeedSkeleton } from './feed-skeleton';
 
 export const SocialFeed = () => {
-  const {
-    user,
-    posts,
-    fetchPosts,
-    fetchSavedPosts,
-    isPostsLoading,
-    error,
-    toggleLikePost: likePost,
-    toggleSavePost: savePost,
-    deletePost,
-  } = useSocialContext();
+  const { user, posts, fetchPosts, fetchSavedPosts, isPostsLoading, error } =
+    useSocialContext();
 
   const [sortOption, setSortOption] = useState<'latest' | 'popular'>('latest');
 
@@ -35,33 +26,18 @@ export const SocialFeed = () => {
     fetchSavedPosts();
   }, [fetchPosts, fetchSavedPosts]);
 
-  const handleLike = (postId: string) => {
-    likePost(postId);
-  };
-
-  const handleSave = (postId: string) => {
-    savePost(postId);
-  };
-
-  const handleDeletePost = (postId: string) => {
-    deletePost(postId);
-  };
-
-  const handleComment = (postId: string) => {
-    const post = posts.find((p) => p.id === postId);
-    if (post) {
-      setSelectedPost(post);
-      setCommentDialogOpen(true);
-    } else {
-      toast.error('Post not found');
-    }
-  };
-
-  const handleShare = (postId: string) => {
-    // In a real app, this would open a share dialog
-    navigator.clipboard.writeText(`${window.location.origin}/post/${postId}`);
-    toast.success('Post link copied to clipboard!');
-  };
+  const handleComment = useCallback(
+    (postId: string) => {
+      const post = posts.find((p) => p.id === postId);
+      if (post) {
+        setSelectedPost(post);
+        setCommentDialogOpen(true);
+      } else {
+        toast.error('Post not found');
+      }
+    },
+    [posts]
+  );
 
   const toggleSortOption = () => {
     setSortOption((prev) => (prev === 'latest' ? 'popular' : 'latest'));
@@ -158,14 +134,7 @@ export const SocialFeed = () => {
                 }}
                 className="backdrop-blur-sm"
               >
-                <PostCard
-                  post={post}
-                  onLikeAction={handleLike}
-                  onCommentAction={handleComment}
-                  onSaveAction={handleSave}
-                  onShareAction={handleShare}
-                  onDeleteAction={handleDeletePost}
-                />
+                <PostCard post={post} onCommentAction={handleComment} />
               </motion.div>
             ))}
           </AnimatePresence>

@@ -4,10 +4,10 @@ import { CommentService, PostService } from '@/service/social-service';
 import { userService } from '@/service/user-service';
 import {
   Comment,
+  CommentRequestDto,
+  CommentResponseDto,
   Post,
   PostRequestDto,
-  PostResponse,
-  PostResponseDto,
   User,
 } from '@/types';
 import React, {
@@ -29,14 +29,21 @@ interface SocialContextValue {
   setSavedPosts: React.Dispatch<React.SetStateAction<Post[]>>;
   fetchPosts: () => Promise<void>;
   fetchSavedPosts: () => Promise<void>;
-  createPost: (postData: PostRequestDto) => Promise<PostResponse>;
+  createPost: (postData: PostRequestDto) => Promise<void>;
   toggleLikePost: (postId: string) => Promise<void>;
   toggleSavePost: (post: Post) => Promise<void>;
   deletePost: (postId: string) => Promise<void>;
+  fetchComments: (postId: string) => Promise<CommentResponseDto[]>;
+  createComment: (
+    postId: string,
+    commentData: CommentRequestDto
+  ) => Promise<CommentResponseDto | null>;
   isLoading: boolean;
   isPostsLoading: boolean;
   isSavedPostsLoading: boolean;
+  isCommentsLoading: boolean;
   isCreatingPost: boolean;
+  isCreatingComment: boolean;
   error: string | null;
 }
 
@@ -49,21 +56,18 @@ const SocialContext = createContext<SocialContextValue>({
   setSavedPosts: () => {},
   fetchPosts: async () => {},
   fetchSavedPosts: async () => {},
-  createPost: async (postData: PostRequestDto) => {
-    return {
-      success: true,
-      data: postData as PostResponseDto,
-      message: '',
-      status: 200,
-    };
-  },
+  createPost: async () => {},
   toggleLikePost: async () => {},
   toggleSavePost: async () => {},
   deletePost: async () => {},
+  fetchComments: async () => [],
+  createComment: async () => null,
   isLoading: false,
   isPostsLoading: false,
   isSavedPostsLoading: false,
+  isCommentsLoading: false,
   isCreatingPost: false,
+  isCreatingComment: false,
   error: null,
 });
 
@@ -82,7 +86,9 @@ export const SocialProvider = ({
   const [isUserLoading, setIsUserLoading] = useState(true);
   const [isPostsLoading, setIsPostsLoading] = useState(!initialPosts.length);
   const [isSavedPostsLoading, setIsSavedPostsLoading] = useState(false);
+  const [isCommentsLoading, setIsCommentsLoading] = useState(false);
   const [isCreatingPost, setIsCreatingPost] = useState(false);
+  const [isCreatingComment, setIsCreatingComment] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const fetchUserProfile = useCallback(async () => {
@@ -134,7 +140,7 @@ export const SocialProvider = ({
   }, []);
 
   const createPost = useCallback(
-    async (postData: PostRequestDto): Promise<PostResponse> => {
+    async (postData: PostRequestDto): Promise<void> => {
       try {
         setIsCreatingPost(true);
 
@@ -160,25 +166,12 @@ export const SocialProvider = ({
 
           toast.success('Post shared successfully!');
           fetchPosts(); // Refresh posts after creating a new one
-          return response;
         } else {
           toast.error('Failed to create post');
-          return {
-            success: false,
-            data: {} as PostResponseDto,
-            message: 'Failed to create post',
-            status: 400,
-          };
         }
       } catch (error) {
         console.error('Error creating post:', error);
         toast.error('Failed to create post. Please try again.');
-        return {
-          success: false,
-          data: {} as PostResponseDto,
-          message: 'Failed to create post',
-          status: 500,
-        };
       } finally {
         setIsCreatingPost(false);
       }
@@ -309,6 +302,109 @@ export const SocialProvider = ({
     }
   }, []);
 
+  const fetchComments = useCallback(
+    async (postId: string): Promise<CommentResponseDto[]> => {
+      try {
+        setIsCommentsLoading(true);
+        setError(null);
+        const response = await CommentService.getCommentsByPostId(postId);
+
+        if (response.success) {
+          // Transform API response to Comment[] by adding missing properties
+          const transformedComments: Comment[] = response.data.map(
+            (comment) => ({
+              ...comment,
+              post: { id: postId } as Post, // Minimal post object with correct type
+            })
+          );
+          return transformedComments;
+        } else {
+          setError('Failed to fetch comments');
+          return [];
+        }
+      } catch (err) {
+        console.error('Error fetching comments:', err);
+        setError('An error occurred while fetching comments');
+        return [];
+      } finally {
+        setIsCommentsLoading(false);
+      }
+    },
+    []
+  );
+
+  const createComment = useCallback(
+    async (
+      postId: string,
+      commentData: CommentRequestDto
+    ): Promise<CommentResponseDto | null> => {
+      if (!user.id) {
+        toast.error('You need to be logged in to comment');
+        return null;
+      }
+
+      if (!commentData.text.trim()) {
+        toast.error('Comment cannot be empty');
+        return null;
+      }
+
+      try {
+        setIsCreatingComment(true);
+
+        const response = await CommentService.createComment(
+          postId,
+          commentData
+        );
+
+        if (response.success) {
+          // Create a comment object with complete data
+          const newComment: Comment = {
+            ...response.data,
+            post: { id: postId } as Post, // Minimal post object with correct type
+            user: user,
+          };
+
+          // Update the post's comments in state
+          setPosts((prevPosts) =>
+            prevPosts.map((p) =>
+              p.id === postId
+                ? {
+                    ...p,
+                    comments: [newComment, ...(p.comments || [])],
+                  }
+                : p
+            )
+          );
+
+          // Also update saved posts if the commented post is saved
+          setSavedPosts((prevPosts) =>
+            prevPosts.map((p) =>
+              p.id === postId
+                ? {
+                    ...p,
+                    comments: [newComment, ...(p.comments || [])],
+                  }
+                : p
+            )
+          );
+
+          toast.success('Comment added successfully');
+          return newComment;
+        } else {
+          toast.error('Failed to add comment. Please try again.');
+          return null;
+        }
+      } catch (err) {
+        console.error('Error adding comment:', err);
+        toast.error('Failed to add comment. Please try again.');
+        return null;
+      } finally {
+        setIsCreatingComment(false);
+      }
+    },
+    [user]
+  );
+
   useEffect(() => {
     fetchUserProfile();
   }, [fetchUserProfile]);
@@ -328,10 +424,14 @@ export const SocialProvider = ({
         toggleLikePost,
         toggleSavePost,
         deletePost,
+        fetchComments,
+        createComment,
         isLoading: isUserLoading,
         isPostsLoading,
         isSavedPostsLoading,
+        isCommentsLoading,
         isCreatingPost,
+        isCreatingComment,
         error,
       }}
     >

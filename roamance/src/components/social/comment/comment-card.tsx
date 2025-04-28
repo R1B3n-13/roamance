@@ -1,12 +1,12 @@
-import { Comment, User } from '@/types';
-import { MoreHorizontal, ThumbsUp, MessageCircle } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { CommentResponseDto, User } from '@/types';
+import { motion } from 'framer-motion';
+import { MessageCircle, MoreHorizontal, ThumbsUp } from 'lucide-react';
 import Image from 'next/image';
 import { useState } from 'react';
-import { cn } from '@/lib/utils';
-import { motion } from 'framer-motion';
 
 interface CommentCardProps {
-  comment: Comment;
+  comment: CommentResponseDto;
   currentUser?: User;
   onLike?: (commentId: string) => void;
   onReply?: (commentId: string) => void;

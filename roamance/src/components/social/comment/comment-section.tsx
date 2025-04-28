@@ -1,12 +1,11 @@
 'use client';
 
 import { CommentCard } from '@/components/social/comment/comment-card';
-import { CommentService } from '@/service/social-service';
-import { Comment, Post, User } from '@/types';
+import { useSocialContext } from '@/context/SocialContext';
+import { Comment, CommentResponseDto, User } from '@/types';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Loader2, MessageSquarePlus } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
-import { toast } from 'sonner';
 import { CommentForm } from './comment-form';
 
 interface CommentSectionProps {
@@ -20,86 +19,37 @@ export const CommentSection = ({
   currentUser,
   initialComments = [],
 }: CommentSectionProps) => {
-  const [comments, setComments] = useState<Comment[]>(initialComments);
-  const [isLoading, setIsLoading] = useState(!initialComments.length);
-  const [error, setError] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { fetchComments, createComment, isCommentsLoading, isCreatingComment, error } = useSocialContext();
+  const [comments, setComments] = useState<CommentResponseDto[]>(initialComments);
 
-  const fetchComments = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      const response = await CommentService.getCommentsByPostId(postId);
-
-      if (response.success) {
-        // Transform API response to Comment[] by adding missing properties
-        const transformedComments: Comment[] = response.data.map((comment) => ({
-          ...comment,
-          post: { id: postId } as Post, // Minimal post object with correct type
-        }));
-        setComments(transformedComments);
-      } else {
-        setError('Failed to fetch comments');
-      }
-    } catch (err) {
-      console.error('Error fetching comments:', err);
-      setError('An error occurred while fetching comments');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [postId]);
-
-  useEffect(() => {
+  // Fetch comments when needed
+  const loadComments = useCallback(async () => {
     if (!initialComments.length) {
-      fetchComments();
+      const fetchedComments = await fetchComments(postId);
+      setComments(fetchedComments);
     }
   }, [fetchComments, initialComments, postId]);
+
+  useEffect(() => {
+    loadComments();
+  }, [loadComments]);
 
   const handleSubmitComment = async (
     text: string,
     imagePath?: string,
     videoPath?: string
   ) => {
-    if (!currentUser) {
-      toast.error('You need to be logged in to comment');
-      return;
-    }
+    const commentData = {
+      text,
+      image_path: imagePath || '',
+      video_path: videoPath || '',
+    };
 
-    if (!text.trim()) {
-      toast.error('Comment cannot be empty');
-      return;
-    }
+    const newComment = await createComment(postId, commentData);
 
-    try {
-      setIsSubmitting(true);
-
-      const commentData = {
-        text,
-        image_path: imagePath || '',
-        video_path: videoPath || '',
-      };
-
-      const response = await CommentService.createComment(postId, commentData);
-
-      if (response.success) {
-        // Create a temporary comment object to add to the UI immediately
-        const newComment: Comment = {
-          ...response.data,
-          post: { id: postId } as Post, // Minimal post object with correct type
-          user: currentUser,
-        };
-
-        // Add the new comment to the comment list at the top
-        setComments((prevComments) => [newComment, ...prevComments]);
-        toast.success('Comment added successfully');
-      } else {
-        toast.error('Failed to add comment. Please try again.');
-      }
-    } catch (err) {
-      console.error('Error adding comment:', err);
-      toast.error('Failed to add comment. Please try again.');
-    } finally {
-      setIsSubmitting(false);
+    if (newComment) {
+      // Add the new comment to the local state
+      setComments((prevComments) => [newComment, ...prevComments]);
     }
   };
 
@@ -131,12 +81,12 @@ export const CommentSection = ({
         <CommentForm
           onSubmit={handleSubmitComment}
           currentUser={currentUser}
-          isSubmitting={isSubmitting}
+          isSubmitting={isCreatingComment}
         />
       </div>
 
       {/* Comments count */}
-      {!isLoading && (
+      {!isCommentsLoading && (
         <div className="flex items-center gap-2 mb-5">
           <h3 className="text-sm font-medium bg-gradient-ocean text-transparent bg-clip-text">
             {comments.length > 0
@@ -160,7 +110,7 @@ export const CommentSection = ({
           <motion.button
             whileHover={{ scale: 1.03, y: -1 }}
             whileTap={{ scale: 0.98 }}
-            onClick={fetchComments}
+            onClick={loadComments}
             className="px-3 py-1.5 bg-white/90 dark:bg-gray-800/90 rounded-full text-xs font-medium text-red-600 dark:text-red-400 shadow-sm hover:shadow-md transition-all backdrop-blur-sm"
           >
             Try Again
@@ -169,7 +119,7 @@ export const CommentSection = ({
       )}
 
       {/* Loading state */}
-      {isLoading ? (
+      {isCommentsLoading ? (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
