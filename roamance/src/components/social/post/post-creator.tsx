@@ -1,11 +1,10 @@
 'use client';
 
 import FileUploader from '@/components/common/file-uploader';
+import { LocationPickerMap } from '@/components/maps/LocationPickerMap';
 import {
   Dialog,
-  DialogClose,
   DialogContent,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
@@ -17,9 +16,8 @@ import {
   ImageIcon,
   Loader2,
   MapPin,
-  Smile,
   Video,
-  X,
+  X
 } from 'lucide-react';
 import Image from 'next/image';
 import { useState } from 'react';
@@ -64,75 +62,26 @@ export const PostCreator = () => {
     setVideoPaths((prev) => prev.filter((_, i) => i !== index));
   };
 
+  const [showLocationDialog, setShowLocationDialog] = useState(false);
+  const [tempLocation, setTempLocation] = useState<{
+    latitude: number;
+    longitude: number;
+    name?: string;
+  } | null>(null);
+
   const handleLocationAdd = () => {
-    // Show loading state
-    const locationToast = toast.loading('Getting your location...');
-
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        // Get location name using reverse geocoding
-        try {
-          const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${position.coords.latitude}&lon=${position.coords.longitude}&zoom=18&addressdetails=1`,
-            { headers: { 'Accept-Language': 'en' } }
-          );
-
-          const data = await response.json();
-          let locationName = data.display_name;
-
-          // Try to get a shorter name if possible
-          if (data.address) {
-            locationName =
-              data.address.city ||
-              data.address.town ||
-              data.address.village ||
-              data.address.suburb ||
-              data.address.county ||
-              locationName;
-          }
-
-          // Set location with name
-          setLocation({
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
-            name: locationName,
-          });
-
-          toast.dismiss(locationToast);
-          toast.success('Location added!');
-        } catch (error) {
-          console.error('Error getting location name:', error);
-
-          // Fallback to coordinates only
-          setLocation({
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
-          });
-
-          toast.dismiss(locationToast);
-          toast.success('Location added (coordinates only).');
-        }
-      },
-      (error) => {
-        console.error('Error getting location:', error);
-        toast.dismiss(locationToast);
-        toast.error(
-          'Could not get your location. Please check your permissions.'
-        );
-
-        // Ask user to enter location manually
-        const manualLocation = window.prompt('Enter a location name:');
-        if (manualLocation) {
-          setLocation({
-            latitude: 0, // Default coordinates
-            longitude: 0,
-            name: manualLocation,
-          });
-        }
-      }
-    );
-
+    // Open map modal for picking location
+    setTempLocation(location ?? { latitude: 0, longitude: 0 });
+    setShowLocationDialog(true);
     setIsExpanded(true);
+  };
+
+  const handleLocationConfirm = () => {
+    if (tempLocation) {
+      setLocation(tempLocation);
+      toast.success('Location added!');
+    }
+    setShowLocationDialog(false);
   };
 
   const handleRemoveLocation = () => {
@@ -148,8 +97,11 @@ export const PostCreator = () => {
         text,
         image_paths: imagePaths,
         video_paths: videoPaths,
-        location: location || undefined,
-      });
+        location: location || {
+          latitude: 0,
+          longitude: 0,
+        },
+      }).then((res) => res.success);
 
       if (success) {
         // Reset form on success
@@ -341,7 +293,7 @@ export const PostCreator = () => {
                   <span>Location</span>
                 </button>
 
-                <button
+                {/* <button
                   className={cn(
                     'flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-full transition-all',
                     isSubmitting
@@ -352,7 +304,7 @@ export const PostCreator = () => {
                 >
                   <Smile className="h-4 w-4" />
                   <span>Mood</span>
-                </button>
+                </button> */}
               </div>
 
               <button
@@ -395,10 +347,13 @@ export const PostCreator = () => {
             multiple
             showPreview={false}
             onUploadSuccess={(result) => {
-              if (result.resource_type === 'image')
-                setImagePaths((prev) => [...prev, result.url]);
-              if (result.resource_type === 'video')
-                setVideoPaths((prev) => [...prev, result.url]);
+              const results = Array.isArray(result) ? result : [result];
+              results.forEach((res) => {
+                if (res.resource_type === 'image')
+                  setImagePaths((prev) => [...prev, res.url]);
+                if (res.resource_type === 'video')
+                  setVideoPaths((prev) => [...prev, res.url]);
+              });
               // close uploader dialog on successful upload
               setShowUploaderDialog(false);
             }}
@@ -410,13 +365,56 @@ export const PostCreator = () => {
             onClose={() => setShowUploaderDialog(false)}
             className=""
           />
-          <DialogFooter>
-            <DialogClose asChild>
-              <button className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-sm rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600">
-                Close
-              </button>
-            </DialogClose>
-          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Location Picker Dialog */}
+      <Dialog open={showLocationDialog} onOpenChange={setShowLocationDialog}>
+        <DialogContent className="w-11/12 max-w-lg p-0 overflow-hidden rounded-xl">
+          <div className="bg-gradient-to-r from-purple-600 to-indigo-600 p-4">
+            <DialogHeader className="p-0 m-0">
+              <div className="flex items-center gap-2 text-white">
+                <MapPin className="h-5 w-5" />
+                <DialogTitle className="m-0 text-white">
+                  Pin Your Location
+                </DialogTitle>
+              </div>
+              <p className="text-white/80 text-sm mt-1">
+                Mark where this moment happened on the map
+              </p>
+            </DialogHeader>
+          </div>
+
+          <div className="p-4 pb-0">
+            <LocationPickerMap
+              initialLocation={tempLocation ?? { latitude: 0, longitude: 0 }}
+              onLocationChangeAction={(lat, lng) =>
+                setTempLocation({ latitude: lat, longitude: lng })
+              }
+              height="300px"
+            />
+          </div>
+
+          <div className="p-4 mt-4 border-t border-gray-100 dark:border-gray-800 flex justify-end gap-3">
+            <button
+              onClick={() => setShowLocationDialog(false)}
+              className="px-4 py-2 rounded-full text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleLocationConfirm}
+              disabled={!tempLocation}
+              className={cn(
+                'px-5 py-2 rounded-full text-sm font-medium transition-all',
+                tempLocation
+                  ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-sm hover:shadow hover:from-purple-500 hover:to-indigo-500 hover:-translate-y-0.5 active:translate-y-0'
+                  : 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed'
+              )}
+            >
+              Add to Post
+            </button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

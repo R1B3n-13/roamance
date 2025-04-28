@@ -1,6 +1,13 @@
 'use client';
 
-import { Comment, Post, User } from '@/types';
+import {
+  Comment,
+  Post,
+  PostRequestDto,
+  PostResponse,
+  PostResponseDto,
+  User,
+} from '@/types';
 import React, {
   createContext,
   useContext,
@@ -12,14 +19,6 @@ import React, {
 import { userService } from '@/service/user-service';
 import { CommentService, PostService } from '@/service/social-service';
 import { toast } from 'sonner';
-
-interface CreatePostParams {
-  text: string;
-  image_paths: string[];
-  video_paths: string[];
-  location?: { latitude: number; longitude: number; name?: string };
-  saved: Post[];
-}
 
 interface SocialContextValue {
   user: User;
@@ -33,7 +32,7 @@ interface SocialContextValue {
   fetchPosts: () => Promise<void>;
   fetchSavedPosts: () => Promise<void>;
   refreshFeed: () => Promise<void>;
-  createPost: (postData: CreatePostParams) => Promise<boolean>;
+  createPost: (postData: PostRequestDto) => Promise<PostResponse>;
   isLoading: boolean;
   isPostsLoading: boolean;
   isSavedPostsLoading: boolean;
@@ -53,7 +52,14 @@ const SocialContext = createContext<SocialContextValue>({
   fetchPosts: async () => {},
   fetchSavedPosts: async () => {},
   refreshFeed: async () => {},
-  createPost: async () => false,
+  createPost: async (postData: PostRequestDto) => {
+    return {
+      success: true,
+      data: postData as PostResponseDto,
+      message: '',
+      status: 200,
+    };
+  },
   isLoading: false,
   isPostsLoading: false,
   isSavedPostsLoading: false,
@@ -158,7 +164,7 @@ export const SocialProvider = ({
   }, []);
 
   const createPost = useCallback(
-    async (postData: CreatePostParams): Promise<boolean> => {
+    async (postData: PostRequestDto): Promise<PostResponse> => {
       try {
         setIsCreatingPost(true);
 
@@ -185,15 +191,25 @@ export const SocialProvider = ({
           // Trigger a refresh to get the latest data from the server
           setPostCreated((prev) => !prev);
           toast.success('Post shared successfully!');
-          return true;
+          return response;
         } else {
           toast.error('Failed to create post');
-          return false;
+          return {
+            success: false,
+            data: {} as PostResponseDto,
+            message: 'Failed to create post',
+            status: 400,
+          };
         }
       } catch (error) {
         console.error('Error creating post:', error);
         toast.error('Failed to create post. Please try again.');
-        return false;
+        return {
+          success: false,
+          data: {} as PostResponseDto,
+          message: 'Failed to create post',
+          status: 500,
+        };
       } finally {
         setIsCreatingPost(false);
       }

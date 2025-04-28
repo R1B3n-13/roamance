@@ -6,14 +6,25 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { ImageIcon, Loader2, SendHorizontal, Video, X } from 'lucide-react';
 import Image from 'next/image';
 import { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogClose,
+} from '@/components/ui/dialog';
 import FileUploader from '@/components/common/file-uploader';
 import { toast } from 'sonner';
 
 interface CommentFormProps {
   currentUser?: User;
   isSubmitting?: boolean;
-  onSubmit: (text: string, imagePath?: string, videoPath?: string) => Promise<void>;
+  onSubmit: (
+    text: string,
+    imagePath?: string,
+    videoPath?: string
+  ) => Promise<void>;
   placeholder?: string;
   autoFocus?: boolean;
 }
@@ -31,7 +42,6 @@ export const CommentForm = ({
   const [showUploaderDialog, setShowUploaderDialog] = useState(false);
   const [uploaderType, setUploaderType] = useState<'image' | 'video'>('image');
   const [isExpanded, setIsExpanded] = useState(false);
-  const [uploadingMedia, setUploadingMedia] = useState(false);
   const [charCount, setCharCount] = useState(0);
   const MAX_CHARS = 280;
 
@@ -56,7 +66,7 @@ export const CommentForm = ({
   };
 
   const handleSubmit = async () => {
-    if (isSubmitting || uploadingMedia || text.trim() === '') return;
+    if (isSubmitting || text.trim() === '') return;
 
     try {
       await onSubmit(text, imagePath, videoPath);
@@ -78,7 +88,7 @@ export const CommentForm = ({
         <div className="flex gap-3">
           <motion.div
             whileHover={{ scale: 1.05 }}
-            transition={{ type: "spring", stiffness: 400, damping: 15 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 15 }}
             className="relative h-9 w-9 rounded-full overflow-hidden flex-shrink-0 border-2 border-ocean-light dark:border-ocean shadow-soft-xl"
           >
             <Image
@@ -126,7 +136,7 @@ export const CommentForm = ({
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
                   exit={{ opacity: 0, height: 0 }}
-                  transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 25 }}
                 >
                   {/* Media Previews */}
                   {(imagePath || videoPath) && (
@@ -179,14 +189,6 @@ export const CommentForm = ({
                       )}
                     </div>
                   )}
-
-                  {/* Upload Status */}
-                  {uploadingMedia && (
-                    <div className="mt-2.5 flex items-center text-xs text-gray-500 dark:text-gray-400">
-                      <Loader2 className="mr-2 h-3 w-3 text-ocean dark:text-ocean-light animate-spin" />
-                      <span className="animate-pulse">Uploading media...</span>
-                    </div>
-                  )}
                 </motion.div>
               )}
             </AnimatePresence>
@@ -200,7 +202,7 @@ export const CommentForm = ({
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            transition={{ type: "spring", stiffness: 300, damping: 25 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 25 }}
             className="px-3.5 pb-3.5 pt-1 border-t border-gray-100/50 dark:border-gray-700/30"
           >
             <div className="flex justify-between items-center">
@@ -215,11 +217,11 @@ export const CommentForm = ({
                   }}
                   className={cn(
                     'flex items-center gap-1 p-2 text-xs rounded-lg transition-all shadow-sm',
-                    uploadingMedia || isSubmitting
+                    isSubmitting
                       ? 'bg-gray-100/80 dark:bg-gray-700/40 text-gray-400 dark:text-gray-500 cursor-not-allowed'
                       : 'bg-white/70 dark:bg-gray-800/60 text-ocean dark:text-ocean-light hover:bg-ocean/10 dark:hover:bg-ocean/20 backdrop-blur-sm'
                   )}
-                  disabled={uploadingMedia || isSubmitting}
+                  disabled={isSubmitting}
                 >
                   <ImageIcon className="h-3.5 w-3.5" />
                 </motion.button>
@@ -233,11 +235,11 @@ export const CommentForm = ({
                   }}
                   className={cn(
                     'flex items-center gap-1 p-2 text-xs rounded-lg transition-all shadow-sm',
-                    uploadingMedia || isSubmitting
+                    isSubmitting
                       ? 'bg-gray-100/80 dark:bg-gray-700/40 text-gray-400 dark:text-gray-500 cursor-not-allowed'
                       : 'bg-white/70 dark:bg-gray-800/60 text-forest dark:text-forest-light hover:bg-forest/10 dark:hover:bg-forest/20 backdrop-blur-sm'
                   )}
-                  disabled={uploadingMedia || isSubmitting}
+                  disabled={isSubmitting}
                 >
                   <Video className="h-3.5 w-3.5" />
                 </motion.button>
@@ -247,10 +249,10 @@ export const CommentForm = ({
                 whileHover={{ scale: 1.05, y: -1 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={handleSubmit}
-                disabled={isSubmitting || uploadingMedia || text.trim() === ''}
+                disabled={isSubmitting || text.trim() === ''}
                 className={cn(
                   'p-2 rounded-lg text-xs font-medium transition-all shadow-sm',
-                  text.trim() !== '' && !uploadingMedia && !isSubmitting
+                  text.trim() !== '' && !!isSubmitting
                     ? 'bg-gradient-ocean text-white hover:opacity-90'
                     : 'bg-gray-100/80 dark:bg-gray-700/50 text-gray-400 dark:text-gray-500 cursor-not-allowed'
                 )}
@@ -275,16 +277,19 @@ export const CommentForm = ({
             </DialogTitle>
           </DialogHeader>
           <FileUploader
-            acceptedFileTypes={
-              uploaderType === 'image' ? 'image/*' : 'video/*'
-            }
+            acceptedFileTypes={uploaderType === 'image' ? 'image/*' : 'video/*'}
             multiple={false}
             showPreview={false}
             onUploadSuccess={(result) => {
-              if (result.resource_type === 'image')
-                setImagePath(result.url);
-              if (result.resource_type === 'video')
-                setVideoPath(result.url);
+              const results = Array.isArray(result) ? result : [result];
+              results.forEach((res) => {
+                if (res.resource_type === 'image') {
+                  setImagePath(res.url);
+                }
+                if (res.resource_type === 'video') {
+                  setVideoPath(res.url);
+                }
+              });
               // close uploader dialog on successful upload
               setShowUploaderDialog(false);
               toast.success('Media uploaded successfully');
