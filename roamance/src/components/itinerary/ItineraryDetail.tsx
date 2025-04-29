@@ -24,7 +24,6 @@ import {
   Calendar,
   CalendarDays,
   Check,
-  CheckSquare,
   Clock,
   Copy,
   Download,
@@ -53,7 +52,6 @@ import { Label } from '../ui/label';
 import { Textarea } from '../ui/textarea';
 import { CostTracker } from './CostTracker';
 import { DayPlanCard } from './DayPlanCard';
-import { TripChecklist } from './TripChecklist';
 
 export function ItineraryDetail() {
   const { resolvedTheme } = useTheme();
@@ -434,13 +432,6 @@ export function ItineraryDetail() {
               <Receipt className="h-4 w-4" />
               <span>Budget</span>
             </TabsTrigger>
-            <TabsTrigger
-              value="checklist"
-              className="flex gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-purple-800 data-[state=active]:text-white rounded-xl transition-all duration-300"
-            >
-              <CheckSquare className="h-4 w-4" />
-              <span>Checklist</span>
-            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
@@ -738,13 +729,6 @@ export function ItineraryDetail() {
                 />
               );
             })()}
-          </TabsContent>
-
-          <TabsContent value="checklist" className="space-y-6">
-            <TripChecklist
-              itineraryId={itineraryId || ''}
-              isDarkMode={isDarkMode}
-            />
           </TabsContent>
         </Tabs>
       </motion.div>
