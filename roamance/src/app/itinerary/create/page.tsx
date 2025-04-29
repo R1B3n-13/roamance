@@ -1,9 +1,15 @@
 'use client';
 
-import { LocationSearchInput } from '@/components/maps';
+import { LocationPickerMap } from '@/components/maps/LocationPickerMap';
 import { Button } from '@/components/ui/button';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import {
   Form,
   FormControl,
@@ -11,18 +17,17 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+  FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import {
   Popover,
   PopoverContent,
-  PopoverTrigger
-} from "@/components/ui/popover";
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { ItineraryService } from '@/service/itinerary-service';
-import { Location } from '@/types';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { addDays, differenceInDays, format } from 'date-fns';
 import { motion } from 'framer-motion';
@@ -35,7 +40,7 @@ import {
   MapPin,
   Plus,
   Save,
-  Trash2
+  Trash2,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -43,25 +48,39 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import * as z from 'zod';
 
-// Define validation schema
+// Define a local type for the location data used in the form
+interface FormLocation {
+  latitude: number;
+  longitude: number;
+  name?: string;
+  street?: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  description?: string;
+}
+
+// Define validation schema using the local FormLocation type
 const formSchema = z.object({
-  title: z.string().min(3, { message: 'Title must be at least 3 characters' }).max(100),
-  description: z.string().min(10, { message: 'Description must be at least 10 characters' }).max(500),
+  title: z
+    .string()
+    .min(3, { message: 'Title must be at least 3 characters' })
+    .max(100),
+  description: z
+    .string()
+    .min(10, { message: 'Description must be at least 10 characters' })
+    .max(500),
   start_date: z.date({ required_error: 'Start date is required' }),
   end_date: z.date({ required_error: 'End date is required' }),
   notes: z.array(z.string()).optional(),
-  locations: z.array(
-    z.object({
-      latitude: z.number(),
-      longitude: z.number(),
-      name: z.string().optional(),
-      street: z.string().optional(),
-      city: z.string().optional(),
-      state: z.string().optional(),
-      country: z.string().optional(),
-      description: z.string().optional(),
-    })
-  ).min(1, { message: 'At least one location is required' }),
+  locations: z
+    .array(
+      z.object({
+        latitude: z.number(),
+        longitude: z.number(),
+      })
+    )
+    .min(1, { message: 'At least one location is required' }),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -72,7 +91,8 @@ export default function CreateItineraryPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [notes, setNotes] = useState<string[]>([]);
   const [newNote, setNewNote] = useState('');
-  const [locations, setLocations] = useState<Location[]>([]);
+  // Use the local FormLocation type for state
+  const [locations, setLocations] = useState<FormLocation[]>([]);
 
   // Initialize form
   const form = useForm<FormValues>({
@@ -116,7 +136,8 @@ export default function CreateItineraryPage() {
     setNotes(notes.filter((_, i) => i !== index));
   };
 
-  const handleAddLocation = (location: Location) => {
+  // Update handler to accept FormLocation
+  const handleAddLocation = (location: FormLocation) => {
     setLocations([...locations, location]);
   };
 
@@ -128,6 +149,12 @@ export default function CreateItineraryPage() {
     try {
       setIsSubmitting(true);
 
+      // Map FormLocation[] to Location[] before sending
+      const mappedLocations = data.locations.map((loc) => ({
+        latitude: loc.latitude,
+        longitude: loc.longitude,
+      }));
+
       // Prepare the request
       const itineraryData = {
         title: data.title,
@@ -135,22 +162,25 @@ export default function CreateItineraryPage() {
         start_date: format(data.start_date, 'yyyy-MM-dd'),
         end_date: format(data.end_date, 'yyyy-MM-dd'),
         notes: data.notes || [],
-        locations: data.locations || [],
+        locations: mappedLocations, // Use the mapped locations
       };
 
       // Create the itinerary
       const response = await ItineraryService.createItinerary(itineraryData);
 
       toast.success('Itinerary Created', {
-        description: 'Your itinerary has been successfully created.'
+        description: 'Your itinerary has been successfully created.',
       });
 
       // Redirect to the new itinerary
+      // Access the id from response.data as ItineraryDetailResponse is BaseResponse<ItineraryDetail>
       router.push(`/itinerary/${response.data.id}`);
     } catch (error) {
       console.error('Failed to create itinerary:', error);
       toast.error('Failed to create itinerary', {
-        description: 'Please try again.'
+        // Provide more specific error message if available from error object
+        description:
+          error instanceof Error ? error.message : 'Please try again.',
       });
     } finally {
       setIsSubmitting(false);
@@ -224,7 +254,9 @@ export default function CreateItineraryPage() {
 
         {/* Form header */}
         <motion.div variants={itemVariants} className="space-y-2">
-          <h1 className="text-2xl md:text-3xl font-bold">Create New Itinerary</h1>
+          <h1 className="text-2xl md:text-3xl font-bold">
+            Create New Itinerary
+          </h1>
           <p className="text-muted-foreground">
             Plan your next adventure by creating a new travel itinerary.
           </p>
@@ -316,14 +348,14 @@ export default function CreateItineraryPage() {
                             <PopoverTrigger asChild>
                               <FormControl>
                                 <Button
-                                  variant={"outline"}
+                                  variant={'outline'}
                                   className={cn(
-                                    "pl-3 text-left font-normal",
-                                    !field.value && "text-muted-foreground"
+                                    'pl-3 text-left font-normal',
+                                    !field.value && 'text-muted-foreground'
                                   )}
                                 >
                                   {field.value ? (
-                                    format(field.value, "PPP")
+                                    format(field.value, 'PPP')
                                   ) : (
                                     <span>Pick a date</span>
                                   )}
@@ -331,7 +363,10 @@ export default function CreateItineraryPage() {
                                 </Button>
                               </FormControl>
                             </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start">
+                            <PopoverContent
+                              className="w-auto p-0"
+                              align="start"
+                            >
                               <CalendarComponent
                                 mode="single"
                                 selected={field.value}
@@ -357,14 +392,14 @@ export default function CreateItineraryPage() {
                             <PopoverTrigger asChild>
                               <FormControl>
                                 <Button
-                                  variant={"outline"}
+                                  variant={'outline'}
                                   className={cn(
-                                    "pl-3 text-left font-normal",
-                                    !field.value && "text-muted-foreground"
+                                    'pl-3 text-left font-normal',
+                                    !field.value && 'text-muted-foreground'
                                   )}
                                 >
                                   {field.value ? (
-                                    format(field.value, "PPP")
+                                    format(field.value, 'PPP')
                                   ) : (
                                     <span>Pick a date</span>
                                   )}
@@ -372,15 +407,21 @@ export default function CreateItineraryPage() {
                                 </Button>
                               </FormControl>
                             </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start">
+                            <PopoverContent
+                              className="w-auto p-0"
+                              align="start"
+                            >
                               <CalendarComponent
                                 mode="single"
                                 selected={field.value}
                                 onSelect={field.onChange}
                                 disabled={(date) => {
                                   // Cannot select dates before the start date
-                                  const startDate = form.getValues("start_date");
-                                  return startDate ? date < startDate : date < new Date();
+                                  const startDate =
+                                    form.getValues('start_date');
+                                  return startDate
+                                    ? date < startDate
+                                    : date < new Date();
                                 }}
                                 initialFocus
                               />
@@ -393,9 +434,14 @@ export default function CreateItineraryPage() {
                   </div>
 
                   {/* Display trip duration */}
-                  {form.watch("start_date") && form.watch("end_date") && (
+                  {form.watch('start_date') && form.watch('end_date') && (
                     <div className="mt-2 text-sm text-muted-foreground">
-                      Trip Duration: {differenceInDays(form.watch("end_date"), form.watch("start_date")) + 1} days
+                      Trip Duration:{' '}
+                      {differenceInDays(
+                        form.watch('end_date'),
+                        form.watch('start_date')
+                      ) + 1}{' '}
+                      days
                     </div>
                   )}
                 </CardContent>
@@ -413,25 +459,51 @@ export default function CreateItineraryPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {/* Location Search */}
-                  <div className="space-y-2">
-                    <Label>Search and add locations</Label>
-                    <LocationSearchInput onSelectLocation={handleAddLocation} />
+                  {/* Location Picker Map */}
+                  <div className="mt-6 space-y-2">
+                    <Label>Map Selection</Label>
+                    <LocationPickerMap
+                      initialLocation={{
+                        latitude:
+                          locations.length > 0
+                            ? locations[locations.length - 1].latitude
+                            : 0,
+                        longitude:
+                          locations.length > 0
+                            ? locations[locations.length - 1].longitude
+                            : 0,
+                      }}
+                      onLocationChangeAction={(lat, lng) => {
+                        // When a location is selected on map, add it to locations
+                        handleAddLocation({
+                          latitude: lat,
+                          longitude: lng,
+                          name: `Location ${locations.length + 1}`,
+                          description: 'Selected from map',
+                        });
+                      }}
+                      height="300px"
+                    />
                     <p className="text-xs text-muted-foreground">
-                      Search for cities, attractions, hotels, or any destination
+                      Click on the map to add a location, or use the search
+                      above
                     </p>
                   </div>
 
                   {/* Locations List */}
                   <div className="space-y-3 mt-4">
-                    <p className="text-sm font-medium">Added Locations ({locations.length})</p>
+                    <p className="text-sm font-medium">
+                      Added Locations ({locations.length})
+                    </p>
 
                     {locations.length === 0 ? (
                       <div className="text-sm text-muted-foreground p-4 border border-dashed rounded-lg text-center">
-                        No locations added yet. Search and add destinations above.
+                        No locations added yet. Search and add destinations
+                        above.
                       </div>
                     ) : (
                       <div className="space-y-2">
+                        {/* Render using fields from FormLocation */}
                         {locations.map((location, index) => (
                           <div
                             key={index}
@@ -443,18 +515,28 @@ export default function CreateItineraryPage() {
                               </div>
                               <div>
                                 <p className="font-medium text-sm">
-                                  {location.name || (location.city && location.country
-                                    ? `${location.city}, ${location.country}`
-                                    : 'Unnamed Location')}
+                                  {/* Safely access optional fields */}
+                                  {location.name ||
+                                    (location.city && location.country
+                                      ? `${location.city}, ${location.country}`
+                                      : `Location ${index + 1}`)}
                                 </p>
                                 {location.street && (
-                                  <p className="text-xs text-muted-foreground">{location.street}</p>
+                                  <p className="text-xs text-muted-foreground">
+                                    {location.street}
+                                  </p>
                                 )}
                                 <p className="text-xs text-muted-foreground">
-                                  {[location.city, location.state, location.country]
+                                  {[
+                                    location.city,
+                                    location.state,
+                                    location.country,
+                                  ]
                                     .filter(Boolean)
                                     .join(', ')}
                                 </p>
+                                {/* Optionally display description if needed */}
+                                {/* {location.description && <p className="text-xs text-muted-foreground mt-1">{location.description}</p>} */}
                               </div>
                             </div>
                             <Button

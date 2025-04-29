@@ -12,6 +12,7 @@ import {
 import { cn } from '@/lib/utils';
 import { Activity, ActivityType } from '@/types';
 import { format, parseISO } from 'date-fns';
+import { motion } from 'framer-motion';
 import {
   Calendar,
   Coffee,
@@ -55,19 +56,49 @@ export function ActivityList({
     return timeA - timeB;
   });
 
+  // Animation variants for list items
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 10 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        type: "spring",
+        stiffness: 200,
+        damping: 20
+      }
+    },
+  };
+
   return (
-    <div className="space-y-4">
+    <motion.div
+      className="space-y-4"
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+    >
       {sortedActivities.map((activity) => (
-        <ActivityItem
-          key={activity.id}
-          activity={activity}
-          onEdit={onEdit}
-          onDelete={onDelete}
-          showActions={showActions}
-          isDarkMode={isDarkMode}
-        />
+        <motion.div key={activity.id} variants={itemVariants}>
+          <ActivityItem
+            activity={activity}
+            onEdit={onEdit}
+            onDelete={onDelete}
+            showActions={showActions}
+            isDarkMode={isDarkMode}
+          />
+        </motion.div>
       ))}
-    </div>
+    </motion.div>
   );
 }
 
@@ -205,17 +236,21 @@ function ActivityItem({
   return (
     <div
       className={cn(
-        'p-4 rounded-xl border flex items-start gap-3',
+        'p-4 rounded-xl border flex items-start gap-3 transition-all duration-300 hover:shadow-md',
         isDarkMode
-          ? 'border-muted/30 bg-muted/10'
-          : 'border-muted/40 bg-muted/5'
+          ? 'border-muted/30 bg-muted/10 hover:border-muted/40 hover:bg-muted/15'
+          : 'border-muted/40 bg-muted/5 hover:border-muted/50 hover:bg-muted/10'
       )}
     >
-      {/* Time indicator */}
+      {/* Time indicator with enhanced styling */}
       {startTime && (
         <div className="min-w-20 text-center">
           <div
-            className={cn('rounded-lg p-2', colorClasses.bg, colorClasses.text)}
+            className={cn(
+              'rounded-xl p-2 shadow-sm backdrop-blur-sm transition-all duration-300 hover:shadow-md',
+              colorClasses.bg,
+              colorClasses.text
+            )}
           >
             <p className="font-semibold text-sm">{startTime}</p>
             {endTime && (
@@ -228,20 +263,20 @@ function ActivityItem({
         </div>
       )}
 
-      {/* Activity content */}
+      {/* Activity content with improved typographic hierarchy */}
       <div className="flex-1">
         <div className="flex flex-wrap items-start justify-between gap-2">
           <div className="flex-1">
-            {/* Use activity.note as the title since Activity type has no title field */}
-            <h4 className="font-medium">{activity.note}</h4>
+            {/* Use activity.note as the title with enhanced typography */}
+            <h4 className="font-medium text-foreground">{activity.note}</h4>
 
-            {/* Type and cost */}
-            <div className="flex flex-wrap items-center gap-2 mt-1">
+            {/* Type and cost badges with improved styling */}
+            <div className="flex flex-wrap items-center gap-2 mt-1.5">
               {activity.type && (
                 <Badge
                   variant="outline"
                   className={cn(
-                    'px-2 py-0.5 rounded-full text-xs font-normal',
+                    'px-2 py-0.5 rounded-full text-xs font-normal shadow-sm',
                     colorClasses.bg,
                     colorClasses.text,
                     colorClasses.border
@@ -255,7 +290,7 @@ function ActivityItem({
               )}
 
               {activity.cost > 0 && (
-                <span className="text-xs text-muted-foreground inline-flex items-center">
+                <span className="text-xs text-muted-foreground inline-flex items-center px-2 py-0.5 rounded-full bg-muted/30 shadow-sm">
                   <DollarSign className="h-3 w-3 mr-0.5" />
                   {activity.cost.toFixed(2)}
                 </span>
@@ -263,22 +298,28 @@ function ActivityItem({
             </div>
           </div>
 
-          {/* Actions menu */}
+          {/* Actions menu with improved button styling */}
           {showActions && (onEdit || onDelete) && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 rounded-full"
+                  className="h-8 w-8 rounded-full hover:bg-muted/20 transition-all duration-300"
                 >
                   <MoreHorizontal className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
+              <DropdownMenuContent
+                align="end"
+                className="rounded-xl border-muted/30 shadow-lg backdrop-blur-sm bg-background/70"
+              >
                 {onEdit && (
-                  <DropdownMenuItem onClick={() => onEdit(activity.id)}>
-                    <Edit className="h-4 w-4 mr-2" />
+                  <DropdownMenuItem
+                    onClick={() => onEdit(activity.id)}
+                    className="flex items-center gap-2 cursor-pointer focus:bg-ocean/10"
+                  >
+                    <Edit className="h-4 w-4 text-ocean" />
                     <span>Edit</span>
                   </DropdownMenuItem>
                 )}
@@ -287,9 +328,9 @@ function ActivityItem({
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                       onClick={() => onDelete(activity.id)}
-                      className="text-destructive"
+                      className="text-destructive flex items-center gap-2 cursor-pointer focus:bg-destructive/10"
                     >
-                      <Trash2 className="h-4 w-4 mr-2" />
+                      <Trash2 className="h-4 w-4" />
                       <span>Delete</span>
                     </DropdownMenuItem>
                   </>
@@ -299,9 +340,9 @@ function ActivityItem({
           )}
         </div>
 
-        {/* Location info */}
+        {/* Location info with improved visual alignment */}
         {activity.location && (
-          <div className="mt-2 flex items-start gap-1.5 text-sm text-muted-foreground">
+          <div className="mt-2.5 flex items-start gap-1.5 text-sm text-muted-foreground bg-muted/10 px-2.5 py-1.5 rounded-lg shadow-sm">
             <MapPin className="h-3.5 w-3.5 flex-shrink-0 mt-0.5" />
             {/* Display location name if available, otherwise coordinates */}
             <span>

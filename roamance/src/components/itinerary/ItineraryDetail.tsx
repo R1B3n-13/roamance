@@ -193,23 +193,24 @@ export function ItineraryDetail() {
       animate="visible"
       className="space-y-8 relative"
     >
-      {/* Decorative background elements */}
-      <div className="absolute top-20 right-10 w-64 h-64 bg-gradient-radial from-ocean/5 to-transparent rounded-full blur-3xl -z-10" />
-      <div className="absolute bottom-40 left-10 w-72 h-72 bg-gradient-radial from-forest/5 to-transparent rounded-full blur-3xl -z-10" />
+      {/* Enhanced decorative background elements */}
+      <div className="absolute -top-20 -right-40 w-96 h-96 bg-gradient-radial from-ocean/10 to-transparent rounded-full blur-3xl -z-10" />
+      <div className="absolute -bottom-20 -left-40 w-96 h-96 bg-gradient-radial from-forest/10 to-transparent rounded-full blur-3xl -z-10" />
+      <div className="absolute top-1/2 left-1/3 w-72 h-72 bg-gradient-radial from-sunset/5 to-transparent rounded-full blur-3xl -z-10" />
 
       {/* Header with back button and actions */}
       <motion.div
         variants={itemVariants}
-        className="flex flex-wrap items-center justify-between gap-4"
+        className="flex flex-wrap items-center justify-between gap-4 backdrop-blur-sm bg-background/50 p-4 rounded-2xl shadow-sm border border-muted/10"
       >
         <div className="flex items-center gap-2">
           <Button
             variant="ghost"
             size="sm"
-            className="rounded-xl"
+            className="rounded-xl hover:bg-muted/50 transition-all"
             onClick={() => router.back()}
           >
-            <ArrowLeft className="h-4 w-4 mr-1" />
+            <ArrowLeft className="h-4 w-4 mr-1.5" />
             Back
           </Button>
         </div>
@@ -218,7 +219,7 @@ export function ItineraryDetail() {
           <Button
             variant="outline"
             size="sm"
-            className="rounded-xl border-primary/30 text-primary hover:bg-primary/10"
+            className="rounded-xl border-primary/30 text-primary hover:bg-primary/10 transition-all shadow-sm"
             asChild
           >
             <Link href={`/itinerary/edit?id=${itineraryId}`}>
@@ -229,7 +230,7 @@ export function ItineraryDetail() {
           <Button
             variant="outline"
             size="sm"
-            className="rounded-xl border-ocean/30 text-ocean hover:bg-ocean/10"
+            className="rounded-xl border-ocean/30 text-ocean hover:bg-ocean/10 transition-all shadow-sm"
             asChild
           >
             <Link href={`/itinerary/day-plan/create?itineraryId=${itineraryId}`}>
@@ -241,18 +242,21 @@ export function ItineraryDetail() {
       </motion.div>
 
       {/* Title and Status */}
-      <motion.div variants={itemVariants}>
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-2">
-          <h1 className="text-2xl md:text-3xl font-bold">{itinerary.title}</h1>
+      <motion.div
+        variants={itemVariants}
+        className="bg-background/80 backdrop-blur-sm p-6 rounded-2xl border border-muted/10 shadow-sm"
+      >
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
+          <h1 className="text-2xl md:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary-dark">{itinerary.title}</h1>
           <Badge
             variant="outline"
             className={cn(
-              'px-3 py-1 text-sm rounded-full font-medium',
+              'px-4 py-1.5 text-sm rounded-full font-medium shadow-sm transition-all',
               status === 'upcoming'
-                ? 'bg-forest/10 text-forest border-forest/30'
+                ? 'bg-forest/10 text-forest border-forest/30 hover:bg-forest/20'
                 : status === 'ongoing'
-                  ? 'bg-ocean/10 text-ocean border-ocean/30'
-                  : 'bg-sunset/10 text-sunset border-sunset/30'
+                  ? 'bg-ocean/10 text-ocean border-ocean/30 hover:bg-ocean/20'
+                  : 'bg-sunset/10 text-sunset border-sunset/30 hover:bg-sunset/20'
             )}
           >
             {status === 'upcoming'
@@ -262,21 +266,21 @@ export function ItineraryDetail() {
                 : 'Completed'}
           </Badge>
         </div>
-        <p className="text-muted-foreground">{itinerary.description}</p>
+        <p className="text-muted-foreground text-base">{itinerary.description}</p>
       </motion.div>
 
       {/* Quick Info Cards */}
       <motion.div variants={itemVariants}>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
           {/* Date Info */}
-          <Card className="border-muted/40 bg-gradient-to-b from-background to-background/95 backdrop-blur-sm shadow-sm">
-            <CardHeader className="pb-2">
+          <Card className="border-muted/20 bg-background/70 backdrop-blur-sm shadow-md hover:shadow-lg transition-all duration-300 rounded-2xl overflow-hidden group">
+            <CardHeader className="pb-2 bg-gradient-to-r from-background/80 to-background/40 border-b border-muted/10">
               <CardTitle className="text-sm font-medium flex items-center gap-2 text-muted-foreground">
                 <Calendar className="h-4 w-4 text-primary" />
                 Date Range
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-4">
               <p className="text-base font-medium">
                 {format(startDate, 'MMM d, yyyy')} -{' '}
                 {format(endDate, 'MMM d, yyyy')}
@@ -288,14 +292,14 @@ export function ItineraryDetail() {
           </Card>
 
           {/* Countdown/Status */}
-          <Card className="border-muted/40 bg-gradient-to-b from-background to-background/95 backdrop-blur-sm shadow-sm">
-            <CardHeader className="pb-2">
+          <Card className="border-muted/20 bg-background/70 backdrop-blur-sm shadow-md hover:shadow-lg transition-all duration-300 rounded-2xl overflow-hidden group">
+            <CardHeader className="pb-2 bg-gradient-to-r from-background/80 to-background/40 border-b border-muted/10">
               <CardTitle className="text-sm font-medium flex items-center gap-2 text-muted-foreground">
                 <Clock className="h-4 w-4 text-primary" />
                 Status
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-4">
               {status === 'upcoming' && (
                 <>
                   <p className="text-base font-medium text-forest">
@@ -338,14 +342,14 @@ export function ItineraryDetail() {
           </Card>
 
           {/* Locations */}
-          <Card className="border-muted/40 bg-gradient-to-b from-background to-background/95 backdrop-blur-sm shadow-sm">
-            <CardHeader className="pb-2">
+          <Card className="border-muted/20 bg-background/70 backdrop-blur-sm shadow-md hover:shadow-lg transition-all duration-300 rounded-2xl overflow-hidden group">
+            <CardHeader className="pb-2 bg-gradient-to-r from-background/80 to-background/40 border-b border-muted/10">
               <CardTitle className="text-sm font-medium flex items-center gap-2 text-muted-foreground">
                 <MapPin className="h-4 w-4 text-primary" />
                 Destinations
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-4">
               <p className="text-base font-medium">
                 {itinerary.locations.length}{' '}
                 {itinerary.locations.length === 1 ? 'Location' : 'Locations'}
@@ -361,14 +365,14 @@ export function ItineraryDetail() {
           </Card>
 
           {/* Day Plans */}
-          <Card className="border-muted/40 bg-gradient-to-b from-background to-background/95 backdrop-blur-sm shadow-sm">
-            <CardHeader className="pb-2">
+          <Card className="border-muted/20 bg-background/70 backdrop-blur-sm shadow-md hover:shadow-lg transition-all duration-300 rounded-2xl overflow-hidden group">
+            <CardHeader className="pb-2 bg-gradient-to-r from-background/80 to-background/40 border-b border-muted/10">
               <CardTitle className="text-sm font-medium flex items-center gap-2 text-muted-foreground">
                 <CalendarDays className="h-4 w-4 text-primary" />
                 Day Plans
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-4">
               <p className="text-base font-medium">
                 {dayPlans.length}{' '}
                 {dayPlans.length === 1 ? 'Day Plan' : 'Day Plans'}
@@ -386,24 +390,24 @@ export function ItineraryDetail() {
       {/* Tabs */}
       <motion.div variants={itemVariants}>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="bg-muted/50 backdrop-blur-sm p-1 rounded-xl mb-6">
+          <TabsList className="bg-background/70 backdrop-blur-md p-1.5 rounded-2xl mb-6 border border-muted/10 shadow-sm">
             <TabsTrigger
               value="overview"
-              className="flex gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary-dark data-[state=active]:text-white rounded-lg"
+              className="flex gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary-dark data-[state=active]:text-white rounded-xl transition-all duration-300"
             >
               <Info className="h-4 w-4" />
               <span>Overview</span>
             </TabsTrigger>
             <TabsTrigger
               value="day-plans"
-              className="flex gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-forest data-[state=active]:to-forest-dark data-[state=active]:text-white rounded-lg"
+              className="flex gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-forest data-[state=active]:to-forest-dark data-[state=active]:text-white rounded-xl transition-all duration-300"
             >
               <CalendarDays className="h-4 w-4" />
               <span>Day Plans</span>
             </TabsTrigger>
             <TabsTrigger
               value="map"
-              className="flex gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-ocean data-[state=active]:to-ocean-dark data-[state=active]:text-white rounded-lg"
+              className="flex gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-ocean data-[state=active]:to-ocean-dark data-[state=active]:text-white rounded-xl transition-all duration-300"
             >
               <Globe className="h-4 w-4" />
               <span>Map</span>
@@ -412,8 +416,8 @@ export function ItineraryDetail() {
 
           <TabsContent value="overview" className="space-y-6">
             {/* Overview content - Route visualization */}
-            <Card className="border-muted/40 bg-gradient-to-b from-background to-background/95 backdrop-blur-sm shadow-md">
-              <CardHeader>
+            <Card className="border-muted/20 bg-background/70 backdrop-blur-sm shadow-md rounded-2xl overflow-hidden">
+              <CardHeader className="border-b border-muted/10 bg-gradient-to-r from-background/80 to-background/40">
                 <CardTitle className="flex items-center gap-2">
                   <Route className="h-5 w-5 text-primary/80" />
                   Trip Route Overview
@@ -422,7 +426,7 @@ export function ItineraryDetail() {
                   Visualization of your complete travel route
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-0">
                 {mapLocations.length > 0 ? (
                   <RouteVisualization
                     locations={mapLocations}
@@ -453,8 +457,8 @@ export function ItineraryDetail() {
             </Card>
 
             {/* Notes section */}
-            <Card className="border-muted/40 bg-gradient-to-b from-background to-background/95 backdrop-blur-sm shadow-md">
-              <CardHeader>
+            <Card className="border-muted/20 bg-background/70 backdrop-blur-sm shadow-md rounded-2xl overflow-hidden">
+              <CardHeader className="border-b border-muted/10 bg-gradient-to-r from-background/80 to-background/40">
                 <CardTitle className="flex items-center gap-2">
                   <Info className="h-5 w-5 text-primary/80" />
                   Trip Notes
@@ -463,28 +467,33 @@ export function ItineraryDetail() {
                   Important information about your trip
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-5">
                 {itinerary.notes && itinerary.notes.length > 0 ? (
-                  <ul className="space-y-2">
+                  <ul className="space-y-3">
                     {itinerary.notes.map((note, index) => (
-                      <li key={index} className="flex items-start gap-2">
-                        <Check className="h-4 w-4 text-primary mt-1 flex-shrink-0" />
-                        <span>{note}</span>
+                      <li key={index} className="flex items-start gap-3 p-3 rounded-xl bg-background/50 border border-muted/10">
+                        <div className="bg-primary/10 text-primary p-1.5 rounded-full">
+                          <Check className="h-4 w-4 text-primary" />
+                        </div>
+                        <span className="text-sm">{note}</span>
                       </li>
                     ))}
                   </ul>
                 ) : (
-                  <p className="text-muted-foreground">
-                    No notes have been added for this trip.
-                  </p>
+                  <div className="flex flex-col items-center justify-center py-8 px-4 rounded-xl border border-dashed border-muted/30 bg-muted/5">
+                    <Info className="h-10 w-10 text-muted-foreground/40 mb-2" />
+                    <p className="text-muted-foreground text-center">
+                      No notes have been added for this trip.
+                    </p>
+                  </div>
                 )}
               </CardContent>
             </Card>
 
             {/* Day Plans Preview (first few) */}
             {dayPlans.length > 0 && (
-              <Card className="border-muted/40 bg-gradient-to-b from-background to-background/95 backdrop-blur-sm shadow-md">
-                <CardHeader className="flex flex-row items-center justify-between">
+              <Card className="border-muted/20 bg-background/70 backdrop-blur-sm shadow-md rounded-2xl overflow-hidden">
+                <CardHeader className="flex flex-row items-center justify-between border-b border-muted/10 bg-gradient-to-r from-background/80 to-background/40">
                   <div>
                     <CardTitle className="flex items-center gap-2">
                       <Layers className="h-5 w-5 text-primary/80" />
@@ -497,13 +506,13 @@ export function ItineraryDetail() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-primary hover:text-primary-dark hover:bg-primary/5"
+                    className="text-primary hover:text-primary-dark hover:bg-primary/5 rounded-xl"
                     onClick={() => setActiveTab('day-plans')}
                   >
                     View All
                   </Button>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="p-5">
                   <div className="space-y-4">
                     {dayPlans.slice(0, 3).map((dayPlan) => (
                       <DayPlanCard
@@ -520,7 +529,7 @@ export function ItineraryDetail() {
                     {dayPlans.length > 3 && (
                       <Button
                         variant="outline"
-                        className="w-full mt-4 border-muted text-muted-foreground hover:text-foreground"
+                        className="w-full mt-4 border-muted bg-background/50 text-muted-foreground hover:text-foreground hover:bg-background transition-all duration-300 shadow-sm rounded-xl"
                         onClick={() => setActiveTab('day-plans')}
                       >
                         Show All {dayPlans.length} Day Plans
@@ -536,12 +545,12 @@ export function ItineraryDetail() {
             {dayPlans.length > 0 ? (
               <>
                 {/* Action bar */}
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-xl font-semibold">Day Plans</h2>
+                <div className="flex justify-between items-center mb-4 p-4 rounded-xl bg-background/70 backdrop-blur-sm border border-muted/10 shadow-sm">
+                  <h2 className="text-xl font-semibold bg-clip-text text-transparent bg-gradient-to-r from-forest to-forest-dark">Day Plans</h2>
                   <Button
                     variant="outline"
                     size="sm"
-                    className="rounded-xl border-ocean/30 text-ocean hover:bg-ocean/10"
+                    className="rounded-xl border-ocean/30 text-ocean hover:bg-ocean/10 shadow-sm"
                     asChild
                   >
                     <Link href={`/itinerary/day-plan/create?itineraryId=${itineraryId}`}>
@@ -552,7 +561,7 @@ export function ItineraryDetail() {
                 </div>
 
                 {/* Day Plans Accordion */}
-                <div className="space-y-4">
+                <div className="space-y-5">
                   {dayPlans.map((dayPlan) => (
                     <DayPlanCard
                       key={dayPlan.id}
@@ -579,9 +588,11 @@ export function ItineraryDetail() {
                 </div>
               </>
             ) : (
-              <Card className="border-dashed border-muted/50 bg-muted/5 p-8 text-center">
+              <Card className="border-dashed border-muted/30 bg-background/50 p-10 text-center rounded-2xl shadow-sm">
                 <div className="flex flex-col items-center justify-center">
-                  <CalendarDays className="h-12 w-12 text-muted-foreground mb-4" />
+                  <div className="bg-muted/10 p-4 rounded-full mb-4">
+                    <CalendarDays className="h-12 w-12 text-muted-foreground" />
+                  </div>
                   <h3 className="text-lg font-medium mb-2">No Day Plans Yet</h3>
                   <p className="text-muted-foreground mb-6 max-w-md mx-auto">
                     Start planning your trip by creating detailed day plans with
@@ -589,7 +600,7 @@ export function ItineraryDetail() {
                   </p>
                   <Button
                     variant="default"
-                    className="bg-gradient-to-r from-forest to-ocean text-white hover:from-forest-dark hover:to-ocean-dark"
+                    className="rounded-xl bg-gradient-to-r from-forest to-ocean text-white hover:from-forest-dark hover:to-ocean-dark shadow-md transition-all duration-300"
                     asChild
                   >
                     <Link href={`/itinerary/day-plan/create?itineraryId=${itineraryId}`}>
@@ -603,8 +614,8 @@ export function ItineraryDetail() {
           </TabsContent>
 
           <TabsContent value="map" className="space-y-6">
-            <Card className="border-muted/40 bg-gradient-to-b from-background to-background/95 backdrop-blur-sm shadow-md">
-              <CardHeader>
+            <Card className="border-muted/20 bg-background/70 backdrop-blur-sm shadow-md rounded-2xl overflow-hidden">
+              <CardHeader className="border-b border-muted/10 bg-gradient-to-r from-background/80 to-background/40">
                 <CardTitle className="flex items-center gap-2">
                   <Globe className="h-5 w-5 text-primary/80" />
                   Travel Route Map
@@ -613,7 +624,7 @@ export function ItineraryDetail() {
                   Interactive map of your complete travel itinerary
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-0">
                 {mapLocations.length > 0 ? (
                   <RouteVisualization
                     locations={mapLocations}
@@ -644,8 +655,8 @@ export function ItineraryDetail() {
             </Card>
 
             {/* Location List */}
-            <Card className="border-muted/40 bg-gradient-to-b from-background to-background/95 backdrop-blur-sm shadow-md">
-              <CardHeader>
+            <Card className="border-muted/20 bg-background/70 backdrop-blur-sm shadow-md rounded-2xl overflow-hidden">
+              <CardHeader className="border-b border-muted/10 bg-gradient-to-r from-background/80 to-background/40">
                 <CardTitle className="flex items-center gap-2">
                   <MapPin className="h-5 w-5 text-primary/80" />
                   Destination Details
@@ -654,7 +665,7 @@ export function ItineraryDetail() {
                   Information about each destination in your itinerary
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-5">
                 {itinerary.locations.length > 0 ? (
                   <div className="space-y-4">
                     {itinerary.locations.map((location, index) => (
@@ -667,9 +678,12 @@ export function ItineraryDetail() {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-muted-foreground">
-                    No locations have been added for this trip.
-                  </p>
+                  <div className="flex flex-col items-center justify-center py-8 px-4 rounded-xl border border-dashed border-muted/30 bg-muted/5">
+                    <MapPin className="h-10 w-10 text-muted-foreground/40 mb-2" />
+                    <p className="text-muted-foreground text-center">
+                      No locations have been added for this trip.
+                    </p>
+                  </div>
                 )}
               </CardContent>
             </Card>
