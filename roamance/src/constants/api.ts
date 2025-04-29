@@ -51,7 +51,6 @@ export const POSTS_ENDPOINTS = {
   DELETE: (postId: string) => `${POSTS}/delete/${postId}`,
 };
 
-
 /* -------------------------------- Comments -------------------------------- */
 
 const COMMENTS = `${API_BASE_URL}/comments`;
@@ -94,4 +93,38 @@ export const SUBSECTION_ENDPOINTS = {
   GET_BY_ID: (id: string) => `${SUBSECTIONS}/${id}`,
   UPDATE: (id: string) => `${SUBSECTIONS}/${id}`,
   DELETE: (id: string) => `${SUBSECTIONS}/${id}`,
+} as const;
+
+/* -------------------------------- Itinerary ------------------------------- */
+
+const ITINERARIES = `${TRAVEL}/itineraries`;
+export const ITINERARY_ENDPOINTS = {
+  ROOT: ITINERARIES,
+  CREATE: `${ITINERARIES}`,
+  CREATE_WITH_DETAILS: `${ITINERARIES}/with-details`,
+  GET_BY_ID: (id: string) => `${ITINERARIES}/${id}`,
+  GET_ALL: `${ITINERARIES}`,
+  GET_BY_USER_ID: (userId: string) => `${ITINERARIES}/user/${userId}`,
+  UPDATE: (id: string) => `${ITINERARIES}/${id}`,
+  DELETE: (id: string) => `${ITINERARIES}/${id}`,
+} as const;
+
+const ACTIVITIES = `${TRAVEL}/activities`;
+export const ACTIVITIES_ENDPOINTS = {
+  ROOT: ACTIVITIES,
+  CREATE: ACTIVITIES,
+  GET: (activityId: string) => `${ACTIVITIES}/${activityId}`,
+  GET_BY_DAY_PLAN_ID: (dayPlanId: string) => `${ACTIVITIES}/day-plan/${dayPlanId}`,
+  UPDATE: (activityId: string) => `${ACTIVITIES}/${activityId}`,
+  DELETE: (activityId: string) => `${ACTIVITIES}/${activityId}`,
+} as const;
+
+const DAY_PLANS = `${TRAVEL}/day-plans`;
+export const DAY_PLAN_ENDPOINTS = {
+  ROOT: DAY_PLANS,
+  CREATE: DAY_PLANS,
+  GET: (dayPlanId: string) => `${DAY_PLANS}/${dayPlanId}`,
+  GET_BY_ITINERARY_ID: (itineraryId: string) => `${DAY_PLANS}/itinerary/${itineraryId}`,
+  UPDATE: (dayPlanId: string) => `${DAY_PLANS}/${dayPlanId}`,
+  DELETE: (dayPlanId: string) => `${DAY_PLANS}/${dayPlanId}`,
 } as const;
