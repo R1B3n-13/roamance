@@ -1,12 +1,15 @@
+import { ApiError } from '@/api/errors';
+import { api } from '@/api/roamance-api';
 import { ITINERARY_ENDPOINTS } from '@/constants/api';
 import {
   BaseResponse,
   ItineraryCreateRequest,
   ItineraryDetailResponse,
   ItineraryListResponse,
+  ItineraryWithDetailsRequest
 } from '@/types';
-import { api } from '@/api/roamance-api';
-import { ApiError } from '@/api/errors';
+
+
 
 export const ItineraryService = {
   createItinerary: async (
@@ -21,6 +24,26 @@ export const ItineraryService = {
     } catch (error) {
       if (error instanceof ApiError) {
         throw new Error(`Failed to create itinerary: ${error.message}`);
+      }
+      throw error;
+    }
+  },
+
+  createItineraryWithDetails: async (
+    itineraryWithDetails: ItineraryWithDetailsRequest
+  ): Promise<ItineraryDetailResponse> => {
+    try {
+      const response = await api.post<
+        ItineraryDetailResponse,
+        ItineraryWithDetailsRequest
+      >(
+        ITINERARY_ENDPOINTS.CREATE_WITH_DETAILS,
+        itineraryWithDetails
+      );
+      return response.data;
+    } catch (error) {
+      if (error instanceof ApiError) {
+        throw new Error(`Failed to create itinerary with details: ${error.message}`);
       }
       throw error;
     }

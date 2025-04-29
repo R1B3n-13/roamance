@@ -2,6 +2,7 @@ import { Location } from './location';
 import { User } from './user';
 import { Audit } from './audit';
 import { BaseResponse } from './response';
+import { ActivityCreateRequest } from './activity';
 
 /* ------------------------------ DayPlan types ----------------------------- */
 
@@ -87,6 +88,15 @@ export interface ItineraryDetail extends ItineraryBrief {
   notes: string[];
 }
 
+export interface ItineraryWithDetailsRequest extends ItineraryCreateRequest {
+  day_plans: Array<{
+    date: string;
+    notes?: string[];
+    route_plan?: RoutePlanRequest;
+    activities?: Omit<ActivityCreateRequest, 'day_plan_id'>[];
+  }>;
+}
+
 export type ItineraryBriefResponse = BaseResponse<ItineraryBrief>;
 export type ItineraryListResponse = BaseResponse<ItineraryBrief[]>;
 export type ItineraryDetailResponse = BaseResponse<ItineraryDetail>;
@@ -104,4 +114,8 @@ export type ItineraryDtoByEndpoints = {
   };
   GET_BY_USER_ID: { request: undefined; response: ItineraryListResponse };
   DELETE: { request: undefined; response: BaseResponse<null> };
+  CREATE_WITH_DETAILS: {
+    request: ItineraryWithDetailsRequest;
+    response: ItineraryDetailResponse;
+  };
 };
