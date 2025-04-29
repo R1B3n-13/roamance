@@ -7,6 +7,7 @@ import {
   ActivityResponse,
   ActivityListResponse,
 } from '@/types/activity';
+import { BaseResponse } from '@/types/response';
 
 export const ActivityService = {
   createActivity: async (
@@ -78,9 +79,9 @@ export const ActivityService = {
 
   deleteActivity: async (
     activityId: string
-  ): Promise<{ data: null }> => {
+  ): Promise<BaseResponse<null>> => {
     try {
-      const response = await api.delete<{ data: null }>(
+      const response = await api.delete<BaseResponse<null>>(
         ACTIVITIES_ENDPOINTS.DELETE(activityId)
       );
       return response.data;

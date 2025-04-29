@@ -42,10 +42,8 @@ export interface ActivityUpdateRequest {
   cost?: number;
 }
 
-export interface ActivityDto extends Activity {}
-
-export type ActivityResponse = BaseResponse<ActivityDto>;
-export type ActivityListResponse = BaseResponse<ActivityDto[]>;
+export type ActivityResponse = BaseResponse<Activity>;
+export type ActivityListResponse = BaseResponse<Activity[]>;
 
 export type ActivityDtoByEndpoints = {
   CREATE: { request: ActivityCreateRequest; response: ActivityResponse };

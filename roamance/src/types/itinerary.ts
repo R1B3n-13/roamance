@@ -75,11 +75,12 @@ export interface Itinerary extends BaseItinerary {
   audit: Audit;
 }
 
-export interface ItineraryCreateRequest extends BaseItinerary {}
+export type ItineraryCreateRequest = BaseItinerary;
+export type ItineraryUpdateRequest = BaseItinerary;
 
 export type ItineraryDto = Omit<Itinerary, 'notes' | 'location'>;
 
-export interface ItineraryBrief extends Itinerary {}
+export type ItineraryBrief = Itinerary;
 
 export interface ItineraryDetail extends ItineraryBrief {
   locations: Location[];
@@ -91,10 +92,16 @@ export type ItineraryListResponse = BaseResponse<ItineraryBrief[]>;
 export type ItineraryDetailResponse = BaseResponse<ItineraryDetail>;
 
 export type ItineraryDtoByEndpoints = {
-  CREATE: { request: ItineraryCreateRequest; response: ItineraryDetailResponse };
+  CREATE: {
+    request: ItineraryCreateRequest;
+    response: ItineraryDetailResponse;
+  };
   GET: { request: undefined; response: ItineraryDetailResponse };
   GET_ALL: { request: undefined; response: ItineraryListResponse };
-  UPDATE: { request: ItineraryCreateRequest; response: ItineraryDetailResponse };
+  UPDATE: {
+    request: ItineraryCreateRequest;
+    response: ItineraryDetailResponse;
+  };
   GET_BY_USER_ID: { request: undefined; response: ItineraryListResponse };
   DELETE: { request: undefined; response: BaseResponse<null> };
 };
