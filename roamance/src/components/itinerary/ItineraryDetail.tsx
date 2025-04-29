@@ -24,21 +24,36 @@ import {
   Calendar,
   CalendarDays,
   Check,
+  CheckSquare,
   Clock,
+  Copy,
+  Download,
+  Facebook,
   FilePlus,
+  FileText,
   Globe,
   Info,
   Layers,
+  Mail,
   MapPin,
+  MessageSquare,
   Pencil,
   Plus,
+  Receipt,
   Route,
+  Twitter,
+  X,
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
+import { Input } from '../ui/input';
+import { Label } from '../ui/label';
+import { Textarea } from '../ui/textarea';
+import { CostTracker } from './CostTracker';
 import { DayPlanCard } from './DayPlanCard';
+import { TripChecklist } from './TripChecklist';
 
 export function ItineraryDetail() {
   const { resolvedTheme } = useTheme();
@@ -216,24 +231,20 @@ export function ItineraryDetail() {
         </div>
 
         <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            className="rounded-xl border-primary/30 text-primary hover:bg-primary/10 transition-all shadow-sm"
-            asChild
-          >
-            <Link href={`/itinerary/edit?id=${itineraryId}`}>
+          <Button variant="outline" size="sm" asChild>
+            <Link
+              href={`/itinerary/edit?id=${itineraryId}`}
+              className="flex gap-1.5 items-center px-4 py-2 rounded-xl border-primary/30 text-primary hover:bg-primary/10 transition-all shadow-sm"
+            >
               <Pencil className="h-3.5 w-3.5 mr-1.5" />
               Edit Itinerary
             </Link>
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className="rounded-xl border-ocean/30 text-ocean hover:bg-ocean/10 transition-all shadow-sm"
-            asChild
-          >
-            <Link href={`/itinerary/day-plan/create?itineraryId=${itineraryId}`}>
+          <Button variant="outline" size="sm" asChild>
+            <Link
+              href={`/itinerary/day-plan/create?itineraryId=${itineraryId}`}
+              className="flex gap-1.5 items-center px-4 py-2 rounded-xl border-ocean/30 text-ocean hover:bg-ocean/10 transition-all shadow-sm"
+            >
               <Plus className="h-3.5 w-3.5 mr-1.5" />
               Add Day Plan
             </Link>
@@ -247,7 +258,9 @@ export function ItineraryDetail() {
         className="bg-background/80 backdrop-blur-sm p-6 rounded-2xl border border-muted/10 shadow-sm"
       >
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
-          <h1 className="text-2xl md:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary-dark">{itinerary.title}</h1>
+          <h1 className="text-2xl md:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary-dark">
+            {itinerary.title}
+          </h1>
           <Badge
             variant="outline"
             className={cn(
@@ -266,7 +279,9 @@ export function ItineraryDetail() {
                 : 'Completed'}
           </Badge>
         </div>
-        <p className="text-muted-foreground text-base">{itinerary.description}</p>
+        <p className="text-muted-foreground text-base">
+          {itinerary.description}
+        </p>
       </motion.div>
 
       {/* Quick Info Cards */}
@@ -412,6 +427,20 @@ export function ItineraryDetail() {
               <Globe className="h-4 w-4" />
               <span>Map</span>
             </TabsTrigger>
+            <TabsTrigger
+              value="budget"
+              className="flex gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-sunset data-[state=active]:to-sunset-dark data-[state=active]:text-white rounded-xl transition-all duration-300"
+            >
+              <Receipt className="h-4 w-4" />
+              <span>Budget</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="checklist"
+              className="flex gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-purple-800 data-[state=active]:text-white rounded-xl transition-all duration-300"
+            >
+              <CheckSquare className="h-4 w-4" />
+              <span>Checklist</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
@@ -471,7 +500,10 @@ export function ItineraryDetail() {
                 {itinerary.notes && itinerary.notes.length > 0 ? (
                   <ul className="space-y-3">
                     {itinerary.notes.map((note, index) => (
-                      <li key={index} className="flex items-start gap-3 p-3 rounded-xl bg-background/50 border border-muted/10">
+                      <li
+                        key={index}
+                        className="flex items-start gap-3 p-3 rounded-xl bg-background/50 border border-muted/10"
+                      >
                         <div className="bg-primary/10 text-primary p-1.5 rounded-full">
                           <Check className="h-4 w-4 text-primary" />
                         </div>
@@ -546,14 +578,18 @@ export function ItineraryDetail() {
               <>
                 {/* Action bar */}
                 <div className="flex justify-between items-center mb-4 p-4 rounded-xl bg-background/70 backdrop-blur-sm border border-muted/10 shadow-sm">
-                  <h2 className="text-xl font-semibold bg-clip-text text-transparent bg-gradient-to-r from-forest to-forest-dark">Day Plans</h2>
+                  <h2 className="text-xl font-semibold bg-clip-text text-transparent bg-gradient-to-r from-forest to-forest-dark">
+                    Day Plans
+                  </h2>
                   <Button
                     variant="outline"
                     size="sm"
                     className="rounded-xl border-ocean/30 text-ocean hover:bg-ocean/10 shadow-sm"
                     asChild
                   >
-                    <Link href={`/itinerary/day-plan/create?itineraryId=${itineraryId}`}>
+                    <Link
+                      href={`/itinerary/day-plan/create?itineraryId=${itineraryId}`}
+                    >
                       <FilePlus className="h-4 w-4 mr-1.5" />
                       Add Day Plan
                     </Link>
@@ -574,12 +610,12 @@ export function ItineraryDetail() {
                       showActions={true}
                       onAddActivity={() =>
                         router.push(
-                          `/itinerary/day-plan/${dayPlan.id}/activity/create?itineraryId=${itineraryId}`
+                          `/itinerary/activity/create?dayPlanId=${dayPlan.id}&itineraryId=${itineraryId}`
                         )
                       }
                       onEditDayPlan={() =>
                         router.push(
-                          `/itinerary/day-plan/${dayPlan.id}/edit?itineraryId=${itineraryId}`
+                          `/itinerary/day-plan/edit?id=${dayPlan.id}&itineraryId=${itineraryId}`
                         )
                       }
                       isDarkMode={isDarkMode}
@@ -598,12 +634,11 @@ export function ItineraryDetail() {
                     Start planning your trip by creating detailed day plans with
                     activities and itineraries.
                   </p>
-                  <Button
-                    variant="default"
-                    className="rounded-xl bg-gradient-to-r from-forest to-ocean text-white hover:from-forest-dark hover:to-ocean-dark shadow-md transition-all duration-300"
-                    asChild
-                  >
-                    <Link href={`/itinerary/day-plan/create?itineraryId=${itineraryId}`}>
+                  <Button variant="default" asChild>
+                    <Link
+                      href={`/itinerary/day-plan/create?itineraryId=${itineraryId}`}
+                      className="flex gap-1.5 items-center px-4 py-2 rounded-xl bg-gradient-to-r from-forest to-ocean text-white hover:from-forest-dark hover:to-ocean-dark shadow-md transition-all duration-300"
+                    >
                       <Plus className="h-4 w-4 mr-2" />
                       Create First Day Plan
                     </Link>
@@ -688,6 +723,29 @@ export function ItineraryDetail() {
               </CardContent>
             </Card>
           </TabsContent>
+
+          <TabsContent value="budget" className="space-y-6">
+            {/* Get all activities across all day plans */}
+            {(() => {
+              // Combine all activities from all day plans
+              const allActivities = Object.values(activities).flat();
+
+              return (
+                <CostTracker
+                  activities={allActivities}
+                  dayPlans={dayPlans}
+                  isDarkMode={isDarkMode}
+                />
+              );
+            })()}
+          </TabsContent>
+
+          <TabsContent value="checklist" className="space-y-6">
+            <TripChecklist
+              itineraryId={itineraryId || ''}
+              isDarkMode={isDarkMode}
+            />
+          </TabsContent>
         </Tabs>
       </motion.div>
     </motion.div>
@@ -770,6 +828,172 @@ function ItineraryDetailSkeleton() {
       {/* Content skeleton */}
       <Skeleton className="h-96 w-full rounded-xl" />
       <Skeleton className="h-64 w-full rounded-xl" />
+    </div>
+  );
+}
+
+interface ShareItineraryProps {
+  itineraryId: string;
+  title: string;
+  onClose: () => void;
+  isDarkMode: boolean;
+}
+
+export function ShareItinerary({
+  itineraryId,
+  title,
+  onClose,
+  isDarkMode,
+}: ShareItineraryProps) {
+  const [copied, setCopied] = useState(false);
+  const [shareMethod, setShareMethod] = useState<'link' | 'email' | 'pdf'>(
+    'link'
+  );
+  const [email, setEmail] = useState('');
+  const [message, setMessage] = useState('');
+  const linkUrl = `${window.location.origin}/itinerary/shared?id=${itineraryId}`;
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(linkUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const sendEmail = () => {
+    // In a real app, this would call an API endpoint to send the email
+    alert(`Email would be sent to ${email} with itinerary "${title}"`);
+    onClose();
+  };
+
+  const generatePdf = () => {
+    // In a real app, this would generate a PDF for download
+    alert('PDF generation would start here');
+    onClose();
+  };
+
+  return (
+    <div
+      className={cn(
+        'p-6 rounded-xl border shadow-lg',
+        isDarkMode
+          ? 'bg-background/90 border-muted/30'
+          : 'bg-background/95 border-muted/20'
+      )}
+    >
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-semibold">Share Itinerary</h3>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onClose}
+          className="rounded-full"
+        >
+          <X className="h-4 w-4" />
+        </Button>
+      </div>
+
+      <Tabs
+        defaultValue="link"
+        className="w-full"
+        onValueChange={(v) => setShareMethod(v as any)}
+      >
+        <TabsList className="grid grid-cols-3 mb-4">
+          <TabsTrigger value="link" className="rounded-lg">
+            Share Link
+          </TabsTrigger>
+          <TabsTrigger value="email" className="rounded-lg">
+            Email
+          </TabsTrigger>
+          <TabsTrigger value="pdf" className="rounded-lg">
+            PDF
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="link" className="space-y-4">
+          <div className="flex space-x-2">
+            <Input value={linkUrl} readOnly className="flex-1" />
+            <Button onClick={copyToClipboard} className="flex-shrink-0">
+              {copied ? (
+                <Check className="h-4 w-4 mr-2" />
+              ) : (
+                <Copy className="h-4 w-4 mr-2" />
+              )}
+              {copied ? 'Copied' : 'Copy'}
+            </Button>
+          </div>
+
+          <div className="flex space-x-2">
+            <Button className="flex items-center" asChild>
+              <a
+                href={`https://twitter.com/intent/tweet?text=Check out my travel itinerary: ${encodeURIComponent(title)}&url=${encodeURIComponent(linkUrl)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Twitter className="h-4 w-4 mr-2" />
+                Twitter
+              </a>
+            </Button>
+            <Button className="flex items-center" asChild>
+              <a
+                href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(linkUrl)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Facebook className="h-4 w-4 mr-2" />
+                Facebook
+              </a>
+            </Button>
+            <Button className="flex items-center" asChild>
+              <a
+                href={`https://wa.me/?text=${encodeURIComponent(`Check out my travel itinerary: ${title} ${linkUrl}`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <MessageSquare className="h-4 w-4 mr-2" />
+                WhatsApp
+              </a>
+            </Button>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="email" className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="email">Recipient Email</Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="friend@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="message">Message (Optional)</Label>
+            <Textarea
+              id="message"
+              placeholder="Check out my travel plans!"
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              className="min-h-[100px]"
+            />
+          </div>
+          <Button onClick={sendEmail} className="w-full">
+            <Mail className="h-4 w-4 mr-2" />
+            Send Email
+          </Button>
+        </TabsContent>
+
+        <TabsContent value="pdf" className="space-y-4">
+          <div className="space-y-2 text-center">
+            <FileText className="h-16 w-16 mx-auto text-muted-foreground" />
+            <p>Generate a PDF version of your itinerary to download or print</p>
+          </div>
+          <Button onClick={generatePdf} className="w-full">
+            <Download className="h-4 w-4 mr-2" />
+            Generate PDF
+          </Button>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

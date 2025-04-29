@@ -26,6 +26,9 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
+import { ShareItinerary } from './ItineraryDetail';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { useTheme } from 'next-themes';
 
 interface ItineraryCardProps {
   itinerary: Itinerary;
@@ -39,6 +42,9 @@ export function ItineraryCard({
   onDelete,
 }: ItineraryCardProps) {
   const [isHovering, setIsHovering] = useState(false);
+  const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
+  const { resolvedTheme } = useTheme();
+  const isDarkMode = resolvedTheme === 'dark';
 
   // Calculate status
   const now = new Date();
@@ -112,6 +118,18 @@ export function ItineraryCard({
       className="will-change-transform"
     >
       <Card className="overflow-hidden border-muted/20 bg-gradient-to-b from-background/80 to-background/50 backdrop-blur-md shadow-md transition-all duration-300 hover:shadow-xl rounded-xl relative h-full py-0">
+        {/* Share Dialog */}
+        <Dialog open={isShareDialogOpen} onOpenChange={setIsShareDialogOpen}>
+          <DialogContent className="sm:max-w-md p-0 border-none bg-transparent shadow-none">
+            <ShareItinerary
+              itineraryId={itinerary.id}
+              title={itinerary.title}
+              onClose={() => setIsShareDialogOpen(false)}
+              isDarkMode={isDarkMode}
+            />
+          </DialogContent>
+        </Dialog>
+
         {/* Decorative top accent bar */}
         <div
           className={`absolute top-0 left-0 w-full h-1 ${status === 'upcoming' ? 'bg-forest' : status === 'ongoing' ? 'bg-ocean' : 'bg-sunset'}`}
@@ -185,7 +203,10 @@ export function ItineraryCard({
                   <Edit className="h-4 w-4 text-ocean" />
                   <span>Edit Itinerary</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer flex items-center gap-2 focus:bg-primary/10">
+                <DropdownMenuItem
+                  className="cursor-pointer flex items-center gap-2 focus:bg-primary/10"
+                  onClick={() => setIsShareDialogOpen(true)}
+                >
                   <Share2 className="h-4 w-4 text-muted-foreground" />
                   <span>Share</span>
                 </DropdownMenuItem>

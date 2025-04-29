@@ -63,6 +63,7 @@
     "react-hook-form": "^7.56.1",
     "react-leaflet": "^5.0.0",
     "react-leaflet-draw": "^0.20.6",
+    "recharts": "^2.15.3",
     "rehype-sanitize": "^6.0.0",
     "sharp": "^0.34.1",
     "sonner": "^2.0.1",

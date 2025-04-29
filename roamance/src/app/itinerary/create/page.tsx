@@ -172,9 +172,8 @@ export default function CreateItineraryPage() {
         description: 'Your itinerary has been successfully created.',
       });
 
-      // Redirect to the new itinerary
-      // Access the id from response.data as ItineraryDetailResponse is BaseResponse<ItineraryDetail>
-      router.push(`/itinerary/${response.data.id}`);
+      // Redirect to the new itinerary using query parameters
+      router.push(`/itinerary/details?id=${response.data.id}`);
     } catch (error) {
       console.error('Failed to create itinerary:', error);
       toast.error('Failed to create itinerary', {
