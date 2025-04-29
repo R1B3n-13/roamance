@@ -27,9 +27,7 @@ interface ItineraryDashboardProps {
 export function ItineraryDashboard({ userId }: ItineraryDashboardProps) {
   const router = useRouter();
   const [itineraries, setItineraries] = useState<Itinerary[]>([]);
-  const [filteredItineraries, setFilteredItineraries] = useState<Itinerary[]>(
-    []
-  );
+  const [filteredItineraries, setFilteredItineraries] = useState<Itinerary[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -156,35 +154,42 @@ export function ItineraryDashboard({ userId }: ItineraryDashboardProps) {
     setSearchQuery('');
   };
 
-  // Animation variants
+  // Enhanced animation variants
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.05,
+        staggerChildren: 0.07,
+        delayChildren: 0.02
       },
     },
   };
 
   const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
+    hidden: { opacity: 0, y: 15 },
     visible: {
       opacity: 1,
       y: 0,
       transition: {
         type: 'spring',
-        stiffness: 260,
-        damping: 20,
+        stiffness: 300,
+        damping: 24,
       },
     },
   };
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
-        <p className="text-muted-foreground">Loading your itineraries...</p>
+      <div className="flex flex-col items-center justify-center py-16">
+        <div className="relative w-16 h-16 mb-6">
+          <Loader2 className="h-16 w-16 animate-spin text-primary absolute" />
+          <div className="absolute inset-0 rounded-full border-t-2 border-primary/20 border-dotted animate-ping"></div>
+        </div>
+        <h3 className="text-xl font-medium mb-2">Loading your journeys</h3>
+        <p className="text-muted-foreground text-center max-w-md">
+          We&apos;re fetching your travel plans. This will only take a moment...
+        </p>
       </div>
     );
   }
@@ -212,194 +217,194 @@ export function ItineraryDashboard({ userId }: ItineraryDashboardProps) {
   };
 
   return (
-    <div className="space-y-8">
-      {/* Decorative background elements */}
-      <div className="absolute -top-64 -right-40 w-96 h-96 bg-gradient-radial from-primary/5 to-transparent rounded-full blur-3xl -z-10" />
-      <div className="absolute top-1/3 -left-40 w-96 h-96 bg-gradient-radial from-forest/5 to-transparent rounded-full blur-3xl -z-10" />
-      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-gradient-radial from-ocean/5 to-transparent rounded-full blur-3xl -z-10" />
+    <div className="space-y-10 relative">
+      {/* Enhanced decorative background elements */}
+      <div className="absolute -top-64 -right-40 w-[500px] h-[500px] bg-gradient-radial from-primary/10 to-transparent rounded-full blur-3xl -z-10 animate-pulse-slow" />
+      <div className="absolute top-1/3 -left-40 w-[500px] h-[500px] bg-gradient-radial from-forest/10 to-transparent rounded-full blur-3xl -z-10 animate-pulse-slower" />
+      <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-gradient-radial from-ocean/10 to-transparent rounded-full blur-3xl -z-10 animate-pulse-slow" />
 
-      {/* Header section */}
-      <div className="flex items-center justify-between flex-wrap gap-4">
+      {/* Enhanced Header section */}
+      <div className="flex items-center justify-between flex-wrap gap-4 bg-background/40 backdrop-blur-md p-6 rounded-2xl border border-muted/15 shadow-md">
         <motion.div
-          initial={{ opacity: 0, y: -10 }}
+          initial={{ opacity: 0, y: -15 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="space-y-1"
+          transition={{ duration: 0.6, type: "spring", stiffness: 100 }}
+          className="space-y-2"
         >
-          <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/80">
-            Your Itineraries
+          <h2 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/70">
+            Your Adventures
           </h2>
-          <p className="text-muted-foreground">
-            Manage and organize your travel plans
+          <p className="text-muted-foreground text-lg">
+            Manage and explore your travel plans
           </p>
         </motion.div>
 
         <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
         >
-          <Button asChild size={'lg'}>
+          <Button asChild size={'lg'} className="shadow-lg">
             <Link
               href="/itinerary/create"
-              className={`w-full px-4 py-2 rounded-xl flex items-center justify-center transition-all duration-300 shadow-md
+              className={`w-full px-5 py-2.5 rounded-xl flex items-center justify-center transition-all duration-300
               bg-gradient-to-r from-primary/90 to-primary hover:from-primary hover:to-primary/80
-              text-white font-medium hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]`}
+              text-white font-medium hover:shadow-xl hover:scale-[1.03] active:scale-[0.98]`}
             >
-              <Plus className="h-4 w-4 mr-2" />
-              Create New
+              <Plus className="h-5 w-5 mr-2" />
+              Create New Journey
             </Link>
           </Button>
         </motion.div>
       </div>
 
-      {/* Tabs and filters */}
+      {/* Enhanced Tabs and filters */}
       <motion.div
-        initial={{ opacity: 0, y: 10 }}
+        initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.2 }}
-        className="flex flex-col space-y-4"
+        transition={{ duration: 0.6, delay: 0.3, type: "spring", stiffness: 100 }}
+        className="space-y-5"
       >
-        {/* Status Tabs */}
+        {/* Enhanced Status Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="bg-background/70 backdrop-blur-md p-1.5 rounded-2xl border border-muted/10 shadow-sm">
+          <TabsList className="bg-background/70 backdrop-blur-md p-2 rounded-2xl border border-muted/15 shadow-md">
             <TabsTrigger
               value="all"
-              className="flex gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary/80 data-[state=active]:to-primary data-[state=active]:text-white rounded-xl transition-all duration-300"
+              className="flex gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary/80 data-[state=active]:to-primary data-[state=active]:text-white rounded-xl transition-all duration-300 px-4 py-2.5"
             >
-              <span>All ({countItinerariesByStatus('all')})</span>
+              <span>All Trips ({countItinerariesByStatus('all')})</span>
             </TabsTrigger>
             <TabsTrigger
               value="upcoming"
-              className="flex gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-forest data-[state=active]:to-forest-dark data-[state=active]:text-white rounded-xl transition-all duration-300"
+              className="flex gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-forest data-[state=active]:to-forest-dark data-[state=active]:text-white rounded-xl transition-all duration-300 px-4 py-2.5"
             >
               <span>Upcoming ({countItinerariesByStatus('upcoming')})</span>
             </TabsTrigger>
             <TabsTrigger
               value="ongoing"
-              className="flex gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-ocean data-[state=active]:to-ocean-dark data-[state=active]:text-white rounded-xl transition-all duration-300"
+              className="flex gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-ocean data-[state=active]:to-ocean-dark data-[state=active]:text-white rounded-xl transition-all duration-300 px-4 py-2.5"
             >
               <span>Ongoing ({countItinerariesByStatus('ongoing')})</span>
             </TabsTrigger>
             <TabsTrigger
               value="past"
-              className="flex gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-sunset data-[state=active]:to-sunset-dark data-[state=active]:text-white rounded-xl transition-all duration-300"
+              className="flex gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-sunset data-[state=active]:to-sunset-dark data-[state=active]:text-white rounded-xl transition-all duration-300 px-4 py-2.5"
             >
               <span>Completed ({countItinerariesByStatus('past')})</span>
             </TabsTrigger>
           </TabsList>
         </Tabs>
 
-        {/* Filters bar */}
-        <div className="flex flex-wrap items-center gap-3 pb-2">
-          {/* Search */}
-          <div className="flex-1 min-w-[180px] relative">
+        {/* Enhanced Filters bar */}
+        <div className="flex flex-wrap items-center gap-4 p-4 bg-background/50 backdrop-blur-sm rounded-xl border border-muted/15 shadow-sm">
+          {/* Enhanced Search */}
+          <div className="flex-1 min-w-[250px] relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search itineraries..."
+              placeholder="Search your itineraries..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 py-5 rounded-xl bg-muted/50 border-muted/40 focus-visible:ring-primary/30 focus-visible:border-primary/30"
+              className="pl-10 py-6 rounded-xl bg-background/80 border-muted/30 focus-visible:ring-primary/40 focus-visible:border-primary/40 text-base shadow-sm"
             />
             {searchQuery && (
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={clearSearch}
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 h-7 w-7 rounded-full hover:bg-muted/80"
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 h-8 w-8 rounded-full hover:bg-muted/80"
               >
-                <X className="h-3.5 w-3.5" />
+                <X className="h-4 w-4" />
               </Button>
             )}
           </div>
 
-          {/* Sort */}
-          <div className="w-40">
+          {/* Enhanced Sort */}
+          <div className="w-44">
             <Select value={sortOption} onValueChange={setSortOption}>
-              <SelectTrigger className="rounded-xl bg-muted/50 border-muted/40 focus:ring-primary/30 focus:border-primary/30">
-                <SelectValue placeholder="Sort by" />
+              <SelectTrigger className="rounded-xl bg-background/80 border-muted/30 focus:ring-primary/40 focus:border-primary/40 py-6 text-base shadow-sm">
+                <SelectValue placeholder="Sort your trips" />
               </SelectTrigger>
-              <SelectContent className="rounded-xl border-muted/30 shadow-lg backdrop-blur-sm">
-                <SelectItem value="date-desc">Date (Newest)</SelectItem>
-                <SelectItem value="date-asc">Date (Oldest)</SelectItem>
-                <SelectItem value="title-asc">Title (A-Z)</SelectItem>
-                <SelectItem value="title-desc">Title (Z-A)</SelectItem>
+              <SelectContent className="rounded-xl border-muted/20 shadow-lg backdrop-blur-sm">
+                <SelectItem value="date-desc">Newest First</SelectItem>
+                <SelectItem value="date-asc">Oldest First</SelectItem>
+                <SelectItem value="title-asc">A to Z</SelectItem>
+                <SelectItem value="title-desc">Z to A</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
-          {/* Status filter */}
-          <div className="w-40">
+          {/* Enhanced Status filter */}
+          <div className="w-44">
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="rounded-xl bg-muted/50 border-muted/40 focus:ring-primary/30 focus:border-primary/30">
+              <SelectTrigger className="rounded-xl bg-background/80 border-muted/30 focus:ring-primary/40 focus:border-primary/40 py-6 text-base shadow-sm">
                 <div className="flex items-center gap-2">
                   <Filter className="h-4 w-4" />
-                  <SelectValue placeholder="Filter" />
+                  <SelectValue placeholder="Filter by status" />
                 </div>
               </SelectTrigger>
-              <SelectContent className="rounded-xl border-muted/30 shadow-lg backdrop-blur-sm">
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="upcoming">Upcoming</SelectItem>
-                <SelectItem value="ongoing">Ongoing</SelectItem>
-                <SelectItem value="past">Completed</SelectItem>
+              <SelectContent className="rounded-xl border-muted/20 shadow-lg backdrop-blur-sm">
+                <SelectItem value="all">All Trips</SelectItem>
+                <SelectItem value="upcoming">Upcoming Only</SelectItem>
+                <SelectItem value="ongoing">Ongoing Only</SelectItem>
+                <SelectItem value="past">Completed Only</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
-          {/* Clear filters */}
+          {/* Enhanced Clear filters */}
           {(searchQuery ||
             statusFilter !== 'all' ||
             sortOption !== 'date-desc') && (
             <Button
               variant="outline"
-              size="sm"
               onClick={clearFilters}
-              className="rounded-xl border-muted/40 hover:bg-muted/20"
+              className="rounded-xl border-muted/30 hover:bg-muted/20 py-6 px-4 shadow-sm"
             >
-              <X className="h-3.5 w-3.5 mr-2" />
-              Clear
+              <X className="h-4 w-4 mr-2" />
+              Clear Filters
             </Button>
           )}
         </div>
       </motion.div>
 
-      {/* Itineraries Grid with improved layout */}
+      {/* Enhanced Itineraries Grid */}
       <AnimatePresence mode="wait">
         {filteredItineraries.length === 0 ? (
           <motion.div
             key="empty"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5 }}
-            className="text-center py-12 border border-dashed rounded-xl bg-muted/5"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.5, type: "spring", stiffness: 100 }}
+            className="text-center py-20 border border-dashed rounded-2xl bg-muted/5 shadow-inner"
           >
-            <div className="max-w-md mx-auto space-y-4">
-              <div className="bg-muted/10 mx-auto h-16 w-16 flex items-center justify-center rounded-full">
+            <div className="max-w-md mx-auto space-y-6">
+              <div className="bg-muted/20 mx-auto h-20 w-20 flex items-center justify-center rounded-full shadow-inner">
                 {searchQuery ? (
-                  <Search className="h-8 w-8 text-muted-foreground/60" />
+                  <Search className="h-10 w-10 text-muted-foreground/60" />
                 ) : (
-                  <Plus className="h-8 w-8 text-muted-foreground/60" />
+                  <Plus className="h-10 w-10 text-muted-foreground/60" />
                 )}
               </div>
-              <h3 className="text-lg font-medium mb-2">
+              <h3 className="text-xl font-medium mb-2">
                 {searchQuery
-                  ? 'No matching itineraries found'
-                  : 'No itineraries yet'}
+                  ? 'No matching journeys found'
+                  : 'No journeys planned yet'}
               </h3>
-              <p className="text-muted-foreground mb-6">
+              <p className="text-muted-foreground text-lg mb-6 px-4">
                 {searchQuery
                   ? `Try adjusting your search terms or filters to find what you're looking for.`
-                  : 'Create your first travel itinerary to get started planning your adventures.'}
+                  : 'Create your first travel itinerary to start planning your adventures.'}
               </p>
               {!searchQuery && (
                 <Button
                   asChild
-                  className="rounded-xl bg-gradient-to-r from-forest to-ocean text-white hover:from-forest-dark hover:to-ocean-dark transition-all duration-300 shadow-md"
+                  size="lg"
+                  className="rounded-xl bg-gradient-to-r from-forest to-ocean text-white hover:from-forest-dark hover:to-ocean-dark transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-[1.02]"
                 >
                   <Link href="/itinerary/create">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Create New Itinerary
+                    <Plus className="h-5 w-5 mr-2" />
+                    Start Your First Journey
                   </Link>
                 </Button>
               )}
@@ -411,14 +416,14 @@ export function ItineraryDashboard({ userId }: ItineraryDashboardProps) {
             variants={containerVariants}
             initial="hidden"
             animate="visible"
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
           >
             {filteredItineraries.map((itinerary) => (
               <motion.div key={itinerary.id} variants={itemVariants}>
                 <ItineraryCard
                   itinerary={itinerary}
-                  onEdit={handleEditItinerary}
-                  onDelete={handleDeleteItinerary}
+                  onEditAction={handleEditItinerary}
+                  onDeleteAction={handleDeleteItinerary}
                 />
               </motion.div>
             ))}

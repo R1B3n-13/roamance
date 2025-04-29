@@ -1,51 +1,42 @@
 'use client';
 
+import { getImagePath } from '@/components';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger
+} from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { Itinerary } from '@/types/itinerary';
 import { differenceInDays, format, parseISO } from 'date-fns';
 import { motion } from 'framer-motion';
 import {
-  Calendar,
+  Clock,
   Edit,
   Eye,
   Globe,
   MapPin,
-  MoreHorizontal,
-  Share2,
-  Trash2,
+  Trash2
 } from 'lucide-react';
 import Link from 'next/link';
-import { useState } from 'react';
-import { ShareItinerary } from './ItineraryDetail';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { useTheme } from 'next-themes';
+
+// Create a motion-enabled Card component
+const MotionCard = motion(Card);
 
 interface ItineraryCardProps {
   itinerary: Itinerary;
-  onEdit: (id: string) => void;
-  onDelete: (id: string) => void;
+  onEditAction: (id: string) => void;
+  onDeleteAction: (id: string) => void;
 }
 
 export function ItineraryCard({
   itinerary,
-  onEdit,
-  onDelete,
+  onEditAction,
+  onDeleteAction,
 }: ItineraryCardProps) {
-  const [isHovering, setIsHovering] = useState(false);
-  const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
-  const { resolvedTheme } = useTheme();
-  const isDarkMode = resolvedTheme === 'dark';
-
   // Calculate status
   const now = new Date();
   const startDate = parseISO(itinerary.start_date);
@@ -75,92 +66,169 @@ export function ItineraryCard({
 
   // Format location
   const locationText = primaryLocation
-    ? `${primaryLocation.latitude.toFixed(2)}, ${primaryLocation.longitude.toFixed(2)}`
+    ? `${`${primaryLocation.latitude.toFixed(2)}, ${primaryLocation.longitude.toFixed(2)}`}`
     : 'Multiple Destinations';
 
-  // Status-based styling
-  const statusConfig = {
+  // Get locations count text
+  const locationsCountText =
+    itinerary.locations?.length === 1
+      ? '1 destination'
+      : `${itinerary.locations?.length || 0} destinations`;
+
+  // Get shimmer delay based on itinerary ID for staggered effect
+  const getShimmerDelay = () => {
+    // Create a hash from the itinerary id
+    const hash = itinerary.id
+      .split('')
+      .reduce((sum, char) => sum + char.charCodeAt(0), 0);
+    return `${hash % 5}s`; // 0-4 second delay
+  };
+
+  // Enhanced status-based styling with more refined color choices
+  const colorScheme = {
     upcoming: {
-      gradientFrom: 'from-forest/5',
-      gradientTo: 'to-forest/20',
-      textColor: 'text-forest',
-      borderColor: 'border-forest/30',
-      hoverBg: 'hover:bg-forest/10',
-      badgeBg: 'bg-forest/70',
+      name: 'forest',
+      gradient:
+        'bg-gradient-to-tr from-emerald-500/90 via-green-500/90 to-teal-500/90',
+      pattern: 'opacity-15',
+      badge: 'bg-emerald-500 border-emerald-400/20 text-white',
+      accentColor: 'text-emerald-600 dark:text-emerald-400',
+      accentHoverBg: 'hover:bg-emerald-50 dark:hover:bg-emerald-900/10',
+      accentBorder: 'border-emerald-200 dark:border-emerald-800/40',
+      starBg: 'bg-white/15 hover:bg-white/30 border-white/20',
+      shimmerColor: 'via-white/20',
+      iconBg: 'bg-emerald-50 dark:bg-emerald-900/30',
+      iconColor: 'text-emerald-600 dark:text-emerald-400',
+      dotColor: 'bg-emerald-500 dark:bg-emerald-400',
+      statusBgLight: 'from-emerald-50/70 to-emerald-50/30',
+      statusBgDark: 'from-emerald-900/30 to-emerald-900/10',
     },
     ongoing: {
-      gradientFrom: 'from-ocean/5',
-      gradientTo: 'to-ocean/20',
-      textColor: 'text-ocean',
-      borderColor: 'border-ocean/30',
-      hoverBg: 'hover:bg-ocean/10',
-      badgeBg: 'bg-ocean/70',
+      name: 'ocean',
+      gradient:
+        'bg-gradient-to-tr from-blue-500/90 via-cyan-500/90 to-sky-500/90',
+      pattern: 'opacity-15',
+      badge: 'bg-blue-500 border-blue-400/20 text-white',
+      accentColor: 'text-blue-600 dark:text-blue-400',
+      accentHoverBg: 'hover:bg-blue-50 dark:hover:bg-blue-900/10',
+      accentBorder: 'border-blue-200 dark:border-blue-800/40',
+      starBg: 'bg-white/15 hover:bg-white/30 border-white/20',
+      shimmerColor: 'via-white/20',
+      iconBg: 'bg-blue-50 dark:bg-blue-900/30',
+      iconColor: 'text-blue-600 dark:text-blue-400',
+      dotColor: 'bg-blue-500 dark:bg-blue-400',
+      statusBgLight: 'from-blue-50/70 to-blue-50/30',
+      statusBgDark: 'from-blue-900/30 to-blue-900/10',
     },
     past: {
-      gradientFrom: 'from-sunset/5',
-      gradientTo: 'to-sunset/20',
-      textColor: 'text-sunset',
-      borderColor: 'border-sunset/30',
-      hoverBg: 'hover:bg-sunset/10',
-      badgeBg: 'bg-sunset/70',
+      name: 'sunset',
+      gradient:
+        'bg-gradient-to-tr from-amber-500/90 via-orange-500/90 to-yellow-500/90',
+      pattern: 'opacity-10',
+      badge: 'bg-amber-500 border-amber-400/20 text-white',
+      accentColor: 'text-amber-600 dark:text-amber-400',
+      accentHoverBg: 'hover:bg-amber-50 dark:hover:bg-amber-900/10',
+      accentBorder: 'border-amber-200 dark:border-amber-800/40',
+      starBg: 'bg-white/15 hover:bg-white/30 border-white/20',
+      shimmerColor: 'via-white/15',
+      iconBg: 'bg-amber-50 dark:bg-amber-900/30',
+      iconColor: 'text-amber-600 dark:text-amber-400',
+      dotColor: 'bg-amber-500 dark:bg-amber-400',
+      statusBgLight: 'from-amber-50/70 to-amber-50/30',
+      statusBgDark: 'from-amber-900/30 to-amber-900/10',
     },
   };
 
-  const config = statusConfig[status];
+  const scheme = colorScheme[status];
+
+  // Card animations
+  const cardVariants = {
+    hover: {
+      y: -8,
+      scale: 1.02,
+      boxShadow: '0 20px 40px -20px rgba(0, 0, 0, 0.15)',
+      transition: { type: 'spring', stiffness: 300, damping: 15 },
+    },
+  };
+
+  // Button animations
+  const buttonVariants = {
+    hover: {
+      scale: 1.08,
+      transition: { type: 'spring', stiffness: 400, damping: 15 },
+    },
+    tap: {
+      scale: 0.92,
+    },
+  };
+
+  // Format date for display
+  const formatDate = (date: Date) => {
+    return format(date, 'MMM d, yyyy');
+  };
 
   return (
     <motion.div
-      whileHover={{ y: -5, scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
-      transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-      onHoverStart={() => setIsHovering(true)}
-      onHoverEnd={() => setIsHovering(false)}
-      className="will-change-transform"
+      whileHover="hover"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 20 }}
+      transition={{ duration: 0.3 }}
+      className="h-full"
     >
-      <Card className="overflow-hidden border-muted/20 bg-gradient-to-b from-background/80 to-background/50 backdrop-blur-md shadow-md transition-all duration-300 hover:shadow-xl rounded-xl relative h-full py-0">
-        {/* Share Dialog */}
-        <Dialog open={isShareDialogOpen} onOpenChange={setIsShareDialogOpen}>
-          <DialogContent className="sm:max-w-md p-0 border-none bg-transparent shadow-none">
-            <ShareItinerary
-              itineraryId={itinerary.id}
-              title={itinerary.title}
-              onClose={() => setIsShareDialogOpen(false)}
-              isDarkMode={isDarkMode}
-            />
-          </DialogContent>
-        </Dialog>
-
-        {/* Decorative top accent bar */}
-        <div
-          className={`absolute top-0 left-0 w-full h-1 ${status === 'upcoming' ? 'bg-forest' : status === 'ongoing' ? 'bg-ocean' : 'bg-sunset'}`}
-        ></div>
-
-        {/* Decorative background elements */}
-        <div
-          className={`absolute -right-12 -top-12 w-24 h-24 rounded-full blur-xl opacity-10 ${status === 'upcoming' ? 'bg-forest' : status === 'ongoing' ? 'bg-ocean' : 'bg-sunset'}`}
-        ></div>
-        <div
-          className={`absolute -left-12 -bottom-12 w-24 h-24 rounded-full blur-xl opacity-10 ${status === 'upcoming' ? 'bg-forest' : status === 'ongoing' ? 'bg-ocean' : 'bg-sunset'}`}
-        ></div>
-
-        {/* Header with background */}
-        <div className="relative h-40 w-full overflow-hidden rounded-t-xl">
-          {/* Visual background with subtle pattern */}
+      <MotionCard
+        variants={cardVariants}
+        className="overflow-hidden group h-full flex flex-col border-slate-200/60 dark:border-slate-800/60 bg-white dark:bg-slate-900 backdrop-blur-sm shadow-sm hover:shadow-xl transition-all duration-300 rounded-xl py-0"
+      >
+        {/* Header with gradient background */}
+        <div className="h-52 relative overflow-hidden flex-shrink-0">
           <div
-            className={`absolute inset-0 bg-gradient-to-br ${config.gradientFrom} ${config.gradientTo} pattern-dots pattern-bg-transparent pattern-size-4 pattern-opacity-10`}
+            className={cn(
+              'absolute inset-0 flex items-center justify-center',
+              scheme.gradient
+            )}
           >
-            <div className="absolute inset-0 opacity-20">
-              <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent animate-pulse-slow"></div>
+            {/* Decorative pattern overlay */}
+            <div
+              className={cn('absolute inset-0', scheme.pattern)}
+              style={{
+                backgroundImage: `url('${getImagePath('roamance-logo-no-text.png')}')`,
+                backgroundRepeat: 'repeat-space',
+                backgroundSize: 'contain',
+                mixBlendMode: 'overlay',
+              }}
+            />
+
+            {/* Enhanced shimmer effect */}
+            <div className="absolute inset-0 overflow-hidden">
+              <motion.div
+                className={cn(
+                  'absolute -inset-x-full top-0 bottom-0 bg-gradient-to-r from-transparent',
+                  scheme.shimmerColor,
+                  'to-transparent animate-[shimmer_3s_infinite]'
+                )}
+                style={{
+                  transform: 'translateX(-10%) skewX(-15deg)',
+                  animationDelay: getShimmerDelay(),
+                  animationDuration: '3s',
+                }}
+              />
             </div>
           </div>
 
-          {/* Status indicator */}
-          <div className="absolute top-3 left-3 z-10">
+          {/* Centered title for gradient backgrounds */}
+          <div className="relative z-10 text-center px-6 h-full flex items-center justify-center">
+            <p className="text-white text-2xl font-bold drop-shadow-md leading-tight tracking-tight">
+              {itinerary.title}
+            </p>
+          </div>
+
+          {/* Top badges row */}
+          <div className="absolute top-3 left-3 right-3 flex justify-between items-center z-20">
             <Badge
-              variant="outline"
               className={cn(
-                'px-3 py-1 text-xs rounded-full font-medium backdrop-blur-md shadow-sm border-white/20 text-white',
-                config.badgeBg
+                'capitalize rounded-full px-3 py-1 font-medium backdrop-blur-sm shadow-md',
+                scheme.badge
               )}
             >
               {status === 'upcoming'
@@ -169,88 +237,63 @@ export function ItineraryCard({
                   ? 'Ongoing'
                   : 'Completed'}
             </Badge>
+
+            {/* Duration badge - replacing date badge */}
+            <Badge className="bg-black/50 text-white border-white/30 flex items-center gap-1.5 rounded-full backdrop-blur-sm px-3.5 py-1 shadow-md">
+              <Clock className="h-3.5 w-3.5" />
+              <span className="text-xs font-medium">
+                {duration} {duration === 1 ? 'day' : 'days'} trip
+              </span>
+            </Badge>
           </div>
 
-          {/* Actions menu */}
-          <div className="absolute top-3 right-3 z-10">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white hover:text-white transition-all h-8 w-8"
-                >
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align="end"
-                className="rounded-xl border-muted/30 shadow-lg backdrop-blur-sm bg-background/70"
-              >
-                <DropdownMenuItem
-                  className="cursor-pointer flex items-center gap-2 focus:bg-primary/10"
-                  asChild
-                >
-                  <Link href={`/itinerary/details?id=${itinerary.id}`}>
-                    <Eye className="h-4 w-4 text-muted-foreground" />
-                    <span>View Details</span>
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  className="cursor-pointer flex items-center gap-2 focus:bg-ocean/10"
-                  onClick={() => onEdit(itinerary.id)}
-                >
-                  <Edit className="h-4 w-4 text-ocean" />
-                  <span>Edit Itinerary</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  className="cursor-pointer flex items-center gap-2 focus:bg-primary/10"
-                  onClick={() => setIsShareDialogOpen(true)}
-                >
-                  <Share2 className="h-4 w-4 text-muted-foreground" />
-                  <span>Share</span>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  className="cursor-pointer flex items-center gap-2 text-destructive focus:bg-destructive/10"
-                  onClick={() => onDelete(itinerary.id)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                  <span>Delete</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-
-          {/* Centered status icon */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-5 opacity-30">
-            <Calendar className={`h-16 w-16 ${config.textColor}`} />
+          {/* Bottom badges row */}
+          <div className="absolute bottom-3 left-3 right-3 flex justify-between items-center z-20">
+            {/* Locations badge */}
+            <Badge
+              variant="outline"
+              className="bg-black/50 text-white border-white/30 flex items-center gap-1.5 rounded-full backdrop-blur-sm px-3 py-1 shadow-md"
+            >
+              <Globe className="h-3.5 w-3.5" />
+              <span className="text-xs font-medium">{locationsCountText}</span>
+            </Badge>
           </div>
         </div>
 
-        <CardContent className="p-5 space-y-4">
-          {/* Title and date range */}
-          <Link
-            href={`/itinerary/details?id=${itinerary.id}`}
-            className="block space-y-1 group"
-          >
-            <h3
-              className={`font-semibold text-lg truncate group-hover:${config.textColor} transition-colors`}
-            >
-              {itinerary.title}
-            </h3>
-            <div className="flex items-center text-muted-foreground text-sm">
-              <Calendar className="h-3.5 w-3.5 mr-1.5 flex-shrink-0" />
-              <span>
-                {format(startDate, 'MMM d')} - {format(endDate, 'MMM d, yyyy')}
+        <CardContent className="p-5 space-y-4 flex-1 flex flex-col">
+          {/* Trip details bar */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center text-slate-500 dark:text-slate-400 text-sm gap-1.5">
+              <MapPin className="h-3.5 w-3.5" />
+              <span className="truncate max-w-[180px]" title={locationText}>
+                {locationText}
               </span>
             </div>
-          </Link>
+            {/* <div className="flex items-center text-slate-500 dark:text-slate-400 text-sm gap-1.5">
+              <Calendar className="h-3.5 w-3.5" />
+              <span>
+                {duration} {duration === 1 ? 'day' : 'days'}
+              </span>
+            </div> */}
+          </div>
 
-          {/* Status information */}
-          <div className="mt-2 py-2 px-3 rounded-lg bg-muted/5 border border-muted/20">
-            {status === 'upcoming' && (
-              <div className="flex items-center text-forest font-medium">
+          {/* Status information with enhanced styling */}
+          <div
+            className={cn(
+              `py-3 px-4 rounded-xl bg-gradient-to-br dark:${scheme.statusBgDark} ${scheme.statusBgLight} flex items-center backdrop-blur-sm`
+            )}
+          >
+            <div
+              className={cn(
+                `h-2.5 w-2.5 rounded-full ${scheme.dotColor} mr-3 animate-pulse`
+              )}
+            ></div>
+            <div
+              className={cn(
+                `flex items-center ${scheme.accentColor} text-sm font-medium`
+              )}
+            >
+              {status === 'upcoming' && (
                 <span>
                   {daysUntil === 0
                     ? 'Starts today!'
@@ -258,10 +301,8 @@ export function ItineraryCard({
                       ? 'Starts tomorrow'
                       : `${daysUntil} days until departure`}
                 </span>
-              </div>
-            )}
-            {status === 'ongoing' && (
-              <div className="flex items-center text-ocean font-medium">
+              )}
+              {status === 'ongoing' && (
                 <span>
                   {daysSince === 0
                     ? 'Ends today'
@@ -269,87 +310,108 @@ export function ItineraryCard({
                       ? 'Ends tomorrow'
                       : `${daysSince} days remaining`}
                 </span>
-              </div>
-            )}
-            {status === 'past' && (
-              <div className="flex items-center text-sunset font-medium">
+              )}
+              {status === 'past' && (
                 <span>
                   {`Completed ${Math.abs(daysSince)} ${
                     Math.abs(daysSince) === 1 ? 'day' : 'days'
                   } ago`}
                 </span>
-              </div>
-            )}
+              )}
+            </div>
           </div>
 
-          {/* Trip details */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="flex flex-col bg-muted/5 p-2 rounded-lg border border-muted/10">
-              <span className="text-xs text-muted-foreground">Duration</span>
-              <div className="flex items-center">
-                <Calendar className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
-                <span className="font-medium">
-                  {duration} {duration === 1 ? 'day' : 'days'}
+          {/* Duration and destinations with enhanced visualization */}
+          <div className="grid grid-cols-1 gap-3">
+            <div className="flex flex-col p-4 rounded-xl bg-muted/10 backdrop-blur-sm border border-muted/30">
+              <span className="text-xs text-muted-foreground mb-1.5 font-medium">
+                Trip Overview
+              </span>
+              <div className="flex flex-wrap gap-4">
+                <div className="flex items-center">
+                  <Clock className={`h-4 w-4 mr-2 ${scheme.iconColor}`} />
+                  <span className="font-medium">
+                    {formatDate(startDate)} - {formatDate(endDate)}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Action buttons with enhanced styling - updated to match journal card */}
+          <div className="mt-5 pt-4 border-t border-slate-200/70 dark:border-slate-800/70 flex justify-between items-center">
+            <div className="flex items-center text-xs text-slate-500 dark:text-slate-400">
+              <div className="flex items-center gap-1.5">
+                <Clock className="h-3.5 w-3.5" />
+                <span>
+                  {formatDate(startDate)} - {formatDate(endDate)}
                 </span>
               </div>
             </div>
 
-            <div className="flex flex-col bg-muted/5 p-2 rounded-lg border border-muted/10">
-              <span className="text-xs text-muted-foreground">
-                Destinations
-              </span>
-              <div className="flex items-center">
-                <Globe className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
-                <span className="font-medium">
-                  {itinerary.locations?.length || 0}
-                </span>
-              </div>
+            {/* Action buttons */}
+            <div className="flex gap-1.5">
+              <TooltipProvider delayDuration={300}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Link href={`/itinerary/details?id=${itinerary.id}`}>
+                      <motion.button
+                        variants={buttonVariants}
+                        whileTap="tap"
+                        className="flex items-center justify-center h-8 w-8 rounded-full text-slate-500 dark:text-slate-400 transition-colors duration-200 hover:bg-indigo-50 dark:hover:bg-indigo-900/10 hover:text-indigo-600 dark:hover:text-indigo-400"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </motion.button>
+                    </Link>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>View Details</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+
+              <TooltipProvider delayDuration={300}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <motion.button
+                      variants={buttonVariants}
+                      whileTap="tap"
+                      onClick={() => onEditAction(itinerary.id)}
+                      className={cn(
+                        'flex items-center justify-center h-8 w-8 rounded-full text-slate-500 dark:text-slate-400 transition-colors duration-200',
+                        `hover:bg-${scheme.name}-50 dark:hover:bg-${scheme.name}-900/10 hover:${scheme.accentColor}`
+                      )}
+                    >
+                      <Edit className="h-4 w-4" />
+                    </motion.button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Edit Itinerary</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+
+              <TooltipProvider delayDuration={300}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <motion.button
+                      variants={buttonVariants}
+                      whileTap="tap"
+                      onClick={() => onDeleteAction(itinerary.id)}
+                      className="flex items-center justify-center h-8 w-8 rounded-full text-slate-500 dark:text-slate-400 transition-colors duration-200 hover:bg-rose-50 dark:hover:bg-rose-900/10 hover:text-rose-600 dark:hover:text-rose-400"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </motion.button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Delete Itinerary</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </div>
           </div>
-
-          {/* Location info */}
-          <div className="flex items-center text-muted-foreground text-xs">
-            <div className="flex items-center gap-1.5 bg-muted/5 px-2 py-1.5 rounded-md border border-muted/10 w-full">
-              <MapPin className="h-3 w-3 flex-shrink-0" />
-              <span className="truncate" title={locationText}>
-                {locationText}
-              </span>
-            </div>
-          </div>
-
-          {/* Action buttons with animated reveal on hover */}
-          <motion.div
-            variants={{
-              hidden: { opacity: 0, y: 10 },
-              visible: { opacity: 1, y: 0 },
-            }}
-            initial="hidden"
-            animate={isHovering ? 'visible' : 'hidden'}
-            transition={{ duration: 0.2 }}
-            className="flex gap-2 pt-1"
-          >
-            {/* Using the properly implemented Button component with asChild */}
-            <Button variant="outline" size="sm" asChild>
-              <Link
-                href={`/itinerary/details?id=${itinerary.id}`}
-                className={`w-full rounded-xl flex items-center justify-center ${config.borderColor} ${config.textColor} ${config.hoverBg} transition-all duration-300 shadow-sm`}
-              >
-                <Eye className="h-3.5 w-3.5 mr-1.5" />
-                View Details
-              </Link>
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className={`w-full rounded-xl ${config.borderColor} ${config.textColor} ${config.hoverBg} transition-all duration-300 shadow-sm`}
-              onClick={() => onEdit(itinerary.id)}
-            >
-              <Edit className="h-3.5 w-3.5 mr-1.5" />
-              Edit
-            </Button>
-          </motion.div>
         </CardContent>
-      </Card>
+      </MotionCard>
     </motion.div>
   );
 }
