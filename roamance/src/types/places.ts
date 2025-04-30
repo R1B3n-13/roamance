@@ -11,6 +11,20 @@ export interface TouristPlace {
   images?: string[];
 }
 
+// New interface for leaflet-geosearch results
+export interface GeosearchResult {
+  id: string;
+  name: string;
+  lat: number;
+  lng: number;
+  country: string;
+  city: string;
+  raw?: unknown;
+  originalSearch?: string; // Used when searching for specific destinations
+}
+
+// The following interfaces are kept for backward compatibility
+// during the transition, but will be deprecated
 export interface Geoname {
   name: string;
   toponymName: string;

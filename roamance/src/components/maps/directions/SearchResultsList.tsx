@@ -1,13 +1,13 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import { Geoname } from '@/types/places';
+import { GeosearchResult } from '@/types/places';
 import { motion } from 'framer-motion';
 import { MapPin } from 'lucide-react';
 
 interface SearchResultsListProps {
-  results: Geoname[];
-  onSelectResult: (geoname: Geoname) => void;
+  results: GeosearchResult[];
+  onSelectResult: (result: GeosearchResult) => void;
   isDarkMode: boolean;
   accentColor?: string; // Optional color for the pin icon
 }
@@ -34,7 +34,7 @@ export function SearchResultsList({
     >
       {results.map((result) => (
         <div
-          key={`${result.geonameId || result.name}`}
+          key={result.id || result.name}
           className={cn(
             'px-3 py-2 text-xs cursor-pointer flex items-start gap-2 transition-colors',
             isDarkMode
@@ -46,10 +46,10 @@ export function SearchResultsList({
           <MapPin className={cn("h-3 w-3 mt-0.5", accentColor)} />
           <div>
             <p className="font-medium">
-              {result.toponymName || result.name}
+              {result.name}
             </p>
             <p className="text-2xs text-muted-foreground">
-              {[result.adminName1, result.countryName]
+              {[result.city, result.country]
                 .filter(Boolean)
                 .join(', ')}
             </p>
