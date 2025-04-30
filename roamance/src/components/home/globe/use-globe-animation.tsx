@@ -11,7 +11,9 @@ export const useGlobeAnimation = (
   isMouseOverGlobe: boolean
 ) => {
   useEffect(() => {
-    if (!globeRef.current) return;
+    // Only run animation on client-side
+    if (!isClient || !globeRef.current) return;
+
     let lastTime = performance.now();
     const animate = () => {
       if (!globeRef.current?.scene) {
@@ -114,7 +116,7 @@ export const useGlobeAnimation = (
       requestAnimationFrame(animate);
     };
     animate();
-  }, [selectedPlace, globeRef]);
+  }, [selectedPlace, globeRef, isClient]);
 
   useEffect(() => {
     let rotationFrame: number;
@@ -136,7 +138,9 @@ export const useGlobeAnimation = (
     }
 
     return () => {
-      cancelAnimationFrame(rotationFrame);
+      if (typeof cancelAnimationFrame === 'function' && rotationFrame) {
+        cancelAnimationFrame(rotationFrame);
+      }
     };
   }, [isClient, selectedPlace, isMouseOverGlobe, globeRef]);
 };
