@@ -16,7 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/posts")
+@RequestMapping("/social/posts")
 public class PostController {
 
   private final PostService postService;
@@ -26,7 +26,7 @@ public class PostController {
     this.postService = postService;
   }
 
-  @PostMapping("/create")
+  @PostMapping
   public ResponseEntity<PostResponseDto> createPost(@Valid @RequestBody PostRequestDto requestDto) {
 
     PostResponseDto responseDto = postService.create(requestDto);
@@ -119,7 +119,7 @@ public class PostController {
     return ResponseEntity.ok(responseDto);
   }
 
-  @PutMapping("/update/{postId}")
+  @PutMapping("/{postId}")
   public ResponseEntity<PostResponseDto> updatePost(
       @PathVariable @NotNull UUID postId, @Valid @RequestBody PostRequestDto requestDto) {
 
@@ -144,7 +144,7 @@ public class PostController {
     return ResponseEntity.ok(responseDto);
   }
 
-  @DeleteMapping("/delete/{postId}")
+  @DeleteMapping("/{postId}")
   public ResponseEntity<BaseResponseDto> deletePost(@PathVariable @NotNull UUID postId) {
 
     BaseResponseDto responseDto = postService.delete(postId);

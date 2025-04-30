@@ -46,3 +46,12 @@ logging:
   level:
     root: warn
     com.devs.roamance: info
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
+    tagsSorter: alpha
+    filter: true
