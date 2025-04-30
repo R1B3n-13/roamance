@@ -1,4 +1,4 @@
-package com.devs.roamance.service.impl;
+package com.devs.roamance.service.aiimpl;
 
 import static dev.langchain4j.model.googleai.GeminiHarmBlockThreshold.BLOCK_LOW_AND_ABOVE;
 import static dev.langchain4j.model.googleai.GeminiHarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE;
