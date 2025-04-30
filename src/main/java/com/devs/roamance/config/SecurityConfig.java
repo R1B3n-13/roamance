@@ -1,5 +1,6 @@
 package com.devs.roamance.config;
 
+import com.devs.roamance.constant.WhiteListedPaths;
 import com.devs.roamance.security.AuthTokenFilter;
 import jakarta.servlet.DispatcherType;
 import java.util.Arrays;
@@ -48,7 +49,9 @@ public class SecurityConfig {
             authorize -> {
               authorize.dispatcherTypeMatchers(DispatcherType.ASYNC).permitAll();
               authorize.requestMatchers(HttpMethod.POST, "/users").permitAll();
-              authorize.requestMatchers("/auth/**").permitAll();
+              authorize
+                  .requestMatchers(WhiteListedPaths.WHITELIST_PATHS.toArray(new String[0]))
+                  .permitAll();
               authorize.requestMatchers("/admin/**").hasRole("ADMIN");
               authorize.anyRequest().authenticated();
             })
