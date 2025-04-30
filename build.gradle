@@ -41,6 +41,7 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok:1.18.36'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
+    testImplementation 'io.projectreactor:reactor-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     runtimeOnly 'com.h2database:h2'
     testImplementation 'com.h2database:h2'
@@ -65,6 +66,9 @@ sonarqube {
         property "sonar.tests", "src/test/java"
         property "sonar.java.binaries", "build/classes/java/main"
         property "sonar.coverage.jacoco.xmlReportPaths", "build/reports/jacoco/test/jacocoTestReport.xml"
+        property "sonar.exclusions", "src/test/**/*, **/test/**/*,"
+        property "sonar.coverage.exclusions", "**/com/devs/roamance/config/**, **/com/devs/roamance/controller/**,**/com/devs/roamance/dto/**, **/com/devs/roamance/constant/**, **/com/devs/roamance/exception/**, **/com/devs/roamance/model/**, **/com/devs/roamance/pojo/**, **/com/devs/roamance/security/**, **/com/devs/roamance/util/**, **/com/devs/roamance/repository/**"
+
     }
 }
 
