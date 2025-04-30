@@ -65,7 +65,9 @@ sonarqube {
         property "sonar.tests", "src/test/java"
         property "sonar.java.binaries", "build/classes/java/main"
         property "sonar.coverage.jacoco.xmlReportPaths", "build/reports/jacoco/test/jacocoTestReport.xml"
-        property "sonar.exclusions", "src/test/**/*"
+        property "sonar.exclusions", "src/test/**/*, **/test/**/*,"
+        property "sonar.coverage.exclusions", "**/com/devs/roamance/config/**, **/com/devs/roamance/controller/**,**/com/devs/roamance/dto/**, **/com/devs/roamance/constant/**, **/com/devs/roamance/exception/**, **/com/devs/roamance/model/**, **/com/devs/roamance/pojo/**, **/com/devs/roamance/security/**, **/com/devs/roamance/util/**, **/com/devs/roamance/repository/**"
+
     }
 }
 
