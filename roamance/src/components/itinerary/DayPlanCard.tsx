@@ -47,18 +47,18 @@ export function DayPlanCard({
   const dayName = format(date, 'EEEE');
 
   // Calculate total cost
-  const activitiesCost = activities.reduce((sum, activity) => sum + activity.cost, 0);
+  const activitiesCost = activities.reduce((sum, activity) => sum + (activity.cost || 0), 0);
   const totalCost = dayPlan.total_cost || activitiesCost;
 
   // Animation variants
   const cardVariants = {
     hover: {
-      boxShadow: "0 10px 30px -10px rgba(0, 0, 0, 0.1)",
-      borderColor: isExpanded ? "rgba(var(--primary), 0.5)" : "rgba(var(--muted-foreground), 0.2)"
+      boxShadow: "0 10px 25px -12px rgba(0, 0, 0, 0.15)",
+      y: -2
     },
     initial: {
       boxShadow: "0 2px 10px -5px rgba(0, 0, 0, 0.1)",
-      borderColor: isExpanded ? "rgba(var(--primary), 0.3)" : "rgba(var(--muted-foreground), 0.1)"
+      y: 0
     }
   };
 
@@ -68,58 +68,65 @@ export function DayPlanCard({
       onHoverEnd={() => setHovering(false)}
       initial="initial"
       whileHover="hover"
-      animate={{ opacity: 1 }}
+      animate={isExpanded ? "hover" : "initial"}
       variants={cardVariants}
-      transition={{ duration: 0.2 }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
       className={cn(
-        'rounded-2xl overflow-hidden border transition-all duration-300',
+        'rounded-2xl overflow-hidden border bg-background/80 backdrop-blur-sm transition-all duration-300',
         isExpanded
           ? isDarkMode
-            ? 'border-primary/30 bg-gradient-to-b from-primary/10 to-primary/5'
-            : 'border-primary/20 bg-gradient-to-b from-primary/10 to-primary/5'
+            ? 'border-primary/40 bg-gradient-to-br from-primary/10 via-background/95 to-background/95'
+            : 'border-primary/30 bg-gradient-to-br from-primary/10 via-background/95 to-background/95'
           : isDarkMode
-          ? 'border-muted/40 bg-gradient-to-b from-background/95 to-background/90'
-          : 'border-muted/30 bg-gradient-to-b from-background/80 to-background/95',
-        hovering && !isExpanded && 'border-muted/60',
-        isExpanded && 'shadow-md'
+          ? 'border-muted/30 bg-gradient-to-b from-background/95 to-background/90'
+          : 'border-muted/20 bg-gradient-to-b from-background/90 to-background/95',
+        hovering && !isExpanded && 'border-muted/50',
+        isExpanded && 'shadow-lg'
       )}
     >
       <div
         onClick={onToggleExpandAction}
         className={cn(
           'cursor-pointer transition-colors',
-          isExpanded ? 'border-b border-muted/20' : ''
+          isExpanded ? 'border-b border-muted/10' : ''
         )}
       >
-        <div className="flex items-start p-4">
-          {/* Date indicator with enhanced styling */}
+        <div className="flex items-start p-5 relative">
+          {/* Decorative accent */}
+          {isExpanded && (
+            <div className="absolute top-0 left-0 h-full w-1 bg-gradient-to-b from-primary to-primary/40"></div>
+          )}
+
+          {/* Date indicator with glass morphism */}
           <div className="mr-4">
-            <div className="flex flex-col items-center justify-center w-18 h-18 rounded-xl overflow-hidden shadow-sm">
-              <div className="w-full bg-primary text-primary-foreground text-center py-1 text-xs font-medium uppercase tracking-wider">
+            <div className="flex flex-col items-center justify-center min-w-[60px] rounded-xl overflow-hidden shadow-md backdrop-blur-sm border border-muted/20 group-hover:border-primary/20 transition-all duration-300">
+              <div className="w-full text-center py-1 text-xs font-semibold tracking-wider uppercase bg-gradient-to-r from-primary to-primary-dark text-primary-foreground">
                 {dayMonth}
               </div>
-              <div className="flex flex-col items-center justify-center w-full h-16 bg-primary/10 text-primary border-x border-b border-primary/20">
-                <span className="text-2xl font-bold leading-none mt-1">{dayNumber}</span>
-                <span className="text-xs font-medium mt-1">{format(date, 'EEE')}</span>
+              <div className="flex flex-col items-center justify-center w-full min-h-[64px] bg-primary/5 text-primary-dark dark:text-primary-light py-2">
+                <span className="text-2xl font-bold">{dayNumber}</span>
+                <span className="text-xs font-medium mt-0.5 opacity-80">{format(date, 'EEE')}</span>
               </div>
             </div>
           </div>
 
           {/* Day plan details with improved typography */}
           <div className="flex-1">
-            <h3 className="text-lg font-semibold bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/80">{dayName}</h3>
-            <p className="text-muted-foreground text-sm">{formattedDate}</p>
+            <h3 className="text-lg font-semibold bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/80">
+              {dayName}
+            </h3>
+            <p className="text-muted-foreground text-sm mt-0.5">{formattedDate}</p>
 
             {activities.length > 0 && (
-              <div className="flex flex-wrap items-center gap-2 mt-2 text-sm">
-                <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs">
-                  <span className="font-medium">{activities.length}</span>
+              <div className="flex flex-wrap items-center gap-2 mt-3 text-sm">
+                <div className="flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-primary/10 text-primary text-xs backdrop-blur-sm">
+                  <span className="font-semibold">{activities.length}</span>
                   <span>{activities.length === 1 ? 'Activity' : 'Activities'}</span>
                 </div>
 
                 {totalCost > 0 && (
-                  <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-forest/10 text-forest text-xs">
-                    <span className="font-medium">${totalCost.toFixed(2)}</span>
+                  <div className="flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-forest/10 text-forest text-xs backdrop-blur-sm">
+                    <span className="font-semibold">${totalCost.toFixed(2)}</span>
                     <span>total</span>
                   </div>
                 )}
@@ -133,8 +140,10 @@ export function DayPlanCard({
               variant={isExpanded ? "secondary" : "ghost"}
               size="icon"
               className={cn(
-                "h-9 w-9 rounded-full transition-all duration-300 shadow-sm",
-                isExpanded ? "bg-primary/15 text-primary hover:bg-primary/20" : "hover:bg-muted/80"
+                "h-9 w-9 rounded-full transition-all duration-300 shadow-md",
+                isExpanded
+                  ? "bg-gradient-to-r from-primary/20 to-primary/30 text-primary hover:from-primary/30 hover:to-primary/40"
+                  : "hover:bg-muted/80"
               )}
               onClick={(e) => {
                 e.stopPropagation();
@@ -163,7 +172,7 @@ export function DayPlanCard({
             className="overflow-hidden"
           >
             {/* Activities list with improved spacing */}
-            <div className="p-5">
+            <div className="p-5 pt-3">
               {activities.length > 0 ? (
                 <ActivityList
                   activities={activities}
@@ -171,14 +180,14 @@ export function DayPlanCard({
                   showActions={showActions}
                 />
               ) : (
-                <div className="flex flex-col items-center justify-center py-8 px-4 rounded-xl border border-dashed border-muted/30 bg-muted/5">
-                  <p className="text-muted-foreground text-center mb-3">No activities planned for this day.</p>
+                <div className="flex flex-col items-center justify-center py-8 px-4 rounded-xl border border-dashed border-muted/20 bg-muted/5 backdrop-blur-sm">
+                  <p className="text-muted-foreground text-center mb-4">No activities planned for this day.</p>
                   {showActions && onAddActivity && (
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={onAddActivity}
-                      className="border-primary/30 text-primary hover:bg-primary/10 transition-all duration-300 rounded-xl shadow-sm"
+                      className="border-primary/30 text-primary hover:bg-primary/10 transition-all duration-300 rounded-xl shadow-md"
                     >
                       <Plus className="h-3.5 w-3.5 mr-1.5" />
                       Add First Activity
@@ -190,13 +199,13 @@ export function DayPlanCard({
 
             {/* Footer with actions - Enhanced with better button styling */}
             {showActions && (
-              <div className="px-5 pb-5 flex justify-end gap-2 pt-2 border-t border-muted/10">
+              <div className="px-5 pb-5 flex justify-end gap-2 pt-3 border-t border-muted/10">
                 {onAddActivity && (
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={onAddActivity}
-                    className="rounded-xl border-forest/30 text-forest hover:bg-forest/10 transition-all duration-300 shadow-sm"
+                    className="rounded-xl border-forest/30 text-forest hover:bg-forest/10 transition-all duration-300 shadow-md"
                   >
                     <Plus className="h-3.5 w-3.5 mr-1.5" />
                     Add Activity
@@ -208,7 +217,7 @@ export function DayPlanCard({
                     variant="outline"
                     size="sm"
                     onClick={onEditDayPlan}
-                    className="rounded-xl border-ocean/30 text-ocean hover:bg-ocean/10 transition-all duration-300 shadow-sm"
+                    className="rounded-xl border-ocean/30 text-ocean hover:bg-ocean/10 transition-all duration-300 shadow-md"
                   >
                     <Edit className="h-3.5 w-3.5 mr-1.5" />
                     Edit Day Plan
@@ -220,7 +229,7 @@ export function DayPlanCard({
                     variant="outline"
                     size="sm"
                     onClick={onDeleteDayPlan}
-                    className="rounded-xl border-destructive/30 text-destructive hover:bg-destructive/10 transition-all duration-300 shadow-sm"
+                    className="rounded-xl border-destructive/30 text-destructive hover:bg-destructive/10 transition-all duration-300 shadow-md"
                   >
                     <Trash2 className="h-3.5 w-3.5 mr-1.5" />
                     Delete
