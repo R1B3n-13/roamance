@@ -28,7 +28,7 @@ export interface ActivityCreateRequest {
   location: Location;
   start_time: string;
   end_time: string;
-  type: string;
+  type: ActivityType;
   note: string;
   cost: number;
 }
@@ -37,7 +37,7 @@ export interface ActivityUpdateRequest {
   location?: Location;
   start_time?: string;
   end_time?: string;
-  type?: string;
+  type?: ActivityType;
   note?: string;
   cost?: number;
 }

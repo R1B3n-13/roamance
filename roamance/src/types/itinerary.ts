@@ -1,4 +1,4 @@
-import { ActivityCreateRequest } from './activity';
+import { ActivityCreateRequest, ActivityType } from './activity';
 import { Audit } from './audit';
 import { Location } from './location';
 import { BaseResponse } from './response';
@@ -35,8 +35,15 @@ export interface DayPlanDetail extends DayPlanBrief {
 export interface DayPlanCreateRequest {
   itinerary_id: string;
   date: string;
-  route_plan?: RoutePlanRequest;
-  notes?: string[];
+  route_plan: RoutePlanRequest;
+  notes: string[];
+}
+
+export interface DayPlanDetailsRequestDto {
+  date: string;
+  route_plan: RoutePlanRequest;
+  notes: string[];
+  activities: Omit<ActivityCreateRequest, 'day_plan_id'>[];
 }
 
 export interface DayPlanUpdateRequest {
@@ -76,8 +83,8 @@ export interface Itinerary extends BaseItinerary {
   audit: Audit;
 }
 
-export type ItineraryCreateRequest = BaseItinerary;
-export type ItineraryUpdateRequest = BaseItinerary;
+export type ItineraryCreateRequest = Omit<BaseItinerary, 'user' | 'audit'>;
+export type ItineraryUpdateRequest = Omit<BaseItinerary, 'user' | 'audit'>;
 
 export type ItineraryDto = Omit<Itinerary, 'notes' | 'location'>;
 
@@ -88,14 +95,27 @@ export interface ItineraryDetail extends ItineraryBrief {
   notes: string[];
 }
 
-export interface ItineraryWithDetailsRequest extends ItineraryCreateRequest {
+export type ItineraryWithDetailsRequest = {
+  locations: Location[];
+  title: string;
+  description: string;
+  notes: string[];
+  start_date: string;
+  end_date: string;
   day_plans: Array<{
     date: string;
-    notes?: string[];
-    route_plan?: RoutePlanRequest;
-    activities?: Omit<ActivityCreateRequest, 'day_plan_id'>[];
+    route_plan: RoutePlanRequest;
+    notes: string[];
+    activities: Array<{
+      location: Location;
+      start_time: string;
+      end_time: string;
+      type: ActivityType;
+      note: string;
+      cost: number;
+    }>;
   }>;
-}
+};
 
 export type ItineraryBriefResponse = BaseResponse<ItineraryBrief>;
 export type ItineraryListResponse = BaseResponse<ItineraryBrief[]>;
