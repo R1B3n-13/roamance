@@ -114,7 +114,8 @@ export const ACTIVITIES_ENDPOINTS = {
   ROOT: ACTIVITIES,
   CREATE: ACTIVITIES,
   GET: (activityId: string) => `${ACTIVITIES}/${activityId}`,
-  GET_BY_DAY_PLAN_ID: (dayPlanId: string) => `${ACTIVITIES}/day-plan/${dayPlanId}`,
+  GET_BY_DAY_PLAN_ID: (dayPlanId: string) =>
+    `${ACTIVITIES}/day-plan/${dayPlanId}`,
   UPDATE: (activityId: string) => `${ACTIVITIES}/${activityId}`,
   DELETE: (activityId: string) => `${ACTIVITIES}/${activityId}`,
 } as const;
@@ -124,7 +125,18 @@ export const DAY_PLAN_ENDPOINTS = {
   ROOT: DAY_PLANS,
   CREATE: DAY_PLANS,
   GET: (dayPlanId: string) => `${DAY_PLANS}/${dayPlanId}`,
-  GET_BY_ITINERARY_ID: (itineraryId: string) => `${DAY_PLANS}/itinerary/${itineraryId}`,
+  GET_BY_ITINERARY_ID: (itineraryId: string) =>
+    `${DAY_PLANS}/itinerary/${itineraryId}`,
   UPDATE: (dayPlanId: string) => `${DAY_PLANS}/${dayPlanId}`,
   DELETE: (dayPlanId: string) => `${DAY_PLANS}/${dayPlanId}`,
+} as const;
+
+/* ------------------------------- AI Powered ------------------------------- */
+
+const AI = `${API_BASE_URL}/ai`;
+export const AI_ENDPOINTS = {
+  ROOT: AI,
+  GENERATE_ITINERARY: `${AI}/generate-itinerary`,
+  RAG_SEARCH: `${AI}/rag-search`,
+  PROOF_READ: `${AI}/proof-read`,
 } as const;

@@ -1,12 +1,14 @@
 import { ApiError } from '@/api/errors';
 import { api } from '@/api/roamance-api';
-import { ITINERARY_ENDPOINTS } from '@/constants/api';
+import { ITINERARY_ENDPOINTS, AI_ENDPOINTS } from '@/constants/api';
 import {
   BaseResponse,
   ItineraryCreateRequest,
   ItineraryDetailResponse,
   ItineraryListResponse,
-  ItineraryWithDetailsRequest
+  ItineraryWithDetailsRequest,
+  AiPoweredItineraryCreateRequest,
+  AiPoweredItineraryResponse,
 } from '@/types';
 
 
@@ -124,6 +126,23 @@ export const ItineraryService = {
     } catch (error) {
       if (error instanceof ApiError) {
         throw new Error(`Failed to delete itinerary: ${error.message}`);
+      }
+      throw error;
+    }
+  },
+
+  generateItinerary: async (
+    request: AiPoweredItineraryCreateRequest
+  ): Promise<AiPoweredItineraryResponse> => {
+    try {
+      const response = await api.post<
+        AiPoweredItineraryResponse,
+        AiPoweredItineraryCreateRequest
+      >(AI_ENDPOINTS.GENERATE_ITINERARY, request);
+      return response.data;
+    } catch (error) {
+      if (error instanceof ApiError) {
+        throw new Error(`Failed to generate itinerary: ${error.message}`);
       }
       throw error;
     }

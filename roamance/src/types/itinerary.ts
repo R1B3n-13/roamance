@@ -1,8 +1,8 @@
-import { Location } from './location';
-import { User } from './user';
-import { Audit } from './audit';
-import { BaseResponse } from './response';
 import { ActivityCreateRequest } from './activity';
+import { Audit } from './audit';
+import { Location } from './location';
+import { BaseResponse } from './response';
+import { User } from './user';
 
 /* ------------------------------ DayPlan types ----------------------------- */
 
@@ -101,6 +101,20 @@ export type ItineraryBriefResponse = BaseResponse<ItineraryBrief>;
 export type ItineraryListResponse = BaseResponse<ItineraryBrief[]>;
 export type ItineraryDetailResponse = BaseResponse<ItineraryDetail>;
 
+/* ------------------------------- AI Powered ------------------------------- */
+export interface AiPoweredItineraryCreateRequest {
+  location: string;
+  start_date: string;
+  number_of_days: number;
+  budget_level: string;
+  number_of_people: number;
+}
+
+// reuse the existing ItineraryDetail for AI response payload
+export type AiPoweredItineraryDto = ItineraryWithDetailsRequest;
+
+export type AiPoweredItineraryResponse = BaseResponse<AiPoweredItineraryDto>;
+
 export type ItineraryDtoByEndpoints = {
   CREATE: {
     request: ItineraryCreateRequest;
@@ -117,5 +131,9 @@ export type ItineraryDtoByEndpoints = {
   CREATE_WITH_DETAILS: {
     request: ItineraryWithDetailsRequest;
     response: ItineraryDetailResponse;
+  };
+  AI_POWERED: {
+    request: AiPoweredItineraryCreateRequest;
+    response: AiPoweredItineraryResponse;
   };
 };
