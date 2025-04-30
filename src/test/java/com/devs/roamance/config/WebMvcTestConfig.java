@@ -34,6 +34,13 @@ public class WebMvcTestConfig {
 
   @MockBean private AuthTokenFilter authTokenFilter;
 
+  /**
+   * Configures a SecurityFilterChain for testing that disables CSRF, permits all requests without authentication, and enables CORS using a custom configuration.
+   *
+   * @param http the HttpSecurity to configure
+   * @return a SecurityFilterChain with relaxed security settings for web MVC tests
+   * @throws Exception if an error occurs during configuration
+   */
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     return http.csrf(AbstractHttpConfigurer::disable)
@@ -42,6 +49,11 @@ public class WebMvcTestConfig {
         .build();
   }
 
+  /**
+   * Provides a CORS configuration source that allows all origins, methods, and headers for all endpoints.
+   *
+   * @return a CorsConfigurationSource permitting unrestricted cross-origin requests
+   */
   @Bean
   public CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration configuration = new CorsConfiguration();
@@ -53,6 +65,11 @@ public class WebMvcTestConfig {
     return source;
   }
 
+  /**
+   * Provides a {@link PasswordEncoder} bean using the BCrypt hashing algorithm.
+   *
+   * @return a {@link BCryptPasswordEncoder} instance for encoding passwords
+   */
   @Bean
   public PasswordEncoder passwordEncoder() {
     return new BCryptPasswordEncoder();
