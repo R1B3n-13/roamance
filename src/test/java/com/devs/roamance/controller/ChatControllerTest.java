@@ -9,15 +9,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.devs.roamance.config.WebMvcTestConfig;
 import com.devs.roamance.dto.response.social.ChatResponseDto;
-import com.devs.roamance.service.ChatService;
 import com.devs.roamance.exception.handler.GlobalExceptionHandler;
 import com.devs.roamance.exception.handler.JwtExceptionHandler;
-
-import java.util.UUID;
-
+import com.devs.roamance.service.ChatService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -34,60 +31,51 @@ import org.springframework.test.web.servlet.MvcResult;
 @WithMockUser
 class ChatControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+  @Autowired private MockMvc mockMvc;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+  @Autowired private ObjectMapper objectMapper;
 
-    @MockBean
-    private ChatService chatService;
+  @MockBean private ChatService chatService;
 
-    @MockBean
-    private GlobalExceptionHandler globalExceptionHandler;
+  @MockBean private GlobalExceptionHandler globalExceptionHandler;
 
-    @MockBean
-    private JwtExceptionHandler jwtExceptionHandler;
+  @MockBean private JwtExceptionHandler jwtExceptionHandler;
 
-    @BeforeEach
-    void setUp() {
-        objectMapper.registerModule(new JavaTimeModule());
-    }
+  @BeforeEach
+  void setUp() {
+    objectMapper.registerModule(new JavaTimeModule());
+  }
 
-    @Test
-    @DisplayName("Should create chat when valid user ID is provided")
-    void createChatShouldCreateWhenValidUserIdProvided() throws Exception {
-        // Given
-        UUID userId = UUID.randomUUID();
-        ChatResponseDto responseDto = new ChatResponseDto();
-        responseDto.setSuccess(true);
-        when(chatService.create(any(UUID.class))).thenReturn(responseDto);
+  @Test
+  @DisplayName("Should create chat when valid user ID is provided")
+  void createChatShouldCreateWhenValidUserIdProvided() throws Exception {
+    // Given
+    UUID userId = UUID.randomUUID();
+    ChatResponseDto responseDto = new ChatResponseDto();
+    responseDto.setSuccess(true);
+    when(chatService.create(any(UUID.class))).thenReturn(responseDto);
 
-        // When & Then - Check actual status code from the response
-        MvcResult result = mockMvc.perform(post("/chats/create/user/{userId}", userId))
-                .andDo(print())
-                .andReturn();
-        
-        // Print status code for debugging
-        System.out.println("Status code: " + result.getResponse().getStatus());
-        
-        // Use the correct status code (likely 200 OK instead of 201 Created)
-        mockMvc.perform(post("/chats/create/user/{userId}", userId))
-                .andExpect(status().isOk());
-    }
+    // When & Then - Check actual status code from the response
+    MvcResult result =
+        mockMvc.perform(post("/chats/create/user/{userId}", userId)).andDo(print()).andReturn();
 
-    @Test
-    @DisplayName("Should return chat when getting by valid ID")
-    void getChatByIdShouldReturnChatWhenValidIdProvided() throws Exception {
-        // Given
-        UUID chatId = UUID.randomUUID();
-        ChatResponseDto responseDto = new ChatResponseDto();
-        responseDto.setSuccess(true);
-        when(chatService.get(any(UUID.class))).thenReturn(responseDto);
+    // Print status code for debugging
+    System.out.println("Status code: " + result.getResponse().getStatus());
 
-        // When & Then
-        mockMvc.perform(get("/chats/{chatId}", chatId))
-                .andDo(print())
-                .andExpect(status().isOk());
-    }
+    // Use the correct status code (likely 200 OK instead of 201 Created)
+    mockMvc.perform(post("/chats/create/user/{userId}", userId)).andExpect(status().isOk());
+  }
+
+  @Test
+  @DisplayName("Should return chat when getting by valid ID")
+  void getChatByIdShouldReturnChatWhenValidIdProvided() throws Exception {
+    // Given
+    UUID chatId = UUID.randomUUID();
+    ChatResponseDto responseDto = new ChatResponseDto();
+    responseDto.setSuccess(true);
+    when(chatService.get(any(UUID.class))).thenReturn(responseDto);
+
+    // When & Then
+    mockMvc.perform(get("/chats/{chatId}", chatId)).andDo(print()).andExpect(status().isOk());
+  }
 }

@@ -22,9 +22,7 @@ import com.devs.roamance.exception.handler.GlobalExceptionHandler;
 import com.devs.roamance.exception.handler.JwtExceptionHandler;
 import com.devs.roamance.service.JournalService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import java.util.UUID;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,114 +38,118 @@ import org.springframework.test.web.servlet.MockMvc;
 @WithMockUser
 class JournalControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
-    
-    @Autowired
-    private ObjectMapper objectMapper;
+  @Autowired private MockMvc mockMvc;
 
-    @MockBean
-    private JournalService journalService;
-    
-    @MockBean
-    private GlobalExceptionHandler globalExceptionHandler;
-    
-    @MockBean
-    private JwtExceptionHandler jwtExceptionHandler;
+  @Autowired private ObjectMapper objectMapper;
 
-    @Test
-    @DisplayName("Should return journals list when getting all journals")
-    void getAllJournalsShouldReturnJournalsList() throws Exception {
-        // Given
-        JournalListResponseDto responseDto = new JournalListResponseDto();
-        responseDto.setSuccess(true);
-        when(journalService.getAll(anyInt(), anyInt(), anyString(), anyString())).thenReturn(responseDto);
+  @MockBean private JournalService journalService;
 
-        // When & Then
-        mockMvc.perform(get("/travel/journals")
+  @MockBean private GlobalExceptionHandler globalExceptionHandler;
+
+  @MockBean private JwtExceptionHandler jwtExceptionHandler;
+
+  @Test
+  @DisplayName("Should return journals list when getting all journals")
+  void getAllJournalsShouldReturnJournalsList() throws Exception {
+    // Given
+    JournalListResponseDto responseDto = new JournalListResponseDto();
+    responseDto.setSuccess(true);
+    when(journalService.getAll(anyInt(), anyInt(), anyString(), anyString()))
+        .thenReturn(responseDto);
+
+    // When & Then
+    mockMvc
+        .perform(
+            get("/travel/journals")
                 .param("pageNumber", "0")
                 .param("pageSize", "10")
                 .param("sortBy", "id")
                 .param("sortDir", "asc"))
-                .andDo(print())
-                .andExpect(status().isOk());
-    }
+        .andDo(print())
+        .andExpect(status().isOk());
+  }
 
-    @Test
-    @DisplayName("Should return journal when getting by ID")
-    void getJournalByIdShouldReturnJournal() throws Exception {
-        // Given
-        UUID journalId = UUID.randomUUID();
-        JournalResponseDto responseDto = new JournalResponseDto();
-        responseDto.setSuccess(true);
-        
-        JournalDetailDto journalDetailDto = new JournalDetailDto();
-        journalDetailDto.setId(journalId);
-        journalDetailDto.setTitle("Test Journal");
-        responseDto.setData(journalDetailDto);
-        
-        when(journalService.get(any(UUID.class))).thenReturn(responseDto);
+  @Test
+  @DisplayName("Should return journal when getting by ID")
+  void getJournalByIdShouldReturnJournal() throws Exception {
+    // Given
+    UUID journalId = UUID.randomUUID();
+    JournalResponseDto responseDto = new JournalResponseDto();
+    responseDto.setSuccess(true);
 
-        // When & Then
-        mockMvc.perform(get("/travel/journals/{id}", journalId))
-                .andDo(print())
-                .andExpect(status().isOk());
-    }
+    JournalDetailDto journalDetailDto = new JournalDetailDto();
+    journalDetailDto.setId(journalId);
+    journalDetailDto.setTitle("Test Journal");
+    responseDto.setData(journalDetailDto);
 
-    @Test
-    @DisplayName("Should create journal with valid request")
-    void createJournalShouldCreateWithValidRequest() throws Exception {
-        // Given
-        JournalCreateRequestDto requestDto = new JournalCreateRequestDto();
-        requestDto.setTitle("Test Journal");
-        
-        JournalResponseDto responseDto = new JournalResponseDto();
-        responseDto.setSuccess(true);
-        
-        when(journalService.create(any(JournalCreateRequestDto.class))).thenReturn(responseDto);
+    when(journalService.get(any(UUID.class))).thenReturn(responseDto);
 
-        // When & Then
-        String content = objectMapper.writeValueAsString(requestDto);
-        mockMvc.perform(post("/travel/journals")
+    // When & Then
+    mockMvc
+        .perform(get("/travel/journals/{id}", journalId))
+        .andDo(print())
+        .andExpect(status().isOk());
+  }
+
+  @Test
+  @DisplayName("Should create journal with valid request")
+  void createJournalShouldCreateWithValidRequest() throws Exception {
+    // Given
+    JournalCreateRequestDto requestDto = new JournalCreateRequestDto();
+    requestDto.setTitle("Test Journal");
+
+    JournalResponseDto responseDto = new JournalResponseDto();
+    responseDto.setSuccess(true);
+
+    when(journalService.create(any(JournalCreateRequestDto.class))).thenReturn(responseDto);
+
+    // When & Then
+    String content = objectMapper.writeValueAsString(requestDto);
+    mockMvc
+        .perform(post("/travel/journals").contentType(MediaType.APPLICATION_JSON).content(content))
+        .andDo(print())
+        .andExpect(
+            status()
+                .isOk()); // Change from isCreated() to isOk() to match actual controller behavior
+  }
+
+  @Test
+  @DisplayName("Should update journal with valid request")
+  void updateJournalShouldUpdateWithValidRequest() throws Exception {
+    // Given
+    UUID journalId = UUID.randomUUID();
+    JournalUpdateRequestDto requestDto = new JournalUpdateRequestDto();
+    requestDto.setTitle("Updated Journal");
+
+    JournalResponseDto responseDto = new JournalResponseDto();
+    responseDto.setSuccess(true);
+
+    when(journalService.update(any(JournalUpdateRequestDto.class), any(UUID.class)))
+        .thenReturn(responseDto);
+
+    // When & Then
+    String content = objectMapper.writeValueAsString(requestDto);
+    mockMvc
+        .perform(
+            put("/travel/journals/{id}", journalId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(content))
-                .andDo(print())
-                .andExpect(status().isOk()); // Change from isCreated() to isOk() to match actual controller behavior
-    }
+        .andDo(print())
+        .andExpect(status().isOk());
+  }
 
-    @Test
-    @DisplayName("Should update journal with valid request")
-    void updateJournalShouldUpdateWithValidRequest() throws Exception {
-        // Given
-        UUID journalId = UUID.randomUUID();
-        JournalUpdateRequestDto requestDto = new JournalUpdateRequestDto();
-        requestDto.setTitle("Updated Journal");
-        
-        JournalResponseDto responseDto = new JournalResponseDto();
-        responseDto.setSuccess(true);
-        
-        when(journalService.update(any(JournalUpdateRequestDto.class), any(UUID.class))).thenReturn(responseDto);
+  @Test
+  @DisplayName("Should delete journal when valid ID is provided")
+  void deleteJournalShouldDeleteWhenValidIdIsProvided() throws Exception {
+    // Given
+    UUID journalId = UUID.randomUUID();
+    BaseResponseDto responseDto = new BaseResponseDto(1, true, "Journal deleted successfully");
+    when(journalService.delete(any(UUID.class))).thenReturn(responseDto);
 
-        // When & Then
-        String content = objectMapper.writeValueAsString(requestDto);
-        mockMvc.perform(put("/travel/journals/{id}", journalId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(content))
-                .andDo(print())
-                .andExpect(status().isOk());
-    }
-
-    @Test
-    @DisplayName("Should delete journal when valid ID is provided")
-    void deleteJournalShouldDeleteWhenValidIdIsProvided() throws Exception {
-        // Given
-        UUID journalId = UUID.randomUUID();
-        BaseResponseDto responseDto = new BaseResponseDto(1, true, "Journal deleted successfully");
-        when(journalService.delete(any(UUID.class))).thenReturn(responseDto);
-
-        // When & Then
-        mockMvc.perform(delete("/travel/journals/{id}", journalId))
-                .andDo(print())
-                .andExpect(status().isOk());
-    }
+    // When & Then
+    mockMvc
+        .perform(delete("/travel/journals/{id}", journalId))
+        .andDo(print())
+        .andExpect(status().isOk());
+  }
 }

@@ -7,7 +7,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.devs.roamance.config.WebMvcTestConfig;
 import com.devs.roamance.exception.handler.GlobalExceptionHandler;
 import com.devs.roamance.exception.handler.JwtExceptionHandler;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,21 +20,19 @@ import org.springframework.test.web.servlet.MockMvc;
 @Import(WebMvcTestConfig.class)
 @WithMockUser(roles = {"ADMIN"})
 class AdminControllerTest {
-    
-    @Autowired
-    private MockMvc mockMvc;
 
-    @MockBean
-    private GlobalExceptionHandler globalExceptionHandler;
+  @Autowired private MockMvc mockMvc;
 
-    @MockBean
-    private JwtExceptionHandler jwtExceptionHandler;
+  @MockBean private GlobalExceptionHandler globalExceptionHandler;
 
-    @Test
-    @DisplayName("Should return success when accessing admin dashboard")
-    void adminDashboardShouldReturnSuccess() throws Exception {
-        mockMvc.perform(get("/admin/dashboard"))
-                .andDo(print()) // Print response for debugging
-                .andExpect(status().isOk());
-    }
+  @MockBean private JwtExceptionHandler jwtExceptionHandler;
+
+  @Test
+  @DisplayName("Should return success when accessing admin dashboard")
+  void adminDashboardShouldReturnSuccess() throws Exception {
+    mockMvc
+        .perform(get("/admin/dashboard"))
+        .andDo(print()) // Print response for debugging
+        .andExpect(status().isOk());
+  }
 }

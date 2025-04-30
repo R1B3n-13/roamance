@@ -22,9 +22,7 @@ import com.devs.roamance.model.user.User;
 import com.devs.roamance.service.UserPreferencesService;
 import com.devs.roamance.util.UserUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import java.util.UUID;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,189 +38,191 @@ import org.springframework.test.web.servlet.MockMvc;
 @WithMockUser
 class UserPreferencesControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
-    
-    @Autowired
-    private ObjectMapper objectMapper;
+  @Autowired private MockMvc mockMvc;
 
-    @MockBean
-    private UserPreferencesService userPreferencesService;
-    
-    @Autowired
-    private UserUtil userUtil;
-    
-    @MockBean
-    private GlobalExceptionHandler globalExceptionHandler;
-    
-    @MockBean
-    private JwtExceptionHandler jwtExceptionHandler;
+  @Autowired private ObjectMapper objectMapper;
 
-    @Test
-    @DisplayName("Should return user preferences list when getting all user preferences")
-    void getAllUserPreferencesShouldReturnUserPreferencesList() throws Exception {
-        // Given
-        UserPreferencesListResponseDto responseDto = new UserPreferencesListResponseDto();
-        responseDto.setSuccess(true);
-        when(userPreferencesService.getAll(anyInt(), anyInt(), anyString(), anyString())).thenReturn(responseDto);
+  @MockBean private UserPreferencesService userPreferencesService;
 
-        // When & Then
-        mockMvc.perform(get("/users/preferences")
+  @Autowired private UserUtil userUtil;
+
+  @MockBean private GlobalExceptionHandler globalExceptionHandler;
+
+  @MockBean private JwtExceptionHandler jwtExceptionHandler;
+
+  @Test
+  @DisplayName("Should return user preferences list when getting all user preferences")
+  void getAllUserPreferencesShouldReturnUserPreferencesList() throws Exception {
+    // Given
+    UserPreferencesListResponseDto responseDto = new UserPreferencesListResponseDto();
+    responseDto.setSuccess(true);
+    when(userPreferencesService.getAll(anyInt(), anyInt(), anyString(), anyString()))
+        .thenReturn(responseDto);
+
+    // When & Then
+    mockMvc
+        .perform(
+            get("/users/preferences")
                 .param("pageNumber", "0")
                 .param("pageSize", "10")
                 .param("sortBy", "id")
                 .param("sortDir", "asc"))
-                .andDo(print())
-                .andExpect(status().isOk());
-    }
+        .andDo(print())
+        .andExpect(status().isOk());
+  }
 
-    @Test
-    @DisplayName("Should return user preferences when getting by ID")
-    void getUserPreferencesByIdShouldReturnUserPreferences() throws Exception {
-        // Given
-        UUID preferencesId = UUID.randomUUID();
-        UserPreferencesResponseDto responseDto = new UserPreferencesResponseDto();
-        responseDto.setSuccess(true);
-        when(userPreferencesService.get(any(UUID.class))).thenReturn(responseDto);
+  @Test
+  @DisplayName("Should return user preferences when getting by ID")
+  void getUserPreferencesByIdShouldReturnUserPreferences() throws Exception {
+    // Given
+    UUID preferencesId = UUID.randomUUID();
+    UserPreferencesResponseDto responseDto = new UserPreferencesResponseDto();
+    responseDto.setSuccess(true);
+    when(userPreferencesService.get(any(UUID.class))).thenReturn(responseDto);
 
-        // When & Then
-        mockMvc.perform(get("/users/preferences/{id}", preferencesId))
-                .andDo(print())
-                .andExpect(status().isOk());
-    }
+    // When & Then
+    mockMvc
+        .perform(get("/users/preferences/{id}", preferencesId))
+        .andDo(print())
+        .andExpect(status().isOk());
+  }
 
-    @Test
-    @DisplayName("Should return current user preferences")
-    void getCurrentUserPreferencesShouldReturnUserPreferences() throws Exception {
-        // Given
-        UUID userId = UUID.randomUUID();
-        UserPreferencesResponseDto responseDto = new UserPreferencesResponseDto();
-        responseDto.setSuccess(true);
-        
-        User mockUser = new User();
-        mockUser.setId(userId);
-        
-        when(userUtil.getAuthenticatedUser()).thenReturn(mockUser);
-        when(userPreferencesService.getByUserId(any(UUID.class))).thenReturn(responseDto);
+  @Test
+  @DisplayName("Should return current user preferences")
+  void getCurrentUserPreferencesShouldReturnUserPreferences() throws Exception {
+    // Given
+    UUID userId = UUID.randomUUID();
+    UserPreferencesResponseDto responseDto = new UserPreferencesResponseDto();
+    responseDto.setSuccess(true);
 
-        // When & Then
-        mockMvc.perform(get("/users/preferences/me"))
-                .andDo(print())
-                .andExpect(status().isOk());
-    }
+    User mockUser = new User();
+    mockUser.setId(userId);
 
-    @Test
-    @DisplayName("Should return user preferences by user ID")
-    void getUserPreferencesByUserIdShouldReturnUserPreferences() throws Exception {
-        // Given
-        UUID userId = UUID.randomUUID();
-        UserPreferencesResponseDto responseDto = new UserPreferencesResponseDto();
-        responseDto.setSuccess(true);
-        when(userPreferencesService.getByUserId(any(UUID.class))).thenReturn(responseDto);
+    when(userUtil.getAuthenticatedUser()).thenReturn(mockUser);
+    when(userPreferencesService.getByUserId(any(UUID.class))).thenReturn(responseDto);
 
-        // When & Then
-        mockMvc.perform(get("/users/preferences/user/{userId}", userId))
-                .andDo(print())
-                .andExpect(status().isOk());
-    }
+    // When & Then
+    mockMvc.perform(get("/users/preferences/me")).andDo(print()).andExpect(status().isOk());
+  }
 
-    @Test
-    @DisplayName("Should create user preferences with valid request")
-    void createUserPreferencesShouldCreateWithValidRequest() throws Exception {
-        // Given
-        UserPreferencesRequestDto requestDto = new UserPreferencesRequestDto();
-        
-        UserPreferencesResponseDto responseDto = new UserPreferencesResponseDto();
-        responseDto.setSuccess(true);
-        
-        when(userPreferencesService.create(any(UserPreferencesRequestDto.class))).thenReturn(responseDto);
+  @Test
+  @DisplayName("Should return user preferences by user ID")
+  void getUserPreferencesByUserIdShouldReturnUserPreferences() throws Exception {
+    // Given
+    UUID userId = UUID.randomUUID();
+    UserPreferencesResponseDto responseDto = new UserPreferencesResponseDto();
+    responseDto.setSuccess(true);
+    when(userPreferencesService.getByUserId(any(UUID.class))).thenReturn(responseDto);
 
-        // When & Then
-        String content = objectMapper.writeValueAsString(requestDto);
-        mockMvc.perform(post("/users/preferences")
+    // When & Then
+    mockMvc
+        .perform(get("/users/preferences/user/{userId}", userId))
+        .andDo(print())
+        .andExpect(status().isOk());
+  }
+
+  @Test
+  @DisplayName("Should create user preferences with valid request")
+  void createUserPreferencesShouldCreateWithValidRequest() throws Exception {
+    // Given
+    UserPreferencesRequestDto requestDto = new UserPreferencesRequestDto();
+
+    UserPreferencesResponseDto responseDto = new UserPreferencesResponseDto();
+    responseDto.setSuccess(true);
+
+    when(userPreferencesService.create(any(UserPreferencesRequestDto.class)))
+        .thenReturn(responseDto);
+
+    // When & Then
+    String content = objectMapper.writeValueAsString(requestDto);
+    mockMvc
+        .perform(
+            post("/users/preferences").contentType(MediaType.APPLICATION_JSON).content(content))
+        .andDo(print())
+        .andExpect(status().isOk());
+  }
+
+  @Test
+  @DisplayName("Should update current user preferences with valid request")
+  void updateUserPreferencesShouldUpdateWithValidRequest() throws Exception {
+    // Given
+    UUID userId = UUID.randomUUID();
+    UserPreferencesRequestDto requestDto = new UserPreferencesRequestDto();
+
+    UserPreferencesResponseDto responseDto = new UserPreferencesResponseDto();
+    responseDto.setSuccess(true);
+
+    User mockUser = new User();
+    mockUser.setId(userId);
+
+    when(userUtil.getAuthenticatedUser()).thenReturn(mockUser);
+    when(userPreferencesService.updateByUserId(
+            any(UserPreferencesRequestDto.class), any(UUID.class)))
+        .thenReturn(responseDto);
+
+    // When & Then
+    String content = objectMapper.writeValueAsString(requestDto);
+    mockMvc
+        .perform(put("/users/preferences").contentType(MediaType.APPLICATION_JSON).content(content))
+        .andDo(print())
+        .andExpect(status().isOk());
+  }
+
+  @Test
+  @DisplayName("Should update user preferences by ID with valid request")
+  void updateUserPreferencesByIdShouldUpdateWithValidRequest() throws Exception {
+    // Given
+    UUID preferencesId = UUID.randomUUID();
+    UserPreferencesRequestDto requestDto = new UserPreferencesRequestDto();
+
+    UserPreferencesResponseDto responseDto = new UserPreferencesResponseDto();
+    responseDto.setSuccess(true);
+
+    when(userPreferencesService.update(any(UserPreferencesRequestDto.class), any(UUID.class)))
+        .thenReturn(responseDto);
+
+    // When & Then
+    String content = objectMapper.writeValueAsString(requestDto);
+    mockMvc
+        .perform(
+            put("/users/preferences/{id}", preferencesId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(content))
-                .andDo(print())
-                .andExpect(status().isOk());
-    }
+        .andDo(print())
+        .andExpect(status().isOk());
+  }
 
-    @Test
-    @DisplayName("Should update current user preferences with valid request")
-    void updateUserPreferencesShouldUpdateWithValidRequest() throws Exception {
-        // Given
-        UUID userId = UUID.randomUUID();
-        UserPreferencesRequestDto requestDto = new UserPreferencesRequestDto();
-        
-        UserPreferencesResponseDto responseDto = new UserPreferencesResponseDto();
-        responseDto.setSuccess(true);
-        
-        User mockUser = new User();
-        mockUser.setId(userId);
-        
-        when(userUtil.getAuthenticatedUser()).thenReturn(mockUser);
-        when(userPreferencesService.updateByUserId(any(UserPreferencesRequestDto.class), any(UUID.class)))
-                .thenReturn(responseDto);
+  @Test
+  @DisplayName("Should delete current user preferences when requested")
+  void deleteUserPreferencesShouldDeleteWhenRequested() throws Exception {
+    // Given
+    UUID userId = UUID.randomUUID();
+    BaseResponseDto responseDto =
+        new BaseResponseDto(1, true, "User preferences deleted successfully");
 
-        // When & Then
-        String content = objectMapper.writeValueAsString(requestDto);
-        mockMvc.perform(put("/users/preferences")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(content))
-                .andDo(print())
-                .andExpect(status().isOk());
-    }
+    User mockUser = new User();
+    mockUser.setId(userId);
 
-    @Test
-    @DisplayName("Should update user preferences by ID with valid request")
-    void updateUserPreferencesByIdShouldUpdateWithValidRequest() throws Exception {
-        // Given
-        UUID preferencesId = UUID.randomUUID();
-        UserPreferencesRequestDto requestDto = new UserPreferencesRequestDto();
-        
-        UserPreferencesResponseDto responseDto = new UserPreferencesResponseDto();
-        responseDto.setSuccess(true);
-        
-        when(userPreferencesService.update(any(UserPreferencesRequestDto.class), any(UUID.class))).thenReturn(responseDto);
+    when(userUtil.getAuthenticatedUser()).thenReturn(mockUser);
+    when(userPreferencesService.deleteByUserId(any(UUID.class))).thenReturn(responseDto);
 
-        // When & Then
-        String content = objectMapper.writeValueAsString(requestDto);
-        mockMvc.perform(put("/users/preferences/{id}", preferencesId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(content))
-                .andDo(print())
-                .andExpect(status().isOk());
-    }
+    // When & Then
+    mockMvc.perform(delete("/users/preferences")).andDo(print()).andExpect(status().isOk());
+  }
 
-    @Test
-    @DisplayName("Should delete current user preferences when requested")
-    void deleteUserPreferencesShouldDeleteWhenRequested() throws Exception {
-        // Given
-        UUID userId = UUID.randomUUID();
-        BaseResponseDto responseDto = new BaseResponseDto(1, true, "User preferences deleted successfully");
-        
-        User mockUser = new User();
-        mockUser.setId(userId);
-        
-        when(userUtil.getAuthenticatedUser()).thenReturn(mockUser);
-        when(userPreferencesService.deleteByUserId(any(UUID.class))).thenReturn(responseDto);
+  @Test
+  @DisplayName("Should delete user preferences by ID when valid ID is provided")
+  void deleteUserPreferencesByIdShouldDeleteWhenValidIdIsProvided() throws Exception {
+    // Given
+    UUID preferencesId = UUID.randomUUID();
+    BaseResponseDto responseDto =
+        new BaseResponseDto(1, true, "User preferences deleted successfully");
+    when(userPreferencesService.delete(any(UUID.class))).thenReturn(responseDto);
 
-        // When & Then
-        mockMvc.perform(delete("/users/preferences"))
-                .andDo(print())
-                .andExpect(status().isOk());
-    }
-
-    @Test
-    @DisplayName("Should delete user preferences by ID when valid ID is provided")
-    void deleteUserPreferencesByIdShouldDeleteWhenValidIdIsProvided() throws Exception {
-        // Given
-        UUID preferencesId = UUID.randomUUID();
-        BaseResponseDto responseDto = new BaseResponseDto(1, true, "User preferences deleted successfully");
-        when(userPreferencesService.delete(any(UUID.class))).thenReturn(responseDto);
-
-        // When & Then
-        mockMvc.perform(delete("/users/preferences/{id}", preferencesId))
-                .andDo(print())
-                .andExpect(status().isOk());
-    }
+    // When & Then
+    mockMvc
+        .perform(delete("/users/preferences/{id}", preferencesId))
+        .andDo(print())
+        .andExpect(status().isOk());
+  }
 }

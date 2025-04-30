@@ -20,11 +20,9 @@ import com.devs.roamance.exception.handler.JwtExceptionHandler;
 import com.devs.roamance.service.ActivityService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-
 import java.math.BigDecimal;
 import java.time.LocalTime;
 import java.util.UUID;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -41,116 +39,121 @@ import org.springframework.test.web.servlet.MockMvc;
 @WithMockUser
 class ActivityControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
-    @Autowired
-    private ObjectMapper objectMapper;
+  @Autowired private MockMvc mockMvc;
+  @Autowired private ObjectMapper objectMapper;
 
-    @MockBean
-    private ActivityService activityService;
-    @MockBean
-    private GlobalExceptionHandler globalExceptionHandler;
-    @MockBean
-    private JwtExceptionHandler jwtExceptionHandler;
+  @MockBean private ActivityService activityService;
+  @MockBean private GlobalExceptionHandler globalExceptionHandler;
+  @MockBean private JwtExceptionHandler jwtExceptionHandler;
 
-    @BeforeEach
-    void setUp() {
-        objectMapper.registerModule(new JavaTimeModule()); // Add JavaTimeModule for serializing LocalTime
-    }
+  @BeforeEach
+  void setUp() {
+    objectMapper.registerModule(
+        new JavaTimeModule()); // Add JavaTimeModule for serializing LocalTime
+  }
 
-    @Test
-    @DisplayName("Should return activity when getting by ID")
-    void getActivityByIdShouldReturnActivity() throws Exception {
-        // Given
-        UUID activityId = UUID.randomUUID();
-        ActivityResponseDto responseDto = new ActivityResponseDto();
-        responseDto.setSuccess(true);
-        when(activityService.get(any(UUID.class))).thenReturn(responseDto);
+  @Test
+  @DisplayName("Should return activity when getting by ID")
+  void getActivityByIdShouldReturnActivity() throws Exception {
+    // Given
+    UUID activityId = UUID.randomUUID();
+    ActivityResponseDto responseDto = new ActivityResponseDto();
+    responseDto.setSuccess(true);
+    when(activityService.get(any(UUID.class))).thenReturn(responseDto);
 
-        // When & Then
-        mockMvc.perform(get("/travel/activities/{activityId}", activityId))
-                .andDo(print()) // Print response for debugging
-                .andExpect(status().isOk());
-    }
+    // When & Then
+    mockMvc
+        .perform(get("/travel/activities/{activityId}", activityId))
+        .andDo(print()) // Print response for debugging
+        .andExpect(status().isOk());
+  }
 
-    @Test
-    @DisplayName("Should return activities list when getting activities by day plan ID")
-    void getActivitiesByDayPlanIdShouldReturnActivitiesList() throws Exception {
-        // Given
-        UUID dayPlanId = UUID.randomUUID();
-        ActivityListResponseDto responseDto = new ActivityListResponseDto();
-        responseDto.setSuccess(true);
-        when(activityService.getByDayPlanId(any(UUID.class), anyInt(), anyInt(), any(String.class), any(String.class)))
-                .thenReturn(responseDto);
+  @Test
+  @DisplayName("Should return activities list when getting activities by day plan ID")
+  void getActivitiesByDayPlanIdShouldReturnActivitiesList() throws Exception {
+    // Given
+    UUID dayPlanId = UUID.randomUUID();
+    ActivityListResponseDto responseDto = new ActivityListResponseDto();
+    responseDto.setSuccess(true);
+    when(activityService.getByDayPlanId(
+            any(UUID.class), anyInt(), anyInt(), any(String.class), any(String.class)))
+        .thenReturn(responseDto);
 
-        // When & Then
-        mockMvc.perform(get("/travel/activities/day-plan/{dayPlanId}", dayPlanId)
+    // When & Then
+    mockMvc
+        .perform(
+            get("/travel/activities/day-plan/{dayPlanId}", dayPlanId)
                 .param("pageNumber", "1")
                 .param("pageSize", "1")
                 .param("sortBy", "foo")
                 .param("sortDir", "foo"))
-                .andDo(print()) // Print response for debugging
-                .andExpect(status().isOk());
-    }
+        .andDo(print()) // Print response for debugging
+        .andExpect(status().isOk());
+  }
 
-    @Test
-    @DisplayName("Should update activity with valid request")
-    void updateActivityShouldUpdateWithValidRequest() throws Exception {
-        // Given
-        UUID activityId = UUID.randomUUID();
-        ActivityUpdateRequestDto requestDto = new ActivityUpdateRequestDto();
-        ActivityResponseDto responseDto = new ActivityResponseDto();
-        responseDto.setSuccess(true);
-        when(activityService.update(any(ActivityUpdateRequestDto.class), any(UUID.class)))
-                .thenReturn(responseDto);
+  @Test
+  @DisplayName("Should update activity with valid request")
+  void updateActivityShouldUpdateWithValidRequest() throws Exception {
+    // Given
+    UUID activityId = UUID.randomUUID();
+    ActivityUpdateRequestDto requestDto = new ActivityUpdateRequestDto();
+    ActivityResponseDto responseDto = new ActivityResponseDto();
+    responseDto.setSuccess(true);
+    when(activityService.update(any(ActivityUpdateRequestDto.class), any(UUID.class)))
+        .thenReturn(responseDto);
 
-        // When & Then
-        String content = objectMapper.writeValueAsString(requestDto);
-        mockMvc.perform(put("/travel/activities/{activityId}", activityId)
+    // When & Then
+    String content = objectMapper.writeValueAsString(requestDto);
+    mockMvc
+        .perform(
+            put("/travel/activities/{activityId}", activityId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(content))
-                .andDo(print()) // Print response for debugging
-                .andExpect(status().isOk());
-    }
+        .andDo(print()) // Print response for debugging
+        .andExpect(status().isOk());
+  }
 
-    @Test
-    @DisplayName("Should delete activity when valid ID is provided")
-    void deleteActivityShouldDeleteWhenValidIdIsProvided() throws Exception {
-        // Given
-        UUID activityId = UUID.randomUUID();
-        BaseResponseDto responseDto = new BaseResponseDto(1, true, "Not all who wander are lost");
-        when(activityService.delete(any(UUID.class))).thenReturn(responseDto);
+  @Test
+  @DisplayName("Should delete activity when valid ID is provided")
+  void deleteActivityShouldDeleteWhenValidIdIsProvided() throws Exception {
+    // Given
+    UUID activityId = UUID.randomUUID();
+    BaseResponseDto responseDto = new BaseResponseDto(1, true, "Not all who wander are lost");
+    when(activityService.delete(any(UUID.class))).thenReturn(responseDto);
 
-        // When & Then
-        mockMvc.perform(delete("/travel/activities/{activityId}", activityId))
-                .andDo(print()) // Print response for debugging
-                .andExpect(status().isOk());
-    }
+    // When & Then
+    mockMvc
+        .perform(delete("/travel/activities/{activityId}", activityId))
+        .andDo(print()) // Print response for debugging
+        .andExpect(status().isOk());
+  }
 
-    @Test
-    @DisplayName("Should handle activity update with LocalTime properties")
-    void updateActivityWithLocalTimePropertiesShouldWork() throws Exception {
-        // Given
-        UUID activityId = UUID.randomUUID();
-        ActivityUpdateRequestDto requestDto = new ActivityUpdateRequestDto();
-        requestDto.setCost(new BigDecimal("2.3"));
-        requestDto.setEndTime(LocalTime.MIDNIGHT);
-        requestDto.setLocation(new LocationUpdateRequestDto());
-        requestDto.setNote("Note");
-        requestDto.setStartTime(LocalTime.MIDNIGHT);
-        requestDto.setType("Type");
+  @Test
+  @DisplayName("Should handle activity update with LocalTime properties")
+  void updateActivityWithLocalTimePropertiesShouldWork() throws Exception {
+    // Given
+    UUID activityId = UUID.randomUUID();
+    ActivityUpdateRequestDto requestDto = new ActivityUpdateRequestDto();
+    requestDto.setCost(new BigDecimal("2.3"));
+    requestDto.setEndTime(LocalTime.MIDNIGHT);
+    requestDto.setLocation(new LocationUpdateRequestDto());
+    requestDto.setNote("Note");
+    requestDto.setStartTime(LocalTime.MIDNIGHT);
+    requestDto.setType("Type");
 
-        ActivityResponseDto responseDto = new ActivityResponseDto();
-        responseDto.setSuccess(true);
-        when(activityService.update(any(ActivityUpdateRequestDto.class), any(UUID.class)))
-                .thenReturn(responseDto);
+    ActivityResponseDto responseDto = new ActivityResponseDto();
+    responseDto.setSuccess(true);
+    when(activityService.update(any(ActivityUpdateRequestDto.class), any(UUID.class)))
+        .thenReturn(responseDto);
 
-        // When & Then
-        String content = objectMapper.writeValueAsString(requestDto);
-        mockMvc.perform(put("/travel/activities/{activityId}", activityId)
+    // When & Then
+    String content = objectMapper.writeValueAsString(requestDto);
+    mockMvc
+        .perform(
+            put("/travel/activities/{activityId}", activityId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(content))
-                .andDo(print()) // Print response for debugging
-                .andExpect(status().isOk());
-    }
+        .andDo(print()) // Print response for debugging
+        .andExpect(status().isOk());
+  }
 }

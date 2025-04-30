@@ -16,9 +16,7 @@ import com.devs.roamance.exception.handler.JwtExceptionHandler;
 import com.devs.roamance.service.CommentService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-
 import java.util.UUID;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -36,91 +34,99 @@ import org.springframework.test.web.servlet.MvcResult;
 @WithMockUser
 class CommentControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+  @Autowired private MockMvc mockMvc;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+  @Autowired private ObjectMapper objectMapper;
 
-    @MockBean
-    private CommentService commentService;
-    
-    @MockBean
-    private GlobalExceptionHandler globalExceptionHandler;
-    
-    @MockBean
-    private JwtExceptionHandler jwtExceptionHandler;
+  @MockBean private CommentService commentService;
 
-    @BeforeEach
-    void setUp() {
-        objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-    }
+  @MockBean private GlobalExceptionHandler globalExceptionHandler;
 
-    @Test
-    @DisplayName("Should create comment when valid request is provided")
-    void createCommentShouldCreateWhenValidRequestIsProvided() throws Exception {
-        // Given
-        UUID postId = UUID.randomUUID();
-        CommentRequestDto requestDto = new CommentRequestDto();
-        requestDto.setImagePath("Image Path");
-        requestDto.setText("Text");
-        requestDto.setVideoPath("Video Path");
+  @MockBean private JwtExceptionHandler jwtExceptionHandler;
 
-        CommentResponseDto responseDto = new CommentResponseDto();
-        responseDto.setSuccess(true);
-        when(commentService.create(any(CommentRequestDto.class), any(UUID.class)))
-                .thenReturn(responseDto);
+  @BeforeEach
+  void setUp() {
+    objectMapper = new ObjectMapper();
+    objectMapper.registerModule(new JavaTimeModule());
+  }
 
-        // When & Then - Check actual status code first
-        MvcResult result = mockMvc.perform(post("/comments/create/post/{postId}", postId)
+  @Test
+  @DisplayName("Should create comment when valid request is provided")
+  void createCommentShouldCreateWhenValidRequestIsProvided() throws Exception {
+    // Given
+    UUID postId = UUID.randomUUID();
+    CommentRequestDto requestDto = new CommentRequestDto();
+    requestDto.setImagePath("Image Path");
+    requestDto.setText("Text");
+    requestDto.setVideoPath("Video Path");
+
+    CommentResponseDto responseDto = new CommentResponseDto();
+    responseDto.setSuccess(true);
+    when(commentService.create(any(CommentRequestDto.class), any(UUID.class)))
+        .thenReturn(responseDto);
+
+    // When & Then - Check actual status code first
+    MvcResult result =
+        mockMvc
+            .perform(
+                post("/comments/create/post/{postId}", postId)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(requestDto)))
+            .andDo(print())
+            .andReturn();
+
+    // Print status code for debugging
+    System.out.println("Status code: " + result.getResponse().getStatus());
+
+    // Use the correct status code (OK instead of CREATED based on our findings)
+    mockMvc
+        .perform(
+            post("/comments/create/post/{postId}", postId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(requestDto)))
-                .andDo(print())
-                .andReturn();
-                
-        // Print status code for debugging
-        System.out.println("Status code: " + result.getResponse().getStatus());
-        
-        // Use the correct status code (OK instead of CREATED based on our findings)
-        mockMvc.perform(post("/comments/create/post/{postId}", postId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(requestDto)))
-                .andExpect(status().isOk());
-    }
+        .andExpect(status().isOk());
+  }
 
-    @Test
-    @DisplayName("Should return comment when getting by ID")
-    void getCommentByIdShouldReturnComment() throws Exception {
-        // Given
-        UUID commentId = UUID.randomUUID();
-        CommentResponseDto responseDto = new CommentResponseDto();
-        responseDto.setSuccess(true);
-        when(commentService.get(any(UUID.class))).thenReturn(responseDto);
+  @Test
+  @DisplayName("Should return comment when getting by ID")
+  void getCommentByIdShouldReturnComment() throws Exception {
+    // Given
+    UUID commentId = UUID.randomUUID();
+    CommentResponseDto responseDto = new CommentResponseDto();
+    responseDto.setSuccess(true);
+    when(commentService.get(any(UUID.class))).thenReturn(responseDto);
 
-        // When & Then
-        mockMvc.perform(get("/comments/{commentId}", commentId))
-                .andDo(print())
-                .andExpect(status().isOk());
-    }
+    // When & Then
+    mockMvc
+        .perform(get("/comments/{commentId}", commentId))
+        .andDo(print())
+        .andExpect(status().isOk());
+  }
 
-    @Test
-    @DisplayName("Should return comments list when getting by post ID")
-    void getCommentsByPostIdShouldReturnCommentsList() throws Exception {
-        // Given
-        UUID postId = UUID.randomUUID();
-        CommentListResponseDto responseDto = new CommentListResponseDto();
-        responseDto.setSuccess(true);
-        when(commentService.getByPostId(any(UUID.class), any(Integer.class), any(Integer.class),
-                any(String.class), any(String.class))).thenReturn(responseDto);
+  @Test
+  @DisplayName("Should return comments list when getting by post ID")
+  void getCommentsByPostIdShouldReturnCommentsList() throws Exception {
+    // Given
+    UUID postId = UUID.randomUUID();
+    CommentListResponseDto responseDto = new CommentListResponseDto();
+    responseDto.setSuccess(true);
+    when(commentService.getByPostId(
+            any(UUID.class),
+            any(Integer.class),
+            any(Integer.class),
+            any(String.class),
+            any(String.class)))
+        .thenReturn(responseDto);
 
-        // When & Then
-        mockMvc.perform(get("/comments/by-post/{postId}", postId)
+    // When & Then
+    mockMvc
+        .perform(
+            get("/comments/by-post/{postId}", postId)
                 .param("pageNumber", "1")
                 .param("pageSize", "1")
                 .param("sortBy", "foo")
                 .param("sortDir", "foo"))
-                .andDo(print())
-                .andExpect(status().isOk());
-    }
+        .andDo(print())
+        .andExpect(status().isOk());
+  }
 }
