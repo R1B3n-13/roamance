@@ -13,6 +13,9 @@
   <a href="https://www.postgresql.org/">
     <img src="https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL" />
   </a>
+  <a href="https://central.sonatype.com/artifact/dev.langchain4j/langchain4j">
+    <img src="https://img.shields.io/maven-central/v/dev.langchain4j/langchain4j?label=langchain4j&color=blue&style=for-the-badge" alt="LangChain4j on Maven Central" />
+  </a>
   <a href="https://www.docker.com/">
     <img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker" />
   </a>
@@ -98,7 +101,6 @@ Combining powerful itinerary management tools with social networking features, R
 - **Real-time Messaging** — Connect with other travelers through private chats
 - **AI-Powered Features** — Get itinerary suggestions, image analysis, and content recommendations
 - **Secure Authentication** — JWT-based authentication and role-based access control
-- **Mobile-Ready APIs** — RESTful endpoints supporting cross-platform functionality
 
 ---
 
@@ -156,7 +158,7 @@ Roamance follows a modular, microservices-inspired architecture with the followi
 | Itinerary Planning   | Trip planning, day plans, activities                |
 | Social Interaction   | Posts, comments, likes, saves                       |
 | Messaging            | Real-time and asynchronous messaging                |
-| AI Services          | Content analysis, recommendations, search           |
+| AI Services          | Content analysis, itinerary generation, search, proofread      |
 | Security             | JWT authentication, role-based access control       |
 
 ### System Flow
@@ -178,8 +180,10 @@ Roamance follows a modular, microservices-inspired architecture with the followi
 
 4. **AI-Enhanced Experience** 🤖  
    - AI analyzes travel content for insights and safety
+   - Generate itinerary using AI
    - Vector database enables semantic search across travel content
    - Image analysis extracts meaningful information from travel photos
+   - Proofread content
 
 ---
 
