@@ -26,6 +26,7 @@ import {
   X,
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
+import { OpenStreetMapProvider } from 'leaflet-geosearch';
 import * as React from 'react';
 
 interface PlaceSearchCommandProps {
@@ -39,6 +40,9 @@ export function PlaceSearchCommand({
 }: PlaceSearchCommandProps) {
   const { resolvedTheme } = useTheme();
   const isDarkMode = resolvedTheme === 'dark';
+
+  // Leaflet Geosearch provider for location search
+  const provider = React.useMemo(() => new OpenStreetMapProvider(), []);
 
   const [open, setOpen] = React.useState(false);
   const [mainValue, setMainValue] = React.useState('');
@@ -55,18 +59,6 @@ export function PlaceSearchCommand({
   const [triggerWidth, setTriggerWidth] = React.useState<number>(0);
 
   React.useEffect(() => {
-    if (triggerRef.current) {
-      setTriggerWidth(triggerRef.current.offsetWidth);
-    }
-  }, [open, className]);
-
-  React.useEffect(() => {
-    if (open && mainValue && !refinedValue) {
-      setRefinedValue(mainValue);
-    }
-  }, [open, mainValue, refinedValue]);
-
-  React.useEffect(() => {
     if (refinedValue.length < 2) {
       setPlaces([]);
       return;
@@ -79,8 +71,27 @@ export function PlaceSearchCommand({
     setIsSearching(true);
     searchTimeout.current = setTimeout(async () => {
       try {
-        const results = await searchPlaces(refinedValue);
-        setPlaces(results);
+        if (searchMode === 'location') {
+          // Use Leaflet Geosearch for location queries
+          const res = await provider.search({ query: refinedValue });
+          const formatted = res.map((r, idx) => ({
+            id: `osm-${r.x}-${r.y}`,
+            name: r.label,
+            lat: r.y,
+            lng: r.x,
+            country: r.label.split(',').slice(-1)[0].trim(),
+            description: r.label,
+            color: 'var(--primary)',
+            size: 1,
+            image: '',
+            images: [],
+          }));
+          setPlaces(formatted);
+        } else {
+          // Use existing search for region or country
+          const results = await searchPlaces(refinedValue);
+          setPlaces(results);
+        }
       } catch (error) {
         console.error('Error searching places:', error);
       } finally {
@@ -93,7 +104,7 @@ export function PlaceSearchCommand({
         clearTimeout(searchTimeout.current);
       }
     };
-  }, [refinedValue]);
+  }, [refinedValue, searchMode]);
 
   const handleSelectPlace = (placeId: string) => {
     const selectedPlace = places.find((place) => place.id === placeId);

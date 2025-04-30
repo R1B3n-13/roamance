@@ -66,9 +66,17 @@ export async function getInitialPlaces(): Promise<TouristPlace[]> {
 
   try {
     const popularDestinations = [
-      'Paris', 'New York', 'Tokyo', 'Rome', 'Sydney',
-      'Cairo', 'Rio de Janeiro', 'Barcelona', 'Istanbul', 'Dubai',
-      'London', 'Venice', 'Santorini', 'Bali', 'Kyoto',
+      'Paris',
+      'Tokyo',
+      'Rome',
+      'Sydney',
+      'Cairo',
+      'Istanbul',
+      'Dubai',
+      'Venice',
+      'Santorini',
+      'Bali',
+      'Kyoto',
     ];
 
     const searchResults = await fetchPopularDestinations(popularDestinations);

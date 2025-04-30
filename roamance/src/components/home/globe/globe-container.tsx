@@ -1,3 +1,5 @@
+'use client';
+
 import { TouristPlace } from '@/types';
 import dynamic from 'next/dynamic';
 import { GlobeMethods } from 'react-globe.gl';

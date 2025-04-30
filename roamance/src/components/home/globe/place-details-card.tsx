@@ -1,3 +1,5 @@
+'use client';
+
 import { cn } from '@/lib/utils';
 import { getPlaceDetails } from '@/service/tourism-service';
 import { TouristPlace } from '@/types';
