@@ -1,8 +1,8 @@
 'use client';
 
-import { searchGeonames } from '@/api/places-api';
+import { searchLocations } from '@/api/geosearch-api';
 import { cn } from '@/lib/utils';
-import { Geoname } from '@/types/places';
+import { GeosearchResult } from '@/types/places';
 import { Compass, Flag, LocateFixed } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { LocationSearchInput } from './LocationSearchInput';
@@ -25,8 +25,8 @@ export function RoutePlanning({
 }: RoutePlanningProps) {
   const [startPointSearch, setStartPointSearch] = useState<string>('');
   const [destinationSearch, setDestinationSearch] = useState<string>('');
-  const [startPointResults, setStartPointResults] = useState<Geoname[]>([]);
-  const [destinationResults, setDestinationResults] = useState<Geoname[]>([]);
+  const [startPointResults, setStartPointResults] = useState<GeosearchResult[]>([]);
+  const [destinationResults, setDestinationResults] = useState<GeosearchResult[]>([]);
   const [isSearchingStart, setIsSearchingStart] = useState<boolean>(false);
   const [isSearchingDestination, setIsSearchingDestination] = useState<boolean>(false);
   const [showStartResults, setShowStartResults] = useState<boolean>(false);
@@ -43,7 +43,7 @@ export function RoutePlanning({
     const fetchStartPointResults = async () => {
       setIsSearchingStart(true);
       try {
-        const results = await searchGeonames(startPointSearch, 5);
+        const results = await searchLocations(startPointSearch, 5);
         setStartPointResults(results);
         setShowStartResults(true);
       } catch (error) {
@@ -71,7 +71,7 @@ export function RoutePlanning({
     const fetchDestinationResults = async () => {
       setIsSearchingDestination(true);
       try {
-        const results = await searchGeonames(destinationSearch, 5);
+        const results = await searchLocations(destinationSearch, 5);
         setDestinationResults(results);
         setShowDestResults(true);
       } catch (error) {
@@ -89,14 +89,14 @@ export function RoutePlanning({
   }, [destinationSearch]);
 
   // Handle selection of starting point
-  const handleSelectStartPoint = (geoname: Geoname) => {
+  const handleSelectStartPoint = (result: GeosearchResult) => {
     if (onChangeStartPoint) {
       onChangeStartPoint(
-        parseFloat(geoname.lat),
-        parseFloat(geoname.lng),
-        geoname.toponymName || geoname.name
+        result.lat,
+        result.lng,
+        result.name
       );
-      setStartPointSearch(geoname.toponymName || geoname.name);
+      setStartPointSearch(result.name);
     }
     setShowStartResults(false);
     // Reset active step when changing route
@@ -104,14 +104,14 @@ export function RoutePlanning({
   };
 
   // Handle selection of destination
-  const handleSelectDestination = (geoname: Geoname) => {
+  const handleSelectDestination = (result: GeosearchResult) => {
     if (onChangeDestination) {
       onChangeDestination(
-        parseFloat(geoname.lat),
-        parseFloat(geoname.lng),
-        geoname.toponymName || geoname.name
+        result.lat,
+        result.lng,
+        result.name
       );
-      setDestinationSearch(geoname.toponymName || geoname.name);
+      setDestinationSearch(result.name);
     }
     setShowDestResults(false);
     // Reset active step when changing route

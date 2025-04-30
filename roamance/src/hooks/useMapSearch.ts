@@ -1,13 +1,12 @@
 import { useState, useEffect } from 'react';
-import { searchGeonames } from '@/api/places-api';
+import { searchLocations } from '@/api/geosearch-api';
 
 export interface SearchResult {
   name: string;
   lat: number;
   lng: number;
   country?: string;
-  adminName?: string;
-  population?: number;
+  city?: string;
 }
 
 export function useMapSearch(searchQuery: string) {
@@ -24,18 +23,17 @@ export function useMapSearch(searchQuery: string) {
 
       setIsSearching(true);
       try {
-        const geonames = await searchGeonames(searchQuery);
+        const results = await searchLocations(searchQuery);
 
-        // Map Geoname objects to the format expected by SearchResults
-        const formattedResults = geonames
-          .filter((geoname) => geoname.lat && geoname.lng && geoname.name)
-          .map((geoname) => ({
-            name: geoname.toponymName || geoname.name,
-            lat: parseFloat(geoname.lat),
-            lng: parseFloat(geoname.lng),
-            country: geoname.countryName || '',
-            adminName: geoname.adminName1 || '',
-            population: geoname.population || 0,
+        // Map GeosearchResult objects to the format expected by SearchResults
+        const formattedResults = results
+          .filter((result) => result.lat && result.lng && result.name)
+          .map((result) => ({
+            name: result.name,
+            lat: result.lat,
+            lng: result.lng,
+            country: result.country || '',
+            city: result.city || '',
           }))
           .slice(0, 10);
 

@@ -1,6 +1,7 @@
 package com.devs.roamance.security;
 
 import com.devs.roamance.constant.ResponseMessage;
+import com.devs.roamance.constant.WhiteListedPaths;
 import com.devs.roamance.exception.AuthTokenNotFoundException;
 import com.devs.roamance.exception.AuthenticationFailedException;
 import jakarta.servlet.FilterChain;
@@ -45,12 +46,11 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 
     String contextPath = request.getContextPath();
 
-    if (request.getRequestURI().startsWith(contextPath + "/auth")
-        || ("POST".equalsIgnoreCase(request.getMethod())
-            && request.getRequestURI().equals(contextPath + "/users"))) {
+    if (("POST".equalsIgnoreCase(request.getMethod())
+            && request.getRequestURI().equals(contextPath + "/users"))
+        || isWhitelistedPath(request, contextPath)) {
 
       filterChain.doFilter(request, response);
-
       return;
     }
 
@@ -109,5 +109,19 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 
       throw new AuthenticationFailedException(ResponseMessage.AUTHENTICATION_FAILED);
     }
+  }
+
+  private boolean isWhitelistedPath(HttpServletRequest request, String contextPath) {
+
+    String requestPath = request.getRequestURI();
+
+    return WhiteListedPaths.WHITELIST_PATHS.stream()
+        .anyMatch(
+            pattern -> {
+              String fullPattern = contextPath + pattern.replace("/**", "");
+              return pattern.endsWith("/**")
+                  ? requestPath.startsWith(fullPattern)
+                  : requestPath.equals(contextPath + pattern);
+            });
   }
 }

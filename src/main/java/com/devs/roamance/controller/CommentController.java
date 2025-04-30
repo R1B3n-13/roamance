@@ -13,7 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/comments")
+@RequestMapping("/social/comments")
 public class CommentController {
 
   private final CommentService commentService;
@@ -23,7 +23,7 @@ public class CommentController {
     this.commentService = commentService;
   }
 
-  @PostMapping("/create/post/{postId}")
+  @PostMapping("/post/{postId}")
   public ResponseEntity<CommentResponseDto> createComment(
       @Valid @RequestBody CommentRequestDto requestDto, @PathVariable @NotNull UUID postId) {
 
