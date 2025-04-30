@@ -11,7 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/chats")
+@RequestMapping("/social/chats")
 public class ChatController {
 
   private final ChatService chatService;
@@ -21,7 +21,7 @@ public class ChatController {
     this.chatService = chatService;
   }
 
-  @PostMapping("/create/user/{userId}")
+  @PostMapping("/user/{userId}")
   public ResponseEntity<ChatResponseDto> createChat(@PathVariable @NotNull UUID userId) {
 
     ChatResponseDto responseDto = chatService.create(userId);

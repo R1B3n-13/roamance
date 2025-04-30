@@ -13,7 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/messages")
+@RequestMapping("/social/messages")
 public class MessageController {
 
   private final MessageService messageService;
@@ -22,7 +22,7 @@ public class MessageController {
     this.messageService = messageService;
   }
 
-  @PostMapping("/create/chat/{chatId}")
+  @PostMapping("/chat/{chatId}")
   public ResponseEntity<MessageResponseDto> createMessage(
       @PathVariable @NotNull UUID chatId, @Valid @RequestBody MessageRequestDto requestDto) {
 

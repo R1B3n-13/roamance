@@ -39,6 +39,7 @@ application:
     password: ${PGVECTOR_PASSWORD}
 
 server:
+  port: ${SERVER_PORT:8080}
   servlet:
     context-path: /api
 
@@ -46,3 +47,12 @@ logging:
   level:
     root: warn
     com.devs.roamance: info
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
+    tagsSorter: alpha
+    filter: true

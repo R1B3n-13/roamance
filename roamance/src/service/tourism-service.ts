@@ -1,16 +1,16 @@
-import { Geoname, TouristPlace } from '@/types';
 import {
   fetchPopularDestinations,
-  searchGeonames,
-  getGeoname,
   getFromCache,
+  getLocation,
+  searchLocations,
   setCache,
   touristPlaces,
-} from '@/api/places-api';
+} from '@/api/geosearch-api';
 import { fetchImages } from '@/api/unsplash-api';
+import { GeosearchResult, TouristPlace } from '@/types';
 
-async function mapGeonamesToTouristPlace(
-  geoname: Geoname,
+async function mapGeosearchResultToTouristPlace(
+  result: GeosearchResult,
   index: number
 ): Promise<TouristPlace> {
   const colors = [
@@ -19,45 +19,35 @@ async function mapGeonamesToTouristPlace(
     'var(--forest)',
     'var(--sunset)',
   ];
-  const colorIndex = geoname.countryCode
-    ? geoname.countryCode.charCodeAt(0) % colors.length
+
+  // Use the first character of country name to determine color index
+  const colorIndex = result.country
+    ? result.country.charCodeAt(0) % colors.length
     : index % colors.length;
 
-  let description = `${geoname.name} in ${geoname.countryName || 'Unknown'}`;
+  let description = `${result.name}`;
 
-  if (geoname.fcode === 'PPLC') {
-    description += ' (Capital City)';
-  } else if (geoname.fcode === 'ADM1') {
-    description += ' (Administrative Region)';
-  } else if (geoname.fcode === 'PPLA') {
-    description += ' (Regional Capital)';
+  // Get city and country information from the result
+  if (result.city && !description.includes(result.city)) {
+    description = result.city;
   }
 
-  if (geoname.population) {
-    const popMillions = geoname.population / 1000000;
-    if (popMillions >= 1) {
-      description += ` (Pop: ${popMillions.toFixed(1)}M)`;
-    } else if (geoname.population >= 1000) {
-      description += ` (Pop: ${(geoname.population / 1000).toFixed(0)}K)`;
-    }
+  if (result.country && !description.includes(result.country)) {
+    description += ` in ${result.country}`;
   }
 
-  if (geoname.adminName1 && !description.includes(geoname.adminName1)) {
-    description += `, ${geoname.adminName1}`;
-  }
+  // Set a default size for places without additional information
+  const size = 1.0;
 
-  const size = geoname.population
-    ? Math.min(1.5, Math.max(0.8, Math.log10(geoname.population) / 7))
-    : 1.0;
-
-  const images = await fetchImages(geoname.name);
+  // Fetch images for the place
+  const images = await fetchImages(result.name);
 
   return {
-    id: `api-${geoname.geonameId || index}-${geoname.name.replace(/\s+/g, '-').toLowerCase()}`,
-    name: geoname.toponymName || geoname.name,
-    lat: parseFloat(geoname.lat),
-    lng: parseFloat(geoname.lng),
-    country: geoname.countryName || '',
+    id: `api-${result.id || index}-${result.name.replace(/\s+/g, '-').toLowerCase()}`,
+    name: result.name,
+    lat: result.lat,
+    lng: result.lng,
+    country: result.country || '',
     description,
     color: colors[colorIndex],
     size,
@@ -76,15 +66,23 @@ export async function getInitialPlaces(): Promise<TouristPlace[]> {
 
   try {
     const popularDestinations = [
-      'Paris', 'New York', 'Tokyo', 'Rome', 'Sydney',
-      'Cairo', 'Rio de Janeiro', 'Barcelona', 'Istanbul', 'Dubai',
-      'London', 'Venice', 'Santorini', 'Bali', 'Kyoto',
+      'Paris',
+      'Tokyo',
+      'Rome',
+      'Sydney',
+      'Cairo',
+      'Istanbul',
+      'Dubai',
+      'Venice',
+      'Santorini',
+      'Bali',
+      'Kyoto',
     ];
 
-    const geonames = await fetchPopularDestinations(popularDestinations);
+    const searchResults = await fetchPopularDestinations(popularDestinations);
     const places = await Promise.all(
-      geonames.map((geoname, index) =>
-        mapGeonamesToTouristPlace(geoname, index)
+      searchResults.map((result, index) =>
+        mapGeosearchResultToTouristPlace(result, index)
       )
     );
 
@@ -123,11 +121,11 @@ export async function searchPlaces(query: string): Promise<TouristPlace[]> {
   );
 
   try {
-    const geonames = await searchGeonames(query);
+    const searchResults = await searchLocations(query);
     const apiResults = await Promise.all(
-      geonames
+      searchResults
         .filter((item) => item.name && item.lat && item.lng)
-        .map((item, index) => mapGeonamesToTouristPlace(item, index))
+        .map((item, index) => mapGeosearchResultToTouristPlace(item, index))
     );
 
     console.log(
@@ -159,20 +157,20 @@ export async function searchPlaces(query: string): Promise<TouristPlace[]> {
 export async function getPlaceDetails(
   placeId: string
 ): Promise<TouristPlace | null> {
-  const apiPlaceMatch = placeId.match(/^api-(\d+)-(.+)$/);
+  const apiPlaceMatch = placeId.match(/^api-(.+)-(.+)$/);
 
   if (apiPlaceMatch) {
-    const geonameId = apiPlaceMatch[1];
+    const locationId = apiPlaceMatch[1];
     const placeName = apiPlaceMatch[2].replace(/-/g, ' ');
 
     try {
-      const cacheKey = `place_${geonameId}`;
+      const cacheKey = `place_${locationId}`;
       const cachedPlace = getFromCache<TouristPlace>(cacheKey);
       if (cachedPlace) return cachedPlace;
 
-      const geoname = await getGeoname(placeName);
-      if (geoname) {
-        const place = await mapGeonamesToTouristPlace(geoname, 0);
+      const locationResult = await getLocation(placeName);
+      if (locationResult) {
+        const place = await mapGeosearchResultToTouristPlace(locationResult, 0);
         setCache(cacheKey, place);
         return place;
       }
