@@ -39,6 +39,7 @@ application:
     password: ${PGVECTOR_PASSWORD}
 
 server:
+  port: ${SERVER_PORT:8080}
   servlet:
     context-path: /api
 
