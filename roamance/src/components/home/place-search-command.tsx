@@ -17,6 +17,7 @@ import {
 import { cn } from '@/lib/utils';
 import { searchPlaces } from '@/service/tourism-service';
 import { TouristPlace } from '@/types';
+import { OpenStreetMapProvider } from 'leaflet-geosearch';
 import {
   ChevronsUpDown,
   Globe,
@@ -26,7 +27,6 @@ import {
   X,
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
-import { OpenStreetMapProvider } from 'leaflet-geosearch';
 import * as React from 'react';
 
 interface PlaceSearchCommandProps {
@@ -41,8 +41,20 @@ export function PlaceSearchCommand({
   const { resolvedTheme } = useTheme();
   const isDarkMode = resolvedTheme === 'dark';
 
-  // Leaflet Geosearch provider for location search
-  const provider = React.useMemo(() => new OpenStreetMapProvider(), []);
+  // Leaflet Geosearch provider for location search - lazy initialize only in browser
+  const [provider, setProvider] = React.useState<OpenStreetMapProvider | null>(
+    null
+  );
+
+  // Initialize the provider only on the client side
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      // Import dynamically to avoid SSR issues
+      import('leaflet-geosearch').then(({ OpenStreetMapProvider }) => {
+        setProvider(new OpenStreetMapProvider());
+      });
+    }
+  }, []);
 
   const [open, setOpen] = React.useState(false);
   const [mainValue, setMainValue] = React.useState('');
@@ -56,7 +68,6 @@ export function PlaceSearchCommand({
   const searchTimeout = React.useRef<NodeJS.Timeout | null>(null);
   const refinedInputRef = React.useRef<HTMLInputElement>(null);
   const triggerRef = React.useRef<HTMLDivElement>(null);
-  const [triggerWidth, setTriggerWidth] = React.useState<number>(0);
 
   React.useEffect(() => {
     if (refinedValue.length < 2) {
@@ -71,10 +82,10 @@ export function PlaceSearchCommand({
     setIsSearching(true);
     searchTimeout.current = setTimeout(async () => {
       try {
-        if (searchMode === 'location') {
+        if (searchMode === 'location' && provider) {
           // Use Leaflet Geosearch for location queries
           const res = await provider.search({ query: refinedValue });
-          const formatted = res.map((r, idx) => ({
+          const formatted = res.map((r) => ({
             id: `osm-${r.x}-${r.y}`,
             name: r.label,
             lat: r.y,
@@ -104,7 +115,7 @@ export function PlaceSearchCommand({
         clearTimeout(searchTimeout.current);
       }
     };
-  }, [refinedValue, searchMode]);
+  }, [provider, refinedValue, searchMode]);
 
   const handleSelectPlace = (placeId: string) => {
     const selectedPlace = places.find((place) => place.id === placeId);
@@ -196,7 +207,6 @@ export function PlaceSearchCommand({
         align="start"
         side="bottom"
         sideOffset={0}
-        style={{ width: triggerWidth ? `${triggerWidth}px` : 'auto' }}
       >
         <Command shouldFilter={false}>
           <div className="flex items-center gap-2 p-3 border-b border-border">

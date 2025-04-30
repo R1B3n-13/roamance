@@ -38,11 +38,6 @@ interface SubsectionDetailsCache {
   [key: string]: SubsectionDetailResponseDto;
 }
 
-// Create a separate state for loading flags
-interface LoadingState {
-  [key: string]: boolean;
-}
-
 export const JournalEditor: React.FC<JournalEditorProps> = ({
   journal,
   onSave,
@@ -63,13 +58,9 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
   const [subsectionDetails, setSubsectionDetails] =
     useState<SubsectionDetailsCache>({});
   // Tracks whether subsections are currently loading
-  const [isLoading, setIsLoading] = useState<LoadingState>({});
   const [autoSaveStatus, setAutoSaveStatus] = useState<
     'idle' | 'saving' | 'saved' | 'error'
   >('idle');
-
-  // Create a tracking map for temporary IDs
-  const [tempIdMap, setTempIdMap] = useState<Record<string, string>>({});
 
   const [editableJournal, setEditableJournal] = useState<JournalCreateRequest>({
     title: journal.title,
@@ -94,12 +85,6 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
         return;
       }
 
-      // Set loading state for this subsection
-      setIsLoading((prev) => ({
-        ...prev,
-        [subsectionId]: true,
-      }));
-
       try {
         const response =
           await subsectionService.getSubsectionById(subsectionId);
@@ -117,11 +102,6 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
         );
         // Don't show error toast for background loading
         // Only show errors when explicitly trying to view a subsection
-      } finally {
-        setIsLoading((prev) => ({
-          ...prev,
-          [subsectionId]: false,
-        }));
       }
     },
     [subsectionDetails]
@@ -131,7 +111,7 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
   useEffect(() => {
     if (journal.subsections && journal.subsections.length > 0) {
       // Load all subsections in the background as soon as the journal loads
-      journal.subsections.forEach(subsection => {
+      journal.subsections.forEach((subsection) => {
         fetchSubsectionDetails(subsection.id);
       });
     }
@@ -199,12 +179,6 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
         ...prev,
         subsections: [...prev.subsections, subsection],
       };
-
-      // Add to our temp ID tracking
-      setTempIdMap((prev) => ({
-        ...prev,
-        [tempId]: subsection.journal_id, // Store some ID to track this subsection
-      }));
 
       // Use the updated state to get the correct index
       const newIndex = updatedJournal.subsections.length - 1;
@@ -629,7 +603,8 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
             ) : editMode ? (
               <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
                 Edit Section:{' '}
-                {editableJournal.subsections[selectedSubsectionIndex]?.title || ''}
+                {editableJournal.subsections[selectedSubsectionIndex]?.title ||
+                  ''}
               </h2>
             ) : selectedSubsectionId ? (
               <div className="flex items-center justify-between">

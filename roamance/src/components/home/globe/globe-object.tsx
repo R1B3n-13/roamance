@@ -1,8 +1,16 @@
 import { TouristPlace } from '@/types';
-import { useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import * as THREE from 'three';
 
 export const useGlobeObject = () => {
+  // Add a state to track if we're in the browser
+  const [isBrowser, setIsBrowser] = useState(false);
+
+  // Set isBrowser to true once the component is mounted
+  useEffect(() => {
+    setIsBrowser(true);
+  }, []);
+
   const objectsThreeObject = useCallback((d: object) => {
     const place = d as TouristPlace;
 
@@ -26,12 +34,20 @@ export const useGlobeObject = () => {
 
     const cssVarRegex = /var\(\s*(--[a-zA-Z0-9-_]+)\s*\)/;
     const cssVarMatch = cssVarRegex.exec(place.color);
-    const pinColor =
-      cssVarMatch && typeof window !== 'undefined'
-        ? getComputedStyle(document.documentElement)
-            .getPropertyValue(cssVarMatch[1])
-            .trim()
-        : place.color;
+
+    // Use the color directly if not in browser
+    let pinColor = place.color;
+
+    // Only try to access document if we're in the browser
+    if (cssVarMatch && isBrowser) {
+      try {
+        pinColor = getComputedStyle(document.documentElement)
+          .getPropertyValue(cssVarMatch[1])
+          .trim() || place.color;
+      } catch (e) {
+        console.error('Error getting CSS variable:', e);
+      }
+    }
 
     const sphereGeometry = new THREE.SphereGeometry(
       0.15 * scaleFactor * markerScale,
@@ -139,7 +155,7 @@ export const useGlobeObject = () => {
     };
 
     return group;
-  }, []);
+  }, [isBrowser]);
 
   return objectsThreeObject;
 };

@@ -67,9 +67,6 @@ export const JournalDetailView: React.FC<JournalDetailViewProps> = ({
   const [subsectionDetails, setSubsectionDetails] = useState<{
     [key: string]: SubsectionDetailResponseDto;
   }>({});
-  const [isLoadingSubsection, setIsLoadingSubsection] = useState<{
-    [key: string]: boolean;
-  }>({});
   // Add delete journal confirmation state
   const [isDeleteJournalDialogOpen, setIsDeleteJournalDialogOpen] =
     useState(false);
@@ -82,9 +79,6 @@ export const JournalDetailView: React.FC<JournalDetailViewProps> = ({
         // Already loaded
         return;
       }
-
-      // Set loading state for this subsection
-      setIsLoadingSubsection((prev) => ({ ...prev, [subsectionId]: true }));
 
       try {
         const response =
@@ -103,8 +97,6 @@ export const JournalDetailView: React.FC<JournalDetailViewProps> = ({
         );
         // Don't show error toast for background loading
         // Only show errors when explicitly trying to view a subsection
-      } finally {
-        setIsLoadingSubsection((prev) => ({ ...prev, [subsectionId]: false }));
       }
     },
     [subsectionDetails]

@@ -14,13 +14,18 @@ export const useGlobeAnimation = (
     // Only run animation on client-side
     if (!isClient || !globeRef.current) return;
 
-    let lastTime = performance.now();
+    // Define performance and requestAnimationFrame only in client environment
+    const performanceNow = typeof performance !== 'undefined' ?
+      () => performance.now() :
+      () => 0;
+
+    let lastTime = performanceNow();
     const animate = () => {
       if (!globeRef.current?.scene) {
         requestAnimationFrame(animate);
         return;
       }
-      const currentTime = performance.now();
+      const currentTime = performanceNow();
       const delta = (currentTime - lastTime) / 1000;
       lastTime = currentTime;
       const time = currentTime * 0.001;
@@ -119,6 +124,9 @@ export const useGlobeAnimation = (
   }, [selectedPlace, globeRef, isClient]);
 
   useEffect(() => {
+    // Only run this effect on the client side
+    if (!isClient) return;
+
     let rotationFrame: number;
     const rotate = () => {
       if (globeRef.current && !selectedPlace && !isMouseOverGlobe) {
@@ -133,9 +141,7 @@ export const useGlobeAnimation = (
       rotationFrame = requestAnimationFrame(rotate);
     };
 
-    if (isClient) {
-      rotationFrame = requestAnimationFrame(rotate);
-    }
+    rotationFrame = requestAnimationFrame(rotate);
 
     return () => {
       if (typeof cancelAnimationFrame === 'function' && rotationFrame) {

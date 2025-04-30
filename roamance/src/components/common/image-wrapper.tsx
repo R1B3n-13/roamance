@@ -27,9 +27,10 @@ export function getImagePath(src: string, baseDirectory = 'images'): string {
 
 export function ImageWrapper({
   src,
+  alt,
   baseDirectory = 'images',
   ...rest
 }: ImageWrapperProps) {
   const fullPath = getImagePath(src, baseDirectory);
-  return <Image src={fullPath} {...rest} />;
+  return <Image src={fullPath} alt={alt} {...rest} />;
 }

@@ -8,7 +8,7 @@ import {
   JournalDetailResponse,
   JournalListResponse
 } from '@/types/journal';
-import { SubsectionRequest } from '@/types/subsection';
+import { SubsectionDetailResponse, SubsectionRequest } from '@/types/subsection';
 import { AxiosResponse } from 'axios';
 
 class JournalService {
@@ -42,7 +42,7 @@ class JournalService {
         const detailedSubsections = await Promise.all(
           journal.subsections.map(async (subsection) => {
             try {
-              const subsectionResponse = await api.get(
+              const subsectionResponse = await api.get<SubsectionDetailResponse>(
                 `${SUBSECTION_ENDPOINTS.GET_BY_ID(subsection.id)}`
               );
               // Return the detailed subsection data

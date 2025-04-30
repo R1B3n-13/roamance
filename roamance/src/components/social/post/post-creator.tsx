@@ -93,7 +93,7 @@ export const PostCreator = () => {
 
     try {
       // Use the context's createPost function
-      const success = await createPost({
+      await createPost({
         text,
         image_paths: imagePaths,
         video_paths: videoPaths,
@@ -101,17 +101,15 @@ export const PostCreator = () => {
           latitude: 0,
           longitude: 0,
         },
-      }).then((res) => res.success);
+      });
 
-      if (success) {
-        // Reset form on success
-        setText('');
-        setCharCount(0);
-        setImagePaths([]);
-        setVideoPaths([]);
-        setLocation(null);
-        setIsExpanded(false);
-      }
+      // Reset form after successful submission
+      setText('');
+      setCharCount(0);
+      setImagePaths([]);
+      setVideoPaths([]);
+      setLocation(null);
+      setIsExpanded(false);
     } catch (error) {
       console.error('Error creating post:', error);
       toast.error('Failed to create post. Please try again.');

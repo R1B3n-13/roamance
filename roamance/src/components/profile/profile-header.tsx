@@ -60,15 +60,20 @@ export function ProfileHeader({
       .substring(0, 2);
   };
 
-  const handleUploadSuccess = async (result: CloudinaryUploadResult) => {
+  const handleUploadSuccess = async (
+    result: CloudinaryUploadResult | CloudinaryUploadResult[]
+  ) => {
     if (!user) return;
 
     try {
       setIsUploading(true);
 
+      // Handle single result or take the first result if it's an array
+      const uploadResult = Array.isArray(result) ? result[0] : result;
+
       // Update basic user profile with new profile image
       await userService.updateUserProfile({
-        profile_image: result.url,
+        profile_image: uploadResult.url,
       });
 
       toast.success('Profile picture updated successfully');
@@ -110,16 +115,21 @@ export function ProfileHeader({
   };
 
   // Cover image upload functions
-  const handleCoverUploadSuccess = async (result: CloudinaryUploadResult) => {
+  const handleCoverUploadSuccess = async (
+    result: CloudinaryUploadResult | CloudinaryUploadResult[]
+  ) => {
     if (!user) return;
 
     try {
       setIsCoverUploading(true);
 
+      // Handle single result or take the first result if it's an array
+      const uploadResult = Array.isArray(result) ? result[0] : result;
+
       // Update user info with new cover image
       await userService.updateUserInfo({
         ...userInfo,
-        cover_image: result.url,
+        cover_image: uploadResult.url,
       });
 
       toast.success('Cover image updated successfully');
