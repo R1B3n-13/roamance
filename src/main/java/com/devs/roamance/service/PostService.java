@@ -1,5 +1,6 @@
 package com.devs.roamance.service;
 
+import com.devs.roamance.dto.request.NearByFindRequestDto;
 import com.devs.roamance.dto.request.social.PostRequestDto;
 import com.devs.roamance.dto.response.BaseResponseDto;
 import com.devs.roamance.dto.response.social.PostListResponseDto;
@@ -23,6 +24,9 @@ public interface PostService
 
   UserListResponseDto getUsersWhoLiked(
       UUID postId, int pageNumber, int pageSize, String sortBy, String sortDir);
+
+  PostListResponseDto getNearby(
+      NearByFindRequestDto requestDto, int pageNumber, int pageSize, String sortBy, String sortDir);
 
   BaseResponseDto toggleSave(UUID postId);
 

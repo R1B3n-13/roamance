@@ -2,6 +2,7 @@ package com.devs.roamance.service.impl;
 
 import com.devs.roamance.constant.ResponseMessage;
 import com.devs.roamance.dto.common.AiPoweredItineraryDto;
+import com.devs.roamance.dto.request.NearByFindRequestDto;
 import com.devs.roamance.dto.request.travel.itinerary.ItineraryCreateRequestDto;
 import com.devs.roamance.dto.request.travel.itinerary.ItineraryUpdateRequestDto;
 import com.devs.roamance.dto.response.BaseResponseDto;
@@ -130,6 +131,36 @@ public class ItineraryServiceImpl implements ItineraryService {
             pageNumber, pageSize, Sort.by(PaginationSortingUtil.getSortDirection(sortDir), sortBy));
 
     Page<Itinerary> itineraries = itineraryRepository.findAllByUserId(userId, pageable);
+
+    List<ItineraryBriefDto> dtos =
+        itineraries.stream()
+            .map(itinerary -> modelMapper.map(itinerary, ItineraryBriefDto.class))
+            .toList();
+
+    return new ItineraryListResponseDto(200, true, ResponseMessage.ITINERARIES_FETCH_SUCCESS, dtos);
+  }
+
+  @Override
+  public ItineraryListResponseDto getNearby(
+      NearByFindRequestDto requestDto,
+      int pageNumber,
+      int pageSize,
+      String sortBy,
+      String sortDir) {
+
+    List<UUID> itineraryIds =
+        itineraryRepository.findNearby(
+            requestDto.getLocation().getLatitude(),
+            requestDto.getLocation().getLongitude(),
+            requestDto.getRadiusKm(),
+            pageSize,
+            pageNumber);
+
+    Pageable pageable =
+        PageRequest.of(
+            pageNumber, pageSize, Sort.by(PaginationSortingUtil.getSortDirection(sortDir), sortBy));
+
+    Page<Itinerary> itineraries = itineraryRepository.findByIds(itineraryIds, pageable);
 
     List<ItineraryBriefDto> dtos =
         itineraries.stream()

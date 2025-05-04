@@ -1,5 +1,6 @@
 package com.devs.roamance.controller;
 
+import com.devs.roamance.dto.request.NearByFindRequestDto;
 import com.devs.roamance.dto.request.travel.journal.JournalCreateRequestDto;
 import com.devs.roamance.dto.request.travel.journal.JournalUpdateRequestDto;
 import com.devs.roamance.dto.response.BaseResponseDto;
@@ -7,6 +8,7 @@ import com.devs.roamance.dto.response.travel.journal.JournalListResponseDto;
 import com.devs.roamance.dto.response.travel.journal.JournalResponseDto;
 import com.devs.roamance.service.JournalService;
 import com.devs.roamance.util.PaginationSortingUtil;
+import jakarta.validation.Valid;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -65,6 +67,23 @@ public class JournalController {
     }
 
     return ResponseEntity.ok(journal);
+  }
+
+  @GetMapping("/nearby")
+  public ResponseEntity<JournalListResponseDto> getNearbyJournals(
+      @Valid @RequestBody NearByFindRequestDto requestDto,
+      @RequestParam(defaultValue = "0") int pageNumber,
+      @RequestParam(defaultValue = "10") int pageSize,
+      @RequestParam(defaultValue = "created_at") String sortBy,
+      @RequestParam(defaultValue = "desc") String sortDir) {
+
+    int[] validatedParams = PaginationSortingUtil.validatePaginationParams(pageNumber, pageSize);
+
+    JournalListResponseDto responseDto =
+        journalService.getNearby(
+            requestDto, validatedParams[0], validatedParams[1], sortBy, sortDir);
+
+    return ResponseEntity.ok(responseDto);
   }
 
   @PostMapping

@@ -23,6 +23,40 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
       nativeQuery = true)
   Page<Post> findAllByIds(@Param("ids") UUID[] ids, Pageable pageable);
 
+  // Find nearby posts
+  @Query(
+      value =
+          """
+        SELECT * FROM (
+            SELECT p.*,
+                   (6371 * acos(
+                       cos(radians(:lat)) * cos(radians(p.latitude)) *
+                       cos(radians(p.longitude) - radians(:lng)) +
+                       sin(radians(:lat)) * sin(radians(p.latitude))
+                   )) AS distance
+            FROM posts p
+        ) AS sub
+        WHERE distance < :radiusKm
+        """,
+      countQuery =
+          """
+        SELECT COUNT(*) FROM (
+            SELECT (6371 * acos(
+                       cos(radians(:lat)) * cos(radians(p.latitude)) *
+                       cos(radians(p.longitude) - radians(:lng)) +
+                       sin(radians(:lat)) * sin(radians(p.latitude))
+                   )) AS distance
+            FROM posts p
+        ) AS sub
+        WHERE distance < :radiusKm
+        """,
+      nativeQuery = true)
+  Page<Post> findNearby(
+      @Param("lat") double latitude,
+      @Param("lng") double longitude,
+      @Param("radiusKm") double radiusKm,
+      Pageable pageable);
+
   // Saving or unsaving a post
   @Query(
       "SELECT CASE WHEN COUNT(p) > 0 THEN true ELSE false END "

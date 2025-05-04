@@ -1,6 +1,7 @@
 package com.devs.roamance.controller;
 
 import com.devs.roamance.dto.common.AiPoweredItineraryDto;
+import com.devs.roamance.dto.request.NearByFindRequestDto;
 import com.devs.roamance.dto.request.travel.itinerary.ItineraryCreateRequestDto;
 import com.devs.roamance.dto.request.travel.itinerary.ItineraryUpdateRequestDto;
 import com.devs.roamance.dto.response.BaseResponseDto;
@@ -81,6 +82,23 @@ public class ItineraryController {
     ItineraryListResponseDto responseDto =
         itineraryService.getByUserId(
             userId, validatedParams[0], validatedParams[1], sortBy, sortDir);
+
+    return ResponseEntity.ok(responseDto);
+  }
+
+  @GetMapping("/nearby")
+  public ResponseEntity<ItineraryListResponseDto> getNearbyItineraries(
+      @Valid @RequestBody NearByFindRequestDto requestDto,
+      @RequestParam(defaultValue = "0") int pageNumber,
+      @RequestParam(defaultValue = "10") int pageSize,
+      @RequestParam(defaultValue = "audit.createdAt") String sortBy,
+      @RequestParam(defaultValue = "desc") String sortDir) {
+
+    int[] validatedParams = PaginationSortingUtil.validatePaginationParams(pageNumber, pageSize);
+
+    ItineraryListResponseDto responseDto =
+        itineraryService.getNearby(
+            requestDto, validatedParams[0], validatedParams[1], sortBy, sortDir);
 
     return ResponseEntity.ok(responseDto);
   }
