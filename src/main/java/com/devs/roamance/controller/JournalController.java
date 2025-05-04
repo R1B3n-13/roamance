@@ -69,7 +69,7 @@ public class JournalController {
     return ResponseEntity.ok(journal);
   }
 
-  @GetMapping("/nearby")
+  @PostMapping("/nearby")
   public ResponseEntity<JournalListResponseDto> getNearbyJournals(
       @Valid @RequestBody NearByFindRequestDto requestDto,
       @RequestParam(defaultValue = "0") int pageNumber,

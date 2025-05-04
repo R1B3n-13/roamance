@@ -149,6 +149,9 @@ public class UserServiceImpl implements UserService {
     if (requestDto.getPassword() != null && !requestDto.getPassword().isEmpty()) {
       existingUser.setPassword(passwordEncoder.encode(requestDto.getPassword()));
     }
+    if(requestDto.getProfileImage() != null && !requestDto.getProfileImage().isEmpty()) {
+      existingUser.setProfileImage(requestDto.getProfileImage());
+    }
 
     User savedUser = userRepository.save(existingUser);
     userRepository.flush();
