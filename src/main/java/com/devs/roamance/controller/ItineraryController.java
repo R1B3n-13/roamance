@@ -86,7 +86,7 @@ public class ItineraryController {
     return ResponseEntity.ok(responseDto);
   }
 
-  @GetMapping("/nearby")
+  @PostMapping("/nearby")
   public ResponseEntity<ItineraryListResponseDto> getNearbyItineraries(
       @Valid @RequestBody NearByFindRequestDto requestDto,
       @RequestParam(defaultValue = "0") int pageNumber,

@@ -120,7 +120,7 @@ public class PostController {
     return ResponseEntity.ok(responseDto);
   }
 
-  @GetMapping("/nearby")
+  @PostMapping("/nearby")
   public ResponseEntity<PostListResponseDto> getNearbyPosts(
       @Valid @RequestBody NearByFindRequestDto requestDto,
       @RequestParam(defaultValue = "0") int pageNumber,

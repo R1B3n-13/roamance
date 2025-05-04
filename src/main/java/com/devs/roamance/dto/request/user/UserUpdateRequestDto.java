@@ -1,5 +1,6 @@
 package com.devs.roamance.dto.request.user;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -27,4 +28,10 @@ public class UserUpdateRequestDto {
           "Password must contain at least one digit, one lowercase letter, "
               + "one uppercase letter, one special character, and no whitespace")
   private String password;
+
+  @JsonProperty("profile_image")
+  @Pattern(
+          regexp = "^$|(?i)^(https?:\\/\\/)[^\\s]{0,2083}$",
+          message = "Profile image URL format is invalid")
+  private String profileImage;
 }
