@@ -1,6 +1,7 @@
 package com.devs.roamance.service;
 
 import com.devs.roamance.dto.common.AiPoweredItineraryDto;
+import com.devs.roamance.dto.request.NearByFindRequestDto;
 import com.devs.roamance.dto.request.travel.itinerary.ItineraryCreateRequestDto;
 import com.devs.roamance.dto.request.travel.itinerary.ItineraryUpdateRequestDto;
 import com.devs.roamance.dto.response.travel.itinerary.ItineraryListResponseDto;
@@ -20,4 +21,7 @@ public interface ItineraryService
 
   ItineraryListResponseDto getByUserId(
       UUID userId, int pageNumber, int pageSize, String sortBy, String sortDir);
+
+  ItineraryListResponseDto getNearby(
+      NearByFindRequestDto requestDto, int pageNumber, int pageSize, String sortBy, String sortDir);
 }

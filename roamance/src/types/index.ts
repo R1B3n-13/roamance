@@ -2,6 +2,7 @@ export * from './activity';
 export * from './api';
 export * from './audit';
 export * from './auth';
+export * from './itinerary';
 export * from './journal';
 export * from './location';
 export * from './map';
