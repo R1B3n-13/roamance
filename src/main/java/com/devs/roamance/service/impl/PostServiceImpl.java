@@ -1,6 +1,7 @@
 package com.devs.roamance.service.impl;
 
 import com.devs.roamance.constant.ResponseMessage;
+import com.devs.roamance.dto.request.NearByFindRequestDto;
 import com.devs.roamance.dto.request.social.PostRequestDto;
 import com.devs.roamance.dto.response.BaseResponseDto;
 import com.devs.roamance.dto.response.social.PostDto;
@@ -164,6 +165,30 @@ public class PostServiceImpl implements PostService {
     List<UserDto> dtos = users.stream().map(user -> modelMapper.map(user, UserDto.class)).toList();
 
     return new UserListResponseDto(200, true, ResponseMessage.USERS_FETCH_SUCCESS, dtos);
+  }
+
+  @Override
+  public PostListResponseDto getNearby(
+      NearByFindRequestDto requestDto,
+      int pageNumber,
+      int pageSize,
+      String sortBy,
+      String sortDir) {
+
+    Pageable pageable =
+        PageRequest.of(
+            pageNumber, pageSize, Sort.by(PaginationSortingUtil.getSortDirection(sortDir), sortBy));
+
+    Page<Post> posts =
+        postRepository.findNearby(
+            requestDto.getLocation().getLatitude(),
+            requestDto.getLocation().getLongitude(),
+            requestDto.getRadiusKm(),
+            pageable);
+
+    List<PostDto> dtos = posts.stream().map(post -> modelMapper.map(post, PostDto.class)).toList();
+
+    return new PostListResponseDto(200, true, ResponseMessage.POSTS_FETCH_SUCCESS, dtos);
   }
 
   @Override

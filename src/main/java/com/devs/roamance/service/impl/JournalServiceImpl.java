@@ -1,6 +1,7 @@
 package com.devs.roamance.service.impl;
 
 import com.devs.roamance.constant.ResponseMessage;
+import com.devs.roamance.dto.request.NearByFindRequestDto;
 import com.devs.roamance.dto.request.travel.journal.ActivitySubsectionCreateRequestDto;
 import com.devs.roamance.dto.request.travel.journal.ActivitySubsectionUpdateRequestDto;
 import com.devs.roamance.dto.request.travel.journal.JournalCreateRequestDto;
@@ -172,6 +173,31 @@ public class JournalServiceImpl implements JournalService {
 
     return new JournalListResponseDto(
         200, true, ResponseMessage.JOURNALS_FETCH_SUCCESS, journalDtos);
+  }
+
+  @Override
+  public JournalListResponseDto getNearby(
+      NearByFindRequestDto requestDto,
+      int pageNumber,
+      int pageSize,
+      String sortBy,
+      String sortDir) {
+
+    Pageable pageable =
+        PageRequest.of(
+            pageNumber, pageSize, Sort.by(PaginationSortingUtil.getSortDirection(sortDir), sortBy));
+
+    Page<Journal> journals =
+        journalRepository.findNearby(
+            requestDto.getLocation().getLatitude(),
+            requestDto.getLocation().getLongitude(),
+            requestDto.getRadiusKm(),
+            pageable);
+
+    List<JournalBriefDto> dtos =
+        journals.stream().map(journal -> modelMapper.map(journal, JournalBriefDto.class)).toList();
+
+    return new JournalListResponseDto(200, true, ResponseMessage.JOURNALS_FETCH_SUCCESS, dtos);
   }
 
   @Override

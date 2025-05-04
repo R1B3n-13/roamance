@@ -1,5 +1,6 @@
 package com.devs.roamance.controller;
 
+import com.devs.roamance.dto.request.NearByFindRequestDto;
 import com.devs.roamance.dto.request.social.PostRequestDto;
 import com.devs.roamance.dto.response.BaseResponseDto;
 import com.devs.roamance.dto.response.social.PostListResponseDto;
@@ -115,6 +116,22 @@ public class PostController {
     UserListResponseDto responseDto =
         postService.getUsersWhoLiked(
             postId, validatedParams[0], validatedParams[1], sortBy, sortDir);
+
+    return ResponseEntity.ok(responseDto);
+  }
+
+  @GetMapping("/nearby")
+  public ResponseEntity<PostListResponseDto> getNearbyPosts(
+      @Valid @RequestBody NearByFindRequestDto requestDto,
+      @RequestParam(defaultValue = "0") int pageNumber,
+      @RequestParam(defaultValue = "10") int pageSize,
+      @RequestParam(defaultValue = "created_at") String sortBy,
+      @RequestParam(defaultValue = "desc") String sortDir) {
+
+    int[] validatedParams = PaginationSortingUtil.validatePaginationParams(pageNumber, pageSize);
+
+    PostListResponseDto responseDto =
+        postService.getNearby(requestDto, validatedParams[0], validatedParams[1], sortBy, sortDir);
 
     return ResponseEntity.ok(responseDto);
   }
