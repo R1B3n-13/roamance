@@ -152,4 +152,25 @@ class JournalControllerTest {
         .andDo(print())
         .andExpect(status().isOk());
   }
+
+  @Test
+  @DisplayName("Should return public journals list when getting public journals")
+  void getPublicJournalsShouldReturnJournalsList() throws Exception {
+    // Given
+    JournalListResponseDto responseDto = new JournalListResponseDto();
+    responseDto.setSuccess(true);
+    when(journalService.getPublic(anyInt(), anyInt(), anyString(), anyString()))
+        .thenReturn(responseDto);
+
+    // When & Then
+    mockMvc
+        .perform(
+            get("/travel/journals/public")
+                .param("pageNumber", "0")
+                .param("pageSize", "10")
+                .param("sortBy", "audit.createdAt")
+                .param("sortDir", "desc"))
+        .andDo(print())
+        .andExpect(status().isOk());
+  }
 }

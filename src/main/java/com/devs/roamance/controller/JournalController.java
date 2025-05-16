@@ -74,7 +74,7 @@ public class JournalController {
       @Valid @RequestBody NearByFindRequestDto requestDto,
       @RequestParam(defaultValue = "0") int pageNumber,
       @RequestParam(defaultValue = "10") int pageSize,
-      @RequestParam(defaultValue = "created_at") String sortBy,
+      @RequestParam(defaultValue = "audit.createdAt") String sortBy,
       @RequestParam(defaultValue = "desc") String sortDir) {
 
     int[] validatedParams = PaginationSortingUtil.validatePaginationParams(pageNumber, pageSize);
@@ -84,6 +84,23 @@ public class JournalController {
             requestDto, validatedParams[0], validatedParams[1], sortBy, sortDir);
 
     return ResponseEntity.ok(responseDto);
+  }
+
+  @GetMapping("/public")
+  public ResponseEntity<JournalListResponseDto> getPublicJournals(
+      @RequestParam(defaultValue = "0") int pageNumber,
+      @RequestParam(defaultValue = "10") int pageSize,
+      @RequestParam(defaultValue = "audit.createdAt") String sortBy,
+      @RequestParam(defaultValue = "desc") String sortDir) {
+
+    log.info("Getting public journals (isShared=true) with pagination");
+
+    int[] validatedParams = PaginationSortingUtil.validatePaginationParams(pageNumber, pageSize);
+
+    JournalListResponseDto journals =
+        journalService.getPublic(validatedParams[0], validatedParams[1], sortBy, sortDir);
+
+    return ResponseEntity.ok(journals);
   }
 
   @PostMapping

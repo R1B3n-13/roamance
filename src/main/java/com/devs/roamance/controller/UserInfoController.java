@@ -45,7 +45,7 @@ public class UserInfoController {
 
   @GetMapping("/{id}")
   public ResponseEntity<UserInfoResponseDto> getUserInfoById(@PathVariable @NotNull UUID id) {
-    UserInfoResponseDto responseDto = userInfoService.get(id);
+    UserInfoResponseDto responseDto = userInfoService.getByUserId(id);
     return ResponseEntity.status(responseDto.getStatus()).body(responseDto);
   }
 
