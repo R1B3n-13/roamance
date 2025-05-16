@@ -19,4 +19,6 @@ public interface JournalService
 
   JournalListResponseDto getNearby(
       NearByFindRequestDto requestDto, int pageNumber, int pageSize, String sortBy, String sortDir);
+
+  JournalListResponseDto getPublic(int pageNumber, int pageSize, String sortBy, String sortDir);
 }

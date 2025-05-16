@@ -202,6 +202,35 @@ public class JournalServiceImpl implements JournalService {
 
   @Override
   @Transactional(readOnly = true)
+  public JournalListResponseDto getPublic(
+      int pageNumber, int pageSize, String sortBy, String sortDir) {
+
+    Pageable pageable =
+        PageRequest.of(
+            pageNumber, pageSize, Sort.by(PaginationSortingUtil.getSortDirection(sortDir), sortBy));
+
+    Page<Journal> journalPage = journalRepository.findAllByIsSharedTrue(pageable);
+
+    List<JournalBriefDto> journalDtos =
+        journalPage.getContent().stream()
+            .map(
+                journal -> {
+                  Journal journalWithSubsections =
+                      journalRepository.findById(journal.getId()).orElse(journal);
+
+                  JournalBriefDto dto =
+                      modelMapper.map(journalWithSubsections, JournalBriefDto.class);
+                  dto.setTotalSubsections(journalWithSubsections.getSubsections().size());
+                  return dto;
+                })
+            .toList();
+
+    return new JournalListResponseDto(
+        200, true, ResponseMessage.JOURNALS_FETCH_SUCCESS, journalDtos);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
   public JournalResponseDto get(UUID id) {
     log.info("Fetching journal with id: {} using JOIN FETCH for subsections", id);
     Journal journal = findJournalByAccess(id);
