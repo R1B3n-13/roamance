@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
@@ -53,7 +54,9 @@ public class Journal {
 
   @NonNull @Embedded private Location destination;
 
-  @Nullable private String description;
+  @Nullable
+  @Column(length = 1000)
+  private String description;
 
   private Boolean isFavorite;
   private Boolean isArchived;
