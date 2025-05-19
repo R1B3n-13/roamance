@@ -316,7 +316,7 @@ public class JournalServiceImpl implements JournalService {
     boolean isAdmin = userUtil.isAuthenticatedUserAdmin();
     if (!isAdmin
         && !journal.getUser().getId().equals(currentUser.getId())
-        && journal.getIsShared() != true) {
+        && !journal.getIsShared()) {
       log.warn(
           "User {} attempted to access journal {} without permission", currentUser.getEmail(), id);
       throw new UnauthorizedAccessException(ResponseMessage.JOURNAL_ACCESS_DENIED);
