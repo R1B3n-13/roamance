@@ -2,6 +2,7 @@ package com.devs.roamance.dto.response.travel.journal;
 
 import com.devs.roamance.dto.response.AuditDto;
 import com.devs.roamance.dto.response.travel.LocationResponseDto;
+import com.devs.roamance.dto.response.user.UserDto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDate;
 import java.util.UUID;
@@ -33,6 +34,8 @@ public class JournalDto {
 
   @JsonProperty("cover_image")
   private String coverImage;
+
+  private UserDto user;
 
   private AuditDto audit = new AuditDto();
 }
